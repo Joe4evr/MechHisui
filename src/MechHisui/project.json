@@ -1,0 +1,31 @@
+{
+  "version": "0.0.1-*",
+  "description": "Mech-Hisui Discord Bot",
+  "authors": [ "Joe4evr" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+
+    "dependencies": {
+        "Microsoft.Extensions.Configuration": "1.0.0-rc1-final",
+        "Microsoft.Extensions.Configuration.FileExtensions": "1.0.0-rc1-final",
+        "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final",
+        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
+        "Discord.Net": "0.8.1-beta2",
+        "Discord.Net.Commands": "0.8.1-beta2",
+        "Discord.Net.Modules": "0.8.1-beta2"
+    },
+
+  "commands": {
+    "MechHisui": "MechHisui"
+  },
+
+    "frameworks": {
+        "dnx451": { }
+    },
+    "userSecretsId": "aspnet5-MechHisui-20151202080452"
+}
