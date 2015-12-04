@@ -111,7 +111,10 @@ namespace MechHisui
             client.AddService(new CommandService(new CommandServiceConfig() { HelpMode = HelpMode.Public, CommandChar = '.' }));
 
             //register commands
+            client.RegisterDisconnectCommand(config);
             client.RegisterResetCommand(config);
+            //client.RegisterWikiCommand(config, new Wikier());
+
 
             //Convert our sync method to an async one and block the Main function until the bot disconnects
             client.Run(async () =>
@@ -124,7 +127,8 @@ namespace MechHisui
                 client.Modules().Install(
                     new ChannelWhitelistModule(
                         Helpers.ConvertStringArrayToLongArray(
-                            //config["API_testing"],
+                            //config["API_testing"]
+                            config["LTT_general"],
                             config["FGO_trivia"],
                             config["FGO_general"]
                         )
@@ -149,8 +153,12 @@ namespace MechHisui
                                 Console.WriteLine($"{channel.Name}:  {channel.Id}");
                                 if (!channel.IsPrivate && IsWhilested(channel, client))
                                 {
+                                    //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
                                     client.MessageReceived += (new Responder(channel, client).Respond);
-                                    await client.SendMessage(channel, "Mech-Hisui activated. All systems nominal.");
+                                    if (channel.Id != Int64.Parse(config["API_testing"]))
+                                    {
+                                        await client.SendMessage(channel, config["Hello"]);
+                                    }
                                 }
                             }
                         }

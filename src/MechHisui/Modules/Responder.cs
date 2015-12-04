@@ -50,7 +50,7 @@ namespace MechHisui.Modules
 
     internal static class Responses
     {
-        internal static IDictionary<string[], string> responseDict = new Dictionary<string[], string>()
+        internal static IReadOnlyDictionary<string[], string> responseDict = new Dictionary<string[], string>()
         {
             { new[] { "osu", "Osu", "hi" }, "Greetings." },
             { new[] { "Bye", "bye" }, "Take care." },
@@ -63,10 +63,10 @@ namespace MechHisui.Modules
             //{ new[] { "", "" }, "" },
         };
 
-        internal static IDictionary<string[], string> spammableResponses = new Dictionary<string[], string>()
+        internal static IReadOnlyDictionary<string[], string> spammableResponses = new Dictionary<string[], string>()
         {
-            { new[] { "(╯°□°）╯︵ ┻━┻", "(ノಠ益ಠ)ノ彡┻━┻",  }, "┬─┬ノ( º _ ºノ)" },
-            { new[] { "┻━┻ ︵ヽ(`Д´)ﾉ︵﻿ ┻━┻" }, "┬─┬ノ( º _ ºノ)\n(ヽº _ º )ヽ┬─┬" },
+            { new[] { "(╯°□°）╯︵ ┻━┻", "(ノಠ益ಠ)ノ彡┻━┻", "(╯°□°）╯ ︵ ┻━┻", "(╯°□°）╯ ︵ ┻━┻"  }, "┬─┬ノ( º _ ºノ)" },
+            { new[] { "┻━┻ ︵ヽ(`Д´)ﾉ︵﻿ ┻━┻", "┻━┻︵ (°□°)/ ︵ ┻━┻" }, "┬─┬ノ( º _ ºノ)\n(ヽº _ º )ヽ┬─┬" },
             //{ new[] { "", "" }, "" },
             //{ new[] { "", "" }, "" },
         };

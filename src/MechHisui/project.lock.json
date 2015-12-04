@@ -34,6 +34,17 @@
         "type": "project",
         "framework": "DNX,Version=v4.5.1"
       },
+      "Google.GData.Client/1.0.0": {
+        "type": "project",
+        "framework": "DNX,Version=v4.5.1"
+      },
+      "Google.GData.Spreadsheets/1.0.0": {
+        "type": "project",
+        "framework": "DNX,Version=v4.5.1",
+        "dependencies": {
+          "Google.GData.Client": "1.0.0"
+        }
+      },
       "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -215,6 +226,17 @@
       "FuzzyString/1.0.0": {
         "type": "project",
         "framework": "DNX,Version=v4.5.1"
+      },
+      "Google.GData.Client/1.0.0": {
+        "type": "project",
+        "framework": "DNX,Version=v4.5.1"
+      },
+      "Google.GData.Spreadsheets/1.0.0": {
+        "type": "project",
+        "framework": "DNX,Version=v4.5.1",
+        "dependencies": {
+          "Google.GData.Client": "1.0.0"
+        }
       },
       "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
         "type": "package",
@@ -398,6 +420,17 @@
         "type": "project",
         "framework": "DNX,Version=v4.5.1"
       },
+      "Google.GData.Client/1.0.0": {
+        "type": "project",
+        "framework": "DNX,Version=v4.5.1"
+      },
+      "Google.GData.Spreadsheets/1.0.0": {
+        "type": "project",
+        "framework": "DNX,Version=v4.5.1",
+        "dependencies": {
+          "Google.GData.Client": "1.0.0"
+        }
+      },
       "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -552,19 +585,27 @@
   "libraries": {
     "Discord.Net/0.8.1-beta2": {
       "type": "project",
-      "path": "C:\\Users\\Jonathan\\Documents\\visual studio 2015\\ReferenceProjects\\Discord.Net\\src\\Discord.Net\\project.json"
+      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/project.json"
     },
     "Discord.Net.Commands/0.8.1-beta2": {
       "type": "project",
-      "path": "C:\\Users\\Jonathan\\Documents\\visual studio 2015\\ReferenceProjects\\Discord.Net\\src\\Discord.Net.Commands\\project.json"
+      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/project.json"
     },
     "Discord.Net.Modules/0.8.1-beta2": {
       "type": "project",
-      "path": "C:\\Users\\Jonathan\\Documents\\visual studio 2015\\ReferenceProjects\\Discord.Net\\src\\Discord.Net.Modules\\project.json"
+      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Modules/project.json"
     },
     "FuzzyString/1.0.0": {
       "type": "project",
       "path": "../../wrap/FuzzyString/project.json"
+    },
+    "Google.GData.Client/1.0.0": {
+      "type": "project",
+      "path": "../../wrap/Google.GData.Client/project.json"
+    },
+    "Google.GData.Spreadsheets/1.0.0": {
+      "type": "project",
+      "path": "../../wrap/Google.GData.Spreadsheets/project.json"
     },
     "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
       "type": "package",
@@ -757,6 +798,8 @@
     ],
     "DNX,Version=v4.5.1": [
       "FuzzyString >= 1.0.0-*",
+      "Google.GData.Client >= 1.0.0-*",
+      "Google.GData.Spreadsheets >= 1.0.0-*",
       "fx/System.IO >= 4.0.0"
     ]
   }

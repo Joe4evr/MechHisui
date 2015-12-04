@@ -31,7 +31,9 @@
                 "System.IO": "4.0.0.0"
             },
             "dependencies": {
-                "FuzzyString": "1.0.0-*"
+                "FuzzyString": "1.0.0-*",
+                "Google.GData.Client": "1.0.0-*",
+                "Google.GData.Spreadsheets": "1.0.0-*"
             }
         }
     },

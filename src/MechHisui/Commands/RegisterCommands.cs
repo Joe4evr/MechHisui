@@ -7,7 +7,7 @@ using Discord;
 using Discord.Commands;
 using Discord.Modules;
 using MechHisui.Modules;
-
+using System.Threading;
 
 namespace MechHisui.Commands
 {
@@ -66,6 +66,41 @@ namespace MechHisui.Commands
                 });
         }
 
+        public static void RegisterWikiCommand(this DiscordClient client, IConfiguration config, Wikier wikier)
+        {
+            client.Commands().CreateCommand("wiki")
+                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
+                .Parameter("servantname", ParameterType.Required)
+                .Description("Relay information on the specified Servant. Alternative names acceptable. Provide names of multiple words inside quotation marks.")
+                .Do(async cea =>
+                {
+                    var arg = cea.GetArg("servantname");
+                    if (arg.ToLowerInvariant() == "waifu")
+                    {
+                        await client.SendMessage(cea.Channel, "It has come to my attention that your 'waifu' is equatable to feces.");
+                        return;
+                    }
+                    
+                    if ((new[] { "scath", "scathach" }).Contains(arg))
+                    {
+                        await client.SendMessage(cea.Channel, "Never ever.");
+                        return;
+                    }
+
+                    var article = await wikier.LookupStats(arg, new CancellationToken());
+                    if (article == null)
+                    {
+                        await client.SendMessage(cea.Channel, "No such article found. Please try another name.");
+                    }
+                    else
+                    {
+                        string response = $"**Servant:** {article.Sections.First().Title}";
+
+                        await client.SendMessage(cea.Channel, response);
+                    }
+                });
+        }
+
         public static void RegisterDisconnectCommand(this DiscordClient client, IConfiguration config)
         {
             client.Commands().CreateCommand("disconnect")
@@ -92,11 +127,41 @@ namespace MechHisui.Commands
                     }
 
                     foreach (var ch in client.Modules().Modules
-                        .Where(m => m.Id == nameof(ChannelWhitelistModule))
+                        .Where(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())
                         .Single()
                         .EnabledChannels)
                     {
-                        await client.SendMessage(ch, "Mech-Hisui shutting down.");
+                        if (ch.Id != Int64.Parse(config["API_testing"]))
+                        {
+                            await client.SendMessage(ch, config["Goodbye"]);
+                        }
+                    }
+
+                    Environment.Exit(0);
+                });
+        }
+
+        public static void RegisterDailyComand(this DiscordClient client, IConfiguration config)
+        {
+            client.Commands().CreateCommand("daily")
+                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
+                .Parameter("day", ParameterType.Optional)
+                .Description("Relay the information of daily quests for the specified day. Default to current day.")
+                .Do(async cea =>
+                {
+                    DayOfWeek day;
+                    var arg = cea.GetArg("day")?.ToLowerInvariant();
+                    if (String.IsNullOrWhiteSpace(arg))
+                    {
+                        
+                    }
+                    else if (Enum.TryParse(arg, out day))
+                    {
+                        
+                    }
+                    else
+                    {
+                        await client.SendMessage(cea.Channel, "Could not convert argument to a day of the week. Please try again.");
                     }
                 });
         }
