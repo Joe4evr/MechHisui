@@ -30,6 +30,10 @@
           "Discord.Net.Commands": "0.8.1-beta2"
         }
       },
+      "FuzzyString/1.0.0": {
+        "type": "project",
+        "framework": "DNX,Version=v4.5.1"
+      },
       "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -207,6 +211,10 @@
           "Discord.Net": "0.8.1-beta2",
           "Discord.Net.Commands": "0.8.1-beta2"
         }
+      },
+      "FuzzyString/1.0.0": {
+        "type": "project",
+        "framework": "DNX,Version=v4.5.1"
       },
       "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
         "type": "package",
@@ -386,6 +394,10 @@
           "Discord.Net.Commands": "0.8.1-beta2"
         }
       },
+      "FuzzyString/1.0.0": {
+        "type": "project",
+        "framework": "DNX,Version=v4.5.1"
+      },
       "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -549,6 +561,10 @@
     "Discord.Net.Modules/0.8.1-beta2": {
       "type": "project",
       "path": "C:\\Users\\Jonathan\\Documents\\visual studio 2015\\ReferenceProjects\\Discord.Net\\src\\Discord.Net.Modules\\project.json"
+    },
+    "FuzzyString/1.0.0": {
+      "type": "project",
+      "path": "../../wrap/FuzzyString/project.json"
     },
     "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
       "type": "package",
@@ -736,8 +752,12 @@
       "Microsoft.Extensions.PlatformAbstractions >= 1.0.0-rc1-final",
       "Discord.Net >= 0.8.1-beta2",
       "Discord.Net.Commands >= 0.8.1-beta2",
-      "Discord.Net.Modules >= 0.8.1-beta2"
+      "Discord.Net.Modules >= 0.8.1-beta2",
+      "RestSharp >= 105.2.3"
     ],
-    "DNX,Version=v4.5.1": []
+    "DNX,Version=v4.5.1": [
+      "FuzzyString >= 1.0.0-*",
+      "fx/System.IO >= 4.0.0"
+    ]
   }
 }

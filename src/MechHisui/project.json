@@ -17,7 +17,8 @@
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
         "Discord.Net": "0.8.1-beta2",
         "Discord.Net.Commands": "0.8.1-beta2",
-        "Discord.Net.Modules": "0.8.1-beta2"
+        "Discord.Net.Modules": "0.8.1-beta2",
+        "RestSharp": "105.2.3"
     },
 
   "commands": {
@@ -25,7 +26,14 @@
   },
 
     "frameworks": {
-        "dnx451": { }
+        "dnx451": {
+            "frameworkAssemblies": {
+                "System.IO": "4.0.0.0"
+            },
+            "dependencies": {
+                "FuzzyString": "1.0.0-*"
+            }
+        }
     },
     "userSecretsId": "aspnet5-MechHisui-20151202080452"
 }

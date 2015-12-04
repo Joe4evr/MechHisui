@@ -1,9 +1,10 @@
-﻿{
-    "projects": [
-        "C:\\Users\\Jonathan\\Documents\\visual studio 2015\\ReferenceProjects\\Discord.Net\\src",
-        "src",
-        "test"
-    ],
+{
+  "projects": [
+    "C:\\Users\\Jonathan\\Documents\\visual studio 2015\\ReferenceProjects\\Discord.Net\\src",
+    "src",
+    "test",
+    "wrap"
+  ],
   "sdk": {
     "version": "1.0.0-rc1-update1"
   }

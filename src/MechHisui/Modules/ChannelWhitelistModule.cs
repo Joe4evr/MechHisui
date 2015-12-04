@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Modules;
 
-namespace MechHisui
+namespace MechHisui.Modules
 {
     public class ChannelWhitelistModule : IModule
     {
