@@ -27,8 +27,8 @@ namespace MechHisui.Modules
             if (e.Channel == channel)
             {
                 string response = String.Empty;
-                var key = Responses.responseDict.Keys.Where(k => k.Contains(e.Message.Text)).SingleOrDefault();
-                var sKey = Responses.spammableResponses.Keys.Where(k => k.Contains(e.Message.Text)).SingleOrDefault();
+                var key = Responses.responseDict.Keys.Where(k => k.Contains(e.Message.Text.ToLowerInvariant().Trim())).SingleOrDefault();
+                var sKey = Responses.spammableResponses.Keys.Where(k => k.Contains(e.Message.Text.Trim())).SingleOrDefault();
 
                 if (key != null && Responses.responseDict.TryGetValue(key, out response) && response != String.Empty)
                 {
@@ -52,9 +52,9 @@ namespace MechHisui.Modules
     {
         internal static IReadOnlyDictionary<string[], string> responseDict = new Dictionary<string[], string>()
         {
-            { new[] { "osu", "Osu", "hi" }, "Greetings." },
-            { new[] { "Bye", "bye" }, "Take care." },
-            { new[] { "back", "I'm back", "i'm back" }, "Welcome back, master." },
+            { new[] { "osu", "hi" }, "Greetings." },
+            { new[] { "bye" }, "Take care." },
+            { new[] { "back", "i'm back" }, "Welcome back, master." },
             { new[] { "make me a sandwich" }, "Make one yourself." },
             { new[] { "sudo make me a sandwich" }, "Insufficient privilege." },
             //{ new[] { "", "" }, "" },

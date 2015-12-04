@@ -23,7 +23,7 @@ namespace MechHisui.Modules
 
         public async void LogToFile(object sender, MessageEventArgs e)
         {
-            if (Program.IsWhilested(e.Channel, (DiscordClient)sender))
+            if (Helpers.IsWhilested(e.Channel, (DiscordClient)sender))
             {
                 await writer.WriteLineAsync($"{e.Message.Timestamp.ToUniversalTime()} - {e.Message.User.Name}\t\t: {e.Message.Text}");
             }

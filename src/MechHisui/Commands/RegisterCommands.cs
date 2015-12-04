@@ -7,7 +7,6 @@ using Discord;
 using Discord.Commands;
 using Discord.Modules;
 using MechHisui.Modules;
-using System.Threading;
 
 namespace MechHisui.Commands
 {
@@ -16,7 +15,7 @@ namespace MechHisui.Commands
         public static void RegisterResetCommand(this DiscordClient client, IConfiguration config)
         {
             client.Commands().CreateCommand("reset")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Program.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
                 {
@@ -29,7 +28,7 @@ namespace MechHisui.Commands
         public static void RegisterRecording(this DiscordClient client, IConfiguration config)
         {
             client.Commands().CreateCommand("record")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Program.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
                 {
@@ -47,7 +46,7 @@ namespace MechHisui.Commands
                 });
 
             client.Commands().CreateCommand("endrecord")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Program.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
                 {
@@ -66,37 +65,35 @@ namespace MechHisui.Commands
                 });
         }
 
-        public static void RegisterWikiCommand(this DiscordClient client, IConfiguration config, Wikier wikier)
+        public static void RegisterStatCommand(this DiscordClient client, IConfiguration config, Wikier wikier)
         {
-            client.Commands().CreateCommand("wiki")
+            client.Commands().CreateCommand("stats")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Parameter("servantname", ParameterType.Required)
                 .Description("Relay information on the specified Servant. Alternative names acceptable. Provide names of multiple words inside quotation marks.")
                 .Do(async cea =>
                 {
-                    var arg = cea.GetArg("servantname");
+                    var arg = cea.Args[0];
                     if (arg.ToLowerInvariant() == "waifu")
                     {
-                        await client.SendMessage(cea.Channel, "It has come to my attention that your 'waifu' is equatable to feces.");
+                        await client.SendMessage(cea.Channel, "It has come to my attention that your 'waifu' is equatable to fecal matter.");
                         return;
                     }
                     
-                    if ((new[] { "scath", "scathach" }).Contains(arg))
+                    if ((new[] { "scath", "scathach" }).Contains(arg.ToLowerInvariant()))
                     {
                         await client.SendMessage(cea.Channel, "Never ever.");
                         return;
                     }
-
-                    var article = await wikier.LookupStats(arg, new CancellationToken());
-                    if (article == null)
+                    
+                    var profile = wikier.LookupStats(arg);
+                    if (profile == null)
                     {
-                        await client.SendMessage(cea.Channel, "No such article found. Please try another name.");
+                        await client.SendMessage(cea.Channel, "No such entry found. Please try another name.");
                     }
                     else
                     {
-                        string response = $"**Servant:** {article.Sections.First().Title}";
-
-                        await client.SendMessage(cea.Channel, response);
+                        await client.SendMessage(cea.Channel, Helpers.FormatServantProfile(profile));
                     }
                 });
         }
@@ -104,7 +101,7 @@ namespace MechHisui.Commands
         public static void RegisterDisconnectCommand(this DiscordClient client, IConfiguration config)
         {
             client.Commands().CreateCommand("disconnect")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Program.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
                 {
@@ -150,18 +147,31 @@ namespace MechHisui.Commands
                 .Do(async cea =>
                 {
                     DayOfWeek day;
-                    var arg = cea.GetArg("day")?.ToLowerInvariant();
+                    DateTimeWithZone todayInJapan = new DateTimeWithZone(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time"));
+                    var arg = cea.Args[0];
                     if (String.IsNullOrWhiteSpace(arg))
                     {
-                        
+                        day = todayInJapan.LocalTime.DayOfWeek;
                     }
-                    else if (Enum.TryParse(arg, out day))
-                    {
-                        
-                    }
-                    else
+                    else if (!Enum.TryParse(arg, ignoreCase: true, result: out day))
                     {
                         await client.SendMessage(cea.Channel, "Could not convert argument to a day of the week. Please try again.");
+                        return;
+                    }
+
+                    DailyInfo info;
+                    if (DailyInfo.DailyQuests.TryGetValue(day, out info))
+                    {
+                        bool isToday = (day == todayInJapan.LocalTime.DayOfWeek);
+                        string whatDay = isToday ? "Today" : day.ToString();
+                        if (day != DayOfWeek.Sunday)
+                        {
+                            await client.SendMessage(cea.Channel, $"{whatDay}'s quests:\n\tAscension Materials: **{info.Materials.ToString()}**\n\tExperience: **{info.Exp1.ToString()}**, **{info.Exp2.ToString()}**, and **{ServantClass.Berzerker.ToString()}**");
+                        }
+                        else
+                        {
+                            await client.SendMessage(cea.Channel, $"{whatDay}'s quests:\n\tAscension Materials: **{info.Materials.ToString()}**\n\tAnd also **QP**");
+                        }
                     }
                 });
         }

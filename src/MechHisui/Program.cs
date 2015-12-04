@@ -112,8 +112,9 @@ namespace MechHisui
 
             //register commands
             client.RegisterDisconnectCommand(config);
+            client.RegisterDailyComand(config);
             client.RegisterResetCommand(config);
-            //client.RegisterWikiCommand(config, new Wikier());
+            //client.RegisterStatCommand(config, new Wikier(config));
 
 
             //Convert our sync method to an async one and block the Main function until the bot disconnects
@@ -128,7 +129,7 @@ namespace MechHisui
                     new ChannelWhitelistModule(
                         Helpers.ConvertStringArrayToLongArray(
                             //config["API_testing"]
-                            config["LTT_general"],
+                            //config["LTT_general"],
                             config["FGO_trivia"],
                             config["FGO_general"]
                         )
@@ -151,7 +152,7 @@ namespace MechHisui
                             foreach (var channel in server.TextChannels)
                             {
                                 Console.WriteLine($"{channel.Name}:  {channel.Id}");
-                                if (!channel.IsPrivate && IsWhilested(channel, client))
+                                if (!channel.IsPrivate && Helpers.IsWhilested(channel, client))
                                 {
                                     //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
                                     client.MessageReceived += (new Responder(channel, client).Respond);
@@ -180,11 +181,5 @@ namespace MechHisui
         //    recChans.Remove(e.Channel);
         //    await client.SendMessage(e.Channel, $"Stopped recording in {e.Channel}.");
         //}
-
-        internal static bool IsWhilested(Channel channel, DiscordClient client) => client.Modules().Modules
-            .Where(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())
-            .SingleOrDefault()?
-            .EnabledChannels
-            .Contains(channel) ?? false;
     }
 }
