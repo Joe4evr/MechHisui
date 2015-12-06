@@ -24,12 +24,13 @@ namespace MechHisui.Modules
 
         internal async void Respond(object sender, MessageEventArgs e)
         {
-            if (e.Channel == channel)
+            if (e.Channel.Id == channel.Id)
             {
+                string temp = (e.Message.Text.StartsWith("@") ? new string(e.Message.Text.SkipWhile(c => Char.IsWhiteSpace(c)).ToArray()) : e.Message.Text);
                 string[] responses;
                 string quickResponse = String.Empty;
-                var key = Responses.responseDict.Keys.Where(k => k.Contains(e.Message.Text.ToLowerInvariant().Trim())).SingleOrDefault();
-                var sKey = Responses.spammableResponses.Keys.Where(k => k.Contains(e.Message.Text.Trim())).SingleOrDefault();
+                var key = Responses.responseDict.Keys.Where(k => k.Contains(temp.ToLowerInvariant().Trim())).SingleOrDefault();
+                var sKey = Responses.spammableResponses.Keys.Where(k => k.Contains(temp.Trim())).SingleOrDefault();
 
                 if (key != null && Responses.responseDict.TryGetValue(key, out responses) && responses != null)
                 {
@@ -59,11 +60,10 @@ namespace MechHisui.Modules
         {
             { new[] { "osu", "hi" }, new[] { "Greetings." } },
             { new[] { "bye" }, new[] { "Take care." } },
-            { new[] { "back", "i'm back" }, new[] { "Welcome back, master." } },
+            { new[] { "back", "i'm back", "tadaima" }, new[] { "Welcome back, master." } },
             { new[] { "make me a sandwich" }, new[] { "Make one yourself." } },
             { new[] { "sudo make me a sandwich" }, new[] { "Insufficient privilege." } },
             { new[] { "good hisui" }, new[] { "*bows* Thank you, master." } },
-            //{ new[] { "", "" }, new[] { "" } },
             //{ new[] { "", "" }, new[] { "" } },
             //{ new[] { "", "" }, new[] { "" } },
         };
@@ -72,6 +72,7 @@ namespace MechHisui.Modules
         {
             { new[] { "(╯°□°）╯︵ ┻━┻", "(ノಠ益ಠ)ノ彡┻━┻", "(╯°□°）╯ ︵ ┻━┻", "(╯°□°）╯ ︵ ┻━┻"  }, new[] { "┬─┬ノ( º _ ºノ)" } },
             { new[] { "┻━┻ ︵ヽ(`Д´)ﾉ︵﻿ ┻━┻", "┻━┻︵ (°□°)/ ︵ ┻━┻" }, new[] { "┬─┬ノ( º _ ºノ)\n(ヽº _ º )ヽ┬─┬" } },
+            { new[] { "ding dong" }, new[] { "bing bong" } },
             //{ new[] { "", "" }, new[] { "" },
             //{ new[] { "", "" }, new[] { "" },
         };

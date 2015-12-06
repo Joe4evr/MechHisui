@@ -17,7 +17,11 @@ namespace MechHisui.Modules
         {
             foreach (var c in _whitelistedChannels)
             {
-                manager.EnableChannel(manager.Client.GetChannel(c));
+                var channel = manager.Client.GetChannel(c);
+                if (channel != null)
+                {
+                    manager.EnableChannel(channel);
+                }
             }
             
             _manager = manager;

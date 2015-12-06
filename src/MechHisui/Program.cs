@@ -37,12 +37,28 @@ namespace MechHisui
             client.AddService(new CommandService(new CommandServiceConfig() { HelpMode = HelpMode.Public, CommandChar = '.' }));
 
             //register commands
-            client.RegisterDisconnectCommand(config);
+            Console.WriteLine("Registering 'Add channel'...");
+            client.RegisterAddChannelCommand(config);
+            Console.WriteLine("Registering 'Daily'...");
             client.RegisterDailyCommand(config);
+            Console.WriteLine("Registering 'Disconnect'...");
+            client.RegisterDisconnectCommand(config);
+            Console.WriteLine("Registering 'Friends'...");
+            client.RegisterFriendsCommand(config);
+            Console.WriteLine("Registering 'Info'...");
+            client.RegisterInfoCommand(config);
+            Console.WriteLine("Registering 'Known'...");
+            client.RegisterKnownChannelsCommand(config);
+            Console.WriteLine("Registering 'Learn'...");
             client.RegisterLearnCommand(config);
+            Console.WriteLine("Registering 'Reset'...");
             client.RegisterResetCommand(config);
+            //Console.WriteLine("Registering 'Trivia'...");
             //client.RegisterTriviaCommand(config);
-            //client.RegisterStatCommand(config, new Wikier(config));
+            Console.WriteLine("Registering 'Stat'...");
+            client.RegisterStatCommand(config, new Wikier(config));
+            Console.WriteLine("Registering 'Where'...");
+            client.RegisterWhereCommand(config);
 
 
             //Convert our sync method to an async one and block the Main function until the bot disconnects
@@ -58,6 +74,7 @@ namespace MechHisui
                         Helpers.ConvertStringArrayToLongArray(
                             //config["API_testing"]
                             //config["LTT_general"],
+                            //config["LTT_testing"],
                             config["FGO_trivia"],
                             config["FGO_general"]
                         )
@@ -72,26 +89,39 @@ namespace MechHisui
                 }
                 else
                 {
-                    foreach (var server in client.AllServers)
+                    foreach (var channel in Helpers.IterateChannels(client.AllServers, printServerName: true))
                     {
-                        Console.WriteLine(server.Name);
-                        if (server.TextChannels.Any())
+                        Console.WriteLine($"{channel.Name}:  {channel.Id}");
+                        if (!channel.IsPrivate && Helpers.IsWhilested(channel, client))
                         {
-                            foreach (var channel in server.TextChannels)
+                            //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
+                            client.MessageReceived += (new Responder(channel, client).Respond);
+                            if (channel.Id != Int64.Parse(config["API_testing"]))
                             {
-                                Console.WriteLine($"{channel.Name}:  {channel.Id}");
-                                if (!channel.IsPrivate && Helpers.IsWhilested(channel, client))
-                                {
-                                    //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
-                                    client.MessageReceived += (new Responder(channel, client).Respond);
-                                    if (channel.Id != Int64.Parse(config["API_testing"]))
-                                    {
-                                        await client.SendMessage(channel, config["Hello"]);
-                                    }
-                                }
+                                await client.SendMessage(channel, config["Hello"]);
                             }
                         }
                     }
+                    //foreach (var server in client.AllServers)
+                    //{
+                    //    Console.WriteLine(server.Name);
+                    //    if (server.TextChannels.Any())
+                    //    {
+                    //        foreach (var channel in server.TextChannels)
+                    //        {
+                    //            Console.WriteLine($"{channel.Name}:  {channel.Id}");
+                    //            if (!channel.IsPrivate && Helpers.IsWhilested(channel, client))
+                    //            {
+                    //                //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
+                    //                client.MessageReceived += (new Responder(channel, client).Respond);
+                    //                if (channel.Id != Int64.Parse(config["API_testing"]))
+                    //                {
+                    //                    await client.SendMessage(channel, config["Hello"]);
+                    //                }
+                    //            }
+                    //        }
+                    //    }
+                    //}
                 }
             });
         }

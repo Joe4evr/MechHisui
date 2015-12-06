@@ -69,6 +69,21 @@ namespace MechHisui
             sb.AppendLine($"{profile.ImageLink}");
             return sb.ToString();
         }
+
+        internal static IEnumerable<Channel> IterateChannels(IEnumerable<Server> servers, bool printServerName = false)
+        {
+            foreach (var server in servers)
+            {
+                if (printServerName)
+                {
+                    Console.WriteLine(server.Name);
+                }
+                foreach (var channel in server.Channels)
+                {
+                    yield return channel;
+                }
+            }
+        }
     }
 
     internal struct DateTimeWithZone

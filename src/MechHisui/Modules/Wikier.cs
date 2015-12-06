@@ -31,84 +31,84 @@ namespace MechHisui.Modules
                 
             };
 
-            UserCredential credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                new ClientSecrets() { ClientId = config["GDriveUser"], ClientSecret = config["GDriveToken"] },
-                Scopes,
-                "user",
-                new CancellationToken()
-            ).Result;
+            //UserCredential credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+            //    new ClientSecrets() { ClientId = config["GDriveUser"], ClientSecret = config["GDriveToken"] },
+            //    Scopes,
+            //    "user",
+            //    new CancellationToken()
+            //).Result;
 
-            //TODO: get table data and serialize to _servantProfiles so that it's cached
-            string scriptId = "";
-            var service = new ScriptService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "MechHisui"
-            });
+            ////TODO: get table data and serialize to _servantProfiles so that it's cached
+            //string scriptId = "";
+            //var service = new ScriptService(new BaseClientService.Initializer()
+            //{
+            //    HttpClientInitializer = credential,
+            //    ApplicationName = "MechHisui"
+            //});
 
-            ExecutionRequest request = new ExecutionRequest()
-            {
-                Function = "getGameData"
-            };
+            //ExecutionRequest request = new ExecutionRequest()
+            //{
+            //    Function = "getServantData"
+            //};
 
-            ScriptsResource.RunRequest runReq = service.Scripts.Run(request, scriptId);
+            //ScriptsResource.RunRequest runReq = service.Scripts.Run(request, scriptId);
 
-            try
-            {
-                // Make the API request.
-                Operation op = runReq.Execute();
+            //try
+            //{
+            //    // Make the API request.
+            //    Operation op = runReq.Execute();
 
-                if (op.Error != null)
-                {
-                    // The API executed, but the script returned an error.
+            //    if (op.Error != null)
+            //    {
+            //        // The API executed, but the script returned an error.
 
-                    // Extract the first (and only) set of error details
-                    // as a IDictionary. The values of this dictionary are
-                    // the script's 'errorMessage' and 'errorType', and an
-                    // array of stack trace elements. Casting the array as
-                    // a JSON JArray allows the trace elements to be accessed
-                    // directly.
-                    IDictionary<string, object> error = op.Error.Details[0];
-                    Console.WriteLine($"Script error message: {error["errorMessage"]}");
-                    if (error["scriptStackTraceElements"] != null)
-                    {
-                        // There may not be a stacktrace if the script didn't
-                        // start executing.
-                        Console.WriteLine("Script error stacktrace:");
-                        JArray st = (JArray)error["scriptStackTraceElements"];
-                        foreach (var trace in st)
-                        {
-                            Console.WriteLine($"\t{trace["function"]}: {trace["lineNumber"]}");
-                        }
-                    }
-                }
-                else
-                {
-                    // The result provided by the API needs to be cast into
-                    // the correct type, based upon what types the Apps
-                    // Script function returns. Here, the function returns
-                    // an Apps Script Object with String keys and values.
-                    // It is most convenient to cast the return value as a JSON
-                    // JObject (folderSet).
-                    JObject folderSet = (JObject)op.Response["result"];
-                    if (folderSet.Count == 0)
-                    {
-                        Console.WriteLine("No folders returned!");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Folders under your root folder:");
-                        foreach (var folder in folderSet)
-                        {
-                            Console.WriteLine("\t{0} ({1})", folder.Value, folder.Key);
-                        }
-                    }
-                }
-            }
-            catch (Google.GoogleApiException e)
-            {
-                Console.WriteLine($"Error calling API:\n{e}");
-            }
+            //        // Extract the first (and only) set of error details
+            //        // as a IDictionary. The values of this dictionary are
+            //        // the script's 'errorMessage' and 'errorType', and an
+            //        // array of stack trace elements. Casting the array as
+            //        // a JSON JArray allows the trace elements to be accessed
+            //        // directly.
+            //        IDictionary<string, object> error = op.Error.Details[0];
+            //        Console.WriteLine($"Script error message: {error["errorMessage"]}");
+            //        if (error["scriptStackTraceElements"] != null)
+            //        {
+            //            // There may not be a stacktrace if the script didn't
+            //            // start executing.
+            //            Console.WriteLine("Script error stacktrace:");
+            //            JArray st = (JArray)error["scriptStackTraceElements"];
+            //            foreach (var trace in st)
+            //            {
+            //                Console.WriteLine($"\t{trace["function"]}: {trace["lineNumber"]}");
+            //            }
+            //        }
+            //    }
+            //    else
+            //    {
+            //        // The result provided by the API needs to be cast into
+            //        // the correct type, based upon what types the Apps
+            //        // Script function returns. Here, the function returns
+            //        // an Apps Script Object with String keys and values.
+            //        // It is most convenient to cast the return value as a JSON
+            //        // JObject (folderSet).
+            //        JObject folderSet = (JObject)op.Response["result"];
+            //        if (folderSet.Count == 0)
+            //        {
+            //            Console.WriteLine("No folders returned!");
+            //        }
+            //        else
+            //        {
+            //            Console.WriteLine("Folders under your root folder:");
+            //            foreach (var folder in folderSet)
+            //            {
+            //                Console.WriteLine("\t{0} ({1})", folder.Value, folder.Key);
+            //            }
+            //        }
+            //    }
+            //}
+            //catch (Google.GoogleApiException e)
+            //{
+            //    Console.WriteLine($"Error calling API:\n{e}");
+            //}
         }
 
         public ServantProfile LookupStats(string servant)
@@ -119,6 +119,17 @@ namespace MechHisui.Modules
             return (key != null && servantDict.TryGetValue(key, out lookup)) ? 
                 _servantProfiles.Where(p => p.Name == lookup).SingleOrDefault() :
                 _servantProfiles.Where(p => p.Name == servant).SingleOrDefault();
+        }
+
+        public string LookupServantName(string servant)
+        {
+            string lookup = String.Empty;
+            var key = servantDict.Keys.Where(k => k.Contains(servant.ToLowerInvariant())).SingleOrDefault();
+
+            return (key != null && servantDict.TryGetValue(key, out lookup)) ?
+                lookup :
+                servantDict.Values.Contains(servant, StringComparer.OrdinalIgnoreCase) ?
+                servantDict.Values.Where(v => v.ToLowerInvariant() == servant.ToLowerInvariant()).SingleOrDefault() : null;
         }
 
         //private async Task<string> Send(RestRequest request, CancellationToken cancelToken)
@@ -139,7 +150,7 @@ namespace MechHisui.Modules
         //        return response.Content;
         //    }
         //}
-        
+
         internal static IReadOnlyDictionary<string[], string> servantDict = new Dictionary<string[], string>()
         {
             { new[] { "shielder", "mashu" },                "Mash Kyrielight" },
@@ -150,8 +161,8 @@ namespace MechHisui.Modules
             { new[] { "saber lily" },                       "Arturia Pendragon (Lily)" },
             { new[] { "nero", "umu", "emprah" },            "Nero Claudius Ceasar" },
             { new[] { "sieg", "literal shit" },             "Siegfried" },
-            { new[] { "ceasar", "fat saber", "faber" },     "Julius Gaius Caesar" },
-            { new[] { "jets" },                             "Attila" },
+            { new[] { "ceasar", "fat saber", "faber" },     "Gaius Julius Caesar" },
+            { new[] { "jets", "disco", "atilla" },          "Altera" },
             { new[] { "saber gilles", "uncool gilles" },    "Gilles de Rais (Saber)" },
             { new[] { "deon", "trap saber" },               "Le Chevalier d'Eon" },
             { new[] { "okita", "sakusaber" },               "Okita Souji" },
@@ -162,23 +173,23 @@ namespace MechHisui.Modules
             { new[] { "robin" },                            "Robin Hood" },
             { new[] { "nyanta", "atanyanta", "evil cat" },  "Atalanta" },
             { new[] { "gorgon archer" },                    "Euryale" },
-            { new[] { "atrash", "aloha snackbar" },         "Arash" },
+            { new[] { "atrash", "aloha snackbar", "trash" }, "Arash" },
             { new[] { "artemis", "tittymonster" },          "Orion"},
-            //{ new[] { "" },                               "David" },
+            { new[] { "king jew" },                         "David" },
             { new[] { "nobu", "nobunaga" },                 "Oda Nobunaga" },
 
             //Lancers
-            { new[] { "cu", "dog", "blue man" },            "Cu Chulain (Lancer)" },
+            { new[] { "cu", "dog", "blue man" },            "Cu Chulainn (Lancer)" },
             { new[] { "liz", "eli", "cutest" },             "Elizabeth Bathory" },
             { new[] { "benkei" },                           "Musashibo Benkei" },
             { new[] { "proto cu", "proto dog" },            "Cu Chulain (Proto)" },
             { new[] { "leo" },                              "Leonidas I" },
             { new[] { "roma" },                             "Romulus" },
-            //{ new[] { "" },                               "Hector" },
-            //{ new[] { "scath" },                          "Scathach" },
+            { new[] { "ossan" },                            "Hector" },
+            //{ new[] { "scath" },                            "Scathach" },
 
             //Riders
-            //{ new[] { "" },                               "Medusa" },
+            { new[] { "m'dusa", "responsible adult" },      "Medusa" },
             { new[] { "george", "fucking invincible" },     "St. George" },
             { new[] { "teach", "blackbeard" },              "Edward Teach" },
             { new[] { "boobyca", "boobdica" },              "Boudica" },
@@ -199,25 +210,25 @@ namespace MechHisui.Modules
             { new[] { "waver", "el-melloi", "weiba" },      "Zhuge Liang (Lord El-Melloi II)" },
             { new[] { "caster cu", "wickerman" },           "Cu Chulainn (Caster)" },
             { new[] { "caster liz", "casliz" },             "Elizabeth Bathory (Halloween)" },
-            { new[] { "casko", "tamamo" },                  "Tamamo no Mae" },
-            //{ new[] { "" },                               "Medea Lily" },
+            { new[] { "casko", "tamamo", "boss_mog" },      "Tamamo no Mae" },
+            { new[] { "loli medea" },                       "Medea Lily" },
 
             //Assassins
-            { new[] { "saski", "savior", "regend" },        "Sasaki Kojirou" },
+            { new[] { "sasaki", "savior", "regend" },       "Sasaki Kojirou" },
             { new[] { "hassan" },                           "Hassan of the Cursed Arm" },
             { new[] { "gorgon assassin" },                  "Stheno" },
-            //{ new[] { "" },                               "Jing Ke" },
+            { new[] { "chinky" },                           "Jing Ke" },
             { new[] { "sanson" },                           "Charles Henri Sanson" },
             { new[] { "phantom", "poto" },                  "Phantom of the Opera" },
-            //{ new[] { "" },                               "Mata Hari" },
-            //{ new[] { "" },                               "Carmilla" },
-            //{ new[] { "" },                               "Jack the Ripper" },
+            { new[] { "mata harlot" },                      "Mata Hari" },
+            { new[] { "adult liz" },                        "Carmilla" },
+            //{ new[] { "jack" },                             "Jack the Ripper" },
 
             //Berzerkers
-            { new[] { "herc", "hercules" },                 "Herakles" },
+            { new[] { "herc", "hercules", "glad in gladiator" }, "Herakles" },
             { new[] { "lancebutt", "unrivaled" },           "Lancelot" },
-            //{ new[] { "" },                               "Lu Bu Feng Xian" },
-            //{ new[] { "" },                               "Spartacus" },
+            { new[] { "do not pursue" },                    "Lu Bu Feng Xian" },
+            { new[] { "thunderpants" },                     "Spartacus" },
             { new[] { "kintoki" },                          "Sakata Kintoki" },
             { new[] { "vlad" },                             "Vlad III" },
             { new[] { "cowface", "fluffy" },                "Asterios" },

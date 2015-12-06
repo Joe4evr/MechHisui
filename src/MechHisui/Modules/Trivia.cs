@@ -1,7 +1,10 @@
 ﻿using Discord;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -11,25 +14,28 @@ namespace MechHisui.Modules
     public class Trivia
     {
         private readonly DiscordClient _client;
-        private readonly int _rounds;
+        private readonly int _winscore;
         public Channel Channel { get; }
         private readonly ConcurrentDictionary<User, int> _scoreboard;
         private readonly List<string> _asked;
         private readonly Random _rng;
         private bool _isAnswered = false;
         private KeyValuePair<string, string[]> _currentQuestion;
-        private TriviaType _type;
         private Timer _timer;
         
-        public Trivia(DiscordClient client, int rounds, Channel channel, TriviaType type = TriviaType.WinAt)
+        public Trivia(DiscordClient client, int rounds, Channel channel, IConfiguration config)
         {
+            if (!TriviaHelpers.Questions.Any())
+            {
+                TriviaHelpers.InitQuestions(config);
+            }
             _client = client;
             _client.MessageReceived += CheckTrivia;
-            _rounds = rounds;
-            _type = type;
+            _winscore = rounds;
+            _scoreboard = new ConcurrentDictionary<User, int>();
             _asked = new List<string>();
             _rng = new Random();
-            _client.SendMessage(Channel, $"Trivia commencing. *Start the clock!*");
+            _client.SendMessage(Channel, "Trivia commencing. *Start the clock!*");
         }
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
@@ -44,7 +50,7 @@ namespace MechHisui.Modules
             await AskQuestion();
         }
 
-        public async Task EndTrivia()
+        public async Task EndTriviaEarly()
         {
             _client.MessageReceived -= CheckTrivia;
             await _client.SendMessage(Channel, $"Aborting trivia. {_scoreboard.OrderByDescending(kv => kv.Value).First().Key.Name} has the most points.");
@@ -77,20 +83,16 @@ namespace MechHisui.Modules
         
         private async void CheckTrivia(object sender, MessageEventArgs e)
         {
-            if (e.Channel == Channel && !_isAnswered && _currentQuestion.Value.Contains(e.Message.Text.ToLowerInvariant()))
+            if (e.Channel.Id == Channel.Id && !_isAnswered && _currentQuestion.Value.Contains(e.Message.Text.ToLowerInvariant()))
             {
                 _isAnswered = true;
                 _scoreboard.AddOrUpdate(e.User, 1, (k, v) => v++);
                 var userScore = _scoreboard.Single(kv => kv.Key == e.User).Value;
                 await _client.SendMessage(Channel, $"Correct. {e.User.Name} is now at {userScore} points.");
-                if (_type == TriviaType.WinAt && userScore == _rounds)
+                if (userScore == _winscore)
                 {
                     await EndTrivia(e.User);
                 }
-                //else if (_type == TriviaType.BestOf && userScore ==)
-                //{
-                //
-                //}
                 else
                 {
                     await _client.SendMessage(Channel, $"Next question commencing in 15 seconds.");
@@ -99,20 +101,18 @@ namespace MechHisui.Modules
                 }
             }
         }
-
-        public enum TriviaType
-        {
-            //BestOf,
-            WinAt
-        }
     }
 
     internal static class TriviaHelpers
     {
-        internal static IReadOnlyDictionary<string, string[]> Questions = new Dictionary<string, string[]>()
+        internal static IDictionary<string, string[]> Questions = new Dictionary<string, string[]>();
+
+        internal static void InitQuestions(IConfiguration config)
         {
-            { "", new[] { "" } },
-            { "", new[] { "" } }
-        };
+            using (TextReader tr = new StreamReader(config["TriviaPath"]))
+            {
+                Questions = JsonConvert.DeserializeObject<Dictionary<string, string[]>>(tr.ReadToEnd()) ?? new Dictionary<string, string[]>();
+            }
+        }
     }
 }
