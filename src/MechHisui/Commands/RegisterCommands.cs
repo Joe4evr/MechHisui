@@ -27,8 +27,7 @@ namespace MechHisui.Commands
                     {
                         Channel chan = client.GetChannel(ch);
                         client.Modules().Modules
-                            .Where(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())
-                            .SingleOrDefault()
+                            .SingleOrDefault(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())
                             .EnableChannel(chan);
 
                         client.MessageReceived += (new Responder(chan, client).Respond);
@@ -146,7 +145,7 @@ namespace MechHisui.Commands
                 .Hide()
                 .Do(async cea =>
                 {
-                    foreach (var channel in Helpers.IterateChannels(client.AllServers, printServerName: true))
+                    foreach (var channel in Helpers.IterateChannels(client.AllServers, printServerNames: true, printChannelNames: true))
                     {
                         Console.WriteLine($"{channel.Name}:  {channel.Id}");
                     }
@@ -184,7 +183,7 @@ namespace MechHisui.Commands
                     else
                     {
                         rec.Add(cea.Channel.Id);
-                        var recorder = new Recorder(cea.Channel, client);
+                        var recorder = new Recorder(cea.Channel, client, config);
                         client.GetRecorders().Add(recorder);
                     }
                 });
@@ -201,7 +200,7 @@ namespace MechHisui.Commands
                     }
                     else
                     {
-                        var recorder = client.GetRecorders().Where(r => r.channel.Id == cea.Channel.Id).Single();
+                        var recorder = client.GetRecorders().Single(r => r.channel.Id == cea.Channel.Id);
                         await recorder.EndRecord(client);
                         client.GetRecorders().Remove(recorder);
                         rec.Remove(cea.Channel.Id);
@@ -216,21 +215,21 @@ namespace MechHisui.Commands
                 .Hide()
                 .Do(async cea =>
                 {
-                    var resp = client.GetResponders().Where(r => r.channel.Id == cea.Channel.Id).Single();
+                    var resp = client.GetResponders().Single(r => r.channel.Id == cea.Channel.Id);
                     resp.ResetTimeouts();
                     await client.SendMessage(cea.Channel, "Timeouts reset.");
                 });
         }
 
-        public static void RegisterStatCommand(this DiscordClient client, IConfiguration config, Wikier wikier)
+        public static void RegisterStatsCommand(this DiscordClient client, IConfiguration config, StatService wikier)
         {
             client.Commands().CreateCommand("stats")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
-                .Parameter("servantname", ParameterType.Required)
+                .Parameter("servantname", ParameterType.Multiple)
                 .Description("Relay information on the specified Servant. Alternative names acceptable.")
                 .Do(async cea =>
                 {
-                    var arg = String.Join(" ", cea.Args[0]);
+                    var arg = String.Join(" ", cea.Args);
                     if (arg.ToLowerInvariant() == "waifu")
                     {
                         await client.SendMessage(cea.Channel, "It has come to my attention that your 'waifu' is equatable to fecal matter.");
@@ -243,25 +242,25 @@ namespace MechHisui.Commands
                         return;
                     }
 
-                    //var profile = wikier.LookupStats(arg);
-                    //if (profile == null)
-                    //{
-                    //    await client.SendMessage(cea.Channel, "No such entry found. Please try another name.");
-                    //}
-                    //else
-                    //{
-                    //    await client.SendMessage(cea.Channel, Helpers.FormatServantProfile(profile));
-                    //}
-
-                    var profile = wikier.LookupServantName(arg);
+                    var profile = wikier.LookupStats(arg);
                     if (profile == null)
                     {
                         await client.SendMessage(cea.Channel, "No such entry found. Please try another name.");
                     }
                     else
                     {
-                        await client.SendMessage(cea.Channel, $"**Servant:** {profile}");
+                        await client.SendMessage(cea.Channel, Helpers.FormatServantProfile(profile));
                     }
+
+                    //var profile = wikier.LookupServantName(arg);
+                    //if (profile == null)
+                    //{
+                    //    await client.SendMessage(cea.Channel, "No such entry found. Please try another name.");
+                    //}
+                    //else
+                    //{
+                    //    await client.SendMessage(cea.Channel, $"**Servant:** {profile}");
+                    //}
                 });
         }
 
@@ -273,7 +272,7 @@ namespace MechHisui.Commands
                .Description("Would you like to play a game?")
                .Do(async cea =>
                {
-                   if (client.GetTrivias().Where(t => t.Channel.Id == cea.Channel.Id).Any())
+                   if (client.GetTrivias().Any(t => t.Channel.Id == cea.Channel.Id))
                    {
                        await client.SendMessage(cea.Channel, $"Trivia already running.");
                        return;
@@ -358,8 +357,7 @@ namespace MechHisui.Commands
             //await StopTrvias(client.GetTrivias());
 
             foreach (var ch in client.Modules().Modules
-                .Where(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())
-                .Single()
+                .Single(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())
                 .EnabledChannels)
             {
                 if (ch.Id != Int64.Parse(config["API_testing"]))

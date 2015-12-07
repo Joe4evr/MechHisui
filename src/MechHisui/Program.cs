@@ -55,8 +55,8 @@ namespace MechHisui
             client.RegisterResetCommand(config);
             //Console.WriteLine("Registering 'Trivia'...");
             //client.RegisterTriviaCommand(config);
-            Console.WriteLine("Registering 'Stat'...");
-            client.RegisterStatCommand(config, new Wikier(config));
+            Console.WriteLine("Registering 'Stats'...");
+            client.RegisterStatsCommand(config, new StatService(config));
             Console.WriteLine("Registering 'Where'...");
             client.RegisterWhereCommand(config);
 
@@ -89,9 +89,8 @@ namespace MechHisui
                 }
                 else
                 {
-                    foreach (var channel in Helpers.IterateChannels(client.AllServers, printServerName: true))
+                    foreach (var channel in Helpers.IterateChannels(client.AllServers, printServerNames: true, printChannelNames: true))
                     {
-                        Console.WriteLine($"{channel.Name}:  {channel.Id}");
                         if (!channel.IsPrivate && Helpers.IsWhilested(channel, client))
                         {
                             //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);

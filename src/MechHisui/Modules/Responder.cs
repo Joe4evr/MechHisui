@@ -29,8 +29,9 @@ namespace MechHisui.Modules
                 string temp = (e.Message.Text.StartsWith("@") ? new string(e.Message.Text.SkipWhile(c => Char.IsWhiteSpace(c)).ToArray()) : e.Message.Text);
                 string[] responses;
                 string quickResponse = String.Empty;
-                var key = Responses.responseDict.Keys.Where(k => k.Contains(temp.ToLowerInvariant().Trim())).SingleOrDefault();
-                var sKey = Responses.spammableResponses.Keys.Where(k => k.Contains(temp.Trim())).SingleOrDefault();
+                Func<string[], bool> pred = (k => k.Contains(temp.ToLowerInvariant().Trim()));
+                var key = Responses.responseDict.Keys.SingleOrDefault(pred);
+                var sKey = Responses.spammableResponses.Keys.SingleOrDefault(pred);
 
                 if (key != null && Responses.responseDict.TryGetValue(key, out responses) && responses != null)
                 {
@@ -64,6 +65,8 @@ namespace MechHisui.Modules
             { new[] { "make me a sandwich" }, new[] { "Make one yourself." } },
             { new[] { "sudo make me a sandwich" }, new[] { "Insufficient privilege." } },
             { new[] { "good hisui" }, new[] { "*bows* Thank you, master." } },
+            { new[] { "good night", "" }, new[] { "Good night, master." } },
+            //{ new[] { "", "" }, new[] { "" } },
             //{ new[] { "", "" }, new[] { "" } },
             //{ new[] { "", "" }, new[] { "" } },
         };

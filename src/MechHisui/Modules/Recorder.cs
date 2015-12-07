@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using System.IO;
+using Microsoft.Extensions.Configuration;
 
 namespace MechHisui.Modules
 {
@@ -13,10 +14,10 @@ namespace MechHisui.Modules
 
         private readonly TextWriter writer;
 
-        public Recorder(Channel channel, DiscordClient client)
+        public Recorder(Channel channel, DiscordClient client, IConfiguration config)
         {
             this.channel = channel;
-            writer = new StreamWriter($@"..\..\artifacts\obj\chatlogs\{channel.Server.Name} - {channel.Name} - {DateTime.UtcNow.Date}.txt");
+            writer = new StreamWriter($"{config["Recordings"]}{channel.Server.Name} - {channel.Name} - {DateTime.UtcNow.Date}.txt");
             client.MessageReceived += LogToFile;
             client.SendMessage(channel, $"Recording in {channel}....");
         }

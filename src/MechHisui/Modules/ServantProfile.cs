@@ -6,26 +6,26 @@
         public string Class { get; set; }
         public string Rarity { get; set; }
         public string Name { get; set; }
-        public int Attack { get; set; }
-        public int Health { get; set; }
+        public int Atk { get; set; }
+        public int HP { get; set; }
         public string GrowthCurve { get; set; }
-        public string Cards { get; set; }
-        public string NP { get; set; }
-        public string NPEffect { get; set; }
+        public string CardPool { get; set; }
+        public string NoblePhantasm { get; set; }
+        public string NoblePhantasmEffect { get; set; }
         public string Skill1 { get; set; }
-        public string Skill1Effect { get; set; }
+        public string Effect1 { get; set; }
         public string Skill2 { get; set; }
-        public string Skill2Effect { get; set; }
+        public string Effect2 { get; set; }
         public string Skill3 { get; set; }
-        public string Skill3Effect { get; set; }
-        public string Passive1 { get; set; }
-        public string Passive1Effect { get; set; }
-        public string Passive2 { get; set; }
-        public string Passive2Effect { get; set; }
-        public string Passive3 { get; set; }
-        public string Passive3Effect { get; set; }
-        public string Passive4 { get; set; }
-        public string Passive4Effect { get; set; }
-        public string ImageLink { get; set; }
+        public string Effect3 { get; set; }
+        public string PassiveSkill1 { get; set; }
+        public string PEffect1 { get; set; }
+        public string PassiveSkill2 { get; set; }
+        public string PEffect2 { get; set; }
+        public string PassiveSkill3 { get; set; }
+        public string PEffect3 { get; set; }
+        public string PassiveSkill4 { get; set; }
+        public string PEffect4 { get; set; }
+        public string Image { get; set; }
     }
 }
