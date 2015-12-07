@@ -1,13 +1,13 @@
-﻿using Discord;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using Microsoft.Extensions.Configuration;
+using Discord;
+using Newtonsoft.Json;
 
 namespace MechHisui.Modules
 {

@@ -25,7 +25,7 @@ namespace MechHisui.Modules
         {
             using (TextWriter tw = new StreamWriter(path))
             {
-                tw.Write(JsonConvert.SerializeObject(friendData));
+                tw.Write(JsonConvert.SerializeObject(friendData, Formatting.Indented));
             }
         }
 

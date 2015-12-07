@@ -2,9 +2,10 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Discord;
-using MechHisui;
+using System.IO;
+using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace MechHisui.Modules
 {
@@ -12,7 +13,7 @@ namespace MechHisui.Modules
     {
         public Channel channel { get; }
 
-        private ConcurrentDictionary<string[], DateTime> _lastResponses = new ConcurrentDictionary<string[], DateTime>();
+        private ConcurrentDictionary<Response, DateTime> _lastResponses = new ConcurrentDictionary<Response, DateTime>();
 
         public Responder(Channel channel, DiscordClient client)
         {
@@ -20,66 +21,59 @@ namespace MechHisui.Modules
             client.GetResponders().Add(this);
         }
 
-        internal void ResetTimeouts() => _lastResponses = new ConcurrentDictionary<string[], DateTime>();
+        internal void ResetTimeouts() => _lastResponses = new ConcurrentDictionary<Response, DateTime>();
 
         internal async void Respond(object sender, MessageEventArgs e)
         {
             if (e.Channel.Id == channel.Id)
             {
                 string temp = (e.Message.Text.StartsWith("@") ? new string(e.Message.Text.SkipWhile(c => Char.IsWhiteSpace(c)).ToArray()) : e.Message.Text);
-                string[] responses;
+ 
                 string quickResponse = String.Empty;
-                Func<string[], bool> pred = (k => k.Contains(temp.ToLowerInvariant().Trim()));
-                var key = Responses.responseDict.Keys.SingleOrDefault(pred);
-                var sKey = Responses.spammableResponses.Keys.SingleOrDefault(pred);
+                Func<Response, bool> pred = (k => k.Call.Contains(temp.ToLowerInvariant().Trim()));
+                var resp = Responses.responseDict.SingleOrDefault(pred);
+                var sResp = Responses.spammableResponses.SingleOrDefault(pred);
 
-                if (key != null && Responses.responseDict.TryGetValue(key, out responses) && responses != null)
+                if (resp != null)
                 {
                     DateTime last;
                     var msgTime = e.Message.Timestamp.ToUniversalTime();
-                    if (!_lastResponses.TryGetValue(responses, out last) || (DateTime.UtcNow - last) > TimeSpan.FromMinutes(1))
+                    if (!_lastResponses.TryGetValue(resp, out last) || (DateTime.UtcNow - last) > TimeSpan.FromMinutes(1))
                     {
-                        _lastResponses.AddOrUpdate(responses, msgTime, (k, v) => v = msgTime);
-                        await ((DiscordClient)sender).SendMessage(e.Channel, responses[new Random().Next() % responses.Length]);
+                        _lastResponses.AddOrUpdate(resp, msgTime, (k, v) => v = msgTime);
+                        await ((DiscordClient)sender).SendMessage(e.Channel, resp.Resp[new Random().Next() % resp.Resp.Length]);
                     }
                 }
-                else if (sKey != null && Responses.spammableResponses.TryGetValue(sKey, out responses))
+                else if (sResp != null)
                 {
-                    await ((DiscordClient)sender).SendMessage(e.Channel, responses[new Random().Next() % responses.Length]);
-                }
-                else if (Responses.quickLearn.TryGetValue(e.Message.Text, out quickResponse) && quickResponse != String.Empty)
-                {
-                    await ((DiscordClient)sender).SendMessage(e.Channel, quickResponse);
+                    await ((DiscordClient)sender).SendMessage(e.Channel, sResp.Resp[new Random().Next() % sResp.Resp.Length]);
                 }
             }
         }
     }
 
+    public class Response
+    {
+        public string[] Call { get; set; }
+        public string[] Resp { get; set; }
+    }
+
     internal static class Responses
     {
-        internal static IReadOnlyDictionary<string[], string[]> responseDict = new Dictionary<string[], string[]>()
+        public static void InitResponses(IConfiguration config)
         {
-            { new[] { "osu", "hi" }, new[] { "Greetings." } },
-            { new[] { "bye" }, new[] { "Take care." } },
-            { new[] { "back", "i'm back", "tadaima" }, new[] { "Welcome back, master." } },
-            { new[] { "make me a sandwich" }, new[] { "Make one yourself." } },
-            { new[] { "sudo make me a sandwich" }, new[] { "Insufficient privilege." } },
-            { new[] { "good hisui" }, new[] { "*bows* Thank you, master." } },
-            { new[] { "good night", "" }, new[] { "Good night, master." } },
-            //{ new[] { "", "" }, new[] { "" } },
-            //{ new[] { "", "" }, new[] { "" } },
-            //{ new[] { "", "" }, new[] { "" } },
-        };
+            using (TextReader tr = new StreamReader(config["ResponsesPath"]))
+            {
+                responseDict = JsonConvert.DeserializeObject<List<Response>>(tr.ReadToEnd()) ?? new List<Response>();
+            }
+            using (TextReader tr = new StreamReader(config["SpamResponsesPath"]))
+            {
+                spammableResponses = JsonConvert.DeserializeObject<List<Response>>(tr.ReadToEnd()) ?? new List<Response>();
+            }
+        }
 
-        internal static IReadOnlyDictionary<string[], string[]> spammableResponses = new Dictionary<string[], string[]>()
-        {
-            { new[] { "(╯°□°）╯︵ ┻━┻", "(ノಠ益ಠ)ノ彡┻━┻", "(╯°□°）╯ ︵ ┻━┻", "(╯°□°）╯ ︵ ┻━┻"  }, new[] { "┬─┬ノ( º _ ºノ)" } },
-            { new[] { "┻━┻ ︵ヽ(`Д´)ﾉ︵﻿ ┻━┻", "┻━┻︵ (°□°)/ ︵ ┻━┻" }, new[] { "┬─┬ノ( º _ ºノ)\n(ヽº _ º )ヽ┬─┬" } },
-            { new[] { "ding dong" }, new[] { "bing bong" } },
-            //{ new[] { "", "" }, new[] { "" },
-            //{ new[] { "", "" }, new[] { "" },
-        };
+        internal static List<Response> responseDict;
 
-        internal static ConcurrentDictionary<string, string> quickLearn = new ConcurrentDictionary<string, string>();
+        internal static List<Response> spammableResponses;
     }
 }

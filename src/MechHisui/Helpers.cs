@@ -42,9 +42,15 @@ namespace MechHisui
                 .AppendLine($"**Max ATK:** {profile.Atk}")
                 .AppendLine($"**Max HP:** {profile.HP}")
                 .AppendLine($"**Growth type:** {profile.GrowthCurve}")
-                .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*")
-                .AppendLine($"**Skill 1:** {profile.Skill1} - *{profile.Effect1}*")
-                .AppendLine($"**Skill 2:** {profile.Skill2} - *{profile.Effect2}*");
+                .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*");
+            if (!String.IsNullOrWhiteSpace(profile.Skill1))
+            { 
+                sb.AppendLine($"**Skill 1:** {profile.Skill1} - *{profile.Effect1}*");
+            }
+            if (!String.IsNullOrWhiteSpace(profile.Skill2))
+            {
+                sb.AppendLine($"**Skill 2:** {profile.Skill2} - *{profile.Effect2}*");
+            }
             if (!String.IsNullOrWhiteSpace(profile.Skill3))
             {
                 sb.AppendLine($"**Skill 3:** {profile.Skill3} - *{profile.Effect3}*");
@@ -75,7 +81,7 @@ namespace MechHisui
             {
                 if (printServerNames)
                 {
-                    Console.WriteLine(server.Name);
+                    Console.WriteLine(server.Name + "\n");
                 }
                 foreach (var channel in server.Channels)
                 {
@@ -100,16 +106,10 @@ namespace MechHisui
             this.timeZone = timeZone;
         }
 
-        public DateTime UniversalTime { get { return utcDateTime; } }
+        public DateTime UniversalTime => utcDateTime;
 
-        public TimeZoneInfo TimeZone { get { return timeZone; } }
+        public TimeZoneInfo TimeZone => timeZone;
 
-        public DateTime LocalTime
-        {
-            get
-            {
-                return TimeZoneInfo.ConvertTime(utcDateTime, timeZone);
-            }
-        }
+        public DateTime LocalTime => TimeZoneInfo.ConvertTime(utcDateTime, timeZone);
     }
 }

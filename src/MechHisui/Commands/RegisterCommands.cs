@@ -1,25 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Discord;
 using Discord.Commands;
 using Discord.Modules;
 using MechHisui.Modules;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace MechHisui.Commands
 {
     public static class RegisterCommands
     {
+        public static void RegisterAddAliasCommand(this DiscordClient client, IConfiguration config)
+        {
+            client.Commands().CreateCommand("addalias")
+                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && ch.Id == Int64.Parse(config["FGO_general"]))
+                .Hide()
+                .Parameter("servant", ParameterType.Required)
+                .Parameter("alias", ParameterType.Required)
+                .Do(async cea =>
+                {
+                    var newAlias = StatService.servantDict.SingleOrDefault(p => p.Servant == cea.Args[0]);
+                    if (newAlias != null)
+                    {
+                        newAlias.Alias.Add(cea.Args[1]);
+                        using (TextWriter tw = new StreamWriter(config["ServantAliasPath"]))
+                        {
+                            tw.Write(JsonConvert.SerializeObject(StatService.servantDict, Formatting.Indented));
+                        }
+                        await client.SendMessage(cea.Channel, $"Added alias `{cea.Args[1]}` for `{newAlias.Servant}`.");
+                    }
+                    else
+                    {
+                        await client.SendMessage(cea.Channel, "Could not find name to add alias for.");
+                    }
+                });
+        }
+
         public static void RegisterAddChannelCommand(this DiscordClient client, IConfiguration config)
         {
             client.Commands().CreateCommand("add")
                 .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
-                .Parameter("id")
+                .Parameter("id", ParameterType.Required)
+               // .Parameter("services", ParameterType.Multiple)
                 .Do(async cea =>
                 {
                     long ch;
@@ -30,8 +59,35 @@ namespace MechHisui.Commands
                             .SingleOrDefault(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())
                             .EnableChannel(chan);
 
+                        //if (cea.Args.Length > 1)
+                        //{
+                        //    List<string> services = new List<string>();
+                        //    for (int i = 1; i < cea.Args.Length; i++)
+                        //    {
+                        //        if (cea.Args[i] == nameof(Responder).ToLowerInvariant())
+                        //        {
+                        //            client.MessageReceived += (new Responder(chan, client).Respond);
+                        //        }
+                        //        else if (cea.Args[i] == nameof(Recorder).ToLowerInvariant())
+                        //        {
+
+                        //        }
+                        //        else
+                        //        {
+                        //            continue;
+                        //        }
+                        //        services.Add(cea.Args[i]);
+                        //    }
+
+                        //    await client.SendMessage(cea.Channel, $"Now listening on channel {chan.Name} in {chan.Server.Name} with {String.Join(", ", services)} until next shutdown.");
+                        //}
+                        //else
+                        //{
+                        //    await client.SendMessage(cea.Channel, $"Now listening on channel {chan.Name} in {chan.Server.Name} until next shutdown.");
+                        //}
+
                         client.MessageReceived += (new Responder(chan, client).Respond);
-                        await client.SendMessage(cea.Channel, $"Now listening on channel {chan.Name} in {chan.Server.Name} until next shutdown.");
+                        await client.SendMessage(cea.Channel, $"Now listening on channel `{chan.Name}` in `{chan.Server.Name}` until next shutdown.");
                         await client.SendMessage(chan, config["Hello"]);
                     }
                     else
@@ -145,8 +201,7 @@ namespace MechHisui.Commands
                 .Hide()
                 .Do(async cea =>
                 {
-                    foreach (var channel in Helpers.IterateChannels(client.AllServers, printServerNames: true, printChannelNames: true))
-                    {
+                    foreach (var channel in Helpers.IterateChannels(client.AllServers, printServerNames: true, printChannelNames: false))                    {
                         Console.WriteLine($"{channel.Name}:  {channel.Id}");
                     }
                     await client.SendMessage(cea.Channel, "Known Channel IDs logged to console.");
@@ -156,15 +211,19 @@ namespace MechHisui.Commands
         public static void RegisterLearnCommand(this DiscordClient client, IConfiguration config)
         {
             client.Commands().CreateCommand("learn")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("trigger", ParameterType.Required)
                 .Parameter("response", ParameterType.Required)
                 .Hide()
                 .Do(async cea =>
                 {
-                    Responses.quickLearn.AddOrUpdate(cea.Args[0], cea.Args[1], (k,v) => v = cea.Args[1]);
-
-                    await client.SendMessage(cea.Channel, $"Understood. Shall respond to `{cea.Args[0]}` with `{cea.Args[1]}` until next shutdown.");
+                    var response = new Response { Call = new[] { cea.Args[0] }, Resp = new[] { cea.Args[1] } };
+                    Responses.responseDict.Add(response);
+                    using (TextWriter tw = new StreamWriter(config["ResponsesPath"]))
+                    {
+                        tw.Write(JsonConvert.SerializeObject(Responses.responseDict, Formatting.Indented));
+                    }
+                    await client.SendMessage(cea.Channel, $"Understood. Shall respond to `{response.Call}` with `{response.Resp}`.");
                 });
         }
 
@@ -221,7 +280,7 @@ namespace MechHisui.Commands
                 });
         }
 
-        public static void RegisterStatsCommand(this DiscordClient client, IConfiguration config, StatService wikier)
+        public static void RegisterStatsCommand(this DiscordClient client, IConfiguration config, StatService stats)
         {
             client.Commands().CreateCommand("stats")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
@@ -242,7 +301,7 @@ namespace MechHisui.Commands
                         return;
                     }
 
-                    var profile = wikier.LookupStats(arg);
+                    var profile = stats.LookupStats(arg);
                     if (profile == null)
                     {
                         await client.SendMessage(cea.Channel, "No such entry found. Please try another name.");
@@ -297,6 +356,33 @@ namespace MechHisui.Commands
                        await client.SendMessage(cea.Channel, $"Could not start trivia, parameter was not a number.");
                    }
                });
+        }
+
+        public static void RegisterUpdateCommand(this DiscordClient client, IConfiguration config, StatService stats)
+        {
+            client.Commands().CreateCommand("update")
+                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .Parameter("item", ParameterType.Optional)
+                .Hide()
+                .Do(async cea =>
+                {
+                    switch (cea.Args[0])
+                    {
+                        case "alias":
+                            stats.ReadAliasList(config);
+                            await client.SendMessage(cea.Channel, "Updated alias lookup.");
+                            break;
+                        case "profiles":
+                            stats.UpdateProfileList(config);
+                            await client.SendMessage(cea.Channel, "Updated profile lookup.");
+                            break;
+                        default:
+                            stats.ReadAliasList(config);
+                            stats.UpdateProfileList(config);
+                            await client.SendMessage(cea.Channel, "Updated all lookups.");
+                            break;
+                    }
+                });
         }
 
         public static void RegisterWhereCommand(this DiscordClient client, IConfiguration config)

@@ -37,6 +37,8 @@ namespace MechHisui
             client.AddService(new CommandService(new CommandServiceConfig() { HelpMode = HelpMode.Public, CommandChar = '.' }));
 
             //register commands
+            Console.WriteLine("Registering 'Add alias'...");
+            client.RegisterAddAliasCommand(config);
             Console.WriteLine("Registering 'Add channel'...");
             client.RegisterAddChannelCommand(config);
             Console.WriteLine("Registering 'Daily'...");
@@ -56,9 +58,14 @@ namespace MechHisui
             //Console.WriteLine("Registering 'Trivia'...");
             //client.RegisterTriviaCommand(config);
             Console.WriteLine("Registering 'Stats'...");
-            client.RegisterStatsCommand(config, new StatService(config));
+            var statService = new StatService(config);
+            client.RegisterStatsCommand(config, statService);
+            Console.WriteLine("Registering 'Update'...");
+            client.RegisterUpdateCommand(config, statService);
             Console.WriteLine("Registering 'Where'...");
             client.RegisterWhereCommand(config);
+
+            Responses.InitResponses(config);
 
 
             //Convert our sync method to an async one and block the Main function until the bot disconnects
@@ -66,7 +73,11 @@ namespace MechHisui
             {
                 //Connect to the Discord server using our email and password
                 await client.Connect(config["Email"], config["Password"]);
-                Console.WriteLine($"Logged in as {client.CurrentUserId}");
+                var server = client.AllServers.FirstOrDefault();
+                if (server != null)
+                {
+                    Console.WriteLine($"Logged in as {client.GetUser(server, client.CurrentUserId).Name}");
+                }
                 
                 //Use a channel whitelist
                 client.Modules().Install(
@@ -95,7 +106,7 @@ namespace MechHisui
                         {
                             //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
                             client.MessageReceived += (new Responder(channel, client).Respond);
-                            if (channel.Id != Int64.Parse(config["API_testing"]))
+                            if (channel.Id != long.Parse(config["API_testing"]))
                             {
                                 await client.SendMessage(channel, config["Hello"]);
                             }
