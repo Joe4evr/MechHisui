@@ -285,7 +285,7 @@ namespace MechHisui.Commands
             client.Commands().CreateCommand("stats")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Parameter("servantname", ParameterType.Multiple)
-                .Description("Relay information on the specified Servant. Alternative names acceptable.")
+                .Description("Relay information on the specified Servant. Alternative names acceptable. *Currently up to 23/69.*")
                 .Do(async cea =>
                 {
                     var arg = String.Join(" ", cea.Args);

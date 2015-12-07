@@ -18,9 +18,7 @@
         "Discord.Net": "0.8.1-beta2",
         "Discord.Net.Commands": "0.8.1-beta2",
         "Discord.Net.Modules": "0.8.1-beta2",
-        "Google.Apis.Drive.v2": "1.9.2.1940",
-        "Google.Apis.Script.v1": "1.9.2.10",
-        "RestSharp": "105.2.3"
+        "Google.Apis.Script.v1": "1.9.2.10"
     },
 
   "commands": {

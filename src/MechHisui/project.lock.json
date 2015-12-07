@@ -111,19 +111,6 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Core.dll": {}
         }
       },
-      "Google.Apis.Drive.v2/1.9.2.1940": {
-        "type": "package",
-        "dependencies": {
-          "Google.Apis": "1.9.2",
-          "Google.Apis.Auth": "1.9.2"
-        },
-        "compile": {
-          "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Drive.v2.dll": {}
-        },
-        "runtime": {
-          "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Drive.v2.dll": {}
-        }
-      },
       "Google.Apis.Script.v1/1.9.2.10": {
         "type": "package",
         "dependencies": {
@@ -467,19 +454,6 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Core.dll": {}
         }
       },
-      "Google.Apis.Drive.v2/1.9.2.1940": {
-        "type": "package",
-        "dependencies": {
-          "Google.Apis": "1.9.2",
-          "Google.Apis.Auth": "1.9.2"
-        },
-        "compile": {
-          "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Drive.v2.dll": {}
-        },
-        "runtime": {
-          "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Drive.v2.dll": {}
-        }
-      },
       "Google.Apis.Script.v1/1.9.2.10": {
         "type": "package",
         "dependencies": {
@@ -821,19 +795,6 @@
         },
         "runtime": {
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Core.dll": {}
-        }
-      },
-      "Google.Apis.Drive.v2/1.9.2.1940": {
-        "type": "package",
-        "dependencies": {
-          "Google.Apis": "1.9.2",
-          "Google.Apis.Auth": "1.9.2"
-        },
-        "compile": {
-          "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Drive.v2.dll": {}
-        },
-        "runtime": {
-          "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Drive.v2.dll": {}
         }
       },
       "Google.Apis.Script.v1/1.9.2.10": {
@@ -1209,18 +1170,6 @@
         "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Core.pdb",
         "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Core.xml",
         "License.txt"
-      ]
-    },
-    "Google.Apis.Drive.v2/1.9.2.1940": {
-      "type": "package",
-      "sha512": "LMf4asQj3AUmRG9GS+3tqco8rGePXJ54KOBX62q5TRh2RGGMMcViCd9Bep5RzHxMlGaoI2cVk+U/kfqy8ZCA1A==",
-      "files": [
-        "Google.Apis.Drive.v2.1.9.2.1940.nupkg",
-        "Google.Apis.Drive.v2.1.9.2.1940.nupkg.sha512",
-        "Google.Apis.Drive.v2.nuspec",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Drive.v2.dll",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Drive.v2.pdb",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Drive.v2.xml"
       ]
     },
     "Google.Apis.Script.v1/1.9.2.10": {
@@ -1680,9 +1629,7 @@
       "Discord.Net >= 0.8.1-beta2",
       "Discord.Net.Commands >= 0.8.1-beta2",
       "Discord.Net.Modules >= 0.8.1-beta2",
-      "Google.Apis.Drive.v2 >= 1.9.2.1940",
-      "Google.Apis.Script.v1 >= 1.9.2.10",
-      "RestSharp >= 105.2.3"
+      "Google.Apis.Script.v1 >= 1.9.2.10"
     ],
     "DNX,Version=v4.5.1": [
       "FuzzyString >= 1.0.0-*",
