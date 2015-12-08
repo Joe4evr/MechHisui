@@ -31,17 +31,17 @@ namespace MechHisui.Modules
  
                 string quickResponse = String.Empty;
                 Func<Response, bool> pred = (k => k.Call.Contains(temp.ToLowerInvariant().Trim()));
-                var resp = Responses.responseDict.SingleOrDefault(k => k.Key.Contains(temp.ToLowerInvariant().Trim())).Key;
+                var resp = Responses.responseDict.SingleOrDefault(k => k.Key.Contains(temp.ToLowerInvariant().Trim()));
                 var sResp = Responses.spammableResponses.SingleOrDefault(pred);
 
-                if (resp != null)
+                if (resp.Key != null)
                 {
                     DateTime last;
                     var msgTime = e.Message.Timestamp.ToUniversalTime();
-                    if (!_lastResponses.TryGetValue(resp, out last) || (DateTime.UtcNow - last) > TimeSpan.FromMinutes(1))
+                    if (!_lastResponses.TryGetValue(resp.Key, out last) || (DateTime.UtcNow - last) > TimeSpan.FromMinutes(1))
                     {
-                        _lastResponses.AddOrUpdate(resp, msgTime, (k, v) => v = msgTime);
-                        await ((DiscordClient)sender).SendMessage(e.Channel, resp[new Random().Next() % resp.Length]);
+                        _lastResponses.AddOrUpdate(resp.Key, msgTime, (k, v) => v = msgTime);
+                        await ((DiscordClient)sender).SendMessage(e.Channel, resp.Value[new Random().Next() % resp.Value.Length]);
                     }
                 }
                 else if (sResp != null)

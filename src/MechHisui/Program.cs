@@ -53,6 +53,8 @@ namespace MechHisui
             client.RegisterKnownChannelsCommand(config);
             Console.WriteLine("Registering 'Learn'...");
             client.RegisterLearnCommand(config);
+            Console.WriteLine("Registering 'Mark'...");
+            client.RegisterMarkCommand(config);
             Console.WriteLine("Registering 'Reset'...");
             client.RegisterResetCommand(config);
             //Console.WriteLine("Registering 'Trivia'...");
