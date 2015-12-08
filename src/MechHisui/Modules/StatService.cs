@@ -18,7 +18,7 @@ namespace MechHisui.Modules
     {
         public string[] Scopes = new string[] { "https://www.googleapis.com/auth/spreadsheets.readonly" };
 
-        private List<ServantProfile> _servantProfiles = new List<ServantProfile>();
+        internal List<ServantProfile> _servantProfiles = new List<ServantProfile>();
         private readonly UserCredential credential;
 
         public StatService(IConfiguration config)

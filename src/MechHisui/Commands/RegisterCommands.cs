@@ -227,6 +227,18 @@ namespace MechHisui.Commands
                 });
         }
 
+        public static void RegisterMarkCommand(this DiscordClient client, IConfiguration config)
+        {
+            client.Commands().CreateCommand("mark")
+                .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .Hide()
+                .Do(async cea =>
+                {
+                    Console.WriteLine($"Marked at {DateTime.Now}");
+                    await client.SendMessage(cea.Channel, "Marked current activity in the console.");
+                });
+        }
+
         public static void RegisterRecording(this DiscordClient client, IConfiguration config)
         {
             client.Commands().CreateCommand("record")
@@ -285,7 +297,7 @@ namespace MechHisui.Commands
             client.Commands().CreateCommand("stats")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Parameter("servantname", ParameterType.Multiple)
-                .Description("Relay information on the specified Servant. Alternative names acceptable. *Currently up to 23/69.*")
+                .Description($"Relay information on the specified Servant. Alternative names acceptable. *Currently up to {stats._servantProfiles.Count(p => !String.IsNullOrWhiteSpace(p.NoblePhantasm))}/{stats._servantProfiles.Count}.*")
                 .Do(async cea =>
                 {
                     var arg = String.Join(" ", cea.Args);
@@ -300,6 +312,23 @@ namespace MechHisui.Commands
                         await client.SendMessage(cea.Channel, "Never ever.");
                         return;
                     }
+
+                    if ((new[] { "jeanne alter", "ruler alter"}).Contains(arg.ToLowerInvariant()))
+                    {
+                        var sp = new ServantProfile
+                        {
+                            Id = 1000,
+                            Class = "Ruler",
+                            Rarity = "4☆",
+                            Name = "Jeanne d'Arc (Alter) (unobtainable)",
+                            Atk = 9804,
+                            HP = 11137,
+                            CardPool = "BBAAQ"
+                        };
+                        await client.SendMessage(cea.Channel, Helpers.FormatServantProfile(sp));
+                        return;
+                    }
+
 
                     var profile = stats.LookupStats(arg);
                     if (profile == null)
