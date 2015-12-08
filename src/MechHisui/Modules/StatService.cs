@@ -125,7 +125,12 @@ namespace MechHisui.Modules
                     //    }
                     //}
 
-                    _servantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>((string)op.Response["result"]);
+                    var temp = (string)op.Response["result"];
+                    using (TextWriter tw = new StreamWriter(Path.Combine(config["Logs"], "servants.json")))
+                    {
+                        tw.Write(temp);
+                    }
+                    _servantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(temp);
                 }
             }
             catch (Google.GoogleApiException e)

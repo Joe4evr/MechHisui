@@ -13,7 +13,7 @@ namespace MechHisui.Modules
     {
         public Channel channel { get; }
 
-        private ConcurrentDictionary<Response, DateTime> _lastResponses = new ConcurrentDictionary<Response, DateTime>();
+        private ConcurrentDictionary<string[], DateTime> _lastResponses = new ConcurrentDictionary<string[], DateTime>();
 
         public Responder(Channel channel, DiscordClient client)
         {
@@ -21,17 +21,17 @@ namespace MechHisui.Modules
             client.GetResponders().Add(this);
         }
 
-        internal void ResetTimeouts() => _lastResponses = new ConcurrentDictionary<Response, DateTime>();
+        internal void ResetTimeouts() => _lastResponses = new ConcurrentDictionary<string[], DateTime>();
 
         internal async void Respond(object sender, MessageEventArgs e)
         {
             if (e.Channel.Id == channel.Id)
             {
-                string temp = (e.Message.Text.StartsWith("@") ? new string(e.Message.Text.SkipWhile(c => Char.IsWhiteSpace(c)).ToArray()) : e.Message.Text);
+                string temp = (e.Message.Text.StartsWith("@") ? new string(e.Message.Text.SkipWhile(c => !Char.IsWhiteSpace(c)).ToArray()) : e.Message.Text);
  
                 string quickResponse = String.Empty;
                 Func<Response, bool> pred = (k => k.Call.Contains(temp.ToLowerInvariant().Trim()));
-                var resp = Responses.responseDict.SingleOrDefault(pred);
+                var resp = Responses.responseDict.SingleOrDefault(k => k.Key.Contains(temp.ToLowerInvariant().Trim())).Key;
                 var sResp = Responses.spammableResponses.SingleOrDefault(pred);
 
                 if (resp != null)
@@ -41,7 +41,7 @@ namespace MechHisui.Modules
                     if (!_lastResponses.TryGetValue(resp, out last) || (DateTime.UtcNow - last) > TimeSpan.FromMinutes(1))
                     {
                         _lastResponses.AddOrUpdate(resp, msgTime, (k, v) => v = msgTime);
-                        await ((DiscordClient)sender).SendMessage(e.Channel, resp.Resp[new Random().Next() % resp.Resp.Length]);
+                        await ((DiscordClient)sender).SendMessage(e.Channel, resp[new Random().Next() % resp.Length]);
                     }
                 }
                 else if (sResp != null)
@@ -64,7 +64,11 @@ namespace MechHisui.Modules
         {
             using (TextReader tr = new StreamReader(config["ResponsesPath"]))
             {
-                responseDict = JsonConvert.DeserializeObject<List<Response>>(tr.ReadToEnd()) ?? new List<Response>();
+                var temp = JsonConvert.DeserializeObject<List<Response>>(tr.ReadToEnd()) ?? new List<Response>();
+                foreach (var item in temp)
+                {
+                    responseDict.AddOrUpdate(item.Call, item.Resp, (k, v) => v = item.Resp);
+                }
             }
             using (TextReader tr = new StreamReader(config["SpamResponsesPath"]))
             {
@@ -72,7 +76,7 @@ namespace MechHisui.Modules
             }
         }
 
-        internal static List<Response> responseDict;
+        internal static ConcurrentDictionary<string[], string[]> responseDict = new ConcurrentDictionary<string[], string[]>();
 
         internal static List<Response> spammableResponses;
     }

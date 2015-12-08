@@ -108,9 +108,14 @@ namespace MechHisui.Commands
                     DayOfWeek day;
                     DateTimeWithZone todayInJapan = new DateTimeWithZone(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time"));
                     var arg = cea.Args[0];
+                    
                     if (String.IsNullOrWhiteSpace(arg))
                     {
                         day = todayInJapan.LocalTime.DayOfWeek;
+                    }
+                    else if (arg == "tomorrow")
+                    {
+                        day = todayInJapan.LocalTime.AddDays(1).DayOfWeek;
                     }
                     else if (!Enum.TryParse(arg, ignoreCase: true, result: out day))
                     {
@@ -122,7 +127,8 @@ namespace MechHisui.Commands
                     if (DailyInfo.DailyQuests.TryGetValue(day, out info))
                     {
                         bool isToday = (day == todayInJapan.LocalTime.DayOfWeek);
-                        string whatDay = isToday ? "Today" : day.ToString();
+                        bool isTomorrow = (day == todayInJapan.LocalTime.AddDays(1).DayOfWeek);
+                        string whatDay = isToday ? "Today" : (isTomorrow ? "Tomorrow" : day.ToString());
                         if (day != DayOfWeek.Sunday)
                         {
                             await client.SendMessage(cea.Channel, $"{whatDay}'s quests:\n\tAscension Materials: **{info.Materials.ToString()}**\n\tExperience: **{info.Exp1.ToString()}**, **{info.Exp2.ToString()}**, and **{ServantClass.Berzerker.ToString()}**");
@@ -214,16 +220,32 @@ namespace MechHisui.Commands
                 .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("trigger", ParameterType.Required)
                 .Parameter("response", ParameterType.Required)
+                .Parameter("kind", ParameterType.Optional)
                 .Hide()
                 .Do(async cea =>
                 {
-                    var response = new Response { Call = new[] { cea.Args[0] }, Resp = new[] { cea.Args[1] } };
-                    Responses.responseDict.Add(response);
+                    string triggger = cea.Args[0];
+                    string response = cea.Args[1];
+                    //var response = new Response { Call = new[] { cea.Args[0] }, Resp = new[] { cea.Args[1] } };
+                    Responses.responseDict.AddOrUpdate(
+                        Responses.responseDict.SingleOrDefault(kv => kv.Key.Contains(triggger)).Key ?? new string[] { triggger },
+                        new string[] { response },
+                        (k,v) =>
+                        {
+                            var t = v.ToList();
+                            t.Add(response);
+                            return t.ToArray();
+                        });
                     using (TextWriter tw = new StreamWriter(config["ResponsesPath"]))
                     {
-                        tw.Write(JsonConvert.SerializeObject(Responses.responseDict, Formatting.Indented));
+                        var l = new List<Response>();
+                        foreach (var item in Responses.responseDict)
+                        {
+                            l.Add(new Response { Call = item.Key, Resp = item.Value });
+                        }
+                        tw.Write(JsonConvert.SerializeObject(l, Formatting.Indented));
                     }
-                    await client.SendMessage(cea.Channel, $"Understood. Shall respond to `{response.Call}` with `{response.Resp}`.");
+                    await client.SendMessage(cea.Channel, $"Understood. Shall respond to `{triggger}` with `{response}`.");
                 });
         }
 
