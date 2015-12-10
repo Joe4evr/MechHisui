@@ -10,6 +10,7 @@ using Microsoft.Extensions.PlatformAbstractions;
 using Discord;
 using Discord.Commands;
 using Discord.Modules;
+using JiiLib.Net;
 using MechHisui.Commands;
 using MechHisui.FateGOLib;
 using MechHisui.Modules;
@@ -27,7 +28,7 @@ namespace MechHisui
                 .AddUserSecrets()
                 .Build();
 
-            JiiLib.Net.IJsonApiService apiService = new JiiLib.Net.GoogleScriptApiService(
+            IJsonApiService apiService = new GoogleScriptApiService(
                 Path.Combine(config["Secrets_Path"], "client_secret.json"),
                 Path.Combine(config["Secrets_Path"], "scriptcreds"),
                 config["Project_Key"],
