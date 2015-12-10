@@ -35,7 +35,7 @@ namespace MechHisui
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"**Servant:** {profile.Name}")
-                .AppendLine($"**Class** {profile.Class}")
+                .AppendLine($"**Class:** {profile.Class}")
                 .AppendLine($"**Rarity:** {profile.Rarity}")
                 .AppendLine($"**Collection ID:** {profile.Id}")
                 .AppendLine($"**Card pool:** {profile.CardPool}")

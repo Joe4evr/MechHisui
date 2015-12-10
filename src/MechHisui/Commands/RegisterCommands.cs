@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -8,9 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Discord;
 using Discord.Commands;
 using Discord.Modules;
-using MechHisui.Modules;
-using System.IO;
 using Newtonsoft.Json;
+using MechHisui.Modules;
 
 namespace MechHisui.Commands
 {
@@ -316,6 +316,29 @@ namespace MechHisui.Commands
 
         public static void RegisterStatsCommand(this DiscordClient client, IConfiguration config, StatService stats)
         {
+            stats._servantProfiles.Add(new ServantProfile
+            {
+                Name = "Mech-Hisui",
+                Class = "Pleasant-type City Subjugation Weapon",
+                Rarity = "5☆",
+                Id = -10,
+                CardPool = "BBAAQ",
+                Atk = 11137,
+                HP = 10304,
+                GrowthCurve = "Linear",
+                NoblePhantasm = "(Buster) Saturday Night Forever",
+                NoblePhantasmEffect = "Chance to Petrify (40%-90%) 1T, Dmg (1000%-1500%)",
+                Skill1 = "Kohaku Barrier B",
+                Effect1 = "Self Def+ (9%-18%) 3T CD:8",
+                Skill2 = "Execution Laser A",
+                Effect2 = "Inflict Burn status (500-1000 Dmg) 5T CD:8",
+                PassiveSkill1 = "Magic Resistance A",
+                PEffect1 = "Debuff Resist+ 20%",
+                PassiveSkill2 = "Independent Action B",
+                PEffect2 = "Critical Dmg+ 8%"
+            });
+            StatService.servantDict.Add(new ServantAlias { Alias = new List<string> { "mechhisui", "mech hisui", "mech-hisui" }, Servant = "Mech-Hisui" });
+
             client.Commands().CreateCommand("stats")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Parameter("servantname", ParameterType.Multiple)
@@ -328,12 +351,6 @@ namespace MechHisui.Commands
                         await client.SendMessage(cea.Channel, "It has come to my attention that your 'waifu' is equatable to fecal matter.");
                         return;
                     }
-                    
-                    if ((new[] { "scath", "scathach" }).Contains(arg.ToLowerInvariant()))
-                    {
-                        await client.SendMessage(cea.Channel, "Never ever.");
-                        return;
-                    }
 
                     if ((new[] { "jeanne alter", "ruler alter"}).Contains(arg.ToLowerInvariant()))
                     {
@@ -341,8 +358,8 @@ namespace MechHisui.Commands
                         {
                             Id = 1000,
                             Class = "Ruler",
-                            Rarity = "4☆",
-                            Name = "Jeanne d'Arc (Alter) (unobtainable)",
+                            Rarity = "4☆ (unobtainable)",
+                            Name = "Jeanne d'Arc (Alter)",
                             Atk = 9804,
                             HP = 11137,
                             CardPool = "BBAAQ"
@@ -353,24 +370,22 @@ namespace MechHisui.Commands
 
 
                     var profile = stats.LookupStats(arg);
-                    if (profile == null)
+                    if (profile != null)
                     {
-                        await client.SendMessage(cea.Channel, "No such entry found. Please try another name.");
+                        await client.SendMessage(cea.Channel, Helpers.FormatServantProfile(profile)); 
                     }
                     else
                     {
-                        await client.SendMessage(cea.Channel, Helpers.FormatServantProfile(profile));
+                        var name = stats.LookupServantName(arg);
+                        if (name != null)
+                        {
+                            await client.SendMessage(cea.Channel, $"**Servant:** {name}\nMore information TBA.");
+                        }
+                        else
+                        {
+                            await client.SendMessage(cea.Channel, "No such entry found. Please try another name.");
+                        }
                     }
-
-                    //var profile = wikier.LookupServantName(arg);
-                    //if (profile == null)
-                    //{
-                    //    await client.SendMessage(cea.Channel, "No such entry found. Please try another name.");
-                    //}
-                    //else
-                    //{
-                    //    await client.SendMessage(cea.Channel, $"**Servant:** {profile}");
-                    //}
                 });
         }
 
