@@ -1,0 +1,17 @@
+﻿{
+    "version": "0.0.1-*",
+    "description": "TriviaService Class Library",
+    "authors": [ "Joe4evr" ],
+    "tags": [ "" ],
+    "projectUrl": "",
+    "licenseUrl": "",
+    "dependencies": {
+        "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final",
+        "Discord.Net": "0.8.1-beta2",
+        "Discord.Net.Commands": "0.8.1-beta2"
+    },
+
+    "frameworks": {
+        "net451": { }
+    }
+}

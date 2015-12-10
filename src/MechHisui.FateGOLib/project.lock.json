@@ -2,7 +2,7 @@
   "locked": false,
   "version": 2,
   "targets": {
-    "DNX,Version=v4.5.1": {
+    ".NETFramework,Version=v4.5.1": {
       "Discord.Net/0.8.1-beta2": {
         "type": "package",
         "dependencies": {
@@ -18,10 +18,10 @@
           "System.Net.Http"
         ],
         "compile": {
-          "lib/dnx451/Discord.Net.dll": {}
+          "lib/net45/Discord.Net.dll": {}
         },
         "runtime": {
-          "lib/dnx451/Discord.Net.dll": {}
+          "lib/net45/Discord.Net.dll": {}
         }
       },
       "Discord.Net.Commands/0.8.1-beta2": {
@@ -36,34 +36,11 @@
           "System.Core"
         ],
         "compile": {
-          "lib/dnx451/Discord.Net.Commands.dll": {}
+          "lib/net45/Discord.Net.Commands.dll": {}
         },
         "runtime": {
-          "lib/dnx451/Discord.Net.Commands.dll": {}
+          "lib/net45/Discord.Net.Commands.dll": {}
         }
-      },
-      "Discord.Net.Modules/0.8.1-beta2": {
-        "type": "package",
-        "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/dnx451/Discord.Net.Modules.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Discord.Net.Modules.dll": {}
-        }
-      },
-      "FuzzyString/1.0.0": {
-        "type": "project",
-        "framework": "DNX,Version=v4.5.1"
       },
       "Google.Apis/1.9.2": {
         "type": "package",
@@ -138,26 +115,6 @@
         },
         "runtime": {
           "lib/net40-full/log4net.dll": {}
-        }
-      },
-      "MechHisui.FateGOLib/0.0.1": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5.1",
-        "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2",
-          "Google.Apis.Script.v1": "1.9.2.10",
-          "JiiLib.Net": null,
-          "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
-        }
-      },
-      "MechHisui.TriviaServiceLib/0.0.1": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5.1",
-        "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2",
-          "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
       },
       "Microsoft.Bcl/1.1.10": {
@@ -284,54 +241,6 @@
         },
         "runtime": {
           "lib/net451/Microsoft.Extensions.Configuration.UserSecrets.dll": {}
-        }
-      },
-      "Microsoft.Extensions.DependencyInjection/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Extensions.DependencyInjection.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Extensions.DependencyInjection.dll": {}
-        }
-      },
-      "Microsoft.Extensions.DependencyInjection.Abstractions/1.0.0-rc1-final": {
-        "type": "package",
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        }
-      },
-      "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc1-final": {
-        "type": "package",
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Extensions.PlatformAbstractions.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Extensions.PlatformAbstractions.dll": {}
         }
       },
       "Microsoft.Extensions.Primitives/1.0.0-rc1-final": {
@@ -405,7 +314,7 @@
         }
       }
     },
-    "DNX,Version=v4.5.1/win7-x86": {
+    ".NETFramework,Version=v4.5.1/win7-x86": {
       "Discord.Net/0.8.1-beta2": {
         "type": "package",
         "dependencies": {
@@ -421,10 +330,10 @@
           "System.Net.Http"
         ],
         "compile": {
-          "lib/dnx451/Discord.Net.dll": {}
+          "lib/net45/Discord.Net.dll": {}
         },
         "runtime": {
-          "lib/dnx451/Discord.Net.dll": {}
+          "lib/net45/Discord.Net.dll": {}
         }
       },
       "Discord.Net.Commands/0.8.1-beta2": {
@@ -439,34 +348,11 @@
           "System.Core"
         ],
         "compile": {
-          "lib/dnx451/Discord.Net.Commands.dll": {}
+          "lib/net45/Discord.Net.Commands.dll": {}
         },
         "runtime": {
-          "lib/dnx451/Discord.Net.Commands.dll": {}
+          "lib/net45/Discord.Net.Commands.dll": {}
         }
-      },
-      "Discord.Net.Modules/0.8.1-beta2": {
-        "type": "package",
-        "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/dnx451/Discord.Net.Modules.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Discord.Net.Modules.dll": {}
-        }
-      },
-      "FuzzyString/1.0.0": {
-        "type": "project",
-        "framework": "DNX,Version=v4.5.1"
       },
       "Google.Apis/1.9.2": {
         "type": "package",
@@ -541,26 +427,6 @@
         },
         "runtime": {
           "lib/net40-full/log4net.dll": {}
-        }
-      },
-      "MechHisui.FateGOLib/0.0.1": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5.1",
-        "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2",
-          "Google.Apis.Script.v1": "1.9.2.10",
-          "JiiLib.Net": null,
-          "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
-        }
-      },
-      "MechHisui.TriviaServiceLib/0.0.1": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5.1",
-        "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2",
-          "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
       },
       "Microsoft.Bcl/1.1.10": {
@@ -687,54 +553,6 @@
         },
         "runtime": {
           "lib/net451/Microsoft.Extensions.Configuration.UserSecrets.dll": {}
-        }
-      },
-      "Microsoft.Extensions.DependencyInjection/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Extensions.DependencyInjection.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Extensions.DependencyInjection.dll": {}
-        }
-      },
-      "Microsoft.Extensions.DependencyInjection.Abstractions/1.0.0-rc1-final": {
-        "type": "package",
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        }
-      },
-      "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc1-final": {
-        "type": "package",
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Extensions.PlatformAbstractions.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Extensions.PlatformAbstractions.dll": {}
         }
       },
       "Microsoft.Extensions.Primitives/1.0.0-rc1-final": {
@@ -808,7 +626,7 @@
         }
       }
     },
-    "DNX,Version=v4.5.1/win7-x64": {
+    ".NETFramework,Version=v4.5.1/win7-x64": {
       "Discord.Net/0.8.1-beta2": {
         "type": "package",
         "dependencies": {
@@ -824,10 +642,10 @@
           "System.Net.Http"
         ],
         "compile": {
-          "lib/dnx451/Discord.Net.dll": {}
+          "lib/net45/Discord.Net.dll": {}
         },
         "runtime": {
-          "lib/dnx451/Discord.Net.dll": {}
+          "lib/net45/Discord.Net.dll": {}
         }
       },
       "Discord.Net.Commands/0.8.1-beta2": {
@@ -842,34 +660,11 @@
           "System.Core"
         ],
         "compile": {
-          "lib/dnx451/Discord.Net.Commands.dll": {}
+          "lib/net45/Discord.Net.Commands.dll": {}
         },
         "runtime": {
-          "lib/dnx451/Discord.Net.Commands.dll": {}
+          "lib/net45/Discord.Net.Commands.dll": {}
         }
-      },
-      "Discord.Net.Modules/0.8.1-beta2": {
-        "type": "package",
-        "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/dnx451/Discord.Net.Modules.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Discord.Net.Modules.dll": {}
-        }
-      },
-      "FuzzyString/1.0.0": {
-        "type": "project",
-        "framework": "DNX,Version=v4.5.1"
       },
       "Google.Apis/1.9.2": {
         "type": "package",
@@ -944,26 +739,6 @@
         },
         "runtime": {
           "lib/net40-full/log4net.dll": {}
-        }
-      },
-      "MechHisui.FateGOLib/0.0.1": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5.1",
-        "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2",
-          "Google.Apis.Script.v1": "1.9.2.10",
-          "JiiLib.Net": null,
-          "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
-        }
-      },
-      "MechHisui.TriviaServiceLib/0.0.1": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5.1",
-        "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2",
-          "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
       },
       "Microsoft.Bcl/1.1.10": {
@@ -1090,54 +865,6 @@
         },
         "runtime": {
           "lib/net451/Microsoft.Extensions.Configuration.UserSecrets.dll": {}
-        }
-      },
-      "Microsoft.Extensions.DependencyInjection/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Extensions.DependencyInjection.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Extensions.DependencyInjection.dll": {}
-        }
-      },
-      "Microsoft.Extensions.DependencyInjection.Abstractions/1.0.0-rc1-final": {
-        "type": "package",
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        }
-      },
-      "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc1-final": {
-        "type": "package",
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Extensions.PlatformAbstractions.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Extensions.PlatformAbstractions.dll": {}
         }
       },
       "Microsoft.Extensions.Primitives/1.0.0-rc1-final": {
@@ -1213,21 +940,9 @@
     }
   },
   "libraries": {
-    "FuzzyString/1.0.0": {
-      "type": "project",
-      "path": "../../wrap/FuzzyString/project.json"
-    },
     "JiiLib.Net/0.0.1": {
       "type": "project",
       "path": "../../../JiiLib/src/JiiLib.Net/project.json"
-    },
-    "MechHisui.FateGOLib/0.0.1": {
-      "type": "project",
-      "path": "../MechHisui.FateGOLib/project.json"
-    },
-    "MechHisui.TriviaServiceLib/0.0.1": {
-      "type": "project",
-      "path": "../MechHisui.TriviaServiceLib/project.json"
     },
     "Discord.Net/0.8.1-beta2": {
       "type": "package",
@@ -1258,22 +973,6 @@
         "lib/dnxcore50/Discord.Net.Commands.xml",
         "lib/net45/Discord.Net.Commands.dll",
         "lib/net45/Discord.Net.Commands.xml",
-        "repo.json"
-      ]
-    },
-    "Discord.Net.Modules/0.8.1-beta2": {
-      "type": "package",
-      "sha512": "hSb9i7u4NEPWq9F6sTkpAFT5boAWrV95jaP/EsQPcG5mK0jxK7bY3bTE4pcQRvlFrYhTnYF7Jnrmyw75rOB37Q==",
-      "files": [
-        "Discord.Net.Modules.0.8.1-beta2.nupkg",
-        "Discord.Net.Modules.0.8.1-beta2.nupkg.sha512",
-        "Discord.Net.Modules.nuspec",
-        "lib/dnx451/Discord.Net.Modules.dll",
-        "lib/dnx451/Discord.Net.Modules.xml",
-        "lib/dnxcore50/Discord.Net.Modules.dll",
-        "lib/dnxcore50/Discord.Net.Modules.xml",
-        "lib/net45/Discord.Net.Modules.dll",
-        "lib/net45/Discord.Net.Modules.xml",
         "repo.json"
       ]
     },
@@ -1633,52 +1332,6 @@
         "Microsoft.Extensions.Configuration.UserSecrets.nuspec"
       ]
     },
-    "Microsoft.Extensions.DependencyInjection/1.0.0-rc1-final": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "S/+s3fq85j21H5nYOvh1fIt1arl8F5lZ7Ryiw/qend83yHQwIQbBs+dip9FhqiPmAn6Dz3UhW0likQQurfEsLQ==",
-      "files": [
-        "lib/dotnet5.4/Microsoft.Extensions.DependencyInjection.dll",
-        "lib/dotnet5.4/Microsoft.Extensions.DependencyInjection.xml",
-        "lib/net451/Microsoft.Extensions.DependencyInjection.dll",
-        "lib/net451/Microsoft.Extensions.DependencyInjection.xml",
-        "lib/netcore50/Microsoft.Extensions.DependencyInjection.dll",
-        "lib/netcore50/Microsoft.Extensions.DependencyInjection.xml",
-        "Microsoft.Extensions.DependencyInjection.1.0.0-rc1-final.nupkg",
-        "Microsoft.Extensions.DependencyInjection.1.0.0-rc1-final.nupkg.sha512",
-        "Microsoft.Extensions.DependencyInjection.nuspec"
-      ]
-    },
-    "Microsoft.Extensions.DependencyInjection.Abstractions/1.0.0-rc1-final": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "MUKexXAsRZ55C7YZ26ShePZgBeW+6FbasxeIVmZ/BZIgiG4uw6yPOdfl9WvTaUL9SFK2sEPcYLatWmLfTpsOAA==",
-      "files": [
-        "lib/dotnet5.4/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
-        "lib/dotnet5.4/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
-        "lib/net451/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
-        "lib/net451/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
-        "lib/netcore50/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
-        "lib/netcore50/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
-        "Microsoft.Extensions.DependencyInjection.Abstractions.1.0.0-rc1-final.nupkg",
-        "Microsoft.Extensions.DependencyInjection.Abstractions.1.0.0-rc1-final.nupkg.sha512",
-        "Microsoft.Extensions.DependencyInjection.Abstractions.nuspec"
-      ]
-    },
-    "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc1-final": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "26HS4c6MBisN+D7XUr8HObOI/JJvSJQYQR//Bfw/hi9UqhqK3lFpNKjOuYHI+gTxYdXT46HqZiz4D+k7d+ob3A==",
-      "files": [
-        "lib/dotnet5.4/Microsoft.Extensions.PlatformAbstractions.dll",
-        "lib/dotnet5.4/Microsoft.Extensions.PlatformAbstractions.xml",
-        "lib/net451/Microsoft.Extensions.PlatformAbstractions.dll",
-        "lib/net451/Microsoft.Extensions.PlatformAbstractions.xml",
-        "Microsoft.Extensions.PlatformAbstractions.1.0.0-rc1-final.nupkg",
-        "Microsoft.Extensions.PlatformAbstractions.1.0.0-rc1-final.nupkg.sha512",
-        "Microsoft.Extensions.PlatformAbstractions.nuspec"
-      ]
-    },
     "Microsoft.Extensions.Primitives/1.0.0-rc1-final": {
       "type": "package",
       "serviceable": true,
@@ -1846,20 +1499,12 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "Microsoft.Extensions.Configuration >= 1.0.0-rc1-final",
-      "Microsoft.Extensions.Configuration.FileExtensions >= 1.0.0-rc1-final",
       "Microsoft.Extensions.Configuration.UserSecrets >= 1.0.0-rc1-final",
-      "Microsoft.Extensions.DependencyInjection >= 1.0.0-rc1-final",
-      "Microsoft.Extensions.PlatformAbstractions >= 1.0.0-rc1-final",
+      "Google.Apis.Script.v1 >= 1.9.2.10",
+      "JiiLib.Net ",
       "Discord.Net >= 0.8.1-beta2",
-      "Discord.Net.Commands >= 0.8.1-beta2",
-      "Discord.Net.Modules >= 0.8.1-beta2",
-      "MechHisui.FateGOLib ",
-      "MechHisui.TriviaServiceLib "
+      "Discord.Net.Commands >= 0.8.1-beta2"
     ],
-    "DNX,Version=v4.5.1": [
-      "FuzzyString >= 1.0.0-*",
-      "fx/System.IO >= 4.0.0"
-    ]
+    ".NETFramework,Version=v4.5.1": []
   }
 }

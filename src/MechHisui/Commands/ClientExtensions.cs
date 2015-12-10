@@ -17,8 +17,5 @@ namespace MechHisui
         
         private static List<Responder> _responders = new List<Responder>();
         internal static List<Responder> GetResponders(this DiscordClient client) => _responders;
-
-        private static List<Trivia> _trivias = new List<Trivia>();
-        internal static List<Trivia> GetTrivias(this DiscordClient client) => _trivias;
     }
 }

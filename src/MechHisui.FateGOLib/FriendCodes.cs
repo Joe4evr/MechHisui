@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Discord;
-using System.IO;
 
-namespace MechHisui.Modules
+namespace MechHisui.FateGOLib
 {
     public static class FriendCodes
     {

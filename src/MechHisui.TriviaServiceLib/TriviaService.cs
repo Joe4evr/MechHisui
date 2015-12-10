@@ -8,10 +8,11 @@ using System.Timers;
 using Microsoft.Extensions.Configuration;
 using Discord;
 using Newtonsoft.Json;
+using MechHisui.Commands;
 
-namespace MechHisui.Modules
+namespace MechHisui.TriviaService
 {
-    public class Trivia
+    public class Trivia : ITriviaService
     {
         private readonly DiscordClient _client;
         private readonly int _winscore;
@@ -56,14 +57,14 @@ namespace MechHisui.Modules
             await _client.SendMessage(Channel, $"Aborting trivia. {_scoreboard.OrderByDescending(kv => kv.Value).First().Key.Name} has the most points.");
         }
 
-        private async Task EndTrivia(User winner)
+        public async Task EndTrivia(User winner)
         {
             _client.MessageReceived -= CheckTrivia;
             await _client.SendMessage(Channel, $"Trivia over, {winner.Name} has won.");
             _client.GetTrivias().Remove(this);
         }
 
-        private async Task AskQuestion()
+        public async Task AskQuestion()
         {
             do
             {

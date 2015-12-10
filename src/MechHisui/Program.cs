@@ -5,11 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
 using Discord;
 using Discord.Commands;
 using Discord.Modules;
 using MechHisui.Commands;
+using MechHisui.FateGOLib;
 using MechHisui.Modules;
 
 namespace MechHisui
@@ -25,6 +27,22 @@ namespace MechHisui
                 .AddUserSecrets()
                 .Build();
 
+            JiiLib.Net.IJsonApiService apiService = new JiiLib.Net.GoogleScriptApiService(
+                Path.Combine(config["Secrets_Path"], "client_secret.json"),
+                Path.Combine(config["Secrets_Path"], "scriptcreds"),
+                config["Project_Key"],
+                "MechHisui",
+                "exportServants",
+                new string[] { "https://www.googleapis.com/auth/spreadsheets.readonly" });
+
+            StatService statService = new StatService(apiService, config["ServantAliasPath"]);
+
+            //IServiceCollection services = new ServiceCollection()
+            //    .AddInstance(config)
+            //    .AddInstance(new StatService(apiService, config["ServantAliasPath"]));
+
+            //var provider = services.BuildServiceProvider();
+
             var client = new DiscordClient();
 
             Console.CancelKeyPress += async (s,e) => await RegisterCommands.Disconnect(client, config);
@@ -37,34 +55,19 @@ namespace MechHisui
             client.AddService(new CommandService(new CommandServiceConfig() { HelpMode = HelpMode.Public, CommandChar = '.' }));
 
             //register commands
-            Console.WriteLine("Registering 'Add alias'...");
-            client.RegisterAddAliasCommand(config);
-            Console.WriteLine("Registering 'Add channel'...");
             client.RegisterAddChannelCommand(config);
-            Console.WriteLine("Registering 'Daily'...");
             client.RegisterDailyCommand(config);
-            Console.WriteLine("Registering 'Disconnect'...");
             client.RegisterDisconnectCommand(config);
-            Console.WriteLine("Registering 'Friends'...");
             client.RegisterFriendsCommand(config);
-            Console.WriteLine("Registering 'Info'...");
             client.RegisterInfoCommand(config);
-            Console.WriteLine("Registering 'Known'...");
             client.RegisterKnownChannelsCommand(config);
-            Console.WriteLine("Registering 'Learn'...");
             client.RegisterLearnCommand(config);
-            Console.WriteLine("Registering 'Mark'...");
             client.RegisterMarkCommand(config);
-            Console.WriteLine("Registering 'Reset'...");
+            //client.RegisterRecordingCommand(config);
             client.RegisterResetCommand(config);
-            //Console.WriteLine("Registering 'Trivia'...");
             //client.RegisterTriviaCommand(config);
-            Console.WriteLine("Registering 'Stats'...");
-            var statService = new StatService(config);
             client.RegisterStatsCommand(config, statService);
-            Console.WriteLine("Registering 'Update'...");
-            client.RegisterUpdateCommand(config, statService);
-            Console.WriteLine("Registering 'Where'...");
+            client.RegisterQuartzCommand(config);
             client.RegisterWhereCommand(config);
 
             Responses.InitResponses(config);
@@ -114,26 +117,6 @@ namespace MechHisui
                             }
                         }
                     }
-                    //foreach (var server in client.AllServers)
-                    //{
-                    //    Console.WriteLine(server.Name);
-                    //    if (server.TextChannels.Any())
-                    //    {
-                    //        foreach (var channel in server.TextChannels)
-                    //        {
-                    //            Console.WriteLine($"{channel.Name}:  {channel.Id}");
-                    //            if (!channel.IsPrivate && Helpers.IsWhilested(channel, client))
-                    //            {
-                    //                //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
-                    //                client.MessageReceived += (new Responder(channel, client).Respond);
-                    //                if (channel.Id != Int64.Parse(config["API_testing"]))
-                    //                {
-                    //                    await client.SendMessage(channel, config["Hello"]);
-                    //                }
-                    //            }
-                    //        }
-                    //    }
-                    //}
                 }
             });
         }

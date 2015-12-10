@@ -1,9 +1,10 @@
 {
-  "projects": [
-    "src",
-    "test",
-    "wrap"
-  ],
+    "projects": [
+        "C:\\Users\\Jonathan\\Documents\\Visual Studio 2015\\Projects\\JiiLib\\src\\",
+        "src",
+        "test",
+        "wrap"
+    ],
   "sdk": {
     "version": "1.0.0-rc1-update1"
   }

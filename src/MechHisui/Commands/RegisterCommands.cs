@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,41 +10,16 @@ using Discord;
 using Discord.Commands;
 using Discord.Modules;
 using MechHisui.Modules;
-using System.IO;
 using Newtonsoft.Json;
+using MechHisui.TriviaService;
 
 namespace MechHisui.Commands
 {
     public static class RegisterCommands
     {
-        public static void RegisterAddAliasCommand(this DiscordClient client, IConfiguration config)
-        {
-            client.Commands().CreateCommand("addalias")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && ch.Id == Int64.Parse(config["FGO_general"]))
-                .Hide()
-                .Parameter("servant", ParameterType.Required)
-                .Parameter("alias", ParameterType.Required)
-                .Do(async cea =>
-                {
-                    var newAlias = StatService.servantDict.SingleOrDefault(p => p.Servant == cea.Args[0]);
-                    if (newAlias != null)
-                    {
-                        newAlias.Alias.Add(cea.Args[1]);
-                        using (TextWriter tw = new StreamWriter(config["ServantAliasPath"]))
-                        {
-                            tw.Write(JsonConvert.SerializeObject(StatService.servantDict, Formatting.Indented));
-                        }
-                        await client.SendMessage(cea.Channel, $"Added alias `{cea.Args[1]}` for `{newAlias.Servant}`.");
-                    }
-                    else
-                    {
-                        await client.SendMessage(cea.Channel, "Could not find name to add alias for.");
-                    }
-                });
-        }
-
         public static void RegisterAddChannelCommand(this DiscordClient client, IConfiguration config)
         {
+            Console.WriteLine("Registering 'Add channel'...");
             client.Commands().CreateCommand("add")
                 .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
@@ -97,52 +73,9 @@ namespace MechHisui.Commands
                 });
         }
 
-        public static void RegisterDailyCommand(this DiscordClient client, IConfiguration config)
-        {
-            client.Commands().CreateCommand("daily")
-                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
-                .Parameter("day", ParameterType.Optional)
-                .Description("Relay the information of daily quests for the specified day. Default to current day.")
-                .Do(async cea =>
-                {
-                    DayOfWeek day;
-                    DateTimeWithZone todayInJapan = new DateTimeWithZone(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time"));
-                    var arg = cea.Args[0];
-                    
-                    if (String.IsNullOrWhiteSpace(arg))
-                    {
-                        day = todayInJapan.LocalTime.DayOfWeek;
-                    }
-                    else if (arg == "tomorrow")
-                    {
-                        day = todayInJapan.LocalTime.AddDays(1).DayOfWeek;
-                    }
-                    else if (!Enum.TryParse(arg, ignoreCase: true, result: out day))
-                    {
-                        await client.SendMessage(cea.Channel, "Could not convert argument to a day of the week. Please try again.");
-                        return;
-                    }
-
-                    DailyInfo info;
-                    if (DailyInfo.DailyQuests.TryGetValue(day, out info))
-                    {
-                        bool isToday = (day == todayInJapan.LocalTime.DayOfWeek);
-                        bool isTomorrow = (day == todayInJapan.LocalTime.AddDays(1).DayOfWeek);
-                        string whatDay = isToday ? "Today" : (isTomorrow ? "Tomorrow" : day.ToString());
-                        if (day != DayOfWeek.Sunday)
-                        {
-                            await client.SendMessage(cea.Channel, $"{whatDay}'s quests:\n\tAscension Materials: **{info.Materials.ToString()}**\n\tExperience: **{info.Exp1.ToString()}**, **{info.Exp2.ToString()}**, and **{ServantClass.Berzerker.ToString()}**");
-                        }
-                        else
-                        {
-                            await client.SendMessage(cea.Channel, $"{whatDay}'s quests:\n\tAscension Materials: **{info.Materials.ToString()}**\n\tAnd also **QP**");
-                        }
-                    }
-                });
-        }
-
         public static void RegisterDisconnectCommand(this DiscordClient client, IConfiguration config)
         {
+            Console.WriteLine("Registering 'Disconnect'...");
             client.Commands().CreateCommand("disconnect")
                 .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
@@ -152,45 +85,9 @@ namespace MechHisui.Commands
                 });
         }
 
-        public static void RegisterFriendsCommand(this DiscordClient client, IConfiguration config)
-        {
-            FriendCodes.ReadFriendData(config["FriendcodePath"]);
-            client.Commands().CreateCommand("friendcode")
-               .AddCheck((c, u, ch) => ch.Id == long.Parse(config["FGO_general"]))
-               .Parameter("code", ParameterType.Required)
-               .Parameter("servant", ParameterType.Optional)
-               .Description("Add your friendcode to the list. Enter your code with quotes as `\"XXX XXX XXX\"`. You may add your support Servant as well.")
-               .Do(async cea =>
-               {
-                   if (Regex.Match(cea.Args[0], @"[0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9]").Success)
-                   {
-                       var friend = new FriendData { User = cea.User.Name, FriendCode = cea.Args[0], Servant = (cea.Args.Length > 1) ? cea.Args[1] : String.Empty };
-                       FriendCodes.friendData.Add(friend);
-                       FriendCodes.WriteFriendData(config["FriendcodePath"]);
-                       await client.SendMessage(cea.Channel, $"Added {friend.FriendCode} for {friend.User}.");
-                   }
-                   else
-                   {
-                       await client.SendMessage(cea.Channel, $"Incorrect friendcode format specified.");
-                   }
-               });
-            client.Commands().CreateCommand("listcodes")
-               .AddCheck((c, u, ch) => ch.Id == long.Parse(config["FGO_general"]))
-               .Description("Display known friendcodes.")
-               .Do(async cea =>
-               {
-                   StringBuilder sb = new StringBuilder();
-                   foreach (var friend in FriendCodes.friendData)
-                   {
-                       sb.Append($"{friend.User}: {friend.FriendCode}");
-                       sb.AppendLine((!String.IsNullOrEmpty(friend.Servant)) ? $" - {friend.Servant}" : String.Empty);
-                   }
-                   await client.SendMessage(cea.Channel, sb.ToString());
-               });
-        }
-
         public static void RegisterInfoCommand(this DiscordClient client, IConfiguration config)
         {
+            Console.WriteLine("Registering 'Info'...");
             client.Commands().CreateCommand("info")
                 .AddCheck((c, u, ch) =>  Helpers.IsWhilested(ch, client))
                 .Description("Relay info about myself.")
@@ -202,6 +99,7 @@ namespace MechHisui.Commands
 
         public static void RegisterKnownChannelsCommand(this DiscordClient client, IConfiguration config)
         {
+            Console.WriteLine("Registering 'Known'...");
             client.Commands().CreateCommand("known")
                 .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
@@ -216,6 +114,7 @@ namespace MechHisui.Commands
 
         public static void RegisterLearnCommand(this DiscordClient client, IConfiguration config)
         {
+            Console.WriteLine("Registering 'Learn'...");
             client.Commands().CreateCommand("learn")
                 .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("trigger", ParameterType.Required)
@@ -251,6 +150,7 @@ namespace MechHisui.Commands
 
         public static void RegisterMarkCommand(this DiscordClient client, IConfiguration config)
         {
+            Console.WriteLine("Registering 'Mark'...");
             client.Commands().CreateCommand("mark")
                 .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
@@ -261,8 +161,9 @@ namespace MechHisui.Commands
                 });
         }
 
-        public static void RegisterRecording(this DiscordClient client, IConfiguration config)
+        public static void RegisterRecordingCommand(this DiscordClient client, IConfiguration config)
         {
+            Console.WriteLine("Registering 'Recording'...");
             client.Commands().CreateCommand("record")
                 .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
@@ -303,6 +204,7 @@ namespace MechHisui.Commands
 
         public static void RegisterResetCommand(this DiscordClient client, IConfiguration config)
         {
+            Console.WriteLine("Registering 'Reset'...");
             client.Commands().CreateCommand("reset")
                 .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
@@ -313,131 +215,10 @@ namespace MechHisui.Commands
                     await client.SendMessage(cea.Channel, "Timeouts reset.");
                 });
         }
-
-        public static void RegisterStatsCommand(this DiscordClient client, IConfiguration config, StatService stats)
-        {
-            client.Commands().CreateCommand("stats")
-                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
-                .Parameter("servantname", ParameterType.Multiple)
-                .Description($"Relay information on the specified Servant. Alternative names acceptable. *Currently up to {stats._servantProfiles.Count(p => !String.IsNullOrWhiteSpace(p.NoblePhantasm))}/{stats._servantProfiles.Count}.*")
-                .Do(async cea =>
-                {
-                    var arg = String.Join(" ", cea.Args);
-                    if (arg.ToLowerInvariant() == "waifu")
-                    {
-                        await client.SendMessage(cea.Channel, "It has come to my attention that your 'waifu' is equatable to fecal matter.");
-                        return;
-                    }
-                    
-                    if ((new[] { "scath", "scathach" }).Contains(arg.ToLowerInvariant()))
-                    {
-                        await client.SendMessage(cea.Channel, "Never ever.");
-                        return;
-                    }
-
-                    if ((new[] { "jeanne alter", "ruler alter"}).Contains(arg.ToLowerInvariant()))
-                    {
-                        var sp = new ServantProfile
-                        {
-                            Id = 1000,
-                            Class = "Ruler",
-                            Rarity = "4☆",
-                            Name = "Jeanne d'Arc (Alter) (unobtainable)",
-                            Atk = 9804,
-                            HP = 11137,
-                            CardPool = "BBAAQ"
-                        };
-                        await client.SendMessage(cea.Channel, Helpers.FormatServantProfile(sp));
-                        return;
-                    }
-
-
-                    var profile = stats.LookupStats(arg);
-                    if (profile == null)
-                    {
-                        await client.SendMessage(cea.Channel, "No such entry found. Please try another name.");
-                    }
-                    else
-                    {
-                        await client.SendMessage(cea.Channel, Helpers.FormatServantProfile(profile));
-                    }
-
-                    //var profile = wikier.LookupServantName(arg);
-                    //if (profile == null)
-                    //{
-                    //    await client.SendMessage(cea.Channel, "No such entry found. Please try another name.");
-                    //}
-                    //else
-                    //{
-                    //    await client.SendMessage(cea.Channel, $"**Servant:** {profile}");
-                    //}
-                });
-        }
-
-        public static void RegisterTriviaCommand(this DiscordClient client, IConfiguration config)
-        {
-            client.Commands().CreateCommand("trivia")
-               .AddCheck((c, u, ch) => ch.Id == long.Parse(config["FGO_trivia"]))
-               .Parameter("rounds", ParameterType.Required)
-               .Description("Would you like to play a game?")
-               .Do(async cea =>
-               {
-                   if (client.GetTrivias().Any(t => t.Channel.Id == cea.Channel.Id))
-                   {
-                       await client.SendMessage(cea.Channel, $"Trivia already running.");
-                       return;
-                   }
-                   int rounds;
-                   if (int.TryParse(cea.Args[0], out rounds))
-                   {
-                       if (rounds > TriviaHelpers.Questions.Count)
-                       {
-                           await client.SendMessage(cea.Channel, $"Could not start trivia, too many questions specified.");
-                       }
-                       else
-                       {
-                           await client.SendMessage(cea.Channel, $"Starting trivia. Play until {rounds} points to win.");
-                           var trivia = new Trivia(client, rounds, cea.Channel, config);
-                           client.GetTrivias().Add(trivia);
-                           trivia.StartTrivia();
-                       }
-                   }
-                   else
-                   {
-                       await client.SendMessage(cea.Channel, $"Could not start trivia, parameter was not a number.");
-                   }
-               });
-        }
-
-        public static void RegisterUpdateCommand(this DiscordClient client, IConfiguration config, StatService stats)
-        {
-            client.Commands().CreateCommand("update")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
-                .Parameter("item", ParameterType.Optional)
-                .Hide()
-                .Do(async cea =>
-                {
-                    switch (cea.Args[0])
-                    {
-                        case "alias":
-                            stats.ReadAliasList(config);
-                            await client.SendMessage(cea.Channel, "Updated alias lookup.");
-                            break;
-                        case "profiles":
-                            stats.UpdateProfileList(config);
-                            await client.SendMessage(cea.Channel, "Updated profile lookup.");
-                            break;
-                        default:
-                            stats.ReadAliasList(config);
-                            stats.UpdateProfileList(config);
-                            await client.SendMessage(cea.Channel, "Updated all lookups.");
-                            break;
-                    }
-                });
-        }
-
+ 
         public static void RegisterWhereCommand(this DiscordClient client, IConfiguration config)
         {
+            Console.WriteLine("Registering 'Where'...");
             client.Commands().CreateCommand("where")
                 .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("item")

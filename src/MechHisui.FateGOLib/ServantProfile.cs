@@ -1,4 +1,4 @@
-﻿namespace MechHisui.Modules
+﻿namespace MechHisui.FateGOLib
 {
     public class ServantProfile
     {
