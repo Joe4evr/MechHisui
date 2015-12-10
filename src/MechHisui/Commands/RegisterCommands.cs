@@ -323,7 +323,7 @@ namespace MechHisui.Commands
                 .Do(async cea =>
                 {
                     var arg = String.Join(" ", cea.Args);
-                    if (arg.ToLowerInvariant() == "waifu")
+                    if (new[] { "waifu", "mai waifu", "my waifu" }.Contains(arg.ToLowerInvariant()))
                     {
                         await client.SendMessage(cea.Channel, "It has come to my attention that your 'waifu' is equatable to fecal matter.");
                         return;

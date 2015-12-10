@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "MechHisui": {
+      "commandName": "MechHisui",
+      "commandLineArgs": "--environment Development",
+      "environmentVariables": {
+        "ASPNET_ENV": "Development"
+      }
+    }
+  }
+}

@@ -69,7 +69,7 @@ namespace MechHisui.Modules
 
             ExecutionRequest request = new ExecutionRequest()
             {
-                Function = "exportSheet"
+                Function = "exportServants"
             };
 
             ScriptsResource.RunRequest runReq = service.Scripts.Run(request, scriptId);
