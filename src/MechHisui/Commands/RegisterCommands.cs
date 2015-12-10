@@ -261,7 +261,7 @@ namespace MechHisui.Commands
                 });
         }
 
-        public static void RegisterRecording(this DiscordClient client, IConfiguration config)
+        public static void RegisterRecordingCommands(this DiscordClient client, IConfiguration config)
         {
             client.Commands().CreateCommand("record")
                 .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
@@ -339,6 +339,29 @@ namespace MechHisui.Commands
             });
             StatService.servantDict.Add(new ServantAlias { Alias = new List<string> { "mechhisui", "mech hisui", "mech-hisui" }, Servant = "Mech-Hisui" });
 
+            stats._servantProfiles.Add(new ServantProfile
+            {
+                Name = "Kuro von Einzbern",
+                Class = "Archer",
+                Rarity = "4☆",
+                Id = -9,
+                CardPool = "BAAAQ",
+                Atk = 10142,
+                HP = 10528,
+                GrowthCurve = "S",
+                NoblePhantasm = "(Arts) Rho Aias",
+                NoblePhantasmEffect = "Team Invul 1T, Team Def+ (3%-15%) 3T",
+                Skill1 = "Mind's Eye (True) C",
+                Effect1 = "Self Dodge 1T, Self Def+ (8%-16%) 3T CD:8",
+                Skill2 = "Thaumaturgy B",
+                Effect2 = "Self Arts+ (23%-37%) 1T CD:7",
+                PassiveSkill1 = "Magic Resistance C",
+                PEffect1 = "Debuff Resist+ 15%",
+                PassiveSkill2 = "Independent Action C",
+                PEffect2 = "Critical Dmg+ 6%",
+                Image = "http://i.imgur.com/kKghqi7.png"
+            });
+            StatService.servantDict.Add(new ServantAlias { Alias = new List<string> { "kuro", "kuro illya", "chloe" }, Servant = "Kuro von Einzbern" });
             client.Commands().CreateCommand("stats")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Parameter("servantname", ParameterType.Multiple)

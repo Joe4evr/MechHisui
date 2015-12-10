@@ -66,6 +66,8 @@ namespace MechHisui
             client.RegisterLearnCommand(config);
             Console.WriteLine("Registering 'Mark'...");
             client.RegisterMarkCommand(config);
+            Console.WriteLine("Registering 'Record'...");
+            client.RegisterRecordingCommands(config);
             Console.WriteLine("Registering 'Reset'...");
             client.RegisterResetCommand(config);
             //Console.WriteLine("Registering 'Trivia'...");
