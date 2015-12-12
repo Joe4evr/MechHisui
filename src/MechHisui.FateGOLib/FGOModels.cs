@@ -42,12 +42,14 @@ namespace MechHisui.FateGOLib
         public int Id { get; set; }
         public string Rarity { get; set; }
         public string Name { get; set; }
+        public int Cost { get; set; }
         public int Atk { get; set; }
         public int HP { get; set; }
         public string Effect { get; set; }
         public int AtkMax { get; set; }
         public int HPMax { get; set; }
         public string EffectMax { get; set; }
+        public object Image { get; internal set; }
     }
 
     public class CEAlias

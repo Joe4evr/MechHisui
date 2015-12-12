@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MechHisui": {
+      "commandName": "MechHisui",
+      "commandLineArgs": "--environment Development"
+    }
+  }
+}

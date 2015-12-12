@@ -48,7 +48,7 @@ namespace MechHisui
                 new string[] { "https://www.googleapis.com/auth/spreadsheets.readonly" });
 
 
-            StatService statService = new StatService(apiService, config["ServantAliasPath"]);
+            StatService statService = new StatService(apiService, Path.Combine(config["AliasPath"], "servants.json"), Path.Combine(config["AliasPath"], "ces.json"));
             statService.UpdateProfileListsAsync().Wait();
 
             //IServiceCollection services = new ServiceCollection()

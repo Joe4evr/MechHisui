@@ -14,14 +14,20 @@ namespace MechHisui.FateGOLib
     {
         private readonly GoogleScriptApiService _apiService;
         private readonly string _aliasPath;
-        
-        public StatService(GoogleScriptApiService apiService, string aliasPath)
+        private readonly string _ceAliasPath;
+
+        public StatService(GoogleScriptApiService apiService, string aliasPath, string ceAliasPath)
         {
             if (apiService == null) throw new ArgumentNullException(nameof(apiService));
             if (aliasPath == null) throw new ArgumentNullException(nameof(aliasPath));
+            if (ceAliasPath == null) throw new ArgumentNullException(nameof(ceAliasPath));
+
+            if (!File.Exists(aliasPath)) throw new FileNotFoundException(nameof(aliasPath));
+            if (!File.Exists(ceAliasPath)) throw new FileNotFoundException(nameof(ceAliasPath));
 
             _apiService = apiService;
             _aliasPath = aliasPath;
+            _ceAliasPath = ceAliasPath;
 
             ReadAliasList();
         }
@@ -37,7 +43,20 @@ namespace MechHisui.FateGOLib
             }
             else
             {
-                return FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Name == servant);
+                return FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Name.ToLowerInvariant() == servant.ToLowerInvariant());
+            }
+        }
+
+        public CEProfile LookupCE(string name)
+        {
+            var ce = FgoHelpers.CEDict.SingleOrDefault(k => k.Alias.Contains(name.ToLowerInvariant()));
+            if (ce != null)
+            {
+                return FgoHelpers.CEProfiles.SingleOrDefault(p => p.Name == ce.CE);
+            }
+            else
+            {
+                return FgoHelpers.CEProfiles.SingleOrDefault(p => p.Name.ToLowerInvariant() == name.ToLowerInvariant());
             }
         }
 
@@ -57,8 +76,8 @@ namespace MechHisui.FateGOLib
             FgoHelpers.ServantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(await _apiService.GetDataFromServiceAsJsonAsync());
             _apiService.Parameters = new List<object> { "FakeServants" };
             FgoHelpers.FakeServantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(await _apiService.GetDataFromServiceAsJsonAsync());
-            //_apiService.Parameters = new List<object> { "CEs" };
-            //FgoHelpers.CEProfiles = JsonConvert.DeserializeObject<List<CEProfile>>(await _apiService.GetDataFromServiceAsJsonAsync());
+            _apiService.Parameters = new List<object> { "CEs" };
+            FgoHelpers.CEProfiles = JsonConvert.DeserializeObject<List<CEProfile>>(await _apiService.GetDataFromServiceAsJsonAsync());
         }
 
 
@@ -145,6 +164,10 @@ namespace MechHisui.FateGOLib
             using (TextReader tr = new StreamReader(_aliasPath))
             {
                 FgoHelpers.ServantDict = JsonConvert.DeserializeObject<List<ServantAlias>>(tr.ReadToEnd()) ?? new List<ServantAlias>();
+            }
+            using (TextReader tr = new StreamReader(_ceAliasPath))
+            {
+                FgoHelpers.CEDict = JsonConvert.DeserializeObject<List<CEAlias>>(tr.ReadToEnd()) ?? new List<CEAlias>();
             }
         }
 

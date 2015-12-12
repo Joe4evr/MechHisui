@@ -151,6 +151,25 @@ namespace MechHisui.Commands
                     }
                 });
 
+            client.Commands().CreateCommand("ce")
+                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
+                .Parameter("servantname", ParameterType.Multiple)
+                .Description($"Relay information on the specified CE. Alternative names acceptable.")
+                .Do(async cea =>
+                {
+                    var arg = String.Join(" ", cea.Args);
+
+                    var ce = statService.LookupCE(arg);
+                    if (ce != null)
+                    {
+                        await client.SendMessage(cea.Channel, FormatCEProfile(ce));
+                    }
+                    else
+                    {
+                        await client.SendMessage(cea.Channel, "No such entry found. Please try another name.");
+                    }
+                });
+
             Console.WriteLine("Registering 'Update'...");
             client.Commands().CreateCommand("update")
                 .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && (ch.Id == Int64.Parse(config["FGO_general"])))
@@ -188,7 +207,7 @@ namespace MechHisui.Commands
                     if (newAlias != null)
                     {
                         newAlias.Alias.Add(cea.Args[1]);
-                        using (TextWriter tw = new StreamWriter(config["ServantAliasPath"]))
+                        using (TextWriter tw = new StreamWriter(Path.Combine(config["AliasPath"], "servants.json")))
                         {
                             tw.Write(JsonConvert.SerializeObject(FgoHelpers.ServantDict, Formatting.Indented));
                         }
@@ -199,12 +218,52 @@ namespace MechHisui.Commands
                         await client.SendMessage(cea.Channel, "Could not find name to add alias for.");
                     }
                 });
+
+            client.Commands().CreateCommand("cealias")
+                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && ch.Id == Int64.Parse(config["FGO_general"]))
+                .Hide()
+                .Parameter("ce", ParameterType.Required)
+                .Parameter("alias", ParameterType.Required)
+                .Do(async cea =>
+                {
+                    var newAlias = FgoHelpers.CEDict.SingleOrDefault(p => p.CE == cea.Args[0]);
+                    if (newAlias != null)
+                    {
+                        newAlias.Alias.Add(cea.Args[1]);
+                        using (TextWriter tw = new StreamWriter(Path.Combine(config["AliasPath"], "ces.json")))
+                        {
+                            tw.Write(JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
+                        }
+                        await client.SendMessage(cea.Channel, $"Added alias `{cea.Args[1]}` for `{newAlias.CE}`.");
+                    }
+                    else
+                    {
+                        await client.SendMessage(cea.Channel, "Could not find name to add alias for.");
+                    }
+                });
+        }
+
+        private static string FormatCEProfile(CEProfile ce)
+        {
+            StringBuilder sb = new StringBuilder()
+                .AppendLine($"**Collection ID:** {ce.Id}")
+                .AppendLine($"**Rarity:** {ce.Rarity}")
+                .AppendLine($"**CE:** {ce.Name}")
+                .AppendLine($"**Card pool:** {ce.Cost}")
+                .AppendLine($"**ATK:** {ce.Atk}")
+                .AppendLine($"**HP:** {ce.HP}")
+                .AppendLine($"**Effect:** {ce.Effect}")
+                .AppendLine($"**Max ATK:** {ce.AtkMax}")
+                .AppendLine($"**Max HP:** {ce.HPMax}")
+                .AppendLine($"**Max Effect:** {ce.EffectMax}")
+                .AppendLine($"{ce.Image}");
+            return sb.ToString();
         }
 
         internal static string FormatServantProfile(ServantProfile profile)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"**Servant:** {profile.Name}")
+            StringBuilder sb = new StringBuilder()
+                .AppendLine($"**Servant:** {profile.Name}")
                 .AppendLine($"**Class:** {profile.Class}")
                 .AppendLine($"**Rarity:** {profile.Rarity}")
                 .AppendLine($"**Collection ID:** {profile.Id}")
