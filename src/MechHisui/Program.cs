@@ -28,15 +28,17 @@ namespace MechHisui
                 .AddUserSecrets()
                 .Build();
 
-            IJsonApiService apiService = new GoogleScriptApiService(
+            GoogleScriptApiService apiService = new GoogleScriptApiService(
                 Path.Combine(config["Secrets_Path"], "client_secret.json"),
                 Path.Combine(config["Secrets_Path"], "scriptcreds"),
-                config["Project_Key"],
                 "MechHisui",
+                config["Project_Key"],
                 "exportServants",
                 new string[] { "https://www.googleapis.com/auth/spreadsheets.readonly" });
 
+
             StatService statService = new StatService(apiService, config["ServantAliasPath"]);
+            statService.UpdateProfileListsAsync().Wait();
 
             //IServiceCollection services = new ServiceCollection()
             //    .AddInstance(config)
@@ -46,11 +48,11 @@ namespace MechHisui
 
             var client = new DiscordClient();
 
-            Console.CancelKeyPress += async (s,e) => await RegisterCommands.Disconnect(client, config);
+            Console.CancelKeyPress += async (s, e) => await RegisterCommands.Disconnect(client, config);
 
             //Display all log messages in the console
             client.LogMessage += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
-            
+
             //Add a ModuleService and CommandService
             client.AddService(new ModuleService());
             client.AddService(new CommandService(new CommandServiceConfig() { HelpMode = HelpMode.Public, CommandChar = '.' }));
@@ -84,7 +86,7 @@ namespace MechHisui
                 {
                     Console.WriteLine($"Logged in as {client.GetUser(server, client.CurrentUserId).Name}");
                 }
-                
+
                 //Use a channel whitelist
                 client.Modules().Install(
                     new ChannelWhitelistModule(

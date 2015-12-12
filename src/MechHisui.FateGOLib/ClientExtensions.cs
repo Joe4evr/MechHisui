@@ -112,72 +112,11 @@ namespace MechHisui.Commands
 
         public static void RegisterStatsCommand(this DiscordClient client, IConfiguration config, StatService statService)
         {
-            #region extra profiles
-            statService._servantProfiles.Add(new ServantProfile
-            {
-                Id = 1000,
-                Class = "Ruler",
-                Rarity = "4☆ (unobtainable)",
-                Name = "Jeanne d'Arc (Alter)",
-                Atk = 9804,
-                HP = 11137,
-                CardPool = "BBAAQ"
-            });
-            statService.servantDict.Add(new ServantAlias { Alias = new List<string> { "jeanne alter", "ruler alter" }, Servant = "Jeanne d'Arc (Alter)" });
-
-            statService._servantProfiles.Add(new ServantProfile
-            {
-                Name = "Mech-Hisui",
-                Class = "Pleasant-type City Subjugation Weapon",
-                Rarity = "5☆",
-                Id = -10,
-                CardPool = "BBAAQ",
-                Atk = 11137,
-                HP = 10304,
-                GrowthCurve = "Linear",
-                NoblePhantasm = "(Buster) Saturday Night Forever",
-                NoblePhantasmEffect = "Chance to Petrify (40%-90%) 1T, Dmg (1000%-1500%)",
-                Skill1 = "Kohaku Barrier B",
-                Effect1 = "Self Def+ (9%-18%) 3T CD:8",
-                Skill2 = "Execution Laser A",
-                Effect2 = "Inflict Burn status (500-1000 Dmg) 5T CD:8",
-                PassiveSkill1 = "Magic Resistance A",
-                PEffect1 = "Debuff Resist+ 20%",
-                PassiveSkill2 = "Independent Action B",
-                PEffect2 = "Critical Dmg+ 8%"
-            });
-            statService.servantDict.Add(new ServantAlias { Alias = new List<string> { "mechhisui", "mech hisui", "mech-hisui" }, Servant = "Mech-Hisui" });
-
-            statService._servantProfiles.Add(new ServantProfile
-            {
-                Name = "Kuro von Einzbern",
-                Class = "Archer",
-                Rarity = "4☆",
-                Id = -9,
-                CardPool = "BAAAQ",
-                Atk = 10142,
-                HP = 10528,
-                GrowthCurve = "S",
-                NoblePhantasm = "(Arts) Rho Aias",
-                NoblePhantasmEffect = "Team Invul 1T, Team Def+ (3%-15%) 3T",
-                Skill1 = "Mind's Eye (True) C",
-                Effect1 = "Self Dodge 1T, Self Def+ (8%-16%) 3T CD:8",
-                Skill2 = "Thaumaturgy B",
-                Effect2 = "Self Arts+ (23%-37%) 1T CD:7",
-                PassiveSkill1 = "Magic Resistance C",
-                PEffect1 = "Debuff Resist+ 15%",
-                PassiveSkill2 = "Independent Action C",
-                PEffect2 = "Critical Dmg+ 6%",
-                Image = "http://i.imgur.com/kKghqi7.png"
-            });
-            statService.servantDict.Add(new ServantAlias { Alias = new List<string> { "kuro", "kuro illya", "chloe" }, Servant = "Kuro von Einzbern" });
-            #endregion
-
             Console.WriteLine("Registering 'Stats'...");
             client.Commands().CreateCommand("stats")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Parameter("servantname", ParameterType.Multiple)
-                .Description($"Relay information on the specified Servant. Alternative names acceptable. *Currently up to {statService._servantProfiles.Count(p => !String.IsNullOrWhiteSpace(p.NoblePhantasm))}/{statService._servantProfiles.Count}.*")
+                .Description($"Relay information on the specified Servant. Alternative names acceptable. *Currently up to {FgoHelpers.ServantProfiles.Count(p => !String.IsNullOrWhiteSpace(p.NoblePhantasm))}/{FgoHelpers.ServantProfiles.Count}.*")
                 .Do(async cea =>
                 {
                     var arg = String.Join(" ", cea.Args);
@@ -186,6 +125,12 @@ namespace MechHisui.Commands
                         await client.SendMessage(cea.Channel, "It has come to my attention that your 'waifu' is equatable to fecal matter.");
                         return;
                     }
+
+                    //if (new[] { "" }.Contains(arg.ToLowerInvariant()))
+                    //{
+                    //    await client.SendMessage(cea.Channel, "Never ever.");
+                    //    return;
+                    //}
 
                     var profile = statService.LookupStats(arg);
                     if (profile != null)
@@ -220,12 +165,12 @@ namespace MechHisui.Commands
                             await client.SendMessage(cea.Channel, "Updated alias lookup.");
                             break;
                         case "profiles":
-                            statService.UpdateProfileList();
+                            await statService.UpdateProfileListsAsync();
                             await client.SendMessage(cea.Channel, "Updated profile lookup.");
                             break;
                         default:
                             statService.ReadAliasList();
-                            statService.UpdateProfileList();
+                            await statService.UpdateProfileListsAsync();
                             await client.SendMessage(cea.Channel, "Updated all lookups.");
                             break;
                     }
@@ -239,13 +184,13 @@ namespace MechHisui.Commands
                 .Parameter("alias", ParameterType.Required)
                 .Do(async cea =>
                 {
-                    var newAlias = statService.servantDict.SingleOrDefault(p => p.Servant == cea.Args[0]);
+                    var newAlias = FgoHelpers.ServantDict.SingleOrDefault(p => p.Servant == cea.Args[0]);
                     if (newAlias != null)
                     {
                         newAlias.Alias.Add(cea.Args[1]);
                         using (TextWriter tw = new StreamWriter(config["ServantAliasPath"]))
                         {
-                            tw.Write(JsonConvert.SerializeObject(statService.servantDict, Formatting.Indented));
+                            tw.Write(JsonConvert.SerializeObject(FgoHelpers.ServantDict, Formatting.Indented));
                         }
                         await client.SendMessage(cea.Channel, $"Added alias `{cea.Args[1]}` for `{newAlias.Servant}`.");
                     }
@@ -260,7 +205,7 @@ namespace MechHisui.Commands
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"**Servant:** {profile.Name}")
-                .AppendLine($"**Class** {profile.Class}")
+                .AppendLine($"**Class:** {profile.Class}")
                 .AppendLine($"**Rarity:** {profile.Rarity}")
                 .AppendLine($"**Collection ID:** {profile.Id}")
                 .AppendLine($"**Card pool:** {profile.CardPool}")

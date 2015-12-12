@@ -1,4 +1,6 @@
-﻿namespace MechHisui.FateGOLib
+﻿using System.Collections.Generic;
+
+namespace MechHisui.FateGOLib
 {
     public class ServantProfile
     {
@@ -27,5 +29,30 @@
         public string PassiveSkill4 { get; set; }
         public string PEffect4 { get; set; }
         public string Image { get; set; }
+    }
+
+    public class ServantAlias
+    {
+        public IList<string> Alias { get; set; }
+        public string Servant { get; set; }
+    }
+
+    public class CEProfile
+    {
+        public int Id { get; set; }
+        public string Rarity { get; set; }
+        public string Name { get; set; }
+        public int Atk { get; set; }
+        public int HP { get; set; }
+        public string Effect { get; set; }
+        public int AtkMax { get; set; }
+        public int HPMax { get; set; }
+        public string EffectMax { get; set; }
+    }
+
+    public class CEAlias
+    {
+        public IList<string> Alias { get; set; }
+        public string CE { get; set; }
     }
 }

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using JiiLib.Net;
 using Newtonsoft.Json;
 
@@ -9,11 +12,10 @@ namespace MechHisui.FateGOLib
 {
     public class StatService
     {
-        internal List<ServantProfile> _servantProfiles = new List<ServantProfile>();
-        private readonly IJsonApiService _apiService;
+        private readonly GoogleScriptApiService _apiService;
         private readonly string _aliasPath;
-
-        public StatService(IJsonApiService apiService, string aliasPath)
+        
+        public StatService(GoogleScriptApiService apiService, string aliasPath)
         {
             if (apiService == null) throw new ArgumentNullException(nameof(apiService));
             if (aliasPath == null) throw new ArgumentNullException(nameof(aliasPath));
@@ -22,40 +24,43 @@ namespace MechHisui.FateGOLib
             _aliasPath = aliasPath;
 
             ReadAliasList();
-            UpdateProfileList();
         }
 
         public ServantProfile LookupStats(string servant)
         {
-            var serv = servantDict.SingleOrDefault(k => k.Alias.Contains(servant.ToLowerInvariant()));
-
-            return (serv != null) ? 
-                _servantProfiles.SingleOrDefault(p => p.Name == serv.Servant) :
-                _servantProfiles.SingleOrDefault(p => p.Name == servant);
+            var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.Contains(servant.ToLowerInvariant()));
+            if (serv != null)
+            {
+                Func<ServantProfile, bool> pred = p => p.Name == serv.Servant;
+                return FgoHelpers.ServantProfiles.SingleOrDefault(pred) ??
+                       FgoHelpers.FakeServantProfiles.SingleOrDefault(pred);
+            }
+            else
+            {
+                return FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Name == servant);
+            }
         }
 
         public string LookupServantName(string servant)
         {
-            var serv = servantDict.SingleOrDefault(k => k.Alias.Contains(servant.ToLowerInvariant()));
+            var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.Contains(servant.ToLowerInvariant()));
 
             return (serv != null) ?
                 serv.Servant :
-                servantDict.SingleOrDefault(p => p.Servant.ToLowerInvariant() == servant.ToLowerInvariant())?.Servant;
+                FgoHelpers.ServantDict.SingleOrDefault(p => p.Servant.ToLowerInvariant() == servant.ToLowerInvariant())?.Servant;
         }
 
         //get table data and serialize to _servantProfiles so that it's cached
-        public void UpdateProfileList()
+        public async Task UpdateProfileListsAsync()
         {
-            try
-            {
-                _servantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(_apiService.GetDataFromServiceAsJson());
-            }
-            catch (Exception)
-            {
+            _apiService.Parameters = new List<object> { "Servants" };
+            FgoHelpers.ServantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(await _apiService.GetDataFromServiceAsJsonAsync());
+            _apiService.Parameters = new List<object> { "FakeServants" };
+            FgoHelpers.FakeServantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(await _apiService.GetDataFromServiceAsJsonAsync());
+            //_apiService.Parameters = new List<object> { "CEs" };
+            //FgoHelpers.CEProfiles = JsonConvert.DeserializeObject<List<CEProfile>>(await _apiService.GetDataFromServiceAsJsonAsync());
+        }
 
-                throw;
-            }
-            
 
             //string scriptId = config["Project_Key"];
             //var service = new ScriptService(new BaseClientService.Initializer()
@@ -134,17 +139,15 @@ namespace MechHisui.FateGOLib
             //{
             //    Console.WriteLine($"Error calling API:\n{e}");
             //}
-        }
 
         public void ReadAliasList()
         {
             using (TextReader tr = new StreamReader(_aliasPath))
             {
-                servantDict = JsonConvert.DeserializeObject<List<ServantAlias>>(tr.ReadToEnd()) ?? new List<ServantAlias>();
+                FgoHelpers.ServantDict = JsonConvert.DeserializeObject<List<ServantAlias>>(tr.ReadToEnd()) ?? new List<ServantAlias>();
             }
         }
 
-        internal List<ServantAlias> servantDict = new List<ServantAlias>();
         //{ new[] { "moedred" }, "Mordred" },
         //{ new[] { "indian archer" }, "Arjuna" },
         //{ new[] { "" }, "Brynhildr" },
@@ -155,11 +158,5 @@ namespace MechHisui.FateGOLib
         //{ new[] { "jack" }, "Jack the Ripper" },
         //{ new[] { "light" }, "Dr. Jekyll" },
         //{ new[] { "" }, "Frankenstein" },
-    }
-
-    public class ServantAlias
-    {
-        public List<string> Alias { get; set; }
-        public string Servant { get; set; }
     }
 }
