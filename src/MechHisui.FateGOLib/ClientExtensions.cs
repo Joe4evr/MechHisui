@@ -126,11 +126,11 @@ namespace MechHisui.Commands
                         return;
                     }
 
-                    //if (new[] { "" }.Contains(arg.ToLowerInvariant()))
-                    //{
-                    //    await client.SendMessage(cea.Channel, "Never ever.");
-                    //    return;
-                    //}
+                    if (new[] { "enkidu", "monster", "shiki", "arc", "arcueid" }.Contains(arg.ToLowerInvariant()))
+                    {
+                        await client.SendMessage(cea.Channel, "Never ever.");
+                        return;
+                    }
 
                     var profile = statService.LookupStats(arg);
                     if (profile != null)

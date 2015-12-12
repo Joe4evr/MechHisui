@@ -24,7 +24,7 @@ namespace MechHisui.Commands
                 .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Parameter("id", ParameterType.Required)
-               // .Parameter("services", ParameterType.Multiple)
+                // .Parameter("services", ParameterType.Multiple)
                 .Do(async cea =>
                 {
                     long ch;
@@ -68,7 +68,7 @@ namespace MechHisui.Commands
                     }
                     else
                     {
-                        await client.SendMessage(cea.Channel, "Could not parse channel ID."); 
+                        await client.SendMessage(cea.Channel, "Could not parse channel ID.");
                     }
                 });
         }
@@ -89,7 +89,7 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Registering 'Info'...");
             client.Commands().CreateCommand("info")
-                .AddCheck((c, u, ch) =>  Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
                 .Description("Relay info about myself.")
                 .Do(async cea =>
                 {
@@ -105,7 +105,8 @@ namespace MechHisui.Commands
                 .Hide()
                 .Do(async cea =>
                 {
-                    foreach (var channel in Helpers.IterateChannels(client.AllServers, printServerNames: true, printChannelNames: false))                    {
+                    foreach (var channel in Helpers.IterateChannels(client.AllServers, printServerNames: true, printChannelNames: false))
+                    {
                         Console.WriteLine($"{channel.Name}:  {channel.Id}");
                     }
                     await client.SendMessage(cea.Channel, "Known Channel IDs logged to console.");
@@ -129,7 +130,7 @@ namespace MechHisui.Commands
                     Responses.responseDict.AddOrUpdate(
                         Responses.responseDict.SingleOrDefault(kv => kv.Key.Contains(triggger)).Key ?? new string[] { triggger },
                         new string[] { response },
-                        (k,v) =>
+                        (k, v) =>
                         {
                             var t = v.ToList();
                             t.Add(response);
@@ -215,7 +216,7 @@ namespace MechHisui.Commands
                     await client.SendMessage(cea.Channel, "Timeouts reset.");
                 });
         }
- 
+
         public static void RegisterWhereCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Where'...");
@@ -265,6 +266,36 @@ namespace MechHisui.Commands
                     {
                         await client.SendMessage(cea.Channel, "Invalid Argument.");
                     }
+                });
+        }
+
+        public static void RegisterXmasCommand(this DiscordClient client, IConfiguration config)
+        {
+            Console.WriteLine("Registering 'Xmas'...");
+            using (TextReader tr = new StreamReader(Path.Combine(config["other"], "xmas.json")))
+            {
+                xmasvids = JsonConvert.DeserializeObject<List<string>>(tr.ReadToEnd());
+            }
+            client.Commands().CreateCommand("xmas")
+                .AddCheck((c, u, ch) => ch.Id == long.Parse(config["FGO_general"]) && DateTime.UtcNow.Month == 12)
+                .Hide()
+                .Do(async cea =>
+                {
+                    await client.SendMessage(cea.Channel, xmasvids.ElementAt(new Random().Next() % xmasvids.Count));
+                });
+
+            client.Commands().CreateCommand("addxmas")
+                .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && DateTime.UtcNow.Month == 12)
+                .Parameter("item", ParameterType.Required)
+                .Hide()
+                .Do(async cea =>
+                {
+                    xmasvids.Add(cea.Args[0]);
+                    using (TextWriter tw = new StreamWriter(Path.Combine(config["other"], "xmas.json")))
+                    {
+                        tw.Write(JsonConvert.SerializeObject(xmasvids, Formatting.Indented));
+                    }
+                    await client.SendMessage(cea.Channel, $"Added `{cea.Args[0]}` to `{nameof(xmasvids)}`.");
                 });
         }
 
@@ -319,6 +350,8 @@ namespace MechHisui.Commands
                 }
             }
         }
+
+        private static List<string> xmasvids = new List<string>();
 
         private enum ChannelActivity
         {

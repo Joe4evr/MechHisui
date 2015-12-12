@@ -23,10 +23,21 @@ namespace MechHisui
         {
             var platform = PlatformServices.Create(PlatformServices.Default);
 
-            IConfiguration config = new ConfigurationBuilder()
-                .SetBasePath(platform.Application.ApplicationBasePath)
-                .AddUserSecrets()
-                .Build();
+            IConfigurationBuilder builder = new ConfigurationBuilder()
+                .SetBasePath(platform.Application.ApplicationBasePath);
+
+            if (args.Contains("--environment") && args[Array.IndexOf(args, "--environment") + 1] == "Development")
+            {
+                Console.WriteLine("Loading from UserSecret store");
+                builder.AddUserSecrets();
+            }
+            else
+            {
+                Console.WriteLine("Loading from jsons directory");
+                builder.AddJsonFile(@"..\..\..\..\MechHisui-jsons\secrets.json");
+            }
+
+            IConfiguration config = builder.Build();
 
             GoogleScriptApiService apiService = new GoogleScriptApiService(
                 Path.Combine(config["Secrets_Path"], "client_secret.json"),

@@ -62,83 +62,83 @@ namespace MechHisui.FateGOLib
         }
 
 
-            //string scriptId = config["Project_Key"];
-            //var service = new ScriptService(new BaseClientService.Initializer()
-            //{
-            //    HttpClientInitializer = credential,
-            //    ApplicationName = "MechHisui"
-            //});
+        //string scriptId = config["Project_Key"];
+        //var service = new ScriptService(new BaseClientService.Initializer()
+        //{
+        //    HttpClientInitializer = credential,
+        //    ApplicationName = "MechHisui"
+        //});
 
-            //ExecutionRequest request = new ExecutionRequest()
-            //{
-            //    Function = "exportServants"
-            //};
+        //ExecutionRequest request = new ExecutionRequest()
+        //{
+        //    Function = "exportServants"
+        //};
 
-            //ScriptsResource.RunRequest runReq = service.Scripts.Run(request, scriptId);
+        //ScriptsResource.RunRequest runReq = service.Scripts.Run(request, scriptId);
 
-            //try
-            //{
-            //    // Make the API request.
-            //    Operation op = runReq.Execute();
+        //try
+        //{
+        //    // Make the API request.
+        //    Operation op = runReq.Execute();
 
-            //    if (op.Error != null)
-            //    {
-            //        // The API executed, but the script returned an error.
+        //    if (op.Error != null)
+        //    {
+        //        // The API executed, but the script returned an error.
 
-            //        // Extract the first (and only) set of error details
-            //        // as a IDictionary. The values of this dictionary are
-            //        // the script's 'errorMessage' and 'errorType', and an
-            //        // array of stack trace elements. Casting the array as
-            //        // a JSON JArray allows the trace elements to be accessed
-            //        // directly.
-            //        IDictionary<string, object> error = op.Error.Details[0];
-            //        Console.WriteLine($"Script error message: {error["errorMessage"]}");
-            //        if (error["scriptStackTraceElements"] != null)
-            //        {
-            //            // There may not be a stacktrace if the script didn't
-            //            // start executing.
-            //            Console.WriteLine("Script error stacktrace:");
-            //            JArray st = (JArray)error["scriptStackTraceElements"];
-            //            foreach (var trace in st)
-            //            {
-            //                Console.WriteLine($"\t{trace["function"]}: {trace["lineNumber"]}");
-            //            }
-            //        }
-            //    }
-            //    else
-            //    {
-            //        // The result provided by the API needs to be cast into
-            //        // the correct type, based upon what types the Apps
-            //        // Script function returns. Here, the function returns
-            //        // an Apps Script Object with String keys and values.
-            //        // It is most convenient to cast the return value as a JSON
-            //        // JObject (folderSet).
-            //        //JObject folderSet = (JObject)op.Response["result"];
-            //        //if (folderSet.Count == 0)
-            //        //{
-            //        //    Console.WriteLine("No folders returned!");
-            //        //}
-            //        //else
-            //        //{
-            //        //    Console.WriteLine("Folders under your root folder:");
-            //        //    foreach (var folder in folderSet)
-            //        //    {
-            //        //        Console.WriteLine("\t{0} ({1})", folder.Value, folder.Key);
-            //        //    }
-            //        //}
+        //        // Extract the first (and only) set of error details
+        //        // as a IDictionary. The values of this dictionary are
+        //        // the script's 'errorMessage' and 'errorType', and an
+        //        // array of stack trace elements. Casting the array as
+        //        // a JSON JArray allows the trace elements to be accessed
+        //        // directly.
+        //        IDictionary<string, object> error = op.Error.Details[0];
+        //        Console.WriteLine($"Script error message: {error["errorMessage"]}");
+        //        if (error["scriptStackTraceElements"] != null)
+        //        {
+        //            // There may not be a stacktrace if the script didn't
+        //            // start executing.
+        //            Console.WriteLine("Script error stacktrace:");
+        //            JArray st = (JArray)error["scriptStackTraceElements"];
+        //            foreach (var trace in st)
+        //            {
+        //                Console.WriteLine($"\t{trace["function"]}: {trace["lineNumber"]}");
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        // The result provided by the API needs to be cast into
+        //        // the correct type, based upon what types the Apps
+        //        // Script function returns. Here, the function returns
+        //        // an Apps Script Object with String keys and values.
+        //        // It is most convenient to cast the return value as a JSON
+        //        // JObject (folderSet).
+        //        //JObject folderSet = (JObject)op.Response["result"];
+        //        //if (folderSet.Count == 0)
+        //        //{
+        //        //    Console.WriteLine("No folders returned!");
+        //        //}
+        //        //else
+        //        //{
+        //        //    Console.WriteLine("Folders under your root folder:");
+        //        //    foreach (var folder in folderSet)
+        //        //    {
+        //        //        Console.WriteLine("\t{0} ({1})", folder.Value, folder.Key);
+        //        //    }
+        //        //}
 
-            //        var temp = (string)op.Response["result"];
-            //        using (TextWriter tw = new StreamWriter(Path.Combine(config["Logs"], "servants.json")))
-            //        {
-            //            tw.Write(temp);
-            //        }
-            //        _servantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(temp);
-            //    }
-            //}
-            //catch (Google.GoogleApiException e)
-            //{
-            //    Console.WriteLine($"Error calling API:\n{e}");
-            //}
+        //        var temp = (string)op.Response["result"];
+        //        using (TextWriter tw = new StreamWriter(Path.Combine(config["Logs"], "servants.json")))
+        //        {
+        //            tw.Write(temp);
+        //        }
+        //        _servantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(temp);
+        //    }
+        //}
+        //catch (Google.GoogleApiException e)
+        //{
+        //    Console.WriteLine($"Error calling API:\n{e}");
+        //}
 
         public void ReadAliasList()
         {
@@ -155,7 +155,7 @@ namespace MechHisui.FateGOLib
         //{ new[] { "" }, "Karna" },
         //{ new[] { "broskander", "big alex" }, "Alexander the Great" },
         //{ new[] { "alice" }, "Nursery Rhyme" },
-        //{ new[] { "jack" }, "Jack the Ripper" },
+        //{ new[] { "jack", "lolistripper" }, "Jack the Ripper" },
         //{ new[] { "light" }, "Dr. Jekyll" },
         //{ new[] { "" }, "Frankenstein" },
     }
