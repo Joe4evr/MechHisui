@@ -151,6 +151,7 @@ namespace MechHisui.Commands
                     }
                 });
 
+            Console.WriteLine("Registering 'CE'...");
             client.Commands().CreateCommand("ce")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Parameter("cename", ParameterType.Multiple)
@@ -170,6 +171,7 @@ namespace MechHisui.Commands
                     }
                 });
 
+            Console.WriteLine("Registering 'All CE'...");
             client.Commands().CreateCommand("allce")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Parameter("ceeffect", ParameterType.Multiple)
@@ -243,6 +245,7 @@ namespace MechHisui.Commands
                     }
                 });
 
+            Console.WriteLine("Registering 'CE alias'...");
             client.Commands().CreateCommand("cealias")
                 .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && ch.Id == Int64.Parse(config["FGO_general"]))
                 .Hide()
@@ -264,6 +267,21 @@ namespace MechHisui.Commands
                     {
                         await client.SendMessage(cea.Channel, "Could not find name to add alias for.");
                     }
+                });
+
+            Console.WriteLine("Registering 'Curve'...");
+            client.Commands().CreateCommand("curve")
+                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
+                .Hide()
+                .Do(async cea =>
+                {
+                    await client.SendMessage(cea.Channel,
+                        String.Concat(
+                            "From master KyteM: `Linear curves scale as you'd expect.\n",
+                            "Reverse S means their stats will grow fast, slow the fuck down as they reach the midpoint(which zero or near - zero improvements at that midpoint), then return to their previous growth speed.\n",
+                            "S means the opposite. These guys get super little stats at the beginning and end, but are quite fast in the middle (Gonna guesstimate... 35 - 55 in the case of a 5 *).\n",
+                            "Semi(reverse) S is like (reverse)S, except not quite as bad in the slow periods and not quite as good in the fast periods.If you graph it it'll go right between linear and non-semi.`")
+                        );
                 });
         }
 
@@ -294,7 +312,7 @@ namespace MechHisui.Commands
                 .AppendLine($"**Card pool:** {profile.CardPool}")
                 .AppendLine($"**Max ATK:** {profile.Atk}")
                 .AppendLine($"**Max HP:** {profile.HP}")
-                .AppendLine($"**Growth type:** {profile.GrowthCurve}")
+                .AppendLine($"**Growth type:** {profile.GrowthCurve} (Use `.curve` for explanation)")
                 .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*");
             if (!String.IsNullOrWhiteSpace(profile.Skill1))
             {
