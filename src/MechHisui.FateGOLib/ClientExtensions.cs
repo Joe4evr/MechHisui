@@ -153,12 +153,12 @@ namespace MechHisui.Commands
 
             client.Commands().CreateCommand("ce")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
-                .Parameter("servantname", ParameterType.Multiple)
+                .Parameter("cename", ParameterType.Multiple)
                 .Description($"Relay information on the specified CE. Alternative names acceptable.")
                 .Do(async cea =>
                 {
                     var arg = String.Join(" ", cea.Args);
-
+                    
                     var ce = statService.LookupCE(arg);
                     if (ce != null)
                     {
@@ -167,6 +167,30 @@ namespace MechHisui.Commands
                     else
                     {
                         await client.SendMessage(cea.Channel, "No such entry found. Please try another name.");
+                    }
+                });
+
+            client.Commands().CreateCommand("allce")
+                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
+                .Parameter("ceeffect", ParameterType.Multiple)
+                .Description($"Relay information on CEs having the specified effect. Alternative names acceptable.")
+                .Do(async cea =>
+                {
+                    var arg = String.Join(" ", cea.Args);
+
+                    var ces = FgoHelpers.CEProfiles.Where(c => c.Effect.ToLowerInvariant().Contains(arg));
+                    if (ces.Count() > 0)
+                    {
+                        string matches = String.Empty;
+                        foreach (var ce in ces)
+                        {
+                            matches += ce.Name + '\n';
+                        }
+                        await client.SendMessage(cea.Channel, matches);
+                    }
+                    else
+                    {
+                        await client.SendMessage(cea.Channel, "No such CEs found. Please try another term.");
                     }
                 });
 
