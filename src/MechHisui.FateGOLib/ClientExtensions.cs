@@ -116,7 +116,7 @@ namespace MechHisui.Commands
             client.Commands().CreateCommand("stats")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Parameter("servantname", ParameterType.Multiple)
-                .Description($"Relay information on the specified Servant. Alternative names acceptable. *Currently up to {FgoHelpers.ServantProfiles.Count(p => !String.IsNullOrWhiteSpace(p.NoblePhantasm))}/{FgoHelpers.ServantProfiles.Count}.*")
+                .Description($"Relay information on the specified Servant. Alternative names acceptable.")
                 .Do(async cea =>
                 {
                     var arg = String.Join(" ", cea.Args);
@@ -126,7 +126,7 @@ namespace MechHisui.Commands
                         return;
                     }
 
-                    if (new[] { "enkidu", "monster", "shiki", "arc", "arcueid" }.Contains(arg.ToLowerInvariant()))
+                    if (new[] { "enkidu", "arc", "arcueid" }.Contains(arg.ToLowerInvariant()))
                     {
                         await client.SendMessage(cea.Channel, "Never ever.");
                         return;
@@ -154,7 +154,7 @@ namespace MechHisui.Commands
             client.Commands().CreateCommand("ce")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Parameter("cename", ParameterType.Multiple)
-                .Description($"Relay information on the specified CE. Alternative names acceptable.")
+                .Description($"Relay information on the specified Craft Essence. Alternative names acceptable.")
                 .Do(async cea =>
                 {
                     var arg = String.Join(" ", cea.Args);
@@ -173,7 +173,7 @@ namespace MechHisui.Commands
             client.Commands().CreateCommand("allce")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Parameter("ceeffect", ParameterType.Multiple)
-                .Description($"Relay information on CEs having the specified effect. Alternative names acceptable.")
+                .Description($"Relay information on CEs having the specified effect.")
                 .Do(async cea =>
                 {
                     var arg = String.Join(" ", cea.Args);
@@ -184,7 +184,7 @@ namespace MechHisui.Commands
                         string matches = String.Empty;
                         foreach (var ce in ces)
                         {
-                            matches += ce.Name + '\n';
+                            matches += $"**{ce.Name}** - {ce.Effect}\n";
                         }
                         await client.SendMessage(cea.Channel, matches);
                     }
@@ -273,7 +273,7 @@ namespace MechHisui.Commands
                 .AppendLine($"**Collection ID:** {ce.Id}")
                 .AppendLine($"**Rarity:** {ce.Rarity}")
                 .AppendLine($"**CE:** {ce.Name}")
-                .AppendLine($"**Card pool:** {ce.Cost}")
+                .AppendLine($"**Cost:** {ce.Cost}")
                 .AppendLine($"**ATK:** {ce.Atk}")
                 .AppendLine($"**HP:** {ce.HP}")
                 .AppendLine($"**Effect:** {ce.Effect}")

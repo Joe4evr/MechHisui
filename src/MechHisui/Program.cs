@@ -79,8 +79,9 @@ namespace MechHisui
             client.RegisterMarkCommand(config);
             //client.RegisterRecordingCommand(config);
             client.RegisterResetCommand(config);
-            //client.RegisterTriviaCommand(config);
             client.RegisterStatsCommand(config, statService);
+            client.RegisterThemeCommand(config);
+            //client.RegisterTriviaCommand(config);
             client.RegisterQuartzCommand(config);
             client.RegisterWhereCommand(config);
 

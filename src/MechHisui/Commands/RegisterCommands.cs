@@ -217,6 +217,17 @@ namespace MechHisui.Commands
                 });
         }
 
+        public static void RegisterThemeCommand(this DiscordClient client, IConfiguration config)
+        {
+            Console.WriteLine("Registering 'Theme'...");
+            client.Commands().CreateCommand("theme")
+                .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
+                .Do(async cea =>
+                {
+                    await client.SendMessage(cea.Channel, "https://www.youtube.com/watch?v=mQmgIfP-3OQ");
+                });
+        }
+
         public static void RegisterWhereCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Where'...");
