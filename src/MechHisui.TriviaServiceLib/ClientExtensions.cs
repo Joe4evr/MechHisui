@@ -15,11 +15,15 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Registering 'Trivia'...");
             client.Commands().CreateCommand("trivia")
-               .AddCheck((c, u, ch) => ch.Id == long.Parse(config["FGO_trivia"]))
+               .AddCheck((c, u, ch) => ch.Id == long.Parse(config["PrivChat"]))
                .Parameter("rounds", ParameterType.Required)
                .Description("Would you like to play a game?")
                .Do(async cea =>
                {
+                   if (!TriviaHelpers.Questions.Any())
+                   {
+                       TriviaHelpers.InitQuestions(config);
+                   }
                    if (client.GetTrivias().Any(t => t.Channel.Id == cea.Channel.Id))
                    {
                        await client.SendMessage(cea.Channel, $"Trivia already running.");
@@ -34,7 +38,6 @@ namespace MechHisui.Commands
                        }
                        else
                        {
-                           await client.SendMessage(cea.Channel, $"Starting trivia. Play until {rounds} points to win.");
                            var trivia = new Trivia(client, rounds, cea.Channel, config);
                            client.GetTrivias().Add(trivia);
                            trivia.StartTrivia();
@@ -47,7 +50,7 @@ namespace MechHisui.Commands
                });
         }
 
-        public static List<ITriviaService> _trivias = new List<ITriviaService>();
-        public static List<ITriviaService> GetTrivias(this DiscordClient client) => _trivias;
+        public static List<ITriviaService<User, Channel>> _trivias = new List<ITriviaService<User, Channel>>();
+        public static List<ITriviaService<User, Channel>> GetTrivias(this DiscordClient client) => _trivias;
     }
 }

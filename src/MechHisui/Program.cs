@@ -81,9 +81,10 @@ namespace MechHisui
             client.RegisterResetCommand(config);
             client.RegisterStatsCommand(config, statService);
             client.RegisterThemeCommand(config);
-            //client.RegisterTriviaCommand(config);
+            client.RegisterTriviaCommand(config);
             client.RegisterQuartzCommand(config);
             client.RegisterWhereCommand(config);
+            client.RegisterXmasCommand(config);
 
             Responses.InitResponses(config);
 
@@ -120,6 +121,13 @@ namespace MechHisui
                 }
                 else
                 {
+                    foreach (var prChannel in client.PrivateChannels)
+                    {
+                        if (prChannel.Id == Int64.Parse(config["PrivChat"]))
+                        {
+                            client.MessageReceived += (new Responder(prChannel, client).Respond);
+                        }
+                    }
                     foreach (var channel in Helpers.IterateChannels(client.AllServers, printServerNames: true, printChannelNames: true))
                     {
                         if (!channel.IsPrivate && Helpers.IsWhilested(channel, client))

@@ -278,7 +278,7 @@ namespace MechHisui.Commands
                     await client.SendMessage(cea.Channel,
                         String.Concat(
                             "From master KyteM: `Linear curves scale as you'd expect.\n",
-                            "Reverse S means their stats will grow fast, slow the fuck down as they reach the midpoint(which zero or near - zero improvements at that midpoint), then return to their previous growth speed.\n",
+                            "Reverse S means their stats will grow fast, slow the fuck down as they reach the midpoint (with zero or near-zero improvements at that midpoint), then return to their previous growth speed.\n",
                             "S means the opposite. These guys get super little stats at the beginning and end, but are quite fast in the middle (Gonna guesstimate... 35 - 55 in the case of a 5 *).\n",
                             "Semi(reverse) S is like (reverse)S, except not quite as bad in the slow periods and not quite as good in the fast periods.If you graph it it'll go right between linear and non-semi.`")
                         );

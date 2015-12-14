@@ -1,13 +1,16 @@
 ﻿using System.Threading.Tasks;
-using Discord;
-
 namespace MechHisui.TriviaService
 {
-    public interface ITriviaService
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TUser">The 'User' type that represents a user.</typeparam>
+    /// <typeparam name="TChannel">The 'Channel' type that represents a chatroom channel.</typeparam>
+    public interface ITriviaService<TUser, TChannel>
     {
-        Channel Channel { get; }
+        TChannel Channel { get; }
         Task AskQuestion();
-        Task EndTrivia(User winner);
+        Task EndTrivia(TUser winner);
         Task EndTriviaEarly();
         void StartTrivia();
     }
