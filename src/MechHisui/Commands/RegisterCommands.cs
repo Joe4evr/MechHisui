@@ -320,7 +320,7 @@ namespace MechHisui.Commands
                 .Single(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())
                 .EnabledChannels)
             {
-                if (ch.Id != Int64.Parse(config["API_testing"]))
+                if (ch.Id != Int64.Parse(config["API_testing"]) && ch.Id != Int64.Parse(config["FGO_trivia"]))
                 {
                     await client.SendMessage(ch, config["Goodbye"]);
                 }

@@ -135,7 +135,7 @@ namespace MechHisui
                         {
                             //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
                             client.MessageReceived += (new Responder(channel, client).Respond);
-                            if (channel.Id != long.Parse(config["API_testing"]))
+                            if (channel.Id != long.Parse(config["API_testing"]) && channel.Id != Int64.Parse(config["FGO_trivia"]))
                             {
                                 await client.SendMessage(channel, config["Hello"]);
                             }
