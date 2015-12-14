@@ -76,6 +76,7 @@ namespace MechHisui
             client.RegisterInfoCommand(config);
             client.RegisterKnownChannelsCommand(config);
             client.RegisterLearnCommand(config);
+            client.RegisterLoginBonusCommand(config);
             client.RegisterMarkCommand(config);
             //client.RegisterRecordingCommand(config);
             client.RegisterResetCommand(config);

@@ -98,6 +98,20 @@ namespace MechHisui.Commands
                });
         }
 
+        public static void RegisterLoginBonusCommand(this DiscordClient client, IConfiguration config)
+        {
+            Console.WriteLine("Registering 'Login bonus'...");
+            client.Commands().CreateCommand("login")
+                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
+                .Description("Relay the information of the arrival of the next login bonus.")
+                .Do(async cea =>
+                {
+                    DateTimeWithZone rightNowInJapan = new DateTimeWithZone(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time"));
+                    TimeSpan eta = rightNowInJapan.NextLocalTimeAt(new TimeSpan(hours: 4, minutes: 0, seconds: 0));
+                    await client.SendMessage(cea.Channel, $"Next login bonus drop **ETA {eta.Hours} hours and {eta.Minutes} minutes.**");
+                });
+        }
+
         public static void RegisterQuartzCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Quartz'...");
@@ -357,6 +371,8 @@ namespace MechHisui.Commands
             utcDateTime = dateTimeUtc;
             this.timeZone = timeZone;
         }
+
+        public TimeSpan NextLocalTimeAt(TimeSpan targetTimeOfDay) => (LocalTime.TimeOfDay > targetTimeOfDay) ? TimeSpan.FromDays(1) - (LocalTime.TimeOfDay - targetTimeOfDay) : targetTimeOfDay - LocalTime.TimeOfDay;
 
         public DateTime UniversalTime => utcDateTime;
 
