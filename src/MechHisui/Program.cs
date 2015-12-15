@@ -44,12 +44,13 @@ namespace MechHisui
                 Path.Combine(config["Secrets_Path"], "scriptcreds"),
                 "MechHisui",
                 config["Project_Key"],
-                "exportServants",
+                "exportSheet",
                 new string[] { "https://www.googleapis.com/auth/spreadsheets.readonly" });
 
 
             StatService statService = new StatService(apiService, Path.Combine(config["AliasPath"], "servants.json"), Path.Combine(config["AliasPath"], "ces.json"));
             statService.UpdateProfileListsAsync().Wait();
+            statService.UpdateEventListsAsync().Wait();
 
             //IServiceCollection services = new ServiceCollection()
             //    .AddInstance(config)

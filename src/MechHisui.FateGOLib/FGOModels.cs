@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace MechHisui.FateGOLib
 {
@@ -49,12 +50,19 @@ namespace MechHisui.FateGOLib
         public int AtkMax { get; set; }
         public int HPMax { get; set; }
         public string EffectMax { get; set; }
-        public object Image { get; internal set; }
+        public string Image { get; set; }
     }
 
     public class CEAlias
     {
         public IList<string> Alias { get; set; }
         public string CE { get; set; }
+    }
+
+    public class Event
+    {
+        public string EventName { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
     }
 }

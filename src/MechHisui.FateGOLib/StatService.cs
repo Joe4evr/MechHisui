@@ -80,6 +80,11 @@ namespace MechHisui.FateGOLib
             FgoHelpers.CEProfiles = JsonConvert.DeserializeObject<List<CEProfile>>(await _apiService.GetDataFromServiceAsJsonAsync());
         }
 
+        public async Task UpdateEventListsAsync()
+        {
+            _apiService.Parameters = new List<object> { "Events" };
+            FgoHelpers.EventList = JsonConvert.DeserializeObject<List<Event>>(await _apiService.GetDataFromServiceAsJsonAsync());
+        }
 
         //string scriptId = config["Project_Key"];
         //var service = new ScriptService(new BaseClientService.Initializer()
@@ -177,8 +182,6 @@ namespace MechHisui.FateGOLib
         //{ new[] { "gil's bff" }, "Enkidu" },
         //{ new[] { "" }, "Karna" },
         //{ new[] { "broskander", "big alex" }, "Alexander the Great" },
-        //{ new[] { "alice" }, "Nursery Rhyme" },
-        //{ new[] { "jack", "lolistripper" }, "Jack the Ripper" },
         //{ new[] { "light" }, "Dr. Jekyll" },
         //{ new[] { "" }, "Frankenstein" },
     }

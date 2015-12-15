@@ -13,5 +13,7 @@ namespace MechHisui.FateGOLib
 
         public static List<CEProfile> CEProfiles = new List<CEProfile>();
         public static List<CEAlias> CEDict = new List<CEAlias>();
+
+        public static List<Event> EventList = new List<Event>();
     }
 }

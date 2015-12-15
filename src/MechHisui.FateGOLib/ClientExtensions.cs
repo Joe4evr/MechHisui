@@ -15,6 +15,7 @@ namespace MechHisui.Commands
 {
     public static class ClientExtensions
     {
+        private static readonly TimeZoneInfo JpnTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time");
         public static void RegisterDailyCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Daily'...");
@@ -106,7 +107,7 @@ namespace MechHisui.Commands
                 .Description("Relay the information of the arrival of the next login bonus.")
                 .Do(async cea =>
                 {
-                    DateTimeWithZone rightNowInJapan = new DateTimeWithZone(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time"));
+                    DateTimeWithZone rightNowInJapan = new DateTimeWithZone(DateTime.UtcNow, JpnTimeZone);
                     TimeSpan eta = rightNowInJapan.NextLocalTimeAt(new TimeSpan(hours: 4, minutes: 0, seconds: 0));
                     await client.SendMessage(cea.Channel, $"Next login bonus drop **ETA {eta.Hours} hours and {eta.Minutes} minutes.**");
                 });
@@ -227,9 +228,14 @@ namespace MechHisui.Commands
                             await statService.UpdateProfileListsAsync();
                             await client.SendMessage(cea.Channel, "Updated profile lookup.");
                             break;
+                        case "events":
+                            await statService.UpdateEventListsAsync();
+                            await client.SendMessage(cea.Channel, "Updated events lookup.");
+                            break;
                         default:
                             statService.ReadAliasList();
                             await statService.UpdateProfileListsAsync();
+                            await statService.UpdateEventListsAsync();
                             await client.SendMessage(cea.Channel, "Updated all lookups.");
                             break;
                     }
@@ -296,6 +302,66 @@ namespace MechHisui.Commands
                             "S means the opposite. These guys get super little stats at the beginning and end, but are quite fast in the middle (Gonna guesstimate... 35 - 55 in the case of a 5 *).\n",
                             "Semi(reverse) S is like (reverse)S, except not quite as bad in the slow periods and not quite as good in the fast periods.If you graph it it'll go right between linear and non-semi.`")
                         );
+                });
+
+            Console.WriteLine("Registering 'Event'...");
+            client.Commands().CreateCommand("event")
+                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
+                //.Parameter("ceeffect", ParameterType.Multiple)
+                .Description($"Relay information on current or upcoming events.")
+                .Do(async cea =>
+                {
+                    StringBuilder sb = new StringBuilder();
+                    var utcNow = DateTime.UtcNow;
+                    var currentEvents = FgoHelpers.EventList.Where(e => utcNow > e.StartTime && utcNow < e.EndTime);
+                    if (currentEvents.Any())
+                    {
+                        sb.Append("**Current Event(s):** ");
+                        foreach (var ev in currentEvents)
+                        {
+                            var doneAt = ev.EndTime - utcNow;
+                            if (doneAt < TimeSpan.FromDays(1))
+                            {
+                                sb.Append($"{ev.EventName} for {doneAt.Hours} hours and {doneAt.Minutes} minutes.");
+                            }
+                            else
+                            {
+                                sb.Append($"{ev.EventName} for {doneAt.Days} days and {doneAt.Hours} hours.");
+                            }
+
+                            if (ev != currentEvents.Last())
+                            {
+                                sb.Append(", ");
+                            }
+                            else
+                            {
+                                sb.AppendLine();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        sb.AppendLine("No events currently going on.");
+                    }
+
+                    var nextEvent = FgoHelpers.EventList.FirstOrDefault(e => e.StartTime > utcNow);
+                    if (nextEvent != null)
+                    {
+                        var eta = nextEvent.StartTime - utcNow;
+                        if (eta < TimeSpan.FromDays(1))
+                        {
+                            sb.Append($"**Next Event:** {nextEvent.EventName}, planned to start in {eta.Hours} hours and {eta.Minutes} minutes.");
+                        }
+                        else
+                        {
+                            sb.Append($"**Next Event:** {nextEvent.EventName}, planned to start in {eta.Days} days and {eta.Hours} hours.");
+                        }
+                    }
+                    else
+                    {
+                        sb.Append("No known upcoming events.");
+                    }
+                    await client.SendMessage(cea.Channel, sb.ToString());
                 });
         }
 
