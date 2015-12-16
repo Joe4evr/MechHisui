@@ -310,20 +310,16 @@ namespace MechHisui.Commands
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Hide()
                 .Do(async cea =>
-                {
                     await client.SendMessage(cea.Channel,
                         String.Concat(
                             "From master KyteM: `Linear curves scale as you'd expect.\n",
                             "Reverse S means their stats will grow fast, slow the fuck down as they reach the midpoint (with zero or near-zero improvements at that midpoint), then return to their previous growth speed.\n",
                             "S means the opposite. These guys get super little stats at the beginning and end, but are quite fast in the middle (Gonna guesstimate... 35 - 55 in the case of a 5 *).\n",
-                            "Semi(reverse) S is like (reverse)S, except not quite as bad in the slow periods and not quite as good in the fast periods.If you graph it it'll go right between linear and non-semi.`")
-                        );
-                });
+                            "Semi(reverse) S is like (reverse)S, except not quite as bad in the slow periods and not quite as good in the fast periods.If you graph it it'll go right between linear and non-semi.`")));
 
             Console.WriteLine("Registering 'Event'...");
             client.Commands().CreateCommand("event")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
-                //.Parameter("ceeffect", ParameterType.Multiple)
                 .Description($"Relay information on current or upcoming events.")
                 .Do(async cea =>
                 {
@@ -408,6 +404,7 @@ namespace MechHisui.Commands
                 .AppendLine($"**Card pool:** {profile.CardPool}")
                 .AppendLine($"**Max ATK:** {profile.Atk}")
                 .AppendLine($"**Max HP:** {profile.HP}")
+                .AppendLine($"**Starweight:** {profile.Starweight}")
                 .AppendLine($"**Growth type:** {profile.GrowthCurve} (Use `.curve` for explanation)")
                 .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*");
             if (!String.IsNullOrWhiteSpace(profile.Skill1))

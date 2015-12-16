@@ -79,10 +79,7 @@ namespace MechHisui.Commands
             client.Commands().CreateCommand("disconnect")
                 .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
-                .Do(async cea =>
-                {
-                    await Disconnect(client, config);
-                });
+                .Do(async cea => await Disconnect(client, config));
         }
 
         public static void RegisterInfoCommand(this DiscordClient client, IConfiguration config)

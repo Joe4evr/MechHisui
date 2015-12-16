@@ -11,6 +11,7 @@ namespace MechHisui.FateGOLib
         public string Name { get; set; }
         public int Atk { get; set; }
         public int HP { get; set; }
+        public int Starweight { get; set; }
         public string GrowthCurve { get; set; }
         public string CardPool { get; set; }
         public string NoblePhantasm { get; set; }
