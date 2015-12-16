@@ -120,9 +120,8 @@ namespace MechHisui.Commands
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Description("Relay the prices of different amounts of Saint Quartz.")
                 .Do(async cea =>
-                {
-                    await client.SendMessage(cea.Channel, "Prices for Quartz:\n  1Q: 120 JPY\n  5Q: 480 JPY\n 16Q: 1400 JPY\n 36Q: 2900 JPY\n 65Q: 4800 JPY\n140Q: 9800 JPY");
-                });
+                    await client.SendMessage(cea.Channel,
+                    "Prices for Quartz:\n  1Q: 120 JPY\n  5Q: 480 JPY\n 16Q: 1400 JPY\n 36Q: 2900 JPY\n 65Q: 4800 JPY\n140Q: 9800 JPY"));
         }
 
         public static void RegisterStatsCommand(this DiscordClient client, IConfiguration config, StatService statService)
@@ -150,7 +149,7 @@ namespace MechHisui.Commands
                     var profile = statService.LookupStats(arg);
                     if (profile != null)
                     {
-                        await client.SendMessage(cea.Channel, FormatServantProfile(profile)); 
+                        await client.SendMessage(cea.Channel, FormatServantProfile(profile));
                     }
                     else
                     {
@@ -174,7 +173,7 @@ namespace MechHisui.Commands
                 .Do(async cea =>
                 {
                     var arg = String.Join(" ", cea.Args);
-                    
+
                     var ce = statService.LookupCE(arg);
                     if (ce != null)
                     {
@@ -182,7 +181,24 @@ namespace MechHisui.Commands
                     }
                     else
                     {
-                        await client.SendMessage(cea.Channel, "No such entry found. Please try another name.");
+                        var potentials = FgoHelpers.CEDict.Where(c => c.Alias.Any(a => a.Contains(arg.ToLowerInvariant())));
+                        if (potentials.Any())
+                        {
+                            StringBuilder sb = new StringBuilder();
+                            foreach (var p in potentials)
+                            {
+                                sb.Append($"**{p.CE}** *({p.Alias.First()})*");
+                                if (p != potentials.Last())
+                                {
+                                    sb.AppendLine();
+                                }
+                            }
+                            await client.SendMessage(cea.Channel, $"No such entry found. Did you mean one of the following?\n{sb.ToString()}");
+                        }
+                        else
+                        {
+                            await client.SendMessage(cea.Channel, "No such entry found. Please try another name.");
+                        }
                     }
                 });
 
