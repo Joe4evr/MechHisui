@@ -29,9 +29,15 @@ namespace MechHisui.Commands
                     DateTimeWithZone todayInJapan = new DateTimeWithZone(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time"));
                     var arg = cea.Args[0];
 
-                    if (String.IsNullOrWhiteSpace(arg))
+                    if (String.IsNullOrWhiteSpace(arg) || arg == "today")
                     {
                         day = todayInJapan.LocalTime.DayOfWeek;
+                    }
+                    else if (arg == "change")
+                    {
+                        var eta = todayInJapan.NextLocalTimeAt(new TimeSpan(hours: 0, minutes: 0, seconds: 0));
+                        await client.SendMessage(cea.Channel, $"Daily quests changing **ETA: {eta.Hours} hours and {eta.Minutes} minutes.**");
+                        return;
                     }
                     else if (arg == "tomorrow")
                     {
@@ -66,36 +72,75 @@ namespace MechHisui.Commands
             Console.WriteLine("Registering 'Friends'...");
             FriendCodes.ReadFriendData(config["FriendcodePath"]);
             client.Commands().CreateCommand("friendcode")
-               .AddCheck((c, u, ch) => ch.Id == long.Parse(config["FGO_general"]))
+               .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                .Parameter("code", ParameterType.Required)
                .Parameter("servant", ParameterType.Optional)
                .Description("Add your friendcode to the list. Enter your code with quotes as `\"XXX XXX XXX\"`. You may add your support Servant as well.")
                .Do(async cea =>
                {
+                   if (FriendCodes.friendData.Any(fc => fc.User == cea.User.Name))
+                   {
+                       await client.SendMessage(cea.Channel, $"Already in the Friendcode list. Please use `.updatefc` to update your description.");
+                       return;
+                   }
+
                    if (Regex.Match(cea.Args[0], @"[0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9]").Success)
                    {
                        var friend = new FriendData { User = cea.User.Name, FriendCode = cea.Args[0], Servant = (cea.Args.Length > 1) ? cea.Args[1] : String.Empty };
                        FriendCodes.friendData.Add(friend);
                        FriendCodes.WriteFriendData(config["FriendcodePath"]);
-                       await client.SendMessage(cea.Channel, $"Added {friend.FriendCode} for {friend.User}.");
+                       await client.SendMessage(cea.Channel, $"Added `{friend.FriendCode}` for `{friend.User}`.");
                    }
                    else
                    {
                        await client.SendMessage(cea.Channel, $"Incorrect friendcode format specified.");
                    }
                });
+
             client.Commands().CreateCommand("listcodes")
-               .AddCheck((c, u, ch) => ch.Id == long.Parse(config["FGO_general"]))
+               .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                .Description("Display known friendcodes.")
                .Do(async cea =>
                {
-                   StringBuilder sb = new StringBuilder();
+                   StringBuilder sb = new StringBuilder("```\n");
+                   int longestName = FriendCodes.friendData.OrderByDescending(f => f.User.Length).First().User.Length;
                    foreach (var friend in FriendCodes.friendData)
                    {
-                       sb.Append($"{friend.User}: {friend.FriendCode}");
+                       string spaces = new string(' ', (longestName - friend.User.Length) + 1);
+                       sb.Append($"{friend.User}:{spaces}{friend.FriendCode}");
                        sb.AppendLine((!String.IsNullOrEmpty(friend.Servant)) ? $" - {friend.Servant}" : String.Empty);
                    }
+                   sb.Append("\n```");
                    await client.SendMessage(cea.Channel, sb.ToString());
+               });
+
+            client.Commands().CreateCommand("updatefc")
+               .AddCheck((c, u, ch) => ch.Id == long.Parse(config["FGO_general"]))
+               .Parameter("newServant", ParameterType.Multiple)
+               .Description("Update the Support Servant displayed in your friendcode listing.")
+               .Do(async cea =>
+               {
+                   if (!cea.Args.Any())
+                   {
+                       await client.SendMessage(cea.Channel, $"No argument specified.");
+                       return;
+                   }
+
+                   var arg = string.Join(" ", cea.Args);
+                   Func<FriendData, bool> pred = c => c.User == cea.User.Name;
+                   if (FriendCodes.friendData.Any(pred))
+                   {
+                       var temp = FriendCodes.friendData.Single(pred);
+                       FriendCodes.friendData.Remove(FriendCodes.friendData.Single(pred));
+                       temp.Servant = arg;
+                       FriendCodes.friendData.Add(temp);
+                       FriendCodes.WriteFriendData(config["FriendcodePath"]);
+                       await client.SendMessage(cea.Channel, $"Updated `{temp.User}`'s Servant to be `{temp.Servant}`.");
+                   }
+                   else
+                   {
+                       await client.SendMessage(cea.Channel, "Profile not found. Please add your profile using `.friendcode`.");
+                   }
                });
         }
 
@@ -248,8 +293,13 @@ namespace MechHisui.Commands
                             await statService.UpdateEventListsAsync();
                             await client.SendMessage(cea.Channel, "Updated events lookup.");
                             break;
+                        case "fcs":
+                            FriendCodes.ReadFriendData(config["FriendcodePath"]);
+                            await client.SendMessage(cea.Channel, "Updated friendcodes");
+                            break;
                         default:
                             statService.ReadAliasList();
+                            FriendCodes.ReadFriendData(config["FriendcodePath"]);
                             await statService.UpdateProfileListsAsync();
                             await statService.UpdateEventListsAsync();
                             await client.SendMessage(cea.Channel, "Updated all lookups.");
