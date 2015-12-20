@@ -35,7 +35,7 @@ namespace MechHisui.Commands
                     }
                     else if (arg == "change")
                     {
-                        var eta = todayInJapan.NextLocalTimeAt(new TimeSpan(hours: 0, minutes: 0, seconds: 0));
+                        var eta = todayInJapan.TimeUntilNextLocalTimeAt(new TimeSpan(hours: 0, minutes: 0, seconds: 0));
                         await client.SendMessage(cea.Channel, $"Daily quests changing **ETA: {eta.Hours} hours and {eta.Minutes} minutes.**");
                         return;
                     }
@@ -64,6 +64,74 @@ namespace MechHisui.Commands
                             await client.SendMessage(cea.Channel, $"{whatDay}'s quests:\n\tAscension Materials: **{info.Materials.ToString()}**\n\tAnd also **QP**");
                         }
                     }
+                });
+        }
+
+        public static void RegisterEventCommand(this DiscordClient client, IConfiguration config)
+        {
+            Console.WriteLine("Registering 'Event'...");
+            client.Commands().CreateCommand("event")
+                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
+                .Description($"Relay information on current or upcoming events.")
+                .Do(async cea =>
+                {
+                    StringBuilder sb = new StringBuilder();
+                    var utcNow = DateTime.UtcNow;
+                    var currentEvents = FgoHelpers.EventList.Where(e => utcNow > e.StartTime && utcNow < e.EndTime);
+                    if (currentEvents.Any())
+                    {
+                        sb.Append("**Current Event(s):** ");
+                        foreach (var ev in currentEvents)
+                        {
+                            var doneAt = ev.EndTime - utcNow;
+                            string d = doneAt.Hours == 1 ? "day" : "days";
+                            string h = doneAt.Hours == 1 ? "hour" : "hours";
+                            string m = doneAt.Minutes == 1 ? "minute" : "minutes";
+                            if (doneAt < TimeSpan.FromDays(1))
+                            {
+                                sb.Append($"{ev.EventName} for {doneAt.Hours} {h} and {doneAt.Minutes} {m}.");
+                            }
+                            else
+                            {
+                                sb.Append($"{ev.EventName} for {doneAt.Days} {d} and {doneAt.Hours} {h}.");
+                            }
+
+                            if (ev != currentEvents.Last())
+                            {
+                                sb.Append(", ");
+                            }
+                            else
+                            {
+                                sb.AppendLine();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        sb.AppendLine("No events currently going on.");
+                    }
+
+                    var nextEvent = FgoHelpers.EventList.FirstOrDefault(e => e.StartTime > utcNow);
+                    if (nextEvent != null)
+                    {
+                        var eta = nextEvent.StartTime - utcNow;
+                        string d = eta.Hours == 1 ? "day" : "days";
+                        string h = eta.Hours == 1 ? "hour" : "hours";
+                        string m = eta.Minutes == 1 ? "minute" : "minutes";
+                        if (eta < TimeSpan.FromDays(1))
+                        {
+                            sb.Append($"**Next Event:** {nextEvent.EventName}, planned to start in {eta.Hours} {h} and {eta.Minutes} {m}.");
+                        }
+                        else
+                        {
+                            sb.Append($"**Next Event:** {nextEvent.EventName}, planned to start in {eta.Days} {d} and {eta.Hours} {h}.");
+                        }
+                    }
+                    else
+                    {
+                        sb.Append("No known upcoming events.");
+                    }
+                    await client.SendMessage(cea.Channel, sb.ToString());
                 });
         }
 
@@ -153,8 +221,10 @@ namespace MechHisui.Commands
                 .Do(async cea =>
                 {
                     DateTimeWithZone rightNowInJapan = new DateTimeWithZone(DateTime.UtcNow, JpnTimeZone);
-                    TimeSpan eta = rightNowInJapan.NextLocalTimeAt(new TimeSpan(hours: 4, minutes: 0, seconds: 0));
-                    await client.SendMessage(cea.Channel, $"Next login bonus drop **ETA {eta.Hours} hours and {eta.Minutes} minutes.**");
+                    TimeSpan eta = rightNowInJapan.TimeUntilNextLocalTimeAt(new TimeSpan(hours: 4, minutes: 0, seconds: 0));
+                    string h = eta.Hours == 1 ? "hour" : "hours";
+                    string m = eta.Minutes == 1 ? "minute" : "minutes";
+                    await client.SendMessage(cea.Channel, $"Next login bonus drop **ETA {eta.Hours} {h} and {eta.Minutes} {m}.**");
                 });
         }
 
@@ -366,65 +436,6 @@ namespace MechHisui.Commands
                             "Reverse S means their stats will grow fast, slow the fuck down as they reach the midpoint (with zero or near-zero improvements at that midpoint), then return to their previous growth speed.\n",
                             "S means the opposite. These guys get super little stats at the beginning and end, but are quite fast in the middle (Gonna guesstimate... 35 - 55 in the case of a 5 *).\n",
                             "Semi(reverse) S is like (reverse)S, except not quite as bad in the slow periods and not quite as good in the fast periods.If you graph it it'll go right between linear and non-semi.`")));
-
-            Console.WriteLine("Registering 'Event'...");
-            client.Commands().CreateCommand("event")
-                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
-                .Description($"Relay information on current or upcoming events.")
-                .Do(async cea =>
-                {
-                    StringBuilder sb = new StringBuilder();
-                    var utcNow = DateTime.UtcNow;
-                    var currentEvents = FgoHelpers.EventList.Where(e => utcNow > e.StartTime && utcNow < e.EndTime);
-                    if (currentEvents.Any())
-                    {
-                        sb.Append("**Current Event(s):** ");
-                        foreach (var ev in currentEvents)
-                        {
-                            var doneAt = ev.EndTime - utcNow;
-                            if (doneAt < TimeSpan.FromDays(1))
-                            {
-                                sb.Append($"{ev.EventName} for {doneAt.Hours} hours and {doneAt.Minutes} minutes.");
-                            }
-                            else
-                            {
-                                sb.Append($"{ev.EventName} for {doneAt.Days} days and {doneAt.Hours} hours.");
-                            }
-
-                            if (ev != currentEvents.Last())
-                            {
-                                sb.Append(", ");
-                            }
-                            else
-                            {
-                                sb.AppendLine();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        sb.AppendLine("No events currently going on.");
-                    }
-
-                    var nextEvent = FgoHelpers.EventList.FirstOrDefault(e => e.StartTime > utcNow);
-                    if (nextEvent != null)
-                    {
-                        var eta = nextEvent.StartTime - utcNow;
-                        if (eta < TimeSpan.FromDays(1))
-                        {
-                            sb.Append($"**Next Event:** {nextEvent.EventName}, planned to start in {eta.Hours} hours and {eta.Minutes} minutes.");
-                        }
-                        else
-                        {
-                            sb.Append($"**Next Event:** {nextEvent.EventName}, planned to start in {eta.Days} days and {eta.Hours} hours.");
-                        }
-                    }
-                    else
-                    {
-                        sb.Append("No known upcoming events.");
-                    }
-                    await client.SendMessage(cea.Channel, sb.ToString());
-                });
         }
 
         private static string FormatCEProfile(CEProfile ce)
@@ -501,7 +512,10 @@ namespace MechHisui.Commands
             this.timeZone = timeZone;
         }
 
-        public TimeSpan NextLocalTimeAt(TimeSpan targetTimeOfDay) => (LocalTime.TimeOfDay > targetTimeOfDay) ? TimeSpan.FromDays(1) - (LocalTime.TimeOfDay - targetTimeOfDay) : targetTimeOfDay - LocalTime.TimeOfDay;
+        public TimeSpan TimeUntilNextLocalTimeAt(TimeSpan targetTimeOfDay) =>
+            (LocalTime.TimeOfDay > targetTimeOfDay) ?
+            TimeSpan.FromDays(1) - (LocalTime.TimeOfDay - targetTimeOfDay) :
+            targetTimeOfDay - LocalTime.TimeOfDay;
 
         public DateTime UniversalTime => utcDateTime;
 

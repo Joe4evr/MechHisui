@@ -71,22 +71,25 @@ namespace MechHisui
 
             //register commands
             client.RegisterAddChannelCommand(config);
-            client.RegisterDailyCommand(config);
             client.RegisterDisconnectCommand(config);
-            client.RegisterFriendsCommand(config);
             client.RegisterInfoCommand(config);
             client.RegisterKnownChannelsCommand(config);
             client.RegisterLearnCommand(config);
-            client.RegisterLoginBonusCommand(config);
             client.RegisterMarkCommand(config);
             //client.RegisterRecordingCommand(config);
             client.RegisterResetCommand(config);
-            client.RegisterStatsCommand(config, statService);
             client.RegisterThemeCommand(config);
-            client.RegisterTriviaCommand(config);
-            client.RegisterQuartzCommand(config);
             client.RegisterWhereCommand(config);
             client.RegisterXmasCommand(config);
+
+            client.RegisterDailyCommand(config);
+            client.RegisterEventCommand(config);
+            client.RegisterFriendsCommand(config);
+            client.RegisterLoginBonusCommand(config);
+            client.RegisterStatsCommand(config, statService);
+            client.RegisterQuartzCommand(config);
+
+            client.RegisterTriviaCommand(config);
 
             Responses.InitResponses(config);
 
