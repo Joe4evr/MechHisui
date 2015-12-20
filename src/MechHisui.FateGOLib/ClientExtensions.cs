@@ -89,20 +89,20 @@ namespace MechHisui.Commands
                             string m = doneAt.Minutes == 1 ? "minute" : "minutes";
                             if (doneAt < TimeSpan.FromDays(1))
                             {
-                                sb.Append($"{ev.EventName} for {doneAt.Hours} {h} and {doneAt.Minutes} {m}.");
+                                sb.AppendLine($"{ev.EventName} for {doneAt.Hours} {h} and {doneAt.Minutes} {m}.");
                             }
                             else
                             {
-                                sb.Append($"{ev.EventName} for {doneAt.Days} {d} and {doneAt.Hours} {h}.");
+                                sb.AppendLine($"{ev.EventName} for {doneAt.Days} {d} and {doneAt.Hours} {h}.");
                             }
 
-                            if (ev != currentEvents.Last())
+                            if (!String.IsNullOrEmpty(ev.EventGacha))
                             {
-                                sb.Append(", ");
+                                sb.AppendLine($"\tEvent gacha rate up on: **{ev.EventGacha}**.");
                             }
                             else
                             {
-                                sb.AppendLine();
+                                sb.AppendLine("\tNo event gacha for this event.");
                             }
                         }
                     }
