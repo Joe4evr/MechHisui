@@ -16,6 +16,8 @@ namespace MechHisui.FateGOLib
         public string CardPool { get; set; }
         public string NoblePhantasm { get; set; }
         public string NoblePhantasmEffect { get; set; }
+        public string Special { get; set; }
+        public string Attribute { get; set; }
         public string Skill1 { get; set; }
         public string Effect1 { get; set; }
         public string Skill2 { get; set; }

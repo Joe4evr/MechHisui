@@ -467,7 +467,9 @@ namespace MechHisui.Commands
                 .AppendLine($"**Max HP:** {profile.HP}")
                 .AppendLine($"**Starweight:** {profile.Starweight}")
                 .AppendLine($"**Growth type:** {profile.GrowthCurve} (Use `.curve` for explanation)")
-                .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*");
+                .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*")
+                .AppendLine($"**Attribute:** {profile.Attribute}")
+                .AppendLine($"**Special:** {profile.Special}");
             if (!String.IsNullOrWhiteSpace(profile.Skill1))
             {
                 sb.AppendLine($"**Skill 1:** {profile.Skill1} - *{profile.Effect1}*");
