@@ -98,7 +98,7 @@ namespace MechHisui.Commands
 
                             if (!String.IsNullOrEmpty(ev.EventGacha))
                             {
-                                sb.AppendLine($"\tEvent gacha rate up on: **{ev.EventGacha}**.");
+                                sb.AppendLine($"\t**Event gacha rate up on:** {ev.EventGacha}.");
                             }
                             else
                             {
@@ -143,7 +143,7 @@ namespace MechHisui.Commands
                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                .Parameter("code", ParameterType.Required)
                .Parameter("servant", ParameterType.Optional)
-               .Description("Add your friendcode to the list. Enter your code with quotes as `\"XXX XXX XXX\"`. You may add your support Servant as well.")
+               .Description("Add your friendcode to the list. Enter your code with quotes as `\"XXX XXX XXX\"`. You may optionally add your support Servant as well. If you do, enclose that in `\"\"`s as well.")
                .Do(async cea =>
                {
                    if (FriendCodes.friendData.Any(fc => fc.User == cea.User.Name))
@@ -462,12 +462,12 @@ namespace MechHisui.Commands
                 .AppendLine($"**Class:** {profile.Class}")
                 .AppendLine($"**Rarity:** {profile.Rarity}")
                 .AppendLine($"**Collection ID:** {profile.Id}")
-                .AppendLine($"**Card pool:** {profile.CardPool}")
+                .AppendLine($"**Card pool:** {profile.CardPool} (Fourth number is EX attack)")
                 .AppendLine($"**Max ATK:** {profile.Atk}")
                 .AppendLine($"**Max HP:** {profile.HP}")
                 .AppendLine($"**Starweight:** {profile.Starweight}")
                 .AppendLine($"**Growth type:** {profile.GrowthCurve} (Use `.curve` for explanation)")
-                .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*")
+                .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}* (Hits is per enemy)")
                 .AppendLine($"**Attribute:** {profile.Attribute}")
                 .AppendLine($"**Special:** {profile.Special}");
             if (!String.IsNullOrWhiteSpace(profile.Skill1))
