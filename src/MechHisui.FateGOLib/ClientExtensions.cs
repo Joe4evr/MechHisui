@@ -84,7 +84,7 @@ namespace MechHisui.Commands
                         foreach (var ev in currentEvents)
                         {
                             var doneAt = ev.EndTime - utcNow;
-                            string d = doneAt.Hours == 1 ? "day" : "days";
+                            string d = doneAt.Days == 1 ? "day" : "days";
                             string h = doneAt.Hours == 1 ? "hour" : "hours";
                             string m = doneAt.Minutes == 1 ? "minute" : "minutes";
                             if (doneAt < TimeSpan.FromDays(1))
@@ -115,7 +115,7 @@ namespace MechHisui.Commands
                     if (nextEvent != null)
                     {
                         var eta = nextEvent.StartTime - utcNow;
-                        string d = eta.Hours == 1 ? "day" : "days";
+                        string d = eta.Days == 1 ? "day" : "days";
                         string h = eta.Hours == 1 ? "hour" : "hours";
                         string m = eta.Minutes == 1 ? "minute" : "minutes";
                         if (eta < TimeSpan.FromDays(1))
