@@ -32,6 +32,7 @@ namespace MechHisui.FateGOLib
 
     public class FriendData
     {
+        public int Id { get; set; }
         public string User { get; set; }
         public string FriendCode { get; set; }
         public string Servant { get; set; }

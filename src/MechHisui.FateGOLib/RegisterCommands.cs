@@ -154,7 +154,7 @@ namespace MechHisui.Commands
 
                    if (Regex.Match(cea.Args[0], @"[0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9]").Success)
                    {
-                       var friend = new FriendData { User = cea.User.Name, FriendCode = cea.Args[0], Servant = (cea.Args.Length > 1) ? cea.Args[1] : String.Empty };
+                       var friend = new FriendData { Id = FriendCodes.friendData.Count + 1, User = cea.User.Name, FriendCode = cea.Args[0], Servant = (cea.Args.Length > 1) ? cea.Args[1] : String.Empty };
                        FriendCodes.friendData.Add(friend);
                        FriendCodes.WriteFriendData(config["FriendcodePath"]);
                        await client.SendMessage(cea.Channel, $"Added `{friend.FriendCode}` for `{friend.User}`.");
@@ -172,7 +172,7 @@ namespace MechHisui.Commands
                {
                    StringBuilder sb = new StringBuilder("```\n");
                    int longestName = FriendCodes.friendData.OrderByDescending(f => f.User.Length).First().User.Length;
-                   foreach (var friend in FriendCodes.friendData)
+                   foreach (var friend in FriendCodes.friendData.OrderBy(f => f.Id))
                    {
                        string spaces = new string(' ', (longestName - friend.User.Length) + 1);
                        sb.Append($"{friend.User}:{spaces}{friend.FriendCode}");
