@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Discord;
@@ -78,8 +77,17 @@ namespace MechHisui.Commands
             Console.WriteLine("Registering 'Disconnect'...");
             client.Commands().CreateCommand("disconnect")
                 .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .Parameter("code", ParameterType.Optional)
                 .Hide()
-                .Do(async cea => await Disconnect(client, config));
+                .Do(async cea =>
+                {
+                    int c;
+                    if (!String.IsNullOrEmpty(cea.Args[0]) && Int32.TryParse(cea.Args[0], out c))
+                    {
+                        await Disconnect(client, config, c);
+                    }
+                    await Disconnect(client, config);
+                });
         }
 
         public static void RegisterInfoCommand(this DiscordClient client, IConfiguration config)
@@ -307,7 +315,7 @@ namespace MechHisui.Commands
                 });
         }
 
-        internal static async Task Disconnect(DiscordClient client, IConfiguration config)
+        internal static async Task Disconnect(DiscordClient client, IConfiguration config, int code = 0)
         {
             StopReponders(client, client.GetResponders());
             await StopRecorders(client, client.GetRecorders());
@@ -319,11 +327,12 @@ namespace MechHisui.Commands
             {
                 if (ch.Id != Int64.Parse(config["API_testing"]) && ch.Id != Int64.Parse(config["FGO_trivia"]))
                 {
-                    await client.SendMessage(ch, config["Goodbye"]);
+                    string msg = code == 1 ? "Shutting down for rebuild." : config["Goodbye"];
+                    await client.SendMessage(ch, msg);
                 }
             }
 
-            Environment.Exit(0);
+            Environment.Exit(code);
         }
 
         private static async Task StopTrvias(List<Trivia> trivs)
