@@ -69,4 +69,22 @@ namespace MechHisui.FateGOLib
         public DateTime EndTime { get; set; }
         public string EventGacha { get; set; }
     }
+
+    public class MysticCode
+    {
+        public string Code { get; set; }
+        public string Skill1 { get; set; }
+        public string Skill1Effect { get; set; }
+        public string Skill2 { get; set; }
+        public string Skill2Effect { get; set; }
+        public string Skill3 { get; set; }
+        public string Skill3Effect { get; set; }
+        public string Image { get; set; }
+    }
+
+    public class MysticAlias
+    {
+        public IList<string> Alias { get; set; }
+        public string Code { get; set; }
+    }
 }

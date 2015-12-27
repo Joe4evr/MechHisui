@@ -255,7 +255,7 @@ namespace MechHisui.Commands
                         return;
                     }
 
-                    if (new[] { "enkidu", "arc", "arcueid" }.Contains(arg.ToLowerInvariant()))
+                    if (new[] { "enkidu", "arc", "arcueid", "astolfo" }.Contains(arg.ToLowerInvariant()))
                     {
                         await client.SendMessage(cea.Channel, "Never ever.");
                         return;
@@ -353,25 +353,30 @@ namespace MechHisui.Commands
                     {
                         case "alias":
                             statService.ReadAliasList();
-                            await client.SendMessage(cea.Channel, "Updated alias lookup.");
+                            await client.SendMessage(cea.Channel, "Updated alias lookups.");
                             break;
                         case "profiles":
                             await statService.UpdateProfileListsAsync();
                             await client.SendMessage(cea.Channel, "Updated profile lookup.");
                             break;
                         case "events":
-                            await statService.UpdateEventListsAsync();
+                            await statService.UpdateEventListAsync();
                             await client.SendMessage(cea.Channel, "Updated events lookup.");
                             break;
                         case "fcs":
                             FriendCodes.ReadFriendData(config["FriendcodePath"]);
                             await client.SendMessage(cea.Channel, "Updated friendcodes");
                             break;
+                        case "mystic":
+                            await statService.UpdateMysticCodesListAsync();
+                            await client.SendMessage(cea.Channel, "Updated Mystic Codes lookup.");
+                            break;
                         default:
                             statService.ReadAliasList();
                             FriendCodes.ReadFriendData(config["FriendcodePath"]);
                             await statService.UpdateProfileListsAsync();
-                            await statService.UpdateEventListsAsync();
+                            await statService.UpdateEventListAsync();
+                            await statService.UpdateMysticCodesListAsync();
                             await client.SendMessage(cea.Channel, "Updated all lookups.");
                             break;
                     }
@@ -436,6 +441,74 @@ namespace MechHisui.Commands
                             "Reverse S means their stats will grow fast, slow the fuck down as they reach the midpoint (with zero or near-zero improvements at that midpoint), then return to their previous growth speed.\n",
                             "S means the opposite. These guys get super little stats at the beginning and end, but are quite fast in the middle (Gonna guesstimate... 35 - 55 in the case of a 5 *).\n",
                             "Semi(reverse) S is like (reverse)S, except not quite as bad in the slow periods and not quite as good in the fast periods.If you graph it it'll go right between linear and non-semi.`")));
+
+            Console.WriteLine("Registering 'Mystic Codes'");
+            client.Commands().CreateCommand("mystic")
+                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
+                .Description("Relay information on available Mystic Codes")
+                .Parameter("code", ParameterType.Multiple)
+                .Do(async cea =>
+                {
+                    string arg = String.Join(" ", cea.Args);
+
+                    MysticCode code = statService.LookupMystic(arg);
+                    if (code == null)
+                    {
+                        await client.SendMessage(cea.Channel, "Specified Mystic Code not found. Please use `.listmystic` for the list of available Mystic Codes.");
+                    }
+                    else
+                    {
+                        await client.SendMessage(cea.Channel, FormatMysticCodeProfile(code));
+                    }
+                });
+
+            client.Commands().CreateCommand("listmystic")
+                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
+                .Description("Relay the names of available Mystic Codes")
+                .Do(async cea =>
+                {
+                    StringBuilder sb = new StringBuilder("**Available Mystic Codes:**\n");
+                    foreach (var code in FgoHelpers.MysticCodeList)
+                    {
+                        sb.AppendLine(code.Code);
+                    }
+                    await client.SendMessage(cea.Channel, sb.ToString());
+                });
+
+            Console.WriteLine("Registering 'Mystic alias'");
+            client.Commands().CreateCommand("mystic")
+                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]) && u.Id == Int64.Parse(config["Owner"]))
+                .Hide()
+                .Parameter("mystic", ParameterType.Required)
+                .Parameter("alias", ParameterType.Required)
+                .Do(async cea =>
+                {
+                    var newAlias = FgoHelpers.MysticCodeDict.SingleOrDefault(p => p.Code == cea.Args[0]);
+                    if (newAlias != null)
+                    {
+                        newAlias.Alias.Add(cea.Args[1]);
+                        using (TextWriter tw = new StreamWriter(Path.Combine(config["AliasPath"], "mystic.json")))
+                        {
+                            tw.Write(JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
+                        }
+                        await client.SendMessage(cea.Channel, $"Added alias `{cea.Args[1]}` for `{newAlias.Code}`.");
+                    }
+                    else
+                    {
+                        await client.SendMessage(cea.Channel, "Could not find Mystic Code to add alias for.");
+                    }
+                });
+        }
+
+        public static void RegisterZoukenCommand(this DiscordClient client, IConfiguration config)
+        {
+            client.Commands().CreateCommand("zouken")
+                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
+                .Hide()
+                .Do(async cea =>
+                {
+                    await client.SendMessage(cea.Channel, "Friendly reminder that the Zouken CE doesn't trigger on suicides, so don't even think about pairing it with A-Trash.");
+                });
         }
 
         private static string FormatCEProfile(CEProfile ce)
@@ -451,12 +524,13 @@ namespace MechHisui.Commands
                 .AppendLine($"**Max ATK:** {ce.AtkMax}")
                 .AppendLine($"**Max HP:** {ce.HPMax}")
                 .AppendLine($"**Max Effect:** {ce.EffectMax}")
-                .AppendLine($"{ce.Image}");
+                .Append(ce.Image);
             return sb.ToString();
         }
 
         internal static string FormatServantProfile(ServantProfile profile)
         {
+            string aoe = profile.NoblePhantasmEffect.Contains("AoE") ? " (Hits is per enemy)" : String.Empty;
             StringBuilder sb = new StringBuilder()
                 .AppendLine($"**Servant:** {profile.Name}")
                 .AppendLine($"**Class:** {profile.Class}")
@@ -467,7 +541,7 @@ namespace MechHisui.Commands
                 .AppendLine($"**Max HP:** {profile.HP}")
                 .AppendLine($"**Starweight:** {profile.Starweight}")
                 .AppendLine($"**Growth type:** {profile.GrowthCurve} (Use `.curve` for explanation)")
-                .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}* (Hits is per enemy)")
+                .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*{aoe}")
                 .AppendLine($"**Attribute:** {profile.Attribute}")
                 .AppendLine($"**Special:** {profile.Special}");
             if (!String.IsNullOrWhiteSpace(profile.Skill1))
@@ -498,7 +572,18 @@ namespace MechHisui.Commands
                     }
                 }
             }
-            sb.AppendLine($"{profile.Image}");
+            sb.Append(profile.Image);
+            return sb.ToString();
+        }
+
+        private static string FormatMysticCodeProfile(MysticCode code)
+        {
+            StringBuilder sb = new StringBuilder()
+                .AppendLine($"**Name:** {code.Code}")
+                .AppendLine($"**Skill 1:** {code.Skill1} - *{code.Skill1Effect}*")
+                .AppendLine($"**Skill 2:** {code.Skill2} - *{code.Skill2Effect}*")
+                .AppendLine($"**Skill 3:** {code.Skill3} - *{code.Skill3Effect}*")
+                .Append(code.Image);
             return sb.ToString();
         }
     }

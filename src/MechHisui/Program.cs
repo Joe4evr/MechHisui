@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
 using Discord;
 using Discord.Commands;
@@ -48,18 +44,24 @@ namespace MechHisui
                 new string[] { "https://www.googleapis.com/auth/spreadsheets.readonly" });
 
 
-            StatService statService = new StatService(apiService, Path.Combine(config["AliasPath"], "servants.json"), Path.Combine(config["AliasPath"], "ces.json"));
-            statService.UpdateProfileListsAsync().Wait();
-            statService.UpdateEventListsAsync().Wait();
-
-            //IServiceCollection services = new ServiceCollection()
-            //    .AddInstance(config)
-            //    .AddInstance(new StatService(apiService, config["ServantAliasPath"]));
-
-            //var provider = services.BuildServiceProvider();
+            StatService statService = new StatService(apiService,
+                Path.Combine(config["AliasPath"], "servants.json"),
+                Path.Combine(config["AliasPath"], "ces.json"),
+                Path.Combine(config["AliasPath"], "mystic.json"));
+            try
+            {
+                statService.UpdateProfileListsAsync().Wait();
+                statService.UpdateEventListAsync().Wait();
+                statService.UpdateMysticCodesListAsync().Wait();
+            }
+            catch (Exception)
+            {
+                Environment.Exit(0);
+            }
 
             var client = new DiscordClient();
 
+            client.Disconnected += (s, e) => Environment.Exit(0);
             Console.CancelKeyPress += async (s, e) => await RegisterCommands.Disconnect(client, config);
 
             //Display all log messages in the console
@@ -88,6 +90,7 @@ namespace MechHisui
             client.RegisterLoginBonusCommand(config);
             client.RegisterStatsCommand(config, statService);
             client.RegisterQuartzCommand(config);
+            client.RegisterZoukenCommand(config);
 
             client.RegisterTriviaCommand(config);
 
