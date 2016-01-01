@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Discord;
 using Discord.Commands;
@@ -26,7 +25,7 @@ namespace MechHisui.Commands
                 .Do(async cea =>
                 {
                     DayOfWeek day;
-                    DateTimeWithZone todayInJapan = new DateTimeWithZone(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time"));
+                    var todayInJapan = new DateTimeWithZone(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time"));
                     var arg = cea.Args[0];
 
                     if (String.IsNullOrWhiteSpace(arg) || arg == "today")
@@ -75,7 +74,7 @@ namespace MechHisui.Commands
                 .Description($"Relay information on current or upcoming events.")
                 .Do(async cea =>
                 {
-                    StringBuilder sb = new StringBuilder();
+                    var sb = new StringBuilder();
                     var utcNow = DateTime.UtcNow;
                     var currentEvents = FgoHelpers.EventList.Where(e => utcNow > e.StartTime && utcNow < e.EndTime);
                     if (currentEvents.Any())
@@ -170,11 +169,11 @@ namespace MechHisui.Commands
                .Description("Display known friendcodes.")
                .Do(async cea =>
                {
-                   StringBuilder sb = new StringBuilder("```\n");
+                   var sb = new StringBuilder("```\n");
                    int longestName = FriendCodes.friendData.OrderByDescending(f => f.User.Length).First().User.Length;
                    foreach (var friend in FriendCodes.friendData.OrderBy(f => f.Id))
                    {
-                       string spaces = new string(' ', (longestName - friend.User.Length) + 1);
+                       var spaces = new string(' ', (longestName - friend.User.Length) + 1);
                        sb.Append($"{friend.User}:{spaces}{friend.FriendCode}");
                        sb.AppendLine((!String.IsNullOrEmpty(friend.Servant)) ? $" - {friend.Servant}" : String.Empty);
                    }
@@ -220,7 +219,7 @@ namespace MechHisui.Commands
                 .Description("Relay the information of the arrival of the next login bonus.")
                 .Do(async cea =>
                 {
-                    DateTimeWithZone rightNowInJapan = new DateTimeWithZone(DateTime.UtcNow, JpnTimeZone);
+                    var rightNowInJapan = new DateTimeWithZone(DateTime.UtcNow, JpnTimeZone);
                     TimeSpan eta = rightNowInJapan.TimeUntilNextLocalTimeAt(new TimeSpan(hours: 4, minutes: 0, seconds: 0));
                     string h = eta.Hours == 1 ? "hour" : "hours";
                     string m = eta.Minutes == 1 ? "minute" : "minutes";
@@ -299,7 +298,7 @@ namespace MechHisui.Commands
                         var potentials = FgoHelpers.CEDict.Where(c => c.Alias.Any(a => a.Contains(arg.ToLowerInvariant())));
                         if (potentials.Any())
                         {
-                            StringBuilder sb = new StringBuilder();
+                            var sb = new StringBuilder();
                             foreach (var p in potentials)
                             {
                                 sb.Append($"**{p.CE}** *({p.Alias.First()})*");
@@ -357,7 +356,7 @@ namespace MechHisui.Commands
                             break;
                         case "profiles":
                             await statService.UpdateProfileListsAsync();
-                            await client.SendMessage(cea.Channel, "Updated profile lookup.");
+                            await client.SendMessage(cea.Channel, "Updated profile lookups.");
                             break;
                         case "events":
                             await statService.UpdateEventListAsync();
@@ -390,20 +389,33 @@ namespace MechHisui.Commands
                 .Parameter("alias", ParameterType.Required)
                 .Do(async cea =>
                 {
-                    var newAlias = FgoHelpers.ServantDict.SingleOrDefault(p => p.Servant == cea.Args[0]);
+                    ServantAlias newAlias = FgoHelpers.ServantDict.SingleOrDefault(p => p.Servant == cea.Args[0]);
                     if (newAlias != null)
                     {
                         newAlias.Alias.Add(cea.Args[1]);
-                        using (TextWriter tw = new StreamWriter(Path.Combine(config["AliasPath"], "servants.json")))
-                        {
-                            tw.Write(JsonConvert.SerializeObject(FgoHelpers.ServantDict, Formatting.Indented));
-                        }
-                        await client.SendMessage(cea.Channel, $"Added alias `{cea.Args[1]}` for `{newAlias.Servant}`.");
                     }
                     else
                     {
-                        await client.SendMessage(cea.Channel, "Could not find name to add alias for.");
+                        ServantProfile profile = FgoHelpers.ServantProfiles.SingleOrDefault(s => s.Name == cea.Args[0]);
+                        if (profile != null)
+                        {
+                            newAlias = new ServantAlias
+                            {
+                                Alias = new List<string> { cea.Args[1] },
+                                Servant = profile.Name
+                            };
+                        }
+                        else
+                        {
+                            await client.SendMessage(cea.Channel, "Could not find name to add alias for.");
+                            return;
+                        }
                     }
+                    using (TextWriter tw = new StreamWriter(Path.Combine(config["AliasPath"], "servants.json")))
+                    {
+                        tw.Write(JsonConvert.SerializeObject(FgoHelpers.ServantDict, Formatting.Indented));
+                    }
+                    await client.SendMessage(cea.Channel, $"Created alias `{cea.Args[1]}` for `{newAlias.Servant}`.");
                 });
 
             Console.WriteLine("Registering 'CE alias'...");
@@ -414,20 +426,33 @@ namespace MechHisui.Commands
                 .Parameter("alias", ParameterType.Required)
                 .Do(async cea =>
                 {
-                    var newAlias = FgoHelpers.CEDict.SingleOrDefault(p => p.CE == cea.Args[0]);
+                    CEAlias newAlias = FgoHelpers.CEDict.SingleOrDefault(p => p.CE == cea.Args[0]);
                     if (newAlias != null)
                     {
                         newAlias.Alias.Add(cea.Args[1]);
-                        using (TextWriter tw = new StreamWriter(Path.Combine(config["AliasPath"], "ces.json")))
-                        {
-                            tw.Write(JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
-                        }
-                        await client.SendMessage(cea.Channel, $"Added alias `{cea.Args[1]}` for `{newAlias.CE}`.");
                     }
                     else
                     {
-                        await client.SendMessage(cea.Channel, "Could not find name to add alias for.");
+                        CEProfile ce = FgoHelpers.CEProfiles.SingleOrDefault(s => s.Name == cea.Args[0]);
+                        if (ce != null)
+                        {
+                            newAlias = new CEAlias
+                            {
+                                Alias = new List<string> { cea.Args[1] },
+                                CE = ce.Name
+                            };
+                        }
+                        else
+                        {
+                            await client.SendMessage(cea.Channel, "Could not find name to add alias for.");
+                            return;
+                        }
                     }
+                    using (TextWriter tw = new StreamWriter(Path.Combine(config["AliasPath"], "ces.json")))
+                    {
+                        tw.Write(JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
+                    }
+                    await client.SendMessage(cea.Channel, $"Added alias `{cea.Args[1]}` for `{newAlias.CE}`.");
                 });
 
             Console.WriteLine("Registering 'Curve'...");
@@ -451,6 +476,12 @@ namespace MechHisui.Commands
                 {
                     string arg = String.Join(" ", cea.Args);
 
+                    if (arg.ToLowerInvariant() == "chaldea")
+                    {
+                        await client.SendMessage(cea.Channel, "Search term ambiguous. Please specify something more specific.");
+                        return;
+                    }
+
                     MysticCode code = statService.LookupMystic(arg);
                     if (code == null)
                     {
@@ -467,7 +498,7 @@ namespace MechHisui.Commands
                 .Description("Relay the names of available Mystic Codes")
                 .Do(async cea =>
                 {
-                    StringBuilder sb = new StringBuilder("**Available Mystic Codes:**\n");
+                    var sb = new StringBuilder("**Available Mystic Codes:**\n");
                     foreach (var code in FgoHelpers.MysticCodeList)
                     {
                         sb.AppendLine(code.Code);
@@ -487,17 +518,27 @@ namespace MechHisui.Commands
                     if (newAlias != null)
                     {
                         newAlias.Alias.Add(cea.Args[1]);
-                        using (TextWriter tw = new StreamWriter(Path.Combine(config["AliasPath"], "mystic.json")))
-                        {
-                            tw.Write(JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
-                        }
-                        await client.SendMessage(cea.Channel, $"Added alias `{cea.Args[1]}` for `{newAlias.Code}`.");
                     }
                     else
                     {
                         await client.SendMessage(cea.Channel, "Could not find Mystic Code to add alias for.");
+                        return;
                     }
+                    using (TextWriter tw = new StreamWriter(Path.Combine(config["AliasPath"], "mystic.json")))
+                    {
+                        tw.Write(JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
+                    }
+                    await client.SendMessage(cea.Channel, $"Added alias `{cea.Args[1]}` for `{newAlias.Code}`.");
                 });
+
+            //client.Commands().CreateCommand("search")
+            //    .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
+            //    .Parameter("property", ParameterType.Required)
+            //    .Parameter("", ParameterType.Required)
+            //    .Do(async cea =>
+            //    {
+
+            //    });
         }
 
         public static void RegisterZoukenCommand(this DiscordClient client, IConfiguration config)
@@ -530,7 +571,7 @@ namespace MechHisui.Commands
 
         internal static string FormatServantProfile(ServantProfile profile)
         {
-            string aoe = profile.NoblePhantasmEffect.Contains("AoE") ? " (Hits is per enemy)" : String.Empty;
+            string aoe = profile.NoblePhantasmEffect.Contains("AoE") && Regex.Match(profile.NoblePhantasmEffect, "[0-9]+H").Success ? " (Hits is per enemy)" : String.Empty;
             StringBuilder sb = new StringBuilder()
                 .AppendLine($"**Servant:** {profile.Name}")
                 .AppendLine($"**Class:** {profile.Class}")
@@ -543,7 +584,7 @@ namespace MechHisui.Commands
                 .AppendLine($"**Growth type:** {profile.GrowthCurve} (Use `.curve` for explanation)")
                 .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*{aoe}")
                 .AppendLine($"**Attribute:** {profile.Attribute}")
-                .AppendLine($"**Special:** {profile.Special}");
+                .AppendLine($"**Traits:** {profile.Traits}");
             if (!String.IsNullOrWhiteSpace(profile.Skill1))
             {
                 sb.AppendLine($"**Skill 1:** {profile.Skill1} - *{profile.Effect1}*");

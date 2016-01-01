@@ -13,23 +13,23 @@ namespace MechHisui.FateGOLib
     public class StatService
     {
         private readonly GoogleScriptApiService _apiService;
-        private readonly string _aliasPath;
+        private readonly string _servantAliasPath;
         private readonly string _ceAliasPath;
         private readonly string _mysticAliasPath;
 
-        public StatService(GoogleScriptApiService apiService, string aliasPath, string ceAliasPath, string mysticAliasPath)
+        public StatService(GoogleScriptApiService apiService, string servantAliasPath, string ceAliasPath, string mysticAliasPath)
         {
             if (apiService == null) throw new ArgumentNullException(nameof(apiService));
-            if (aliasPath == null) throw new ArgumentNullException(nameof(aliasPath));
+            if (servantAliasPath == null) throw new ArgumentNullException(nameof(servantAliasPath));
             if (ceAliasPath == null) throw new ArgumentNullException(nameof(ceAliasPath));
             if (mysticAliasPath == null) throw new ArgumentNullException(nameof(mysticAliasPath));
 
-            if (!File.Exists(aliasPath)) throw new FileNotFoundException(nameof(aliasPath));
+            if (!File.Exists(servantAliasPath)) throw new FileNotFoundException(nameof(servantAliasPath));
             if (!File.Exists(ceAliasPath)) throw new FileNotFoundException(nameof(ceAliasPath));
             if (!File.Exists(mysticAliasPath)) throw new FileNotFoundException(nameof(mysticAliasPath));
 
             _apiService = apiService;
-            _aliasPath = aliasPath;
+            _servantAliasPath = servantAliasPath;
             _ceAliasPath = ceAliasPath;
             _mysticAliasPath = mysticAliasPath;
 
@@ -114,7 +114,7 @@ namespace MechHisui.FateGOLib
 
         public void ReadAliasList()
         {
-            using (TextReader tr = new StreamReader(_aliasPath))
+            using (TextReader tr = new StreamReader(_servantAliasPath))
             {
                 FgoHelpers.ServantDict = JsonConvert.DeserializeObject<List<ServantAlias>>(tr.ReadToEnd()) ?? new List<ServantAlias>();
             }

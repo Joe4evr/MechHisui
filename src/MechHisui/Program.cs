@@ -1,7 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Microsoft.AspNet.Hosting;
+using Microsoft.Dnx.Compilation;
+using Microsoft.Dnx.Compilation.Caching;
+using Microsoft.Dnx.Runtime;
+using Microsoft.Dnx.Runtime.Compilation;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.EnvironmentVariables;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
 using Discord;
 using Discord.Commands;
@@ -13,16 +20,21 @@ using MechHisui.Modules;
 
 namespace MechHisui
 {
-    public static partial class Program
+    public class Program
     {
         public static void Main(string[] args)
         {
-            var platform = PlatformServices.Create(PlatformServices.Default);
-
+            PlatformServices ps = PlatformServices.Default;
+            IApplicationEnvironment env = ps.Application;
+            //ILibraryExporter exporter = InitLibraryExporter(env, ps.Runtime, ps.AssemblyLoadContextAccessor);
             IConfigurationBuilder builder = new ConfigurationBuilder()
-                .SetBasePath(platform.Application.ApplicationBasePath);
+                .AddEnvironmentVariables()
+                .SetBasePath(env.ApplicationBasePath);
 
-            if (args.Contains("--environment") && args[Array.IndexOf(args, "--environment") + 1] == "Development")
+            IHostingEnvironment hostingEnv = new HostingEnvironment();
+            hostingEnv.Initialize(env.ApplicationBasePath, builder.Build());
+
+            if (hostingEnv.IsDevelopment())
             {
                 Console.WriteLine("Loading from UserSecret store");
                 builder.AddUserSecrets();
@@ -35,7 +47,7 @@ namespace MechHisui
 
             IConfiguration config = builder.Build();
 
-            GoogleScriptApiService apiService = new GoogleScriptApiService(
+            var apiService = new GoogleScriptApiService(
                 Path.Combine(config["Secrets_Path"], "client_secret.json"),
                 Path.Combine(config["Secrets_Path"], "scriptcreds"),
                 "MechHisui",
@@ -44,10 +56,10 @@ namespace MechHisui
                 new string[] { "https://www.googleapis.com/auth/spreadsheets.readonly" });
 
 
-            StatService statService = new StatService(apiService,
-                Path.Combine(config["AliasPath"], "servants.json"),
-                Path.Combine(config["AliasPath"], "ces.json"),
-                Path.Combine(config["AliasPath"], "mystic.json"));
+            var statService = new StatService(apiService,
+                servantAliasPath: Path.Combine(config["AliasPath"], "servants.json"),
+                ceAliasPath: Path.Combine(config["AliasPath"], "ces.json"),
+                mysticAliasPath: Path.Combine(config["AliasPath"], "mystic.json"));
             try
             {
                 statService.UpdateProfileListsAsync().Wait();
@@ -69,11 +81,12 @@ namespace MechHisui
 
             //Add a ModuleService and CommandService
             client.AddService(new ModuleService());
-            client.AddService(new CommandService(new CommandServiceConfig() { HelpMode = HelpMode.Public, CommandChar = '.' }));
+            client.AddService(new CommandService(new CommandServiceConfig { HelpMode = HelpMode.Public, CommandChar = '.' }));
 
             //register commands
             client.RegisterAddChannelCommand(config);
             client.RegisterDisconnectCommand(config);
+            //client.RegisterEvalCommand(config, env, exporter);
             client.RegisterInfoCommand(config);
             client.RegisterKnownChannelsCommand(config);
             client.RegisterLearnCommand(config);
@@ -150,6 +163,39 @@ namespace MechHisui
                     }
                 }
             });
+        }
+
+        private static ILibraryExporter InitLibraryExporter(
+            IApplicationEnvironment appEnv,
+            IRuntimeEnvironment runtimeEnv,
+            IAssemblyLoadContextAccessor loadContextAccessor)
+        {
+            var compilationContext = new CompilationEngineContext(
+                appEnv,
+                runtimeEnv,
+                loadContextAccessor.Default,
+                new CompilationCache());
+
+            var options = new RuntimeOptions
+            {
+                ApplicationBaseDirectory = appEnv.ApplicationBasePath,
+                ApplicationName = appEnv.ApplicationName,
+                CompilationServerPort = null,
+                Configuration = appEnv.Configuration,
+                TargetFramework = appEnv.RuntimeFramework
+            };
+
+            compilationContext.AddCompilationService(typeof(RuntimeOptions), options);
+            var compilationEngine = new CompilationEngine(compilationContext);
+            return new RuntimeLibraryExporter(() =>
+                compilationEngine.CreateProjectExporter(
+                    new Project
+                    {
+                        ProjectFilePath = Directory.GetParent(appEnv.ApplicationBasePath).FullName,
+                        Description = "Runtime compiled project",
+                    },
+                    appEnv.RuntimeFramework,
+                    options.Configuration));
         }
     }
 }

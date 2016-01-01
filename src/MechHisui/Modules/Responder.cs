@@ -27,7 +27,7 @@ namespace MechHisui.Modules
         {
             if (e.Channel.Id == channel.Id)
             {
-                string temp = (e.Message.Text.StartsWith("@") ? new string(e.Message.Text.SkipWhile(c => !Char.IsWhiteSpace(c)).ToArray()) : e.Message.Text);
+                string temp = (e.Message.Text.StartsWith("@", StringComparison.InvariantCultureIgnoreCase) ? new string(e.Message.Text.SkipWhile(c => !Char.IsWhiteSpace(c)).ToArray()) : e.Message.Text);
  
                 string quickResponse = String.Empty;
                 Func<Response, bool> pred = (k => k.Call.Contains(temp.ToLowerInvariant().Trim()));

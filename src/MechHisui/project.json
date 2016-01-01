@@ -11,6 +11,10 @@
   },
 
     "dependencies": {
+        "Microsoft.AspNet.Hosting": "1.0.0-rc1-final",
+        "Microsoft.Dnx.Compilation": "1.0.0-rc1-final",
+        "Microsoft.Dnx.Compilation.CSharp.Abstractions": "1.0.0-rc1-final",
+        "Microsoft.Dnx.Runtime": "1.0.0-rc1-final",
         "Microsoft.Extensions.Configuration": "1.0.0-rc1-final",
         "Microsoft.Extensions.Configuration.FileExtensions": "1.0.0-rc1-final",
         "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final",
@@ -30,7 +34,8 @@
     "frameworks": {
         "dnx451": {
             "frameworkAssemblies": {
-                "System.IO": "4.0.0.0"
+                "System.IO": "4.0.0.0",
+                "System.Runtime": "4.0.10.0"
             },
             "dependencies": {
                 "FuzzyString": "1.0.0-*"
