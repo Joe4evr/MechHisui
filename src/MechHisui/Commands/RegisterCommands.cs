@@ -4,23 +4,18 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.PortableExecutable;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
-using Microsoft.Dnx.Compilation;
-using Microsoft.Dnx.Compilation.CSharp;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.PlatformAbstractions;
 using Discord;
 using Discord.Commands;
 using Discord.Modules;
 using Newtonsoft.Json;
-using MechHisui.Modules;
 using MechHisui.FateGOLib;
+using MechHisui.Modules;
 using MechHisui.TriviaService;
 
 namespace MechHisui.Commands
@@ -101,48 +96,42 @@ namespace MechHisui.Commands
                 });
         }
 
-        public static void RegisterEvalCommand(this DiscordClient client, IConfiguration config, IApplicationEnvironment env, ILibraryExporter exporter)
+        public static void RegisterEvalCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Eval'...");
+            const string sep = "\", \"";
             client.Commands().CreateCommand("eval")
                 .Parameter("func", ParameterType.Required)
                 .Hide()
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]))
+                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) || ch.Id == Int64.Parse(config["FGO_general"]))
                 .Do(async cea =>
                 {
-                    string arg = cea.Args[0];
-                    SyntaxTree syntax = CSharpSyntaxTree.ParseText(@"
+                    string arg = cea.Args[0].Replace("\\", String.Empty);
+                    SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(@"
 using System;
 using System.Linq;
+using Discord;
 using MechHisui.FateGOLib;
 
-namespace EvalCompilation
+namespace DynamicCompile
 {
-    public class Comp
+    public class DynEval
     {
-        public string Eval()
-        {
-            return " + arg + @"
-        }
+        public string Eval() => String.Join(" + sep + @", " + arg + @");
     }
-}", CSharpParseOptions.Default);
-
+}");
                     
-
                     string assemblyName = Path.GetRandomFileName();
-                    List<MetadataReference> references = new List<MetadataReference>
+                    var references = new MetadataReference[]
                     {
                         MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                        MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location)
+                        MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
+                        MetadataReference.CreateFromFile(typeof(DiscordClient).Assembly.Location),
+                        MetadataReference.CreateFromFile(typeof(FgoHelpers).Assembly.Location)
                     };
-                    foreach (var metaref in exporter.GetAllExports(env.ApplicationName).MetadataReferences)
-                    {
-                        references.Add(ConvertMetadataReference(metaref));
-                    }
-
                     CSharpCompilation compilation = CSharpCompilation.Create(
                         assemblyName,
-                        syntaxTrees: new[] { syntax },
+                        syntaxTrees: new[] { syntaxTree },
                         references: references,
                         options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
@@ -166,7 +155,7 @@ namespace EvalCompilation
                             ms.Seek(0, SeekOrigin.Begin);
                             Assembly assembly = Assembly.Load(ms.ToArray());
 
-                            Type type = assembly.GetType("EvalCompilation.Comp");
+                            Type type = assembly.GetType("DynamicCompile.DynEval");
                             object obj = Activator.CreateInstance(type);
                             var res = type.InvokeMember("Eval",
                                 BindingFlags.Default | BindingFlags.InvokeMethod,
@@ -174,8 +163,7 @@ namespace EvalCompilation
                                 obj,
                                 new object[0]);
 
-                            Console.WriteLine("Result: " + res);
-                            await client.SendMessage(cea.Channel, (string)res);
+                            await client.SendMessage(cea.Channel, $"**Result:** {(string)res}");
                         }
                     }
                 });
@@ -460,40 +448,6 @@ namespace EvalCompilation
         }
 
         private static List<string> xmasvids = new List<string>();
-
-        //Source: https://github.com/aspnet/Mvc/blob/dev/src/Microsoft.AspNet.Mvc.Razor/Compilation/RoslynCompilationService.cs
-        private static MetadataReference ConvertMetadataReference(IMetadataReference metadataReference)
-        {
-            var roslynReference = metadataReference as IRoslynMetadataReference;
-            if (roslynReference != null)
-                return roslynReference.MetadataReference;
-
-            var embeddedReference = metadataReference as IMetadataEmbeddedReference;
-            if (embeddedReference != null)
-                return MetadataReference.CreateFromImage(embeddedReference.Contents);
-
-            var fileMetadataReference = metadataReference as IMetadataFileReference;
-            if (fileMetadataReference != null)
-            {
-                using (var stream = File.OpenRead(fileMetadataReference.Path))
-                {
-                    var moduleMetadata = ModuleMetadata.CreateFromStream(stream, PEStreamOptions.PrefetchMetadata);
-                    return AssemblyMetadata.Create(moduleMetadata).GetReference(filePath: fileMetadataReference.Path);
-                }
-            }
-
-            var projectReference = metadataReference as IMetadataProjectReference;
-            if (projectReference != null)
-            {
-                using (var ms = new MemoryStream())
-                {
-                    projectReference.EmitReferenceAssembly(ms);
-                    return MetadataReference.CreateFromImage(ms.ToArray());
-                }
-            }
-
-            throw new NotSupportedException();
-        }
 
         private enum ChannelActivity
         {

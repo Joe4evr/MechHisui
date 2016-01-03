@@ -3,12 +3,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.AspNet.Hosting;
 using Microsoft.Dnx.Compilation;
-using Microsoft.Dnx.Compilation.Caching;
-using Microsoft.Dnx.Runtime;
-using Microsoft.Dnx.Runtime.Compilation;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.EnvironmentVariables;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
 using Discord;
 using Discord.Commands;
@@ -26,14 +21,13 @@ namespace MechHisui
         {
             PlatformServices ps = PlatformServices.Default;
             IApplicationEnvironment env = ps.Application;
-            //ILibraryExporter exporter = InitLibraryExporter(env, ps.Runtime, ps.AssemblyLoadContextAccessor);
+            ILibraryExporter exporter = CompilationServices.Default.LibraryExporter;
             IConfigurationBuilder builder = new ConfigurationBuilder()
                 .AddEnvironmentVariables()
                 .SetBasePath(env.ApplicationBasePath);
 
             IHostingEnvironment hostingEnv = new HostingEnvironment();
             hostingEnv.Initialize(env.ApplicationBasePath, builder.Build());
-
             if (hostingEnv.IsDevelopment())
             {
                 Console.WriteLine("Loading from UserSecret store");
@@ -42,7 +36,7 @@ namespace MechHisui
             else
             {
                 Console.WriteLine("Loading from jsons directory");
-                builder.AddJsonFile(@"..\..\..\..\MechHisui-jsons\secrets.json");
+                builder.AddJsonFile(@"..\..\..\..\..\..\MechHisui-jsons\secrets.json");
             }
 
             IConfiguration config = builder.Build();
@@ -86,7 +80,7 @@ namespace MechHisui
             //register commands
             client.RegisterAddChannelCommand(config);
             client.RegisterDisconnectCommand(config);
-            //client.RegisterEvalCommand(config, env, exporter);
+            client.RegisterEvalCommand(config);
             client.RegisterInfoCommand(config);
             client.RegisterKnownChannelsCommand(config);
             client.RegisterLearnCommand(config);
@@ -163,39 +157,6 @@ namespace MechHisui
                     }
                 }
             });
-        }
-
-        private static ILibraryExporter InitLibraryExporter(
-            IApplicationEnvironment appEnv,
-            IRuntimeEnvironment runtimeEnv,
-            IAssemblyLoadContextAccessor loadContextAccessor)
-        {
-            var compilationContext = new CompilationEngineContext(
-                appEnv,
-                runtimeEnv,
-                loadContextAccessor.Default,
-                new CompilationCache());
-
-            var options = new RuntimeOptions
-            {
-                ApplicationBaseDirectory = appEnv.ApplicationBasePath,
-                ApplicationName = appEnv.ApplicationName,
-                CompilationServerPort = null,
-                Configuration = appEnv.Configuration,
-                TargetFramework = appEnv.RuntimeFramework
-            };
-
-            compilationContext.AddCompilationService(typeof(RuntimeOptions), options);
-            var compilationEngine = new CompilationEngine(compilationContext);
-            return new RuntimeLibraryExporter(() =>
-                compilationEngine.CreateProjectExporter(
-                    new Project
-                    {
-                        ProjectFilePath = Directory.GetParent(appEnv.ApplicationBasePath).FullName,
-                        Description = "Runtime compiled project",
-                    },
-                    appEnv.RuntimeFramework,
-                    options.Configuration));
         }
     }
 }

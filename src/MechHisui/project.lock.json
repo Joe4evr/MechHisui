@@ -402,7 +402,7 @@
           "System"
         ]
       },
-      "Microsoft.CodeAnalysis.Common/1.1.0-rc1-20151109-01": {
+      "Microsoft.CodeAnalysis.Common/1.1.0": {
         "type": "package",
         "dependencies": {
           "Microsoft.CodeAnalysis.Analyzers": "[1.0.0, 1.2.0)",
@@ -416,16 +416,97 @@
           "lib/net45/Microsoft.CodeAnalysis.dll": {}
         }
       },
-      "Microsoft.CodeAnalysis.CSharp/1.1.0-rc1-20151109-01": {
+      "Microsoft.CodeAnalysis.CSharp/1.1.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.CodeAnalysis.Common": "[1.1.0-rc1-20151109-01]"
+          "Microsoft.CodeAnalysis.Common": "[1.1.0]"
         },
         "compile": {
           "lib/net45/Microsoft.CodeAnalysis.CSharp.dll": {}
         },
         "runtime": {
           "lib/net45/Microsoft.CodeAnalysis.CSharp.dll": {}
+        }
+      },
+      "Microsoft.CodeAnalysis.CSharp.Workspaces/1.1.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeAnalysis.CSharp": "[1.1.0]",
+          "Microsoft.CodeAnalysis.Workspaces.Common": "[1.1.0]"
+        },
+        "compile": {
+          "lib/net45/Microsoft.CodeAnalysis.CSharp.Workspaces.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Microsoft.CodeAnalysis.CSharp.Workspaces.dll": {}
+        }
+      },
+      "Microsoft.CodeAnalysis.Workspaces.Common/1.1.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeAnalysis.Common": "[1.1.0]",
+          "Microsoft.Composition": "[1.0.27]"
+        },
+        "compile": {
+          "lib/net45/Microsoft.CodeAnalysis.Workspaces.Desktop.dll": {},
+          "lib/net45/Microsoft.CodeAnalysis.Workspaces.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Microsoft.CodeAnalysis.Workspaces.Desktop.dll": {},
+          "lib/net45/Microsoft.CodeAnalysis.Workspaces.dll": {}
+        }
+      },
+      "Microsoft.CodeAnalysis.Workspaces.Dnx/1.2.2": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.1.0",
+          "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc1-final",
+          "NuGet.Packaging": "3.2.0",
+          "System.Runtime.Loader": "4.0.0-beta-23516"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Collections",
+          "System.Core",
+          "System.IO",
+          "System.Reflection",
+          "System.Runtime",
+          "System.Text.Encoding"
+        ],
+        "compile": {
+          "lib/dnx451/docfx.dll": {},
+          "lib/dnx451/Microsoft.CodeAnalysis.Workspaces.Dnx.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.EntityModel.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.MarkdownLite.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.Plugins.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.Utility.dll": {}
+        },
+        "runtime": {
+          "lib/dnx451/docfx.dll": {},
+          "lib/dnx451/Microsoft.CodeAnalysis.Workspaces.Dnx.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.EntityModel.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.MarkdownLite.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.Plugins.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.Utility.dll": {}
+        }
+      },
+      "Microsoft.Composition/1.0.27": {
+        "type": "package",
+        "compile": {
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.AttributedModel.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Convention.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Hosting.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Runtime.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.TypedParts.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.AttributedModel.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Convention.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Hosting.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Runtime.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.TypedParts.dll": {}
         }
       },
       "Microsoft.Dnx.Compilation/1.0.0-rc1-final": {
@@ -466,29 +547,10 @@
           "lib/net451/Microsoft.Dnx.Compilation.Abstractions.dll": {}
         }
       },
-      "Microsoft.Dnx.Compilation.CSharp.Abstractions/1.0.0-rc1-final": {
+      "Microsoft.Dnx.Loader/1.0.0-rc2-16357": {
         "type": "package",
         "dependencies": {
-          "Microsoft.CodeAnalysis.CSharp": "1.1.0-rc1-20151109-01",
-          "Microsoft.Dnx.Compilation.Abstractions": "1.0.0-rc1-final"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Dnx.Compilation.CSharp.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Dnx.Compilation.CSharp.Abstractions.dll": {}
-        }
-      },
-      "Microsoft.Dnx.Loader/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final"
+          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530"
         },
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -503,12 +565,12 @@
           "lib/dnx451/Microsoft.Dnx.Loader.dll": {}
         }
       },
-      "Microsoft.Dnx.Runtime/1.0.0-rc1-final": {
+      "Microsoft.Dnx.Runtime/1.0.0-rc2-16357": {
         "type": "package",
         "dependencies": {
           "Microsoft.CodeAnalysis.CSharp": "1.1.0-rc1-20151109-01",
-          "Microsoft.Dnx.Loader": "1.0.0-rc1-final",
-          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final"
+          "Microsoft.Dnx.Loader": "1.0.0-rc2-16357",
+          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530"
         },
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -528,6 +590,24 @@
         },
         "runtime": {
           "lib/dnx451/Microsoft.Dnx.Runtime.dll": {}
+        }
+      },
+      "Microsoft.Extensions.CompilationAbstractions/1.0.0-rc2-16357": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net451/Microsoft.Extensions.CompilationAbstractions.dll": {}
+        },
+        "runtime": {
+          "lib/net451/Microsoft.Extensions.CompilationAbstractions.dll": {}
         }
       },
       "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
@@ -691,6 +771,21 @@
           "lib/net451/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         }
       },
+      "Microsoft.Extensions.FileSystemGlobbing/1.0.0-rc1-final": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net451/Microsoft.Extensions.FileSystemGlobbing.dll": {}
+        },
+        "runtime": {
+          "lib/net451/Microsoft.Extensions.FileSystemGlobbing.dll": {}
+        }
+      },
       "Microsoft.Extensions.Logging/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -726,7 +821,7 @@
           "lib/net451/Microsoft.Extensions.Logging.Abstractions.dll": {}
         }
       },
-      "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc1-final": {
+      "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc2-16177": {
         "type": "package",
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -812,6 +907,115 @@
         },
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
+        }
+      },
+      "NuGet.Frameworks/3.2.0": {
+        "type": "package",
+        "dependencies": {
+          "NuGet.Versioning": "3.2.0"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Frameworks.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Frameworks.dll": {}
+        }
+      },
+      "NuGet.Logging/3.2.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Logging.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Logging.dll": {}
+        }
+      },
+      "NuGet.Packaging/3.2.0": {
+        "type": "package",
+        "dependencies": {
+          "NuGet.Logging": "3.2.0",
+          "NuGet.Packaging.Core": "3.2.0"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core",
+          "System.IO.Compression",
+          "System.Xml",
+          "System.Xml.Linq"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Packaging.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Packaging.dll": {}
+        }
+      },
+      "NuGet.Packaging.Core/3.2.0": {
+        "type": "package",
+        "dependencies": {
+          "NuGet.Packaging.Core.Types": "3.2.0"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core",
+          "System.IO.Compression",
+          "System.Xml",
+          "System.Xml.Linq"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Packaging.Core.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Packaging.Core.dll": {}
+        }
+      },
+      "NuGet.Packaging.Core.Types/3.2.0": {
+        "type": "package",
+        "dependencies": {
+          "NuGet.Frameworks": "3.2.0"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Packaging.Core.Types.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Packaging.Core.Types.dll": {}
+        }
+      },
+      "NuGet.Versioning/3.2.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Versioning.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Versioning.dll": {}
         }
       },
       "RestSharp/105.2.3": {
@@ -910,6 +1114,15 @@
           "lib/net45/_._": {}
         }
       },
+      "System.Linq.Dynamic/1.0.6": {
+        "type": "package",
+        "compile": {
+          "lib/net40/System.Linq.Dynamic.dll": {}
+        },
+        "runtime": {
+          "lib/net40/System.Linq.Dynamic.dll": {}
+        }
+      },
       "System.Reflection/4.0.0": {
         "type": "package",
         "compile": {
@@ -996,6 +1209,17 @@
         },
         "runtime": {
           "lib/net45/_._": {}
+        }
+      },
+      "System.Runtime.Loader/4.0.0-beta-23516": {
+        "type": "package",
+        "dependencies": {
+          "System.IO": "4.0.0",
+          "System.Reflection": "4.0.0",
+          "System.Runtime": "4.0.0"
+        },
+        "compile": {
+          "ref/dotnet5.1/System.Runtime.Loader.dll": {}
         }
       },
       "System.Text.Encoding/4.0.0": {
@@ -1444,7 +1668,7 @@
           "System"
         ]
       },
-      "Microsoft.CodeAnalysis.Common/1.1.0-rc1-20151109-01": {
+      "Microsoft.CodeAnalysis.Common/1.1.0": {
         "type": "package",
         "dependencies": {
           "Microsoft.CodeAnalysis.Analyzers": "[1.0.0, 1.2.0)",
@@ -1458,16 +1682,97 @@
           "lib/net45/Microsoft.CodeAnalysis.dll": {}
         }
       },
-      "Microsoft.CodeAnalysis.CSharp/1.1.0-rc1-20151109-01": {
+      "Microsoft.CodeAnalysis.CSharp/1.1.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.CodeAnalysis.Common": "[1.1.0-rc1-20151109-01]"
+          "Microsoft.CodeAnalysis.Common": "[1.1.0]"
         },
         "compile": {
           "lib/net45/Microsoft.CodeAnalysis.CSharp.dll": {}
         },
         "runtime": {
           "lib/net45/Microsoft.CodeAnalysis.CSharp.dll": {}
+        }
+      },
+      "Microsoft.CodeAnalysis.CSharp.Workspaces/1.1.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeAnalysis.CSharp": "[1.1.0]",
+          "Microsoft.CodeAnalysis.Workspaces.Common": "[1.1.0]"
+        },
+        "compile": {
+          "lib/net45/Microsoft.CodeAnalysis.CSharp.Workspaces.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Microsoft.CodeAnalysis.CSharp.Workspaces.dll": {}
+        }
+      },
+      "Microsoft.CodeAnalysis.Workspaces.Common/1.1.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeAnalysis.Common": "[1.1.0]",
+          "Microsoft.Composition": "[1.0.27]"
+        },
+        "compile": {
+          "lib/net45/Microsoft.CodeAnalysis.Workspaces.Desktop.dll": {},
+          "lib/net45/Microsoft.CodeAnalysis.Workspaces.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Microsoft.CodeAnalysis.Workspaces.Desktop.dll": {},
+          "lib/net45/Microsoft.CodeAnalysis.Workspaces.dll": {}
+        }
+      },
+      "Microsoft.CodeAnalysis.Workspaces.Dnx/1.2.2": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.1.0",
+          "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc1-final",
+          "NuGet.Packaging": "3.2.0",
+          "System.Runtime.Loader": "4.0.0-beta-23516"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Collections",
+          "System.Core",
+          "System.IO",
+          "System.Reflection",
+          "System.Runtime",
+          "System.Text.Encoding"
+        ],
+        "compile": {
+          "lib/dnx451/docfx.dll": {},
+          "lib/dnx451/Microsoft.CodeAnalysis.Workspaces.Dnx.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.EntityModel.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.MarkdownLite.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.Plugins.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.Utility.dll": {}
+        },
+        "runtime": {
+          "lib/dnx451/docfx.dll": {},
+          "lib/dnx451/Microsoft.CodeAnalysis.Workspaces.Dnx.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.EntityModel.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.MarkdownLite.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.Plugins.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.Utility.dll": {}
+        }
+      },
+      "Microsoft.Composition/1.0.27": {
+        "type": "package",
+        "compile": {
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.AttributedModel.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Convention.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Hosting.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Runtime.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.TypedParts.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.AttributedModel.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Convention.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Hosting.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Runtime.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.TypedParts.dll": {}
         }
       },
       "Microsoft.Dnx.Compilation/1.0.0-rc1-final": {
@@ -1508,29 +1813,10 @@
           "lib/net451/Microsoft.Dnx.Compilation.Abstractions.dll": {}
         }
       },
-      "Microsoft.Dnx.Compilation.CSharp.Abstractions/1.0.0-rc1-final": {
+      "Microsoft.Dnx.Loader/1.0.0-rc2-16357": {
         "type": "package",
         "dependencies": {
-          "Microsoft.CodeAnalysis.CSharp": "1.1.0-rc1-20151109-01",
-          "Microsoft.Dnx.Compilation.Abstractions": "1.0.0-rc1-final"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Dnx.Compilation.CSharp.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Dnx.Compilation.CSharp.Abstractions.dll": {}
-        }
-      },
-      "Microsoft.Dnx.Loader/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final"
+          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530"
         },
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -1545,12 +1831,12 @@
           "lib/dnx451/Microsoft.Dnx.Loader.dll": {}
         }
       },
-      "Microsoft.Dnx.Runtime/1.0.0-rc1-final": {
+      "Microsoft.Dnx.Runtime/1.0.0-rc2-16357": {
         "type": "package",
         "dependencies": {
           "Microsoft.CodeAnalysis.CSharp": "1.1.0-rc1-20151109-01",
-          "Microsoft.Dnx.Loader": "1.0.0-rc1-final",
-          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final"
+          "Microsoft.Dnx.Loader": "1.0.0-rc2-16357",
+          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530"
         },
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -1570,6 +1856,24 @@
         },
         "runtime": {
           "lib/dnx451/Microsoft.Dnx.Runtime.dll": {}
+        }
+      },
+      "Microsoft.Extensions.CompilationAbstractions/1.0.0-rc2-16357": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net451/Microsoft.Extensions.CompilationAbstractions.dll": {}
+        },
+        "runtime": {
+          "lib/net451/Microsoft.Extensions.CompilationAbstractions.dll": {}
         }
       },
       "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
@@ -1733,6 +2037,21 @@
           "lib/net451/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         }
       },
+      "Microsoft.Extensions.FileSystemGlobbing/1.0.0-rc1-final": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net451/Microsoft.Extensions.FileSystemGlobbing.dll": {}
+        },
+        "runtime": {
+          "lib/net451/Microsoft.Extensions.FileSystemGlobbing.dll": {}
+        }
+      },
       "Microsoft.Extensions.Logging/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -1768,7 +2087,7 @@
           "lib/net451/Microsoft.Extensions.Logging.Abstractions.dll": {}
         }
       },
-      "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc1-final": {
+      "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc2-16177": {
         "type": "package",
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -1854,6 +2173,115 @@
         },
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
+        }
+      },
+      "NuGet.Frameworks/3.2.0": {
+        "type": "package",
+        "dependencies": {
+          "NuGet.Versioning": "3.2.0"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Frameworks.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Frameworks.dll": {}
+        }
+      },
+      "NuGet.Logging/3.2.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Logging.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Logging.dll": {}
+        }
+      },
+      "NuGet.Packaging/3.2.0": {
+        "type": "package",
+        "dependencies": {
+          "NuGet.Logging": "3.2.0",
+          "NuGet.Packaging.Core": "3.2.0"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core",
+          "System.IO.Compression",
+          "System.Xml",
+          "System.Xml.Linq"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Packaging.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Packaging.dll": {}
+        }
+      },
+      "NuGet.Packaging.Core/3.2.0": {
+        "type": "package",
+        "dependencies": {
+          "NuGet.Packaging.Core.Types": "3.2.0"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core",
+          "System.IO.Compression",
+          "System.Xml",
+          "System.Xml.Linq"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Packaging.Core.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Packaging.Core.dll": {}
+        }
+      },
+      "NuGet.Packaging.Core.Types/3.2.0": {
+        "type": "package",
+        "dependencies": {
+          "NuGet.Frameworks": "3.2.0"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Packaging.Core.Types.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Packaging.Core.Types.dll": {}
+        }
+      },
+      "NuGet.Versioning/3.2.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Versioning.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Versioning.dll": {}
         }
       },
       "RestSharp/105.2.3": {
@@ -1952,6 +2380,15 @@
           "lib/net45/_._": {}
         }
       },
+      "System.Linq.Dynamic/1.0.6": {
+        "type": "package",
+        "compile": {
+          "lib/net40/System.Linq.Dynamic.dll": {}
+        },
+        "runtime": {
+          "lib/net40/System.Linq.Dynamic.dll": {}
+        }
+      },
       "System.Reflection/4.0.0": {
         "type": "package",
         "compile": {
@@ -2038,6 +2475,17 @@
         },
         "runtime": {
           "lib/net45/_._": {}
+        }
+      },
+      "System.Runtime.Loader/4.0.0-beta-23516": {
+        "type": "package",
+        "dependencies": {
+          "System.IO": "4.0.0",
+          "System.Reflection": "4.0.0",
+          "System.Runtime": "4.0.0"
+        },
+        "compile": {
+          "ref/dotnet5.1/System.Runtime.Loader.dll": {}
         }
       },
       "System.Text.Encoding/4.0.0": {
@@ -2486,7 +2934,7 @@
           "System"
         ]
       },
-      "Microsoft.CodeAnalysis.Common/1.1.0-rc1-20151109-01": {
+      "Microsoft.CodeAnalysis.Common/1.1.0": {
         "type": "package",
         "dependencies": {
           "Microsoft.CodeAnalysis.Analyzers": "[1.0.0, 1.2.0)",
@@ -2500,16 +2948,97 @@
           "lib/net45/Microsoft.CodeAnalysis.dll": {}
         }
       },
-      "Microsoft.CodeAnalysis.CSharp/1.1.0-rc1-20151109-01": {
+      "Microsoft.CodeAnalysis.CSharp/1.1.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.CodeAnalysis.Common": "[1.1.0-rc1-20151109-01]"
+          "Microsoft.CodeAnalysis.Common": "[1.1.0]"
         },
         "compile": {
           "lib/net45/Microsoft.CodeAnalysis.CSharp.dll": {}
         },
         "runtime": {
           "lib/net45/Microsoft.CodeAnalysis.CSharp.dll": {}
+        }
+      },
+      "Microsoft.CodeAnalysis.CSharp.Workspaces/1.1.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeAnalysis.CSharp": "[1.1.0]",
+          "Microsoft.CodeAnalysis.Workspaces.Common": "[1.1.0]"
+        },
+        "compile": {
+          "lib/net45/Microsoft.CodeAnalysis.CSharp.Workspaces.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Microsoft.CodeAnalysis.CSharp.Workspaces.dll": {}
+        }
+      },
+      "Microsoft.CodeAnalysis.Workspaces.Common/1.1.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeAnalysis.Common": "[1.1.0]",
+          "Microsoft.Composition": "[1.0.27]"
+        },
+        "compile": {
+          "lib/net45/Microsoft.CodeAnalysis.Workspaces.Desktop.dll": {},
+          "lib/net45/Microsoft.CodeAnalysis.Workspaces.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Microsoft.CodeAnalysis.Workspaces.Desktop.dll": {},
+          "lib/net45/Microsoft.CodeAnalysis.Workspaces.dll": {}
+        }
+      },
+      "Microsoft.CodeAnalysis.Workspaces.Dnx/1.2.2": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.1.0",
+          "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc1-final",
+          "NuGet.Packaging": "3.2.0",
+          "System.Runtime.Loader": "4.0.0-beta-23516"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Collections",
+          "System.Core",
+          "System.IO",
+          "System.Reflection",
+          "System.Runtime",
+          "System.Text.Encoding"
+        ],
+        "compile": {
+          "lib/dnx451/docfx.dll": {},
+          "lib/dnx451/Microsoft.CodeAnalysis.Workspaces.Dnx.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.EntityModel.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.MarkdownLite.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.Plugins.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.Utility.dll": {}
+        },
+        "runtime": {
+          "lib/dnx451/docfx.dll": {},
+          "lib/dnx451/Microsoft.CodeAnalysis.Workspaces.Dnx.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.EntityModel.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.MarkdownLite.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.Plugins.dll": {},
+          "lib/dnx451/Microsoft.DocAsCode.Utility.dll": {}
+        }
+      },
+      "Microsoft.Composition/1.0.27": {
+        "type": "package",
+        "compile": {
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.AttributedModel.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Convention.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Hosting.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Runtime.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.TypedParts.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.AttributedModel.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Convention.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Hosting.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.Runtime.dll": {},
+          "lib/portable-net45+win8+wp8+wpa81/System.Composition.TypedParts.dll": {}
         }
       },
       "Microsoft.Dnx.Compilation/1.0.0-rc1-final": {
@@ -2550,29 +3079,10 @@
           "lib/net451/Microsoft.Dnx.Compilation.Abstractions.dll": {}
         }
       },
-      "Microsoft.Dnx.Compilation.CSharp.Abstractions/1.0.0-rc1-final": {
+      "Microsoft.Dnx.Loader/1.0.0-rc2-16357": {
         "type": "package",
         "dependencies": {
-          "Microsoft.CodeAnalysis.CSharp": "1.1.0-rc1-20151109-01",
-          "Microsoft.Dnx.Compilation.Abstractions": "1.0.0-rc1-final"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net451/Microsoft.Dnx.Compilation.CSharp.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/net451/Microsoft.Dnx.Compilation.CSharp.Abstractions.dll": {}
-        }
-      },
-      "Microsoft.Dnx.Loader/1.0.0-rc1-final": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final"
+          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530"
         },
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -2587,12 +3097,12 @@
           "lib/dnx451/Microsoft.Dnx.Loader.dll": {}
         }
       },
-      "Microsoft.Dnx.Runtime/1.0.0-rc1-final": {
+      "Microsoft.Dnx.Runtime/1.0.0-rc2-16357": {
         "type": "package",
         "dependencies": {
           "Microsoft.CodeAnalysis.CSharp": "1.1.0-rc1-20151109-01",
-          "Microsoft.Dnx.Loader": "1.0.0-rc1-final",
-          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final"
+          "Microsoft.Dnx.Loader": "1.0.0-rc2-16357",
+          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530"
         },
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -2612,6 +3122,24 @@
         },
         "runtime": {
           "lib/dnx451/Microsoft.Dnx.Runtime.dll": {}
+        }
+      },
+      "Microsoft.Extensions.CompilationAbstractions/1.0.0-rc2-16357": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net451/Microsoft.Extensions.CompilationAbstractions.dll": {}
+        },
+        "runtime": {
+          "lib/net451/Microsoft.Extensions.CompilationAbstractions.dll": {}
         }
       },
       "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
@@ -2775,6 +3303,21 @@
           "lib/net451/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         }
       },
+      "Microsoft.Extensions.FileSystemGlobbing/1.0.0-rc1-final": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net451/Microsoft.Extensions.FileSystemGlobbing.dll": {}
+        },
+        "runtime": {
+          "lib/net451/Microsoft.Extensions.FileSystemGlobbing.dll": {}
+        }
+      },
       "Microsoft.Extensions.Logging/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -2810,7 +3353,7 @@
           "lib/net451/Microsoft.Extensions.Logging.Abstractions.dll": {}
         }
       },
-      "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc1-final": {
+      "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc2-16177": {
         "type": "package",
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -2896,6 +3439,115 @@
         },
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
+        }
+      },
+      "NuGet.Frameworks/3.2.0": {
+        "type": "package",
+        "dependencies": {
+          "NuGet.Versioning": "3.2.0"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Frameworks.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Frameworks.dll": {}
+        }
+      },
+      "NuGet.Logging/3.2.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Logging.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Logging.dll": {}
+        }
+      },
+      "NuGet.Packaging/3.2.0": {
+        "type": "package",
+        "dependencies": {
+          "NuGet.Logging": "3.2.0",
+          "NuGet.Packaging.Core": "3.2.0"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core",
+          "System.IO.Compression",
+          "System.Xml",
+          "System.Xml.Linq"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Packaging.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Packaging.dll": {}
+        }
+      },
+      "NuGet.Packaging.Core/3.2.0": {
+        "type": "package",
+        "dependencies": {
+          "NuGet.Packaging.Core.Types": "3.2.0"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core",
+          "System.IO.Compression",
+          "System.Xml",
+          "System.Xml.Linq"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Packaging.Core.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Packaging.Core.dll": {}
+        }
+      },
+      "NuGet.Packaging.Core.Types/3.2.0": {
+        "type": "package",
+        "dependencies": {
+          "NuGet.Frameworks": "3.2.0"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Packaging.Core.Types.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Packaging.Core.Types.dll": {}
+        }
+      },
+      "NuGet.Versioning/3.2.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/NuGet.Versioning.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NuGet.Versioning.dll": {}
         }
       },
       "RestSharp/105.2.3": {
@@ -2994,6 +3646,15 @@
           "lib/net45/_._": {}
         }
       },
+      "System.Linq.Dynamic/1.0.6": {
+        "type": "package",
+        "compile": {
+          "lib/net40/System.Linq.Dynamic.dll": {}
+        },
+        "runtime": {
+          "lib/net40/System.Linq.Dynamic.dll": {}
+        }
+      },
       "System.Reflection/4.0.0": {
         "type": "package",
         "compile": {
@@ -3080,6 +3741,17 @@
         },
         "runtime": {
           "lib/net45/_._": {}
+        }
+      },
+      "System.Runtime.Loader/4.0.0-beta-23516": {
+        "type": "package",
+        "dependencies": {
+          "System.IO": "4.0.0",
+          "System.Reflection": "4.0.0",
+          "System.Runtime": "4.0.0"
+        },
+        "compile": {
+          "ref/dotnet5.1/System.Runtime.Loader.dll": {}
         }
       },
       "System.Text.Encoding/4.0.0": {
@@ -3632,32 +4304,104 @@
         "tools/uninstall.ps1"
       ]
     },
-    "Microsoft.CodeAnalysis.Common/1.1.0-rc1-20151109-01": {
+    "Microsoft.CodeAnalysis.Common/1.1.0": {
       "type": "package",
-      "sha512": "5eea4BzS8/ge6aVWbweZ3LxMZumN7lm1hPPjSn3iAS3yi1ozsg1aCZ+lHq2nbS/ZNT+Z3QmTcmKaQd3b4bTqeA==",
+      "sha512": "uDH4arKhk/0N3kgoNyBUUv/nEY+auFimYyF/QNEQOP6LAFH41ingogGfvXfPVPuzo3I8OlY4zIK8MRHq89oC2A==",
       "files": [
         "lib/net45/Microsoft.CodeAnalysis.dll",
         "lib/net45/Microsoft.CodeAnalysis.xml",
         "lib/portable-net45+win8/Microsoft.CodeAnalysis.dll",
         "lib/portable-net45+win8/Microsoft.CodeAnalysis.xml",
-        "Microsoft.CodeAnalysis.Common.1.1.0-rc1-20151109-01.nupkg",
-        "Microsoft.CodeAnalysis.Common.1.1.0-rc1-20151109-01.nupkg.sha512",
+        "Microsoft.CodeAnalysis.Common.1.1.0.nupkg",
+        "Microsoft.CodeAnalysis.Common.1.1.0.nupkg.sha512",
         "Microsoft.CodeAnalysis.Common.nuspec",
         "ThirdPartyNotices.rtf"
       ]
     },
-    "Microsoft.CodeAnalysis.CSharp/1.1.0-rc1-20151109-01": {
+    "Microsoft.CodeAnalysis.CSharp/1.1.0": {
       "type": "package",
-      "sha512": "2u8FpEIzbjvW6kveLYDwVgrrw7rkqN123dQSMLL3aRBcNFpKL4+hJkrU5uutsVNmjrzxjQkrSKQjIw6L2yjU9w==",
+      "sha512": "vLuvAtMCQGq+V8oexIOJo7gDaFlFgCVtJXG2k2kronScTBI7ppCZr8t8eG8sMQI4l4VGAieZEgZYqUAv94LrOg==",
       "files": [
         "lib/net45/Microsoft.CodeAnalysis.CSharp.dll",
         "lib/net45/Microsoft.CodeAnalysis.CSharp.xml",
         "lib/portable-net45+win8/Microsoft.CodeAnalysis.CSharp.dll",
         "lib/portable-net45+win8/Microsoft.CodeAnalysis.CSharp.xml",
-        "Microsoft.CodeAnalysis.CSharp.1.1.0-rc1-20151109-01.nupkg",
-        "Microsoft.CodeAnalysis.CSharp.1.1.0-rc1-20151109-01.nupkg.sha512",
+        "Microsoft.CodeAnalysis.CSharp.1.1.0.nupkg",
+        "Microsoft.CodeAnalysis.CSharp.1.1.0.nupkg.sha512",
         "Microsoft.CodeAnalysis.CSharp.nuspec",
         "ThirdPartyNotices.rtf"
+      ]
+    },
+    "Microsoft.CodeAnalysis.CSharp.Workspaces/1.1.0": {
+      "type": "package",
+      "sha512": "H2rC9Y4JzT0f3k3xB/bTaNaIqMqJ482ErmI/5VSurMJC6/5d4aS8Rut/9KpVMX2qpkC2yvlzI004kI49gqv76A==",
+      "files": [
+        "lib/net45/Microsoft.CodeAnalysis.CSharp.Workspaces.dll",
+        "lib/net45/Microsoft.CodeAnalysis.CSharp.Workspaces.xml",
+        "lib/portable-net45+win8/Microsoft.CodeAnalysis.CSharp.Workspaces.dll",
+        "lib/portable-net45+win8/Microsoft.CodeAnalysis.CSharp.Workspaces.xml",
+        "Microsoft.CodeAnalysis.CSharp.Workspaces.1.1.0.nupkg",
+        "Microsoft.CodeAnalysis.CSharp.Workspaces.1.1.0.nupkg.sha512",
+        "Microsoft.CodeAnalysis.CSharp.Workspaces.nuspec",
+        "ThirdPartyNotices.rtf"
+      ]
+    },
+    "Microsoft.CodeAnalysis.Workspaces.Common/1.1.0": {
+      "type": "package",
+      "sha512": "E1jZOcU+SBxuie1VQq785BEIBQfc5QkExW156P0KAJZLHEfAXtLvHOe73KjJis/to2Awu8+OVgDE0dqoaP17Nw==",
+      "files": [
+        "lib/net45/Microsoft.CodeAnalysis.Workspaces.Desktop.dll",
+        "lib/net45/Microsoft.CodeAnalysis.Workspaces.Desktop.xml",
+        "lib/net45/Microsoft.CodeAnalysis.Workspaces.dll",
+        "lib/net45/Microsoft.CodeAnalysis.Workspaces.xml",
+        "lib/portable-net45+win8/Microsoft.CodeAnalysis.Workspaces.dll",
+        "lib/portable-net45+win8/Microsoft.CodeAnalysis.Workspaces.xml",
+        "Microsoft.CodeAnalysis.Workspaces.Common.1.1.0.nupkg",
+        "Microsoft.CodeAnalysis.Workspaces.Common.1.1.0.nupkg.sha512",
+        "Microsoft.CodeAnalysis.Workspaces.Common.nuspec",
+        "ThirdPartyNotices.rtf"
+      ]
+    },
+    "Microsoft.CodeAnalysis.Workspaces.Dnx/1.2.2": {
+      "type": "package",
+      "sha512": "WQO/4bgkC9/AiD1JsBRvLiUxmQ/3RPMtXDq7+xkOV8Ail+KM5PF7lUwTXeuuSHd7TriThxSEymCtgQv4cYvo1w==",
+      "files": [
+        "lib/dnx451/docfx.dll",
+        "lib/dnx451/docfx.xml",
+        "lib/dnx451/Microsoft.CodeAnalysis.Workspaces.Dnx.dll",
+        "lib/dnx451/Microsoft.CodeAnalysis.Workspaces.Dnx.xml",
+        "lib/dnx451/Microsoft.DocAsCode.EntityModel.dll",
+        "lib/dnx451/Microsoft.DocAsCode.EntityModel.xml",
+        "lib/dnx451/Microsoft.DocAsCode.MarkdownLite.dll",
+        "lib/dnx451/Microsoft.DocAsCode.MarkdownLite.xml",
+        "lib/dnx451/Microsoft.DocAsCode.Plugins.dll",
+        "lib/dnx451/Microsoft.DocAsCode.Plugins.xml",
+        "lib/dnx451/Microsoft.DocAsCode.Utility.dll",
+        "lib/dnx451/Microsoft.DocAsCode.Utility.xml",
+        "Microsoft.CodeAnalysis.Workspaces.Dnx.1.2.2.nupkg",
+        "Microsoft.CodeAnalysis.Workspaces.Dnx.1.2.2.nupkg.sha512",
+        "Microsoft.CodeAnalysis.Workspaces.Dnx.nuspec"
+      ]
+    },
+    "Microsoft.Composition/1.0.27": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "pwu80Ohe7SBzZ6i69LVdzowp6V+LaVRzd5F7A6QlD42vQkX0oT7KXKWWPlM/S00w1gnMQMRnEdbtOV12z6rXdQ==",
+      "files": [
+        "lib/portable-net45+win8+wp8+wpa81/System.Composition.AttributedModel.dll",
+        "lib/portable-net45+win8+wp8+wpa81/System.Composition.AttributedModel.XML",
+        "lib/portable-net45+win8+wp8+wpa81/System.Composition.Convention.dll",
+        "lib/portable-net45+win8+wp8+wpa81/System.Composition.Convention.xml",
+        "lib/portable-net45+win8+wp8+wpa81/System.Composition.Hosting.dll",
+        "lib/portable-net45+win8+wp8+wpa81/System.Composition.Hosting.XML",
+        "lib/portable-net45+win8+wp8+wpa81/System.Composition.Runtime.dll",
+        "lib/portable-net45+win8+wp8+wpa81/System.Composition.Runtime.XML",
+        "lib/portable-net45+win8+wp8+wpa81/System.Composition.TypedParts.dll",
+        "lib/portable-net45+win8+wp8+wpa81/System.Composition.TypedParts.XML",
+        "License-Stable.rtf",
+        "Microsoft.Composition.1.0.27.nupkg",
+        "Microsoft.Composition.1.0.27.nupkg.sha512",
+        "Microsoft.Composition.nuspec"
       ]
     },
     "Microsoft.Dnx.Compilation/1.0.0-rc1-final": {
@@ -3688,46 +4432,46 @@
         "Microsoft.Dnx.Compilation.Abstractions.nuspec"
       ]
     },
-    "Microsoft.Dnx.Compilation.CSharp.Abstractions/1.0.0-rc1-final": {
+    "Microsoft.Dnx.Loader/1.0.0-rc2-16357": {
       "type": "package",
       "serviceable": true,
-      "sha512": "MYJJHSIqOvmQxm2KOCwfber5JUwYKtfMREVYxnj/kv+HQrfrztL9dN4IFvh/SsBzm5cGR0Lt52bWJKzkrIRF/g==",
-      "files": [
-        "lib/dotnet5.4/Microsoft.Dnx.Compilation.CSharp.Abstractions.dll",
-        "lib/dotnet5.4/Microsoft.Dnx.Compilation.CSharp.Abstractions.xml",
-        "lib/net451/Microsoft.Dnx.Compilation.CSharp.Abstractions.dll",
-        "lib/net451/Microsoft.Dnx.Compilation.CSharp.Abstractions.xml",
-        "Microsoft.Dnx.Compilation.CSharp.Abstractions.1.0.0-rc1-final.nupkg",
-        "Microsoft.Dnx.Compilation.CSharp.Abstractions.1.0.0-rc1-final.nupkg.sha512",
-        "Microsoft.Dnx.Compilation.CSharp.Abstractions.nuspec"
-      ]
-    },
-    "Microsoft.Dnx.Loader/1.0.0-rc1-final": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "KxGojNFIWzcWDV/j2WVAIwstVPh4ItNPcwLZqIlEZqLRg3G5YLgMr1XzXXBZva6w8ANjzDmEgJ3HH4dMV+koCw==",
+      "sha512": "bnXEB/SWAq6IzNJ6bmhzZA4UHLojI4s9uubhn6kFbKGOqaApAOnmocd9CdX2Guw8qlvXeWyuCBUZYos/amANOA==",
       "files": [
         "lib/dnx451/Microsoft.Dnx.Loader.dll",
         "lib/dnx451/Microsoft.Dnx.Loader.xml",
         "lib/dnxcore50/Microsoft.Dnx.Loader.dll",
         "lib/dnxcore50/Microsoft.Dnx.Loader.xml",
-        "Microsoft.Dnx.Loader.1.0.0-rc1-final.nupkg",
-        "Microsoft.Dnx.Loader.1.0.0-rc1-final.nupkg.sha512",
+        "Microsoft.Dnx.Loader.1.0.0-rc2-16357.nupkg",
+        "Microsoft.Dnx.Loader.1.0.0-rc2-16357.nupkg.sha512",
         "Microsoft.Dnx.Loader.nuspec"
       ]
     },
-    "Microsoft.Dnx.Runtime/1.0.0-rc1-final": {
+    "Microsoft.Dnx.Runtime/1.0.0-rc2-16357": {
       "type": "package",
       "serviceable": true,
-      "sha512": "7vnecNxDeHwZxRa9egj++dMMze50OJb3WNecIzfC1Lpo/Z/KtUteVPEAdgn4WxAov51U1XZkZ9IfVu2rWNW7WQ==",
+      "sha512": "GzIAYnDhWhSUhrUjz3OBZ0l+SPEx3nLw14F+Siu6EuiZtJFNJKUnQ/t6stnkzL5w9GtKxV8y4vq+cWpwdwnuKw==",
       "files": [
         "lib/dnx451/Microsoft.Dnx.Runtime.dll",
         "lib/dnx451/Microsoft.Dnx.Runtime.xml",
         "lib/dnxcore50/Microsoft.Dnx.Runtime.dll",
         "lib/dnxcore50/Microsoft.Dnx.Runtime.xml",
-        "Microsoft.Dnx.Runtime.1.0.0-rc1-final.nupkg",
-        "Microsoft.Dnx.Runtime.1.0.0-rc1-final.nupkg.sha512",
+        "Microsoft.Dnx.Runtime.1.0.0-rc2-16357.nupkg",
+        "Microsoft.Dnx.Runtime.1.0.0-rc2-16357.nupkg.sha512",
         "Microsoft.Dnx.Runtime.nuspec"
+      ]
+    },
+    "Microsoft.Extensions.CompilationAbstractions/1.0.0-rc2-16357": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "LX7LdEcO1Gv+Z93vuBcxhK5+7EN/W9vpPwvt+OZXsrvD9UY5Plo5KTDisJxDxcmMJILtKt+oAvnMEHnONYufGw==",
+      "files": [
+        "lib/dotnet5.4/Microsoft.Extensions.CompilationAbstractions.dll",
+        "lib/dotnet5.4/Microsoft.Extensions.CompilationAbstractions.xml",
+        "lib/net451/Microsoft.Extensions.CompilationAbstractions.dll",
+        "lib/net451/Microsoft.Extensions.CompilationAbstractions.xml",
+        "Microsoft.Extensions.CompilationAbstractions.1.0.0-rc2-16357.nupkg",
+        "Microsoft.Extensions.CompilationAbstractions.1.0.0-rc2-16357.nupkg.sha512",
+        "Microsoft.Extensions.CompilationAbstractions.nuspec"
       ]
     },
     "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
@@ -3872,6 +4616,20 @@
         "Microsoft.Extensions.DependencyInjection.Abstractions.nuspec"
       ]
     },
+    "Microsoft.Extensions.FileSystemGlobbing/1.0.0-rc1-final": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "7N9IPDU0T1uQBj6hobeGNqiEd+Cuu6RHJ0RcwkUvzTsLq8Vf2Sc72+HEAICTw1CTRXHgW49Zr47PvO0QPxI/5g==",
+      "files": [
+        "lib/dotnet5.4/Microsoft.Extensions.FileSystemGlobbing.dll",
+        "lib/dotnet5.4/Microsoft.Extensions.FileSystemGlobbing.xml",
+        "lib/net451/Microsoft.Extensions.FileSystemGlobbing.dll",
+        "lib/net451/Microsoft.Extensions.FileSystemGlobbing.xml",
+        "Microsoft.Extensions.FileSystemGlobbing.1.0.0-rc1-final.nupkg",
+        "Microsoft.Extensions.FileSystemGlobbing.1.0.0-rc1-final.nupkg.sha512",
+        "Microsoft.Extensions.FileSystemGlobbing.nuspec"
+      ]
+    },
     "Microsoft.Extensions.Logging/1.0.0-rc1-final": {
       "type": "package",
       "serviceable": true,
@@ -3904,17 +4662,17 @@
         "Microsoft.Extensions.Logging.Abstractions.nuspec"
       ]
     },
-    "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc1-final": {
+    "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc2-16177": {
       "type": "package",
       "serviceable": true,
-      "sha512": "26HS4c6MBisN+D7XUr8HObOI/JJvSJQYQR//Bfw/hi9UqhqK3lFpNKjOuYHI+gTxYdXT46HqZiz4D+k7d+ob3A==",
+      "sha512": "EaTRlR1TcxSEcv41zF7M8kEe1KjLLxG+MNGS5s2ygxhOqDRR7VpfCRtSVErrhm/21GqMlgsUk3Fb+qHHf/a8rQ==",
       "files": [
         "lib/dotnet5.4/Microsoft.Extensions.PlatformAbstractions.dll",
         "lib/dotnet5.4/Microsoft.Extensions.PlatformAbstractions.xml",
         "lib/net451/Microsoft.Extensions.PlatformAbstractions.dll",
         "lib/net451/Microsoft.Extensions.PlatformAbstractions.xml",
-        "Microsoft.Extensions.PlatformAbstractions.1.0.0-rc1-final.nupkg",
-        "Microsoft.Extensions.PlatformAbstractions.1.0.0-rc1-final.nupkg.sha512",
+        "Microsoft.Extensions.PlatformAbstractions.1.0.0-rc2-16177.nupkg",
+        "Microsoft.Extensions.PlatformAbstractions.1.0.0-rc2-16177.nupkg.sha512",
         "Microsoft.Extensions.PlatformAbstractions.nuspec"
       ]
     },
@@ -4050,6 +4808,84 @@
         "Newtonsoft.Json.7.0.1.nupkg.sha512",
         "Newtonsoft.Json.nuspec",
         "tools/install.ps1"
+      ]
+    },
+    "NuGet.Frameworks/3.2.0": {
+      "type": "package",
+      "sha512": "o3/eeeQGbd9sJWexTLTSIgUzIcmkrdCo/nEAteRTqxPtPILUIVdis+ItNl72sd6z3qB3imakLqnNF+N8r4fTnQ==",
+      "files": [
+        "lib/dnxcore50/NuGet.Frameworks.dll",
+        "lib/dnxcore50/NuGet.Frameworks.xml",
+        "lib/net45/NuGet.Frameworks.dll",
+        "lib/net45/NuGet.Frameworks.xml",
+        "NuGet.Frameworks.3.2.0.nupkg",
+        "NuGet.Frameworks.3.2.0.nupkg.sha512",
+        "NuGet.Frameworks.nuspec"
+      ]
+    },
+    "NuGet.Logging/3.2.0": {
+      "type": "package",
+      "sha512": "r9WRMNq4U+ptfZuXqZ6RRIGkKSEyhPHqaNp4eFnmxLNvUWYTu/ydZg4YfYELDBxvT3BTilwSRxrxxq9xPTRFHw==",
+      "files": [
+        "lib/dnxcore50/NuGet.Logging.dll",
+        "lib/dnxcore50/NuGet.Logging.xml",
+        "lib/net45/NuGet.Logging.dll",
+        "lib/net45/NuGet.Logging.xml",
+        "NuGet.Logging.3.2.0.nupkg",
+        "NuGet.Logging.3.2.0.nupkg.sha512",
+        "NuGet.Logging.nuspec"
+      ]
+    },
+    "NuGet.Packaging/3.2.0": {
+      "type": "package",
+      "sha512": "5oc0vr3TLq9s6yYaIkAQPsABDsKrcMV3+zU86Op2NkdlkD0uJ21HMqLbbxbY8jwgYvNcc6wCVpV3cOu6EmVjPQ==",
+      "files": [
+        "lib/dnxcore50/NuGet.Packaging.dll",
+        "lib/dnxcore50/NuGet.Packaging.xml",
+        "lib/net45/NuGet.Packaging.dll",
+        "lib/net45/NuGet.Packaging.xml",
+        "NuGet.Packaging.3.2.0.nupkg",
+        "NuGet.Packaging.3.2.0.nupkg.sha512",
+        "NuGet.Packaging.nuspec"
+      ]
+    },
+    "NuGet.Packaging.Core/3.2.0": {
+      "type": "package",
+      "sha512": "vM4LpxRZX6Pn7t69QfJBxXe5Fmduob5N2YQrmZbizB2CKQ2YDly5LUivQRDZjWprTEMBGSIs6RWN/NkjQr7ouA==",
+      "files": [
+        "lib/dnxcore50/NuGet.Packaging.Core.dll",
+        "lib/dnxcore50/NuGet.Packaging.Core.xml",
+        "lib/net45/NuGet.Packaging.Core.dll",
+        "lib/net45/NuGet.Packaging.Core.xml",
+        "NuGet.Packaging.Core.3.2.0.nupkg",
+        "NuGet.Packaging.Core.3.2.0.nupkg.sha512",
+        "NuGet.Packaging.Core.nuspec"
+      ]
+    },
+    "NuGet.Packaging.Core.Types/3.2.0": {
+      "type": "package",
+      "sha512": "xTW8x1LUt2e1RQVPQexby+yIa/MHMexoqFc/4R3c6W5GxVsJ0tkcwdGPFOxl+Gvg8c+mfT4w/Z7mmrynP1uOiA==",
+      "files": [
+        "lib/dnxcore50/NuGet.Packaging.Core.Types.dll",
+        "lib/dnxcore50/NuGet.Packaging.Core.Types.xml",
+        "lib/net45/NuGet.Packaging.Core.Types.dll",
+        "lib/net45/NuGet.Packaging.Core.Types.xml",
+        "NuGet.Packaging.Core.Types.3.2.0.nupkg",
+        "NuGet.Packaging.Core.Types.3.2.0.nupkg.sha512",
+        "NuGet.Packaging.Core.Types.nuspec"
+      ]
+    },
+    "NuGet.Versioning/3.2.0": {
+      "type": "package",
+      "sha512": "z8Y5tesNPG9cZnEkmKVwC/Bqxwxj6WmJAsaXEO3wSqjgyz47j+AxfiBwY/NiQGRpgyU8mpqAn13GTgYAxKmtIA==",
+      "files": [
+        "lib/dnxcore50/NuGet.Versioning.dll",
+        "lib/dnxcore50/NuGet.Versioning.xml",
+        "lib/net45/NuGet.Versioning.dll",
+        "lib/net45/NuGet.Versioning.xml",
+        "NuGet.Versioning.3.2.0.nupkg",
+        "NuGet.Versioning.3.2.0.nupkg.sha512",
+        "NuGet.Versioning.nuspec"
       ]
     },
     "RestSharp/105.2.3": {
@@ -4387,6 +5223,17 @@
         "System.Linq.nuspec"
       ]
     },
+    "System.Linq.Dynamic/1.0.6": {
+      "type": "package",
+      "sha512": "cyT9DeIxbqSDo29bWm5vWp+If2WUEyNt4XohaHim9tkrN+xyceJ1gmj9Mg+5QC0I2fCpHnDuXIrrvP2sHK2dNg==",
+      "files": [
+        "lib/net40/System.Linq.Dynamic.dll",
+        "NuGet.exe",
+        "System.Linq.Dynamic.1.0.6.nupkg",
+        "System.Linq.Dynamic.1.0.6.nupkg.sha512",
+        "System.Linq.Dynamic.nuspec"
+      ]
+    },
     "System.Reflection/4.0.0": {
       "type": "package",
       "sha512": "g96Rn8XuG7y4VfxPj/jnXroRJdQ8L3iN3k3zqsuzk4k3Nq4KMXARYiIO4BLW4GwX06uQpuYwRMcAC/aF117knQ==",
@@ -4693,6 +5540,28 @@
         "System.Runtime.InteropServices.nuspec"
       ]
     },
+    "System.Runtime.Loader/4.0.0-beta-23516": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "Y8rB5Ryoz47nytHPVqqKTfk0RFFcqY9s6GNKnqgzltO/JRAuJYhUeUUhYGgEGXLdQub84t4HwISoKKDZ9lppBA==",
+      "files": [
+        "lib/DNXCore50/System.Runtime.Loader.dll",
+        "ref/dotnet5.1/de/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/es/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/fr/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/it/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/ja/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/ko/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/ru/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/System.Runtime.Loader.dll",
+        "ref/dotnet5.1/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/zh-hans/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/zh-hant/System.Runtime.Loader.xml",
+        "System.Runtime.Loader.4.0.0-beta-23516.nupkg",
+        "System.Runtime.Loader.4.0.0-beta-23516.nupkg.sha512",
+        "System.Runtime.Loader.nuspec"
+      ]
+    },
     "System.Text.Encoding/4.0.0": {
       "type": "package",
       "sha512": "AMxFNOXpA6Ab8swULbXuJmoT2K5w6TnV3ObF5wsmEcIHQUJghoZtDVfVHb08O2wW15mOSI1i9Wg0Dx0pY13o8g==",
@@ -4862,15 +5731,17 @@
   },
   "projectFileDependencyGroups": {
     "": [
+      "System.Linq.Dynamic >= 1.0.6",
       "Microsoft.AspNet.Hosting >= 1.0.0-rc1-final",
-      "Microsoft.Dnx.Compilation >= 1.0.0-rc1-final",
-      "Microsoft.Dnx.Compilation.CSharp.Abstractions >= 1.0.0-rc1-final",
-      "Microsoft.Dnx.Runtime >= 1.0.0-rc1-final",
+      "Microsoft.CodeAnalysis.Workspaces.Dnx >= 1.2.2",
+      "Microsoft.Dnx.Compilation >= 1.0.0-rc1-*",
+      "Microsoft.Dnx.Runtime >= 1.0.0-*",
+      "Microsoft.Extensions.CompilationAbstractions >= 1.0.0-rc2-16357",
       "Microsoft.Extensions.Configuration >= 1.0.0-rc1-final",
       "Microsoft.Extensions.Configuration.FileExtensions >= 1.0.0-rc1-final",
       "Microsoft.Extensions.Configuration.UserSecrets >= 1.0.0-rc1-final",
       "Microsoft.Extensions.DependencyInjection >= 1.0.0-rc1-final",
-      "Microsoft.Extensions.PlatformAbstractions >= 1.0.0-rc1-final",
+      "Microsoft.Extensions.PlatformAbstractions >= 1.0.0-rc1-update1",
       "Discord.Net >= 0.8.1-beta2",
       "Discord.Net.Commands >= 0.8.1-beta2",
       "Discord.Net.Modules >= 0.8.1-beta2",
