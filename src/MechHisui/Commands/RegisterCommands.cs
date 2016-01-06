@@ -78,6 +78,27 @@ namespace MechHisui.Commands
                 });
         }
 
+        public static void RegisterDeleteCommand(this DiscordClient client, IConfiguration config)
+        {
+            Console.WriteLine("Registering 'Delete'...");
+            client.Commands().CreateCommand("del")
+                .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .Parameter("number", ParameterType.Required)
+                .Hide()
+                .Do(async cea =>
+                {
+                    int n;
+                    if (Int32.TryParse(cea.Args[0], out n))
+                    {
+                        await client.DeleteMessages(
+                            (await client.DownloadMessages(cea.Channel, 20))
+                            .Where(m => m.IsAuthor)
+                            .OrderByDescending(m => m.Timestamp)
+                            .Take(n));
+                    }
+                });
+        }
+
         public static void RegisterDisconnectCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Disconnect'...");
@@ -107,8 +128,8 @@ namespace MechHisui.Commands
                 .Do(async cea =>
                 {
                     string arg = cea.Args[0].Replace("\\", String.Empty);
-                    SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(@"
-using System;
+                    SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(
+@"using System;
 using System.Linq;
 using Discord;
 using MechHisui.FateGOLib;
@@ -144,11 +165,9 @@ namespace DynamicCompile
                             IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
                                 diagnostic.IsWarningAsError ||
                                 diagnostic.Severity == DiagnosticSeverity.Error);
-
-                            foreach (Diagnostic diagnostic in failures)
-                            {
-                                Console.Error.WriteLine("{0}: {1}", diagnostic.Id, diagnostic.GetMessage());
-                            }
+                            
+                            Console.Error.WriteLine(String.Join("\n", failures.Select(f => $"{f.Id}: {f.GetMessage()}")));
+                            await client.SendMessage(cea.Channel, $"**Errors:** {String.Join(", ", failures.Select(f => f.GetMessage()))}");
                         }
                         else
                         {
