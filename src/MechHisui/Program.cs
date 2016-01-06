@@ -65,7 +65,10 @@ namespace MechHisui
                 Environment.Exit(0);
             }
 
-            var client = new DiscordClient();
+            var client = new DiscordClient(new DiscordClientConfig
+            {
+                LogLevel = LogMessageSeverity.Warning
+            });
 
             client.Disconnected += (s, e) => Environment.Exit(0);
             Console.CancelKeyPress += async (s, e) => await RegisterCommands.Disconnect(client, config);
@@ -155,6 +158,7 @@ namespace MechHisui
                             }
                         }
                     }
+                    Console.WriteLine($"Started up at {DateTime.Now}.");
                 }
             });
         }
