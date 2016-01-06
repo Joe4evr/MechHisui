@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -34,6 +32,15 @@ namespace MechHisui.FateGOLib
             _mysticAliasPath = mysticAliasPath;
 
             ReadAliasList();
+        }
+
+        public string LookupServantName(string servant)
+        {
+            var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.Contains(servant.ToLowerInvariant()));
+
+            return (serv != null) ?
+                serv.Servant :
+                FgoHelpers.ServantDict.SingleOrDefault(p => p.Servant.ToLowerInvariant() == servant.ToLowerInvariant())?.Servant;
         }
 
         public ServantProfile LookupStats(string servant)
@@ -77,15 +84,6 @@ namespace MechHisui.FateGOLib
             }
         }
 
-        public string LookupServantName(string servant)
-        {
-            var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.Contains(servant.ToLowerInvariant()));
-
-            return (serv != null) ?
-                serv.Servant :
-                FgoHelpers.ServantDict.SingleOrDefault(p => p.Servant.ToLowerInvariant() == servant.ToLowerInvariant())?.Servant;
-        }
-
         //get table data and serialize to the respective lists so that they're cached
         public async Task UpdateProfileListsAsync()
         {
@@ -112,6 +110,13 @@ namespace MechHisui.FateGOLib
             FgoHelpers.MysticCodeList = JsonConvert.DeserializeObject<List<MysticCode>>(await _apiService.GetDataFromServiceAsJsonAsync());
         }
 
+        public async Task UpdateDropsListAsync()
+        {
+            Console.WriteLine("Updating Item Drops list...");
+            _apiService.Parameters = new List<object> { "Drops" };
+            FgoHelpers.ItemDropsList = JsonConvert.DeserializeObject<List<NodeDrop>>(await _apiService.GetDataFromServiceAsJsonAsync());
+        }
+
         public void ReadAliasList()
         {
             using (TextReader tr = new StreamReader(_servantAliasPath))
@@ -127,7 +132,7 @@ namespace MechHisui.FateGOLib
                 FgoHelpers.MysticCodeDict = JsonConvert.DeserializeObject<List<MysticAlias>>(tr.ReadToEnd()) ?? new List<MysticAlias>();
             }
         }
-        
+
         //{ new[] { "indian archer" }, "Arjuna" },
         //{ new[] { "" }, "Brynhildr" },
         //{ new[] { "gil's bff" }, "Enkidu" },

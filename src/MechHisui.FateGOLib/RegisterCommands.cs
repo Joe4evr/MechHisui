@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using Discord;
 using Discord.Commands;
+using JiiLib.Net;
 using Newtonsoft.Json;
 using MechHisui.FateGOLib;
 
@@ -35,7 +36,9 @@ namespace MechHisui.Commands
                     else if (arg == "change")
                     {
                         var eta = todayInJapan.TimeUntilNextLocalTimeAt(new TimeSpan(hours: 0, minutes: 0, seconds: 0));
-                        await client.SendMessage(cea.Channel, $"Daily quests changing **ETA: {eta.Hours} hours and {eta.Minutes} minutes.**");
+                        string h = eta.Hours == 1 ? "hour" : "hours";
+                        string m = eta.Minutes == 1 ? "minute" : "minutes";
+                        await client.SendMessage(cea.Channel, $"Daily quests changing **ETA: {eta.Hours} {h} and {eta.Minutes} {m}.**");
                         return;
                     }
                     else if (arg == "tomorrow")
@@ -238,8 +241,32 @@ namespace MechHisui.Commands
                     "Prices for Quartz:\n  1Q: 120 JPY\n  5Q: 480 JPY\n 16Q: 1400 JPY\n 36Q: 2900 JPY\n 65Q: 4800 JPY\n140Q: 9800 JPY"));
         }
 
-        public static void RegisterStatsCommand(this DiscordClient client, IConfiguration config, StatService statService)
+        public static void RegisterStatsCommands(this DiscordClient client, IConfiguration config)
         {
+            var apiService = new GoogleScriptApiService(
+                Path.Combine(config["Secrets_Path"], "client_secret.json"),
+                Path.Combine(config["Secrets_Path"], "scriptcreds"),
+                "MechHisui",
+                config["Project_Key"],
+                "exportSheet",
+                new string[] { "https://www.googleapis.com/auth/spreadsheets.readonly" });
+            
+            var statService = new StatService(apiService,
+                servantAliasPath: Path.Combine(config["AliasPath"], "servants.json"),
+                ceAliasPath: Path.Combine(config["AliasPath"], "ces.json"),
+                mysticAliasPath: Path.Combine(config["AliasPath"], "mystic.json"));
+            try
+            {
+                statService.UpdateProfileListsAsync().Wait();
+                statService.UpdateEventListAsync().Wait();
+                statService.UpdateMysticCodesListAsync().Wait();
+                statService.UpdateDropsListAsync().Wait();
+            }
+            catch (Exception)
+            {
+                Environment.Exit(0);
+            }
+            
             Console.WriteLine("Registering 'Stats'...");
             client.Commands().CreateCommand("stats")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
@@ -295,19 +322,11 @@ namespace MechHisui.Commands
                     }
                     else
                     {
-                        var potentials = FgoHelpers.CEDict.Where(c => c.Alias.Any(a => a.Contains(arg.ToLowerInvariant())));
+                        var potentials = FgoHelpers.CEDict.Where(c => c.Alias.Any(a => a.Contains(arg.ToLowerInvariant())) || c.CE.ToLowerInvariant().Contains(arg.ToLowerInvariant()));
                         if (potentials.Any())
                         {
-                            var sb = new StringBuilder();
-                            foreach (var p in potentials)
-                            {
-                                sb.Append($"**{p.CE}** *({p.Alias.First()})*");
-                                if (p != potentials.Last())
-                                {
-                                    sb.AppendLine();
-                                }
-                            }
-                            await client.SendMessage(cea.Channel, $"No such entry found. Did you mean one of the following?\n{sb.ToString()}");
+                            string res = String.Join("\n", potentials.Select(p => $"**{p.CE}** *({p.Alias.First()}*"));
+                            await client.SendMessage(cea.Channel, $"Entry ambiguous. Did you mean one of the following?\n{res}");
                         }
                         else
                         {
@@ -328,11 +347,7 @@ namespace MechHisui.Commands
                     var ces = FgoHelpers.CEProfiles.Where(c => c.Effect.ToLowerInvariant().Contains(arg));
                     if (ces.Count() > 0)
                     {
-                        string matches = String.Empty;
-                        foreach (var ce in ces)
-                        {
-                            matches += $"**{ce.Name}** - {ce.Effect}\n";
-                        }
+                        string matches = String.Join("\n", ces.Select(c => $"**{c.Name}** - {c.Effect}"));
                         await client.SendMessage(cea.Channel, matches);
                     }
                     else
@@ -370,12 +385,17 @@ namespace MechHisui.Commands
                             await statService.UpdateMysticCodesListAsync();
                             await client.SendMessage(cea.Channel, "Updated Mystic Codes lookup.");
                             break;
+                        case "drops":
+                            await statService.UpdateDropsListAsync();
+                            await client.SendMessage(cea.Channel, "Updated Item Drops lookup.");
+                            break;
                         default:
                             statService.ReadAliasList();
                             FriendCodes.ReadFriendData(config["FriendcodePath"]);
                             await statService.UpdateProfileListsAsync();
                             await statService.UpdateEventListAsync();
                             await statService.UpdateMysticCodesListAsync();
+                            await statService.UpdateDropsListAsync();
                             await client.SendMessage(cea.Channel, "Updated all lookups.");
                             break;
                     }
@@ -415,7 +435,7 @@ namespace MechHisui.Commands
                     {
                         tw.Write(JsonConvert.SerializeObject(FgoHelpers.ServantDict, Formatting.Indented));
                     }
-                    await client.SendMessage(cea.Channel, $"Created alias `{cea.Args[1]}` for `{newAlias.Servant}`.");
+                    await client.SendMessage(cea.Channel, $"Added alias `{cea.Args[1]}` for `{newAlias.Servant}`.");
                 });
 
             Console.WriteLine("Registering 'CE alias'...");
@@ -467,10 +487,10 @@ namespace MechHisui.Commands
                             "S means the opposite. These guys get super little stats at the beginning and end, but are quite fast in the middle (Gonna guesstimate... 35 - 55 in the case of a 5 *).\n",
                             "Semi(reverse) S is like (reverse)S, except not quite as bad in the slow periods and not quite as good in the fast periods.If you graph it it'll go right between linear and non-semi.`")));
 
-            Console.WriteLine("Registering 'Mystic Codes'");
+            Console.WriteLine("Registering 'Mystic Codes'...");
             client.Commands().CreateCommand("mystic")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
-                .Description("Relay information on available Mystic Codes")
+                .Description("Relay information on available Mystic Codes.")
                 .Parameter("code", ParameterType.Multiple)
                 .Do(async cea =>
                 {
@@ -478,7 +498,7 @@ namespace MechHisui.Commands
 
                     if (arg.ToLowerInvariant() == "chaldea")
                     {
-                        await client.SendMessage(cea.Channel, "Search term ambiguous. Please specify something more specific.");
+                        await client.SendMessage(cea.Channel, "Search term ambiguous. Please be more specific.");
                         return;
                     }
 
@@ -495,7 +515,7 @@ namespace MechHisui.Commands
 
             client.Commands().CreateCommand("listmystic")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
-                .Description("Relay the names of available Mystic Codes")
+                .Description("Relay the names of available Mystic Codes.")
                 .Do(async cea =>
                 {
                     var sb = new StringBuilder("**Available Mystic Codes:**\n");
@@ -506,7 +526,7 @@ namespace MechHisui.Commands
                     await client.SendMessage(cea.Channel, sb.ToString());
                 });
 
-            Console.WriteLine("Registering 'Mystic alias'");
+            Console.WriteLine("Registering 'Mystic alias'...");
             client.Commands().CreateCommand("mystic")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]) && u.Id == Int64.Parse(config["Owner"]))
                 .Hide()
@@ -531,14 +551,24 @@ namespace MechHisui.Commands
                     await client.SendMessage(cea.Channel, $"Added alias `{cea.Args[1]}` for `{newAlias.Code}`.");
                 });
 
-            //client.Commands().CreateCommand("search")
-            //    .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
-            //    .Parameter("property", ParameterType.Required)
-            //    .Parameter("", ParameterType.Required)
-            //    .Do(async cea =>
-            //    {
-
-            //    });
+            Console.WriteLine("Registering 'Drops'...");
+            client.Commands().CreateCommand("drops")
+                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
+                .Description("Relay information about item drop locations.")
+                .Parameter("item", ParameterType.Required)
+                .Do(async cea =>
+                {
+                    var potentials = FgoHelpers.ItemDropsList.Where(d => d.ItemDrops.ToLowerInvariant().Contains(cea.Args[0].ToLowerInvariant()));
+                    if (potentials.Any())
+                    {
+                        string result = String.Join("\n", potentials.Select(p => $"**{p.Map} - {p.NodeJP} ({p.NodeEN}):** {p.ItemDrops}"));
+                        await client.SendMessage(cea.Channel, $"Found in the following locations:\n{result}");
+                    }
+                    else
+                    {
+                        await client.SendMessage(cea.Channel, "Could not find specified item among location drops.");
+                    }
+                });
         }
 
         public static void RegisterZoukenCommand(this DiscordClient client, IConfiguration config)
@@ -556,7 +586,7 @@ namespace MechHisui.Commands
         {
             StringBuilder sb = new StringBuilder()
                 .AppendLine($"**Collection ID:** {ce.Id}")
-                .AppendLine($"**Rarity:** {ce.Rarity}")
+                .AppendLine($"**Rarity:** {ce.Rarity}☆")
                 .AppendLine($"**CE:** {ce.Name}")
                 .AppendLine($"**Cost:** {ce.Cost}")
                 .AppendLine($"**ATK:** {ce.Atk}")
@@ -575,14 +605,15 @@ namespace MechHisui.Commands
             StringBuilder sb = new StringBuilder()
                 .AppendLine($"**Servant:** {profile.Name}")
                 .AppendLine($"**Class:** {profile.Class}")
-                .AppendLine($"**Rarity:** {profile.Rarity}")
+                .AppendLine($"**Rarity:** {profile.Rarity}☆")
                 .AppendLine($"**Collection ID:** {profile.Id}")
-                .AppendLine($"**Card pool:** {profile.CardPool} (Fourth number is EX attack)")
+                .AppendLine($"**Card pool:** {profile.CardPool} ({profile.B}/{profile.A}/{profile.Q}/{profile.EX}) (Fourth number is EX attack)")
                 .AppendLine($"**Max ATK:** {profile.Atk}")
                 .AppendLine($"**Max HP:** {profile.HP}")
                 .AppendLine($"**Starweight:** {profile.Starweight}")
                 .AppendLine($"**Growth type:** {profile.GrowthCurve} (Use `.curve` for explanation)")
                 .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*{aoe}")
+                .AppendLine($"**NP Rank+:** *{profile.NoblePhantasmRankUpEffect}*{aoe}")
                 .AppendLine($"**Attribute:** {profile.Attribute}")
                 .AppendLine($"**Traits:** {profile.Traits}");
             if (!String.IsNullOrWhiteSpace(profile.Skill1))

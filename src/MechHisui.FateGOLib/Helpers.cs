@@ -17,5 +17,7 @@ namespace MechHisui.FateGOLib
         public static List<Event> EventList = new List<Event>();
         public static List<MysticCode> MysticCodeList = new List<MysticCode>();
         public static List<MysticAlias> MysticCodeDict = new List<MysticAlias>();
+
+        public static List<NodeDrop> ItemDropsList = new List<NodeDrop>();
     }
 }

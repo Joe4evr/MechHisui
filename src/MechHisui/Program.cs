@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using Microsoft.AspNet.Hosting;
 using Microsoft.Dnx.Compilation;
@@ -8,9 +7,7 @@ using Microsoft.Extensions.PlatformAbstractions;
 using Discord;
 using Discord.Commands;
 using Discord.Modules;
-using JiiLib.Net;
 using MechHisui.Commands;
-using MechHisui.FateGOLib;
 using MechHisui.Modules;
 
 namespace MechHisui
@@ -40,30 +37,6 @@ namespace MechHisui
             }
 
             IConfiguration config = builder.Build();
-
-            var apiService = new GoogleScriptApiService(
-                Path.Combine(config["Secrets_Path"], "client_secret.json"),
-                Path.Combine(config["Secrets_Path"], "scriptcreds"),
-                "MechHisui",
-                config["Project_Key"],
-                "exportSheet",
-                new string[] { "https://www.googleapis.com/auth/spreadsheets.readonly" });
-
-
-            var statService = new StatService(apiService,
-                servantAliasPath: Path.Combine(config["AliasPath"], "servants.json"),
-                ceAliasPath: Path.Combine(config["AliasPath"], "ces.json"),
-                mysticAliasPath: Path.Combine(config["AliasPath"], "mystic.json"));
-            try
-            {
-                statService.UpdateProfileListsAsync().Wait();
-                statService.UpdateEventListAsync().Wait();
-                statService.UpdateMysticCodesListAsync().Wait();
-            }
-            catch (Exception)
-            {
-                Environment.Exit(0);
-            }
 
             var client = new DiscordClient(new DiscordClientConfig
             {
@@ -98,7 +71,7 @@ namespace MechHisui
             client.RegisterEventCommand(config);
             client.RegisterFriendsCommand(config);
             client.RegisterLoginBonusCommand(config);
-            client.RegisterStatsCommand(config, statService);
+            client.RegisterStatsCommands(config);
             client.RegisterQuartzCommand(config);
             client.RegisterZoukenCommand(config);
 

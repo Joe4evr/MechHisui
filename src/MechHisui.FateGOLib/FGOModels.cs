@@ -7,15 +7,20 @@ namespace MechHisui.FateGOLib
     {
         public int Id { get; set; }
         public string Class { get; set; }
-        public string Rarity { get; set; }
+        public int Rarity { get; set; }
         public string Name { get; set; }
         public int Atk { get; set; }
         public int HP { get; set; }
         public int Starweight { get; set; }
         public string GrowthCurve { get; set; }
         public string CardPool { get; set; }
+        public int B { get; set; }
+        public int A { get; set; }
+        public int Q { get; set; }
+        public int EX { get; set; }
         public string NoblePhantasm { get; set; }
         public string NoblePhantasmEffect { get; set; }
+        public string NoblePhantasmRankUpEffect { get; set; }
         public string Traits { get; set; }
         public string Attribute { get; set; }
         public string Skill1 { get; set; }
@@ -44,7 +49,7 @@ namespace MechHisui.FateGOLib
     public class CEProfile
     {
         public int Id { get; set; }
-        public string Rarity { get; set; }
+        public int Rarity { get; set; }
         public string Name { get; set; }
         public int Cost { get; set; }
         public int Atk { get; set; }
@@ -86,5 +91,13 @@ namespace MechHisui.FateGOLib
     {
         public IList<string> Alias { get; set; }
         public string Code { get; set; }
+    }
+
+    public class NodeDrop
+    {
+        public string Map { get; set; }
+        public string NodeJP { get; set; }
+        public string NodeEN { get; set; }
+        public string ItemDrops { get; set; }
     }
 }
