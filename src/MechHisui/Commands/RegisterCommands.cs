@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Discord;
 using Discord.Commands;
 using Discord.Modules;
+using JiiLib;
 using Newtonsoft.Json;
 using MechHisui.FateGOLib;
 using MechHisui.Modules;
@@ -132,6 +133,7 @@ namespace MechHisui.Commands
 @"using System;
 using System.Linq;
 using Discord;
+using JiiLib;
 using MechHisui.FateGOLib;
 
 namespace DynamicCompile
@@ -148,6 +150,7 @@ namespace DynamicCompile
                         MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                         MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
                         MetadataReference.CreateFromFile(typeof(DiscordClient).Assembly.Location),
+                        MetadataReference.CreateFromFile(typeof(DateTimeWithZone).Assembly.Location),
                         MetadataReference.CreateFromFile(typeof(FgoHelpers).Assembly.Location)
                     };
                     CSharpCompilation compilation = CSharpCompilation.Create(

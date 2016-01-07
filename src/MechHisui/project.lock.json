@@ -124,6 +124,10 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
       },
+      "JiiLib/0.0.1": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5.1"
+      },
       "JiiLib.Net/0.0.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.1",
@@ -147,6 +151,7 @@
           "Discord.Net": "0.8.1-beta2",
           "Discord.Net.Commands": "0.8.1-beta2",
           "Google.Apis.Script.v1": "1.9.2.10",
+          "JiiLib": null,
           "JiiLib.Net": null,
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
@@ -1165,6 +1170,10 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
       },
+      "JiiLib/0.0.1": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5.1"
+      },
       "JiiLib.Net/0.0.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.1",
@@ -1188,6 +1197,7 @@
           "Discord.Net": "0.8.1-beta2",
           "Discord.Net.Commands": "0.8.1-beta2",
           "Google.Apis.Script.v1": "1.9.2.10",
+          "JiiLib": null,
           "JiiLib.Net": null,
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
@@ -2206,6 +2216,10 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
       },
+      "JiiLib/0.0.1": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5.1"
+      },
       "JiiLib.Net/0.0.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.1",
@@ -2229,6 +2243,7 @@
           "Discord.Net": "0.8.1-beta2",
           "Discord.Net.Commands": "0.8.1-beta2",
           "Google.Apis.Script.v1": "1.9.2.10",
+          "JiiLib": null,
           "JiiLib.Net": null,
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
@@ -3130,6 +3145,10 @@
     "FuzzyString/1.0.0": {
       "type": "project",
       "path": "../../wrap/FuzzyString/project.json"
+    },
+    "JiiLib/0.0.1": {
+      "type": "project",
+      "path": "../../../JiiLib/src/JiiLib/project.json"
     },
     "JiiLib.Net/0.0.1": {
       "type": "project",

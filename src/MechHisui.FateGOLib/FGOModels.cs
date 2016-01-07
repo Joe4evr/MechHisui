@@ -23,20 +23,27 @@ namespace MechHisui.FateGOLib
         public string NoblePhantasmRankUpEffect { get; set; }
         public string Traits { get; set; }
         public string Attribute { get; set; }
-        public string Skill1 { get; set; }
-        public string Effect1 { get; set; }
-        public string Skill2 { get; set; }
-        public string Effect2 { get; set; }
-        public string Skill3 { get; set; }
-        public string Effect3 { get; set; }
-        public string PassiveSkill1 { get; set; }
-        public string PEffect1 { get; set; }
-        public string PassiveSkill2 { get; set; }
-        public string PEffect2 { get; set; }
-        public string PassiveSkill3 { get; set; }
-        public string PEffect3 { get; set; }
-        public string PassiveSkill4 { get; set; }
-        public string PEffect4 { get; set; }
+        public string Skill1 { get; set; } = String.Empty;
+        public string Rank1 { get; set; }
+        public string Effect1 { get; set; } = String.Empty;
+        public string Skill2 { get; set; } = String.Empty;
+        public string Rank2 { get; set; }
+        public string Effect2 { get; set; } = String.Empty;
+        public string Skill3 { get; set; } = String.Empty;
+        public string Rank3 { get; set; }
+        public string Effect3 { get; set; } = String.Empty;
+        public string PassiveSkill1 { get; set; } = String.Empty;
+        public string PassiveRank1 { get; set; }
+        public string PassiveEffect1 { get; set; } = String.Empty;
+        public string PassiveSkill2 { get; set; } = String.Empty;
+        public string PassiveRank2 { get; set; }
+        public string PassiveEffect2 { get; set; } = String.Empty;
+        public string PassiveSkill3 { get; set; } = String.Empty;
+        public string PassiveRank3 { get; set; }
+        public string PassiveEffect3 { get; set; } = String.Empty;
+        public string PassiveSkill4 { get; set; } = String.Empty;
+        public string PassiveRank4 { get; set; }
+        public string PassiveEffect4 { get; set; } = String.Empty;
         public string Image { get; set; }
     }
 

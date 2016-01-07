@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using Discord;
 using Discord.Commands;
+using JiiLib;
 using JiiLib.Net;
 using Newtonsoft.Json;
 using MechHisui.FateGOLib;
@@ -15,7 +16,6 @@ namespace MechHisui.Commands
 {
     public static class ClientExtensions
     {
-        private static readonly TimeZoneInfo JpnTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time");
         public static void RegisterDailyCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Daily'...");
@@ -222,7 +222,7 @@ namespace MechHisui.Commands
                 .Description("Relay the information of the arrival of the next login bonus.")
                 .Do(async cea =>
                 {
-                    var rightNowInJapan = new DateTimeWithZone(DateTime.UtcNow, JpnTimeZone);
+                    var rightNowInJapan = new DateTimeWithZone(DateTime.UtcNow, FgoHelpers.JpnTimeZone);
                     TimeSpan eta = rightNowInJapan.TimeUntilNextLocalTimeAt(new TimeSpan(hours: 4, minutes: 0, seconds: 0));
                     string h = eta.Hours == 1 ? "hour" : "hours";
                     string m = eta.Minutes == 1 ? "minute" : "minutes";
@@ -257,6 +257,7 @@ namespace MechHisui.Commands
                 mysticAliasPath: Path.Combine(config["AliasPath"], "mystic.json"));
             try
             {
+                //Using .Wait() here since there is no proper async context that await works
                 statService.UpdateProfileListsAsync().Wait();
                 statService.UpdateEventListAsync().Wait();
                 statService.UpdateMysticCodesListAsync().Wait();
@@ -266,7 +267,7 @@ namespace MechHisui.Commands
             {
                 Environment.Exit(0);
             }
-            
+
             Console.WriteLine("Registering 'Stats'...");
             client.Commands().CreateCommand("stats")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
@@ -325,7 +326,7 @@ namespace MechHisui.Commands
                         var potentials = FgoHelpers.CEDict.Where(c => c.Alias.Any(a => a.Contains(arg.ToLowerInvariant())) || c.CE.ToLowerInvariant().Contains(arg.ToLowerInvariant()));
                         if (potentials.Any())
                         {
-                            string res = String.Join("\n", potentials.Select(p => $"**{p.CE}** *({p.Alias.First()}*"));
+                            string res = String.Join("\n", potentials.Select(p => $"**{p.CE}** *({String.Join(", ", p.Alias)})*"));
                             await client.SendMessage(cea.Channel, $"Entry ambiguous. Did you mean one of the following?\n{res}");
                         }
                         else
@@ -363,6 +364,7 @@ namespace MechHisui.Commands
                 .Hide()
                 .Do(async cea =>
                 {
+                    await client.API.SendIsTyping(cea.Channel.Id);
                     switch (cea.Args[0])
                     {
                         case "alias":
@@ -618,28 +620,28 @@ namespace MechHisui.Commands
                 .AppendLine($"**Traits:** {profile.Traits}");
             if (!String.IsNullOrWhiteSpace(profile.Skill1))
             {
-                sb.AppendLine($"**Skill 1:** {profile.Skill1} - *{profile.Effect1}*");
+                sb.AppendLine($"**Skill 1:** {profile.Skill1} {profile.Rank1} - *{profile.Effect1}*");
             }
             if (!String.IsNullOrWhiteSpace(profile.Skill2))
             {
-                sb.AppendLine($"**Skill 2:** {profile.Skill2} - *{profile.Effect2}*");
+                sb.AppendLine($"**Skill 2:** {profile.Skill2} {profile.Rank2} - *{profile.Effect2}*");
             }
             if (!String.IsNullOrWhiteSpace(profile.Skill3))
             {
-                sb.AppendLine($"**Skill 3:** {profile.Skill3} - *{profile.Effect3}*");
+                sb.AppendLine($"**Skill 3:** {profile.Skill3} {profile.Rank3} - *{profile.Effect3}*");
             }
             if (!String.IsNullOrWhiteSpace(profile.PassiveSkill1))
             {
-                sb.AppendLine($"**Passive 1:** {profile.PassiveSkill1} - *{profile.PEffect1}*");
+                sb.AppendLine($"**Passive 1:** {profile.PassiveSkill1} {profile.PassiveRank1} - *{profile.PassiveEffect1}*");
                 if (!String.IsNullOrWhiteSpace(profile.PassiveSkill2))
                 {
-                    sb.AppendLine($"**Passive 2:** {profile.PassiveSkill2} - *{profile.PEffect2}*");
+                    sb.AppendLine($"**Passive 2:** {profile.PassiveSkill2} {profile.PassiveRank2} - *{profile.PassiveEffect2}*");
                     if (!String.IsNullOrWhiteSpace(profile.PassiveSkill3))
                     {
-                        sb.AppendLine($"**Passive 3:** {profile.PassiveSkill3} - *{profile.PEffect3}*");
+                        sb.AppendLine($"**Passive 3:** {profile.PassiveSkill3} {profile.PassiveRank3} - *{profile.PassiveEffect3}*");
                         if (!String.IsNullOrWhiteSpace(profile.PassiveSkill4))
                         {
-                            sb.AppendLine($"**Passive 4:** {profile.PassiveSkill4} - *{profile.PEffect4}*");
+                            sb.AppendLine($"**Passive 4:** {profile.PassiveSkill4} {profile.PassiveRank4} - *{profile.PassiveEffect4}*");
                         }
                     }
                 }
@@ -658,28 +660,5 @@ namespace MechHisui.Commands
                 .Append(code.Image);
             return sb.ToString();
         }
-    }
-
-    internal struct DateTimeWithZone
-    {
-        private readonly DateTime utcDateTime;
-        private readonly TimeZoneInfo timeZone;
-
-        public DateTimeWithZone(DateTime dateTimeUtc, TimeZoneInfo timeZone)
-        {
-            utcDateTime = dateTimeUtc;
-            this.timeZone = timeZone;
-        }
-
-        public TimeSpan TimeUntilNextLocalTimeAt(TimeSpan targetTimeOfDay) =>
-            (LocalTime.TimeOfDay > targetTimeOfDay) ?
-            TimeSpan.FromDays(1) - (LocalTime.TimeOfDay - targetTimeOfDay) :
-            targetTimeOfDay - LocalTime.TimeOfDay;
-
-        public DateTime UniversalTime => utcDateTime;
-
-        public TimeZoneInfo TimeZone => timeZone;
-
-        public DateTime LocalTime => TimeZoneInfo.ConvertTime(utcDateTime, timeZone);
     }
 }

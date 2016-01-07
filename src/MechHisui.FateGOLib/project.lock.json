@@ -101,6 +101,10 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
       },
+      "JiiLib/0.0.1": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5.1"
+      },
       "JiiLib.Net/0.0.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.1",
@@ -412,6 +416,10 @@
         "runtime": {
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
+      },
+      "JiiLib/0.0.1": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5.1"
       },
       "JiiLib.Net/0.0.1": {
         "type": "project",
@@ -725,6 +733,10 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
       },
+      "JiiLib/0.0.1": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5.1"
+      },
       "JiiLib.Net/0.0.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.1",
@@ -940,6 +952,10 @@
     }
   },
   "libraries": {
+    "JiiLib/0.0.1": {
+      "type": "project",
+      "path": "../../../JiiLib/src/JiiLib/project.json"
+    },
     "JiiLib.Net/0.0.1": {
       "type": "project",
       "path": "../../../JiiLib/src/JiiLib.Net/project.json"
@@ -1501,6 +1517,7 @@
     "": [
       "Microsoft.Extensions.Configuration.UserSecrets >= 1.0.0-rc1-final",
       "Google.Apis.Script.v1 >= 1.9.2.10",
+      "JiiLib ",
       "JiiLib.Net ",
       "Discord.Net >= 0.8.1-beta2",
       "Discord.Net.Commands >= 0.8.1-beta2"

@@ -132,11 +132,9 @@ namespace MechHisui.FateGOLib
                 FgoHelpers.MysticCodeDict = JsonConvert.DeserializeObject<List<MysticAlias>>(tr.ReadToEnd()) ?? new List<MysticAlias>();
             }
         }
-
-        //{ new[] { "indian archer" }, "Arjuna" },
-        //{ new[] { "" }, "Brynhildr" },
-        //{ new[] { "gil's bff" }, "Enkidu" },
-        //{ new[] { "" }, "Karna" },
-        //{ new[] { "broskander", "big alex" }, "Alexander the Great" },
+        
+        //{ new[] [ "" ], "Brynhildr" },
+        //{ new[] [ "gil's bff" ], "Enkidu" },
+        //{ new[] [ "broskander", "big alex" ], "Alexander the Great" },
     }
 }

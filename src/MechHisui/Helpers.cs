@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Discord;
 using Discord.Modules;
 using MechHisui.Modules;
@@ -37,7 +35,7 @@ namespace MechHisui
             {
                 if (printServerNames)
                 {
-                    Console.WriteLine(server.Name + "\n");
+                    Console.WriteLine("\n" + server.Name);
                 }
                 foreach (var channel in server.Channels)
                 {
