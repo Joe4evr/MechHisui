@@ -55,6 +55,7 @@ namespace MechHisui
 
             //register commands
             client.RegisterAddChannelCommand(config);
+            client.RegisterDeleteCommand(config);
             client.RegisterDisconnectCommand(config);
             client.RegisterEvalCommand(config);
             client.RegisterInfoCommand(config);

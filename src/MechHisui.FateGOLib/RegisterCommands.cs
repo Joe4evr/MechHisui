@@ -243,6 +243,7 @@ namespace MechHisui.Commands
 
         public static void RegisterStatsCommands(this DiscordClient client, IConfiguration config)
         {
+            Console.WriteLine("Connecting to data service...");
             var apiService = new GoogleScriptApiService(
                 Path.Combine(config["Secrets_Path"], "client_secret.json"),
                 Path.Combine(config["Secrets_Path"], "scriptcreds"),
@@ -263,8 +264,9 @@ namespace MechHisui.Commands
                 statService.UpdateMysticCodesListAsync().Wait();
                 statService.UpdateDropsListAsync().Wait();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 Environment.Exit(0);
             }
 
@@ -564,7 +566,29 @@ namespace MechHisui.Commands
                     if (potentials.Any())
                     {
                         string result = String.Join("\n", potentials.Select(p => $"**{p.Map} - {p.NodeJP} ({p.NodeEN}):** {p.ItemDrops}"));
-                        await client.SendMessage(cea.Channel, $"Found in the following locations:\n{result}");
+                        if (result.Length > 2000)
+                        {
+                            for (int i = 0; i < result.Length; i += 1750)
+                            {
+                                if (i == 0)
+                                {
+                                    await client.SendMessage(cea.Channel, $"Found in the following locations:\n{result.Substring(i, i + 1750)}...");
+                                }
+                                else if (i + 1749 > result.Length)
+                                {
+                                    await client.SendMessage(cea.Channel, $"...{result.Substring(i)}");
+                                }
+                                else
+                                {
+                                    await client.SendMessage(cea.Channel, $"...{result.Substring(i, i + 1750)}");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            await client.SendMessage(cea.Channel, $"Found in the following locations:\n{result}");
+                        }
+                        
                     }
                     else
                     {

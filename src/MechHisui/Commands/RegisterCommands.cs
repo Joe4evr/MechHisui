@@ -83,7 +83,7 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Registering 'Delete'...");
             client.Commands().CreateCommand("del")
-                .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("number", ParameterType.Required)
                 .Hide()
                 .Do(async cea =>
@@ -121,7 +121,15 @@ namespace MechHisui.Commands
         public static void RegisterEvalCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Eval'...");
-            const string sep = "\", \"";
+            const string sep = "\", \", ";
+            var references = new MetadataReference[]
+            {
+                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(DiscordClient).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(DateTimeWithZone).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(FgoHelpers).Assembly.Location)
+            };
             client.Commands().CreateCommand("eval")
                 .Parameter("func", ParameterType.Required)
                 .Hide()
@@ -140,19 +148,11 @@ namespace DynamicCompile
 {
     public class DynEval
     {
-        public string Eval() => String.Join(" + sep + @", " + arg + @");
+        public string Eval() => String.Join(" + sep + arg + @");
     }
 }");
                     
                     string assemblyName = Path.GetRandomFileName();
-                    var references = new MetadataReference[]
-                    {
-                        MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                        MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
-                        MetadataReference.CreateFromFile(typeof(DiscordClient).Assembly.Location),
-                        MetadataReference.CreateFromFile(typeof(DateTimeWithZone).Assembly.Location),
-                        MetadataReference.CreateFromFile(typeof(FgoHelpers).Assembly.Location)
-                    };
                     CSharpCompilation compilation = CSharpCompilation.Create(
                         assemblyName,
                         syntaxTrees: new[] { syntaxTree },
