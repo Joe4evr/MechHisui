@@ -63,7 +63,7 @@ namespace MechHisui.Commands
                         }
                         else
                         {
-                            await client.SendMessage(cea.Channel, $"{whatDay}'s quests:\n\tAscension Materials: **{info.Materials.ToString()}**\n\tAnd also **QP**");
+                            await client.SendMessage(cea.Channel, $"{whatDay}'s quests:\n\tAscension Materials: **{info.Materials.ToString()}**\n\tExperience: **Any Class**\n\tAnd also **QP**");
                         }
                     }
                 });
@@ -290,7 +290,17 @@ namespace MechHisui.Commands
                         return;
                     }
 
-                    var profile = statService.LookupStats(arg);
+                    ServantProfile profile;
+                    int id;
+                    if (Int32.TryParse(arg, out id))
+                    {
+                        profile = FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Id == id);
+                    }
+                    else
+                    {
+                        profile = statService.LookupStats(arg);
+                    }
+
                     if (profile != null)
                     {
                         await client.SendMessage(cea.Channel, FormatServantProfile(profile));
@@ -566,15 +576,15 @@ namespace MechHisui.Commands
                     if (potentials.Any())
                     {
                         string result = String.Join("\n", potentials.Select(p => $"**{p.Map} - {p.NodeJP} ({p.NodeEN}):** {p.ItemDrops}"));
-                        if (result.Length > 2000)
+                        if (result.Length > 1900)
                         {
                             for (int i = 0; i < result.Length; i += 1750)
                             {
                                 if (i == 0)
                                 {
-                                    await client.SendMessage(cea.Channel, $"Found in the following locations:\n{result.Substring(i, i + 1750)}...");
+                                    await client.SendMessage(cea.Channel, $"Found in the following {potentials.Count()} locations:\n{result.Substring(i, i + 1750)}...");
                                 }
-                                else if (i + 1749 > result.Length)
+                                else if (i + 1750 > result.Length)
                                 {
                                     await client.SendMessage(cea.Channel, $"...{result.Substring(i)}");
                                 }
@@ -586,7 +596,7 @@ namespace MechHisui.Commands
                         }
                         else
                         {
-                            await client.SendMessage(cea.Channel, $"Found in the following locations:\n{result}");
+                            await client.SendMessage(cea.Channel, $"Found in the following {potentials.Count()} locations:\n{result}");
                         }
                         
                     }

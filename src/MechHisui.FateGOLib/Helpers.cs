@@ -43,14 +43,5 @@ namespace MechHisui.FateGOLib
             .Concat(profiles.Where(p => p.PassiveEffect2?.Contains(passive) != null))
             .Concat(profiles.Where(p => p.PassiveEffect3?.Contains(passive) != null))
             .Concat(profiles.Where(p => p.PassiveEffect4?.Contains(passive) != null));
-
-        //        internal static void Test()
-        //        {
-        //FgoHelpers.ServantProfiles.Where(s => s.PassiveSkill1.Contains("Riding")).Select(s => new { Name = s.Name, Rank = s.PassiveRank1 }).Concat(
-        //FgoHelpers.ServantProfiles.Where(s => s.PassiveSkill2.Contains("Riding")).Select(s => new { Name = s.Name, Rank = s.PassiveRank2 })).Concat(
-        //FgoHelpers.ServantProfiles.Where(s => s.PassiveSkill3.Contains("Riding")).Select(s => new { Name = s.Name, Rank = s.PassiveRank3 })).Concat(
-        //FgoHelpers.ServantProfiles.Where(s => s.PassiveSkill4.Contains("Riding")).Select(s => new { Name = s.Name, Rank = s.PassiveRank4 }))
-        //.OrderByDescending(p => p.Rank, new RankComparer()).Select(p => $"{p.Name}: {p.Rank}");
-        //        }
     }
 }
