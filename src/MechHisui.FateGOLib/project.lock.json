@@ -2,7 +2,7 @@
   "locked": false,
   "version": 2,
   "targets": {
-    ".NETFramework,Version=v4.5.1": {
+    ".NETFramework,Version=v4.6": {
       "Discord.Net/0.8.1-beta2": {
         "type": "package",
         "dependencies": {
@@ -103,11 +103,11 @@
       },
       "JiiLib/0.0.1": {
         "type": "project",
-        "framework": ".NETFramework,Version=v4.5.1"
+        "framework": ".NETFramework,Version=v4.6"
       },
       "JiiLib.Net/0.0.1": {
         "type": "project",
-        "framework": ".NETFramework,Version=v4.5.1",
+        "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
           "Google.Apis.Script.v1": "1.9.2.10"
         }
@@ -293,10 +293,10 @@
       "RestSharp/105.2.3": {
         "type": "package",
         "compile": {
-          "lib/net451/RestSharp.dll": {}
+          "lib/net46/RestSharp.dll": {}
         },
         "runtime": {
-          "lib/net451/RestSharp.dll": {}
+          "lib/net46/RestSharp.dll": {}
         }
       },
       "WebSocketSharp/1.0.3-rc9": {
@@ -318,7 +318,7 @@
         }
       }
     },
-    ".NETFramework,Version=v4.5.1/win7-x86": {
+    ".NETFramework,Version=v4.6/win7-x86": {
       "Discord.Net/0.8.1-beta2": {
         "type": "package",
         "dependencies": {
@@ -419,11 +419,11 @@
       },
       "JiiLib/0.0.1": {
         "type": "project",
-        "framework": ".NETFramework,Version=v4.5.1"
+        "framework": ".NETFramework,Version=v4.6"
       },
       "JiiLib.Net/0.0.1": {
         "type": "project",
-        "framework": ".NETFramework,Version=v4.5.1",
+        "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
           "Google.Apis.Script.v1": "1.9.2.10"
         }
@@ -609,10 +609,10 @@
       "RestSharp/105.2.3": {
         "type": "package",
         "compile": {
-          "lib/net451/RestSharp.dll": {}
+          "lib/net46/RestSharp.dll": {}
         },
         "runtime": {
-          "lib/net451/RestSharp.dll": {}
+          "lib/net46/RestSharp.dll": {}
         }
       },
       "WebSocketSharp/1.0.3-rc9": {
@@ -634,7 +634,7 @@
         }
       }
     },
-    ".NETFramework,Version=v4.5.1/win7-x64": {
+    ".NETFramework,Version=v4.6/win7-x64": {
       "Discord.Net/0.8.1-beta2": {
         "type": "package",
         "dependencies": {
@@ -735,11 +735,11 @@
       },
       "JiiLib/0.0.1": {
         "type": "project",
-        "framework": ".NETFramework,Version=v4.5.1"
+        "framework": ".NETFramework,Version=v4.6"
       },
       "JiiLib.Net/0.0.1": {
         "type": "project",
-        "framework": ".NETFramework,Version=v4.5.1",
+        "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
           "Google.Apis.Script.v1": "1.9.2.10"
         }
@@ -925,10 +925,10 @@
       "RestSharp/105.2.3": {
         "type": "package",
         "compile": {
-          "lib/net451/RestSharp.dll": {}
+          "lib/net46/RestSharp.dll": {}
         },
         "runtime": {
-          "lib/net451/RestSharp.dll": {}
+          "lib/net46/RestSharp.dll": {}
         }
       },
       "WebSocketSharp/1.0.3-rc9": {
@@ -1522,6 +1522,6 @@
       "Discord.Net >= 0.8.1-beta2",
       "Discord.Net.Commands >= 0.8.1-beta2"
     ],
-    ".NETFramework,Version=v4.5.1": []
+    ".NETFramework,Version=v4.6": []
   }
 }
