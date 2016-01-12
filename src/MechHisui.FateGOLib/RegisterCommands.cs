@@ -26,6 +26,9 @@ namespace MechHisui.Commands
                 .Do(async cea =>
                 {
                     DayOfWeek day;
+                    ServantClass serv;
+                    DailyInfo info;
+
                     var todayInJapan = new DateTimeWithZone(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time"));
                     var arg = cea.Args[0];
 
@@ -45,13 +48,16 @@ namespace MechHisui.Commands
                     {
                         day = todayInJapan.LocalTime.AddDays(1).DayOfWeek;
                     }
+                    else if (Enum.TryParse(arg, ignoreCase: true, result: out serv))
+                    {
+                        day = DailyInfo.DailyQuests.SingleOrDefault(d => d.Value.Materials == serv).Key;
+                    }
                     else if (!Enum.TryParse(arg, ignoreCase: true, result: out day))
                     {
-                        await client.SendMessage(cea.Channel, "Could not convert argument to a day of the week. Please try again.");
+                        await client.SendMessage(cea.Channel, "Could not convert argument to a day of the week or Servant class. Please try again.");
                         return;
                     }
 
-                    DailyInfo info;
                     if (DailyInfo.DailyQuests.TryGetValue(day, out info))
                     {
                         bool isToday = (day == todayInJapan.LocalTime.DayOfWeek);
@@ -59,7 +65,7 @@ namespace MechHisui.Commands
                         string whatDay = isToday ? "Today" : (isTomorrow ? "Tomorrow" : day.ToString());
                         if (day != DayOfWeek.Sunday)
                         {
-                            await client.SendMessage(cea.Channel, $"{whatDay}'s quests:\n\tAscension Materials: **{info.Materials.ToString()}**\n\tExperience: **{info.Exp1.ToString()}**, **{info.Exp2.ToString()}**, and **{ServantClass.Berzerker.ToString()}**");
+                            await client.SendMessage(cea.Channel, $"{whatDay}'s quests:\n\tAscension Materials: **{info.Materials.ToString()}**\n\tExperience: **{info.Exp1.ToString()}**, **{info.Exp2.ToString()}**, and **{ServantClass.Berserker.ToString()}**");
                         }
                         else
                         {
