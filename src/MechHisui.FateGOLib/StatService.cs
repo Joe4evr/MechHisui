@@ -92,6 +92,10 @@ namespace MechHisui.FateGOLib
             FgoHelpers.ServantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(await _apiService.GetDataFromServiceAsJsonAsync());
             _apiService.Parameters = new List<object> { "FakeServants" };
             FgoHelpers.FakeServantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(await _apiService.GetDataFromServiceAsJsonAsync());
+        }
+
+        public async Task UpdateCEListsAsync()
+        {
             _apiService.Parameters = new List<object> { "CEs" };
             FgoHelpers.CEProfiles = JsonConvert.DeserializeObject<List<CEProfile>>(await _apiService.GetDataFromServiceAsJsonAsync());
         }

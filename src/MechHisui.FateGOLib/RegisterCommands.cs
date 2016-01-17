@@ -91,17 +91,24 @@ namespace MechHisui.Commands
                         sb.Append("**Current Event(s):** ");
                         foreach (var ev in currentEvents)
                         {
-                            var doneAt = ev.EndTime - utcNow;
-                            string d = doneAt.Days == 1 ? "day" : "days";
-                            string h = doneAt.Hours == 1 ? "hour" : "hours";
-                            string m = doneAt.Minutes == 1 ? "minute" : "minutes";
-                            if (doneAt < TimeSpan.FromDays(1))
+                            if (ev.EndTime.HasValue)
                             {
-                                sb.AppendLine($"{ev.EventName} for {doneAt.Hours} {h} and {doneAt.Minutes} {m}.");
+                                TimeSpan doneAt = ev.EndTime.Value - utcNow;
+                                string d = doneAt.Days == 1 ? "day" : "days";
+                                string h = doneAt.Hours == 1 ? "hour" : "hours";
+                                string m = doneAt.Minutes == 1 ? "minute" : "minutes";
+                                if (doneAt < TimeSpan.FromDays(1))
+                                {
+                                    sb.AppendLine($"{ev.EventName} for {doneAt.Hours} {h} and {doneAt.Minutes} {m}.");
+                                }
+                                else
+                                {
+                                    sb.AppendLine($"{ev.EventName} for {doneAt.Days} {d} and {doneAt.Hours} {h}.");
+                                }
                             }
                             else
                             {
-                                sb.AppendLine($"{ev.EventName} for {doneAt.Days} {d} and {doneAt.Hours} {h}.");
+                                sb.AppendLine($"{ev.EventName} for unknown time.");
                             }
 
                             if (!String.IsNullOrEmpty(ev.EventGacha))
@@ -119,20 +126,27 @@ namespace MechHisui.Commands
                         sb.AppendLine("No events currently going on.");
                     }
 
-                    var nextEvent = FgoHelpers.EventList.FirstOrDefault(e => e.StartTime > utcNow);
+                    var nextEvent = FgoHelpers.EventList.FirstOrDefault(e => e.StartTime > utcNow) ?? FgoHelpers.EventList.FirstOrDefault(e => !e.StartTime.HasValue);
                     if (nextEvent != null)
                     {
-                        var eta = nextEvent.StartTime - utcNow;
-                        string d = eta.Days == 1 ? "day" : "days";
-                        string h = eta.Hours == 1 ? "hour" : "hours";
-                        string m = eta.Minutes == 1 ? "minute" : "minutes";
-                        if (eta < TimeSpan.FromDays(1))
+                        if (nextEvent.StartTime.HasValue)
                         {
-                            sb.Append($"**Next Event:** {nextEvent.EventName}, planned to start in {eta.Hours} {h} and {eta.Minutes} {m}.");
+                            TimeSpan eta = nextEvent.StartTime.Value - utcNow;
+                            string d = eta.Days == 1 ? "day" : "days";
+                            string h = eta.Hours == 1 ? "hour" : "hours";
+                            string m = eta.Minutes == 1 ? "minute" : "minutes";
+                            if (eta < TimeSpan.FromDays(1))
+                            {
+                                sb.Append($"**Next Event:** {nextEvent.EventName}, planned to start in {eta.Hours} {h} and {eta.Minutes} {m}.");
+                            }
+                            else
+                            {
+                                sb.Append($"**Next Event:** {nextEvent.EventName}, planned to start in {eta.Days} {d} and {eta.Hours} {h}.");
+                            }
                         }
                         else
                         {
-                            sb.Append($"**Next Event:** {nextEvent.EventName}, planned to start in {eta.Days} {d} and {eta.Hours} {h}.");
+                            sb.Append($"**Next Event:** {nextEvent.EventName}, planned to start at an unknown time.");
                         }
                     }
                     else
@@ -251,13 +265,13 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Connecting to data service...");
             var apiService = new GoogleScriptApiService(
-                Path.Combine(config["Secrets_Path"], "client_secret.json"),
-                Path.Combine(config["Secrets_Path"], "scriptcreds"),
+                Path.Combine(config["Google_Secrets_Path"], "client_secret.json"),
+                Path.Combine(config["Google_Secrets_Path"], "scriptcreds"),
                 "MechHisui",
                 config["Project_Key"],
                 "exportSheet",
                 new string[] { "https://www.googleapis.com/auth/spreadsheets.readonly" });
-            
+
             var statService = new StatService(apiService,
                 servantAliasPath: Path.Combine(config["AliasPath"], "servants.json"),
                 ceAliasPath: Path.Combine(config["AliasPath"], "ces.json"),
@@ -266,6 +280,7 @@ namespace MechHisui.Commands
             {
                 //Using .Wait() here since there is no proper async context that await works
                 statService.UpdateProfileListsAsync().Wait();
+                statService.UpdateCEListsAsync().Wait();
                 statService.UpdateEventListAsync().Wait();
                 statService.UpdateMysticCodesListAsync().Wait();
                 statService.UpdateDropsListAsync().Wait();
@@ -393,6 +408,10 @@ namespace MechHisui.Commands
                             await statService.UpdateProfileListsAsync();
                             await client.SendMessage(cea.Channel, "Updated profile lookups.");
                             break;
+                        case "ces":
+                            await statService.UpdateCEListsAsync();
+                            await client.SendMessage(cea.Channel, "Updated CE lookup.");
+                            break;
                         case "events":
                             await statService.UpdateEventListAsync();
                             await client.SendMessage(cea.Channel, "Updated events lookup.");
@@ -413,6 +432,7 @@ namespace MechHisui.Commands
                             statService.ReadAliasList();
                             FriendCodes.ReadFriendData(config["FriendcodePath"]);
                             await statService.UpdateProfileListsAsync();
+                            await statService.UpdateCEListsAsync();
                             await statService.UpdateEventListAsync();
                             await statService.UpdateMysticCodesListAsync();
                             await statService.UpdateDropsListAsync();
@@ -547,7 +567,7 @@ namespace MechHisui.Commands
                 });
 
             Console.WriteLine("Registering 'Mystic alias'...");
-            client.Commands().CreateCommand("mystic")
+            client.Commands().CreateCommand("mysticalias")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]) && u.Id == Int64.Parse(config["Owner"]))
                 .Hide()
                 .Parameter("mystic", ParameterType.Required)
@@ -575,10 +595,11 @@ namespace MechHisui.Commands
             client.Commands().CreateCommand("drops")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Description("Relay information about item drop locations.")
-                .Parameter("item", ParameterType.Required)
+                .Parameter("item", ParameterType.Multiple)
                 .Do(async cea =>
                 {
-                    var potentials = FgoHelpers.ItemDropsList.Where(d => d.ItemDrops.ToLowerInvariant().Contains(cea.Args[0].ToLowerInvariant()));
+                    var arg = String.Join(" ", cea.Args).ToLowerInvariant();
+                    var potentials = FgoHelpers.ItemDropsList.Where(d => d.ItemDrops.ToLowerInvariant().Contains(arg));
                     if (potentials.Any())
                     {
                         string result = String.Join("\n", potentials.Select(p => $"**{p.Map} - {p.NodeJP} ({p.NodeEN}):** {p.ItemDrops}"));
@@ -604,12 +625,64 @@ namespace MechHisui.Commands
                         {
                             await client.SendMessage(cea.Channel, $"Found in the following {potentials.Count()} locations:\n{result}");
                         }
-                        
+
                     }
                     else
                     {
                         await client.SendMessage(cea.Channel, "Could not find specified item among location drops.");
                     }
+                });
+
+            Console.WriteLine("Registering 'HGW'...");
+            FgoHelpers.UpdateMasters(config);
+            client.Commands().CreateCommand("hgw")
+                .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
+                .Description("Set up a random Holy Grail War. Discuss.")
+                .Do(async cea =>
+                {
+                    var rng = new Random();
+                    var masters = new List<string>();
+                    for (int i = 0; i < 7; i++)
+                    {
+                        string temp;
+                        do
+                        {
+                            temp = FgoHelpers.Masters.ElementAt(rng.Next(maxValue: FgoHelpers.Masters.Count));
+                        } while (masters.Contains(temp));
+                        masters.Add(temp);
+                    }
+                    var servants = new List<ServantProfile>();
+                    for (int i = 0; i < 7; i++)
+                    {
+                        ServantProfile temp;
+                        do
+                        {
+                            var l = FgoHelpers.ServantProfiles
+                                .Except(FgoHelpers.ServantProfiles.Where(p => p.Class == "Ruler"));
+                            temp = l.ElementAt(rng.Next(maxValue: l.Count()));
+                        } while (servants.Select(s => s.Class).Contains(temp.Class));
+                        servants.Add(temp);
+                    }
+                    var hgw = new Dictionary<string, string>
+                    {
+                        { masters.ElementAt(0), servants.Single(p => p.Class == "Saber").Name },
+                        { masters.ElementAt(1), servants.Single(p => p.Class == "Archer").Name },
+                        { masters.ElementAt(2), servants.Single(p => p.Class == "Lancer").Name },
+                        { masters.ElementAt(3), servants.Single(p => p.Class == "Rider").Name },
+                        { masters.ElementAt(4), servants.Single(p => p.Class == "Caster").Name },
+                        { masters.ElementAt(5), servants.Single(p => p.Class == "Assassin").Name },
+                        { masters.ElementAt(6), servants.Single(p => p.Class == "Berserker").Name }
+                    };
+
+                    await client.SendMessage(cea.Channel,
+$@"**Team Saber:** {hgw.ElementAt(0).Key} + {hgw.ElementAt(0).Value}
+**Team Archer:** {hgw.ElementAt(1).Key} + {hgw.ElementAt(1).Value}
+**Team Lancer:** {hgw.ElementAt(2).Key} + {hgw.ElementAt(2).Value}
+**Team Rider:** {hgw.ElementAt(3).Key} + {hgw.ElementAt(3).Value}
+**Team Caster:** {hgw.ElementAt(4).Key} + {hgw.ElementAt(4).Value}
+**Team Assassin:** {hgw.ElementAt(5).Key} + {hgw.ElementAt(5).Value}
+**Team Berserker:** {hgw.ElementAt(6).Key} + {hgw.ElementAt(6).Value}
+Discuss.");
                 });
         }
 

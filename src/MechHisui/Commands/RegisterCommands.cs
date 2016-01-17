@@ -14,6 +14,7 @@ using Discord;
 using Discord.Commands;
 using Discord.Modules;
 using JiiLib;
+using JiiLib.Net;
 using Newtonsoft.Json;
 using MechHisui.FateGOLib;
 using MechHisui.Modules;
@@ -136,7 +137,20 @@ namespace MechHisui.Commands
                 .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) || ch.Id == Int64.Parse(config["FGO_general"]))
                 .Do(async cea =>
                 {
-                    string arg = cea.Args[0].Replace("\\", String.Empty);
+                    string temp = cea.Args[0].Replace("\\", String.Empty);
+                    string arg1;
+                    string arg2;
+                    if (temp.Contains(';') && temp.Contains("return"))
+                    {
+                        arg2 = temp;
+                        arg1 = String.Empty;
+                    }
+                    else
+                    {
+                        arg1 = temp;
+                        arg2 = "return null;";
+                    }
+
                     SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(
 @"using System;
 using System.Linq;
@@ -148,13 +162,18 @@ namespace DynamicCompile
 {
     public class DynEval
     {
-        public string Eval() => String.Join(" + sep + arg + @");
+        public string Eval() => String.Join(" + sep + arg1 + @");
+
+        public string EvalFull()
+        {
+            " + arg2 + @"
+        }
     }
 }");
-                    
+
                     string assemblyName = Path.GetRandomFileName();
                     CSharpCompilation compilation = CSharpCompilation.Create(
-                        assemblyName,
+                        assemblyName: assemblyName,
                         syntaxTrees: new[] { syntaxTree },
                         references: references,
                         options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
@@ -168,9 +187,9 @@ namespace DynamicCompile
                             IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
                                 diagnostic.IsWarningAsError ||
                                 diagnostic.Severity == DiagnosticSeverity.Error);
-                            
+
                             Console.Error.WriteLine(String.Join("\n", failures.Select(f => $"{f.Id}: {f.GetMessage()}")));
-                            await client.SendMessage(cea.Channel, $"**Errors:** {String.Join(", ", failures.Select(f => f.GetMessage()))}");
+                            await client.SendMessage(cea.Channel, $"**Error:** {failures.First().GetMessage()}");
                         }
                         else
                         {
@@ -179,7 +198,7 @@ namespace DynamicCompile
 
                             Type type = assembly.GetType("DynamicCompile.DynEval");
                             object obj = Activator.CreateInstance(type);
-                            var res = type.InvokeMember("Eval",
+                            var res = type.InvokeMember((arg1 != String.Empty ? "Eval" : "EvalFull"),
                                 BindingFlags.Default | BindingFlags.InvokeMethod,
                                 null,
                                 obj,
@@ -187,6 +206,32 @@ namespace DynamicCompile
 
                             await client.SendMessage(cea.Channel, $"**Result:** {(string)res}");
                         }
+                    }
+                });
+        }
+
+        public static void RegisterImageCommand(this DiscordClient client, IConfiguration config)
+        {
+            //var ImgurApi = ImgurApiFactory.CreateClient(
+            //    Path.Combine(config["Imgur_Secrets_Path"], "imgur_client.json"),
+            //    Path.Combine(config["Imgur_Secrets_Path"], "imgur_token.json"));
+
+            
+            Console.WriteLine("Registering 'Image'...");
+            client.Commands().CreateCommand("image")
+                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]))
+                .Hide()
+                .Parameter("album", ParameterType.Optional)
+                .Do(async cea =>
+                {
+                    var imgs = (await client.DownloadMessages(cea.Channel, 20))
+                        .OrderByDescending(m => m.Timestamp)
+                        .FirstOrDefault(m => m.Attachments != null)
+                        .Attachments.Where(a => a.Height != null);
+
+                    foreach (var img in imgs)
+                    {
+                        
                     }
                 });
         }

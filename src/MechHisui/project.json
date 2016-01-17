@@ -33,8 +33,7 @@
     "frameworks": {
         "dnx46": {
             "frameworkAssemblies": {
-                "System.IO": "4.0.0.0",
-                "System.Runtime": "4.0.20.0"
+                "System.IO": "4.0.0.0"
             },
             "dependencies": {
                 "FuzzyString": "1.0.0-*"

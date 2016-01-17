@@ -9,6 +9,7 @@ using Discord.Commands;
 using Discord.Modules;
 using MechHisui.Commands;
 using MechHisui.Modules;
+using System.Diagnostics;
 
 namespace MechHisui
 {
@@ -18,7 +19,6 @@ namespace MechHisui
         {
             PlatformServices ps = PlatformServices.Default;
             IApplicationEnvironment env = ps.Application;
-            ILibraryExporter exporter = CompilationServices.Default.LibraryExporter;
             IConfigurationBuilder builder = new ConfigurationBuilder()
                 .AddEnvironmentVariables()
                 .SetBasePath(env.ApplicationBasePath);
@@ -57,7 +57,11 @@ namespace MechHisui
             client.RegisterAddChannelCommand(config);
             client.RegisterDeleteCommand(config);
             client.RegisterDisconnectCommand(config);
-            client.RegisterEvalCommand(config);
+            if (!Debugger.IsAttached)
+            {
+                client.RegisterEvalCommand(config);
+            }
+            //client.RegisterImageCommand(config);
             client.RegisterInfoCommand(config);
             client.RegisterKnownChannelsCommand(config);
             client.RegisterLearnCommand(config);

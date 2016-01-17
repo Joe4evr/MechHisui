@@ -101,6 +101,18 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
       },
+      "Imgur.API/3.6.0": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "8.0.1"
+        },
+        "compile": {
+          "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
+        }
+      },
       "JiiLib/0.0.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6"
@@ -109,7 +121,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Google.Apis.Script.v1": "1.9.2.10"
+          "Google.Apis.Script.v1": "1.9.2.10",
+          "Imgur.API": "3.6.0"
         }
       },
       "log4net/2.0.3": {
@@ -281,7 +294,7 @@
           "lib/net45/System.Net.Http.Primitives.dll": {}
         }
       },
-      "Newtonsoft.Json/7.0.1": {
+      "Newtonsoft.Json/8.0.1": {
         "type": "package",
         "compile": {
           "lib/net45/Newtonsoft.Json.dll": {}
@@ -417,6 +430,18 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
       },
+      "Imgur.API/3.6.0": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "8.0.1"
+        },
+        "compile": {
+          "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
+        }
+      },
       "JiiLib/0.0.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6"
@@ -425,7 +450,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Google.Apis.Script.v1": "1.9.2.10"
+          "Google.Apis.Script.v1": "1.9.2.10",
+          "Imgur.API": "3.6.0"
         }
       },
       "log4net/2.0.3": {
@@ -597,7 +623,7 @@
           "lib/net45/System.Net.Http.Primitives.dll": {}
         }
       },
-      "Newtonsoft.Json/7.0.1": {
+      "Newtonsoft.Json/8.0.1": {
         "type": "package",
         "compile": {
           "lib/net45/Newtonsoft.Json.dll": {}
@@ -733,6 +759,18 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
       },
+      "Imgur.API/3.6.0": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "8.0.1"
+        },
+        "compile": {
+          "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
+        }
+      },
       "JiiLib/0.0.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6"
@@ -741,7 +779,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Google.Apis.Script.v1": "1.9.2.10"
+          "Google.Apis.Script.v1": "1.9.2.10",
+          "Imgur.API": "3.6.0"
         }
       },
       "log4net/2.0.3": {
@@ -913,7 +952,7 @@
           "lib/net45/System.Net.Http.Primitives.dll": {}
         }
       },
-      "Newtonsoft.Json/7.0.1": {
+      "Newtonsoft.Json/8.0.1": {
         "type": "package",
         "compile": {
           "lib/net45/Newtonsoft.Json.dll": {}
@@ -1089,6 +1128,18 @@
         "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll",
         "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.pdb",
         "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.xml"
+      ]
+    },
+    "Imgur.API/3.6.0": {
+      "type": "package",
+      "sha512": "sI1Fnesdc10YJaxBBD8FdqjWD+k3HxTIIEoQnuZSq4yO8JULqGUSGG314f4jw2UMKtm4O/zWvFTHqvRmMosSpQ==",
+      "files": [
+        "Imgur.API.3.6.0.nupkg",
+        "Imgur.API.3.6.0.nupkg.sha512",
+        "Imgur.API.nuspec",
+        "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll",
+        "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.XML",
+        "tools/init.ps1"
       ]
     },
     "log4net/2.0.3": {
@@ -1432,9 +1483,9 @@
         "Microsoft.Net.Http.nuspec"
       ]
     },
-    "Newtonsoft.Json/7.0.1": {
+    "Newtonsoft.Json/8.0.1": {
       "type": "package",
-      "sha512": "q3V4KLetMLnt1gpAVWgtXnHjKs0UG/RalBc29u2ZKxd5t5Ze4JBL5WiiYIklJyK/5CRiIiNwigVQUo0FgbsuWA==",
+      "sha512": "qFzqzune1D7hDz8kNavFwrJ0fv8qkwANGyUOPjP0I67DmNH04nmSCRB0g0LCIqogMKrBXjsiP43Z0E1huBvxOg==",
       "files": [
         "lib/net20/Newtonsoft.Json.dll",
         "lib/net20/Newtonsoft.Json.xml",
@@ -1448,8 +1499,8 @@
         "lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.xml",
         "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll",
         "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.xml",
-        "Newtonsoft.Json.7.0.1.nupkg",
-        "Newtonsoft.Json.7.0.1.nupkg.sha512",
+        "Newtonsoft.Json.8.0.1.nupkg",
+        "Newtonsoft.Json.8.0.1.nupkg.sha512",
         "Newtonsoft.Json.nuspec",
         "tools/install.ps1"
       ]
