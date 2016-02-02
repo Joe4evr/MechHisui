@@ -79,10 +79,8 @@ namespace MechHisui.TriviaService
 
         public async Task AskQuestion()
         {
-            do
-            {
-                _currentQuestion = TriviaHelpers.Questions.ElementAt(_rng.Next() % TriviaHelpers.Questions.Count);
-            } while (_asked.Contains(_currentQuestion.Key));
+            do _currentQuestion = TriviaHelpers.Questions.ElementAt(_rng.Next(maxValue: TriviaHelpers.Questions.Count));
+            while (_asked.Contains(_currentQuestion.Key));
 
             _asked.Add(_currentQuestion.Key);
             _isAnswered = false;

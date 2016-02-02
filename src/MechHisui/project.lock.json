@@ -169,6 +169,10 @@
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
       },
+      "MechHisui.FfrkLib/1.0.0": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6"
+      },
       "MechHisui.TriviaServiceLib/0.0.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
@@ -1227,6 +1231,10 @@
           "JiiLib.Net": null,
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
+      },
+      "MechHisui.FfrkLib/1.0.0": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6"
       },
       "MechHisui.TriviaServiceLib/0.0.1": {
         "type": "project",
@@ -2287,6 +2295,10 @@
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
       },
+      "MechHisui.FfrkLib/1.0.0": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6"
+      },
       "MechHisui.TriviaServiceLib/0.0.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
@@ -3196,6 +3208,10 @@
     "MechHisui.FateGOLib/0.0.1": {
       "type": "project",
       "path": "../MechHisui.FateGOLib/project.json"
+    },
+    "MechHisui.FfrkLib/1.0.0": {
+      "type": "project",
+      "path": "../MechHisui.FfrkLib/project.json"
     },
     "MechHisui.TriviaServiceLib/0.0.1": {
       "type": "project",
@@ -4939,6 +4955,7 @@
       "Discord.Net.Commands >= 0.8.1-beta2",
       "Discord.Net.Modules >= 0.8.1-beta2",
       "MechHisui.FateGOLib ",
+      "MechHisui.FfrkLib ",
       "MechHisui.TriviaServiceLib "
     ],
     "DNX,Version=v4.6": [

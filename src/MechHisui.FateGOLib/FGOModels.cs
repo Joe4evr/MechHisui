@@ -23,28 +23,16 @@ namespace MechHisui.FateGOLib
         public string NoblePhantasmRankUpEffect { get; set; }
         public string Traits { get; set; }
         public string Attribute { get; set; }
-        public string Skill1 { get; set; }
-        public string Rank1 { get; set; }
-        public string Effect1 { get; set; }
-        public string Skill2 { get; set; }
-        public string Rank2 { get; set; }
-        public string Effect2 { get; set; }
-        public string Skill3 { get; set; }
-        public string Rank3 { get; set; }
-        public string Effect3 { get; set; }
-        public string PassiveSkill1 { get; set; }
-        public string PassiveRank1 { get; set; }
-        public string PassiveEffect1 { get; set; }
-        public string PassiveSkill2 { get; set; }
-        public string PassiveRank2 { get; set; }
-        public string PassiveEffect2 { get; set; }
-        public string PassiveSkill3 { get; set; }
-        public string PassiveRank3 { get; set; }
-        public string PassiveEffect3 { get; set; }
-        public string PassiveSkill4 { get; set; }
-        public string PassiveRank4 { get; set; }
-        public string PassiveEffect4 { get; set; }
+        public ICollection<ServantSkill> ActiveSkills { get; set; }
+        public ICollection<ServantSkill> PassiveSkills { get; set; }
         public string Image { get; set; }
+    }
+
+    public class ServantSkill
+    {
+        public string SkillName { get; set; }
+        public string Rank { get; set; }
+        public string Effect { get; set; }
     }
 
     public class ServantAlias
@@ -106,5 +94,11 @@ namespace MechHisui.FateGOLib
         public string NodeJP { get; set; }
         public string NodeEN { get; set; }
         public string ItemDrops { get; set; }
+    }
+
+    public class NameOnlyServant
+    {
+        public string Class { get; set; }
+        public string Name { get; set; }
     }
 }

@@ -280,7 +280,7 @@ namespace MechHisui.Commands
             {
                 //Using .Wait() here since there is no proper async context that await works
                 statService.UpdateProfileListsAsync().Wait();
-                statService.UpdateCEListsAsync().Wait();
+                statService.UpdateCEListAsync().Wait();
                 statService.UpdateEventListAsync().Wait();
                 statService.UpdateMysticCodesListAsync().Wait();
                 statService.UpdateDropsListAsync().Wait();
@@ -359,8 +359,15 @@ namespace MechHisui.Commands
                         var potentials = FgoHelpers.CEDict.Where(c => c.Alias.Any(a => a.Contains(arg.ToLowerInvariant())) || c.CE.ToLowerInvariant().Contains(arg.ToLowerInvariant()));
                         if (potentials.Any())
                         {
-                            string res = String.Join("\n", potentials.Select(p => $"**{p.CE}** *({String.Join(", ", p.Alias)})*"));
-                            await client.SendMessage(cea.Channel, $"Entry ambiguous. Did you mean one of the following?\n{res}");
+                            if (potentials.Count() > 1)
+                            {
+                                string res = String.Join("\n", potentials.Select(p => $"**{p.CE}** *({String.Join(", ", p.Alias)})*"));
+                                await client.SendMessage(cea.Channel, $"Entry ambiguous. Did you mean one of the following?\n{res}");
+                            }
+                            else
+                            {
+                                await client.SendMessage(cea.Channel, $"**CE:** {potentials.First().CE}\nMore information TBA.");
+                            }
                         }
                         else
                         {
@@ -409,7 +416,7 @@ namespace MechHisui.Commands
                             await client.SendMessage(cea.Channel, "Updated profile lookups.");
                             break;
                         case "ces":
-                            await statService.UpdateCEListsAsync();
+                            await statService.UpdateCEListAsync();
                             await client.SendMessage(cea.Channel, "Updated CE lookup.");
                             break;
                         case "events":
@@ -432,7 +439,7 @@ namespace MechHisui.Commands
                             statService.ReadAliasList();
                             FriendCodes.ReadFriendData(config["FriendcodePath"]);
                             await statService.UpdateProfileListsAsync();
-                            await statService.UpdateCEListsAsync();
+                            await statService.UpdateCEListAsync();
                             await statService.UpdateEventListAsync();
                             await statService.UpdateMysticCodesListAsync();
                             await statService.UpdateDropsListAsync();
@@ -634,7 +641,7 @@ namespace MechHisui.Commands
                 });
 
             Console.WriteLine("Registering 'HGW'...");
-            FgoHelpers.UpdateMasters(config);
+            FgoHelpers.InitRandomHgw(config);
             client.Commands().CreateCommand("hgw")
                 .AddCheck((c, u, ch) => ch.Id == Int64.Parse(config["FGO_general"]))
                 .Description("Set up a random Holy Grail War. Discuss.")
@@ -644,34 +651,46 @@ namespace MechHisui.Commands
                     var masters = new List<string>();
                     for (int i = 0; i < 7; i++)
                     {
+                        FgoHelpers.Masters.Shuffle();
                         string temp;
-                        do
-                        {
-                            temp = FgoHelpers.Masters.ElementAt(rng.Next(maxValue: FgoHelpers.Masters.Count));
-                        } while (masters.Contains(temp));
+                        do temp = FgoHelpers.Masters.ElementAt(rng.Next(maxValue: FgoHelpers.Masters.Count));
+                        while (masters.Contains(temp));
                         masters.Add(temp);
                     }
-                    var servants = new List<ServantProfile>();
+
+                    Func<ServantProfile, bool> pred = p => 
+                        p.Class == ServantClass.Saber.ToString() ||
+                        p.Class == ServantClass.Archer.ToString() ||
+                        p.Class == ServantClass.Lancer.ToString() ||
+                        p.Class == ServantClass.Rider.ToString() ||
+                        p.Class == ServantClass.Caster.ToString() ||
+                        p.Class == ServantClass.Assassin.ToString() ||
+                        p.Class == ServantClass.Berserker.ToString();
+                    var templist = FgoHelpers.ServantProfiles.Concat(FgoHelpers.FakeServantProfiles)
+                        .Where(pred)
+                        .Select(p => new NameOnlyServant { Class = p.Class, Name = p.Name })
+                        .Concat(FgoHelpers.NameOnlyServants)
+                        .ToList();
+
+                    var servants = new List<NameOnlyServant>();
                     for (int i = 0; i < 7; i++)
                     {
-                        ServantProfile temp;
-                        do
-                        {
-                            var l = FgoHelpers.ServantProfiles
-                                .Except(FgoHelpers.ServantProfiles.Where(p => p.Class == "Ruler"));
-                            temp = l.ElementAt(rng.Next(maxValue: l.Count()));
-                        } while (servants.Select(s => s.Class).Contains(temp.Class));
+                        templist.Shuffle();
+                        NameOnlyServant temp;
+                        do temp = templist.ElementAt(rng.Next(maxValue: templist.Count()));
+                        while (servants.Select(s => s.Class).Contains(temp.Class));
                         servants.Add(temp);
                     }
+
                     var hgw = new Dictionary<string, string>
                     {
-                        { masters.ElementAt(0), servants.Single(p => p.Class == "Saber").Name },
-                        { masters.ElementAt(1), servants.Single(p => p.Class == "Archer").Name },
-                        { masters.ElementAt(2), servants.Single(p => p.Class == "Lancer").Name },
-                        { masters.ElementAt(3), servants.Single(p => p.Class == "Rider").Name },
-                        { masters.ElementAt(4), servants.Single(p => p.Class == "Caster").Name },
-                        { masters.ElementAt(5), servants.Single(p => p.Class == "Assassin").Name },
-                        { masters.ElementAt(6), servants.Single(p => p.Class == "Berserker").Name }
+                        { masters.ElementAt(0), servants.Single(p => p.Class == ServantClass.Saber.ToString()).Name },
+                        { masters.ElementAt(1), servants.Single(p => p.Class == ServantClass.Archer.ToString()).Name },
+                        { masters.ElementAt(2), servants.Single(p => p.Class == ServantClass.Lancer.ToString()).Name },
+                        { masters.ElementAt(3), servants.Single(p => p.Class == ServantClass.Rider.ToString()).Name },
+                        { masters.ElementAt(4), servants.Single(p => p.Class == ServantClass.Caster.ToString()).Name },
+                        { masters.ElementAt(5), servants.Single(p => p.Class == ServantClass.Assassin.ToString()).Name },
+                        { masters.ElementAt(6), servants.Single(p => p.Class == ServantClass.Berserker.ToString()).Name }
                     };
 
                     await client.SendMessage(cea.Channel,
@@ -731,32 +750,22 @@ Discuss.");
                 .AppendLine($"**NP Rank+:** *{profile.NoblePhantasmRankUpEffect}*{aoe}")
                 .AppendLine($"**Attribute:** {profile.Attribute}")
                 .AppendLine($"**Traits:** {profile.Traits}");
-            if (!String.IsNullOrWhiteSpace(profile.Skill1))
+            int a = 1;
+            foreach (var skill in profile.ActiveSkills)
             {
-                sb.AppendLine($"**Skill 1:** {profile.Skill1} {profile.Rank1} - *{profile.Effect1}*");
-            }
-            if (!String.IsNullOrWhiteSpace(profile.Skill2))
-            {
-                sb.AppendLine($"**Skill 2:** {profile.Skill2} {profile.Rank2} - *{profile.Effect2}*");
-            }
-            if (!String.IsNullOrWhiteSpace(profile.Skill3))
-            {
-                sb.AppendLine($"**Skill 3:** {profile.Skill3} {profile.Rank3} - *{profile.Effect3}*");
-            }
-            if (!String.IsNullOrWhiteSpace(profile.PassiveSkill1))
-            {
-                sb.AppendLine($"**Passive 1:** {profile.PassiveSkill1} {profile.PassiveRank1} - *{profile.PassiveEffect1}*");
-                if (!String.IsNullOrWhiteSpace(profile.PassiveSkill2))
+                if (!String.IsNullOrWhiteSpace(skill.SkillName))
                 {
-                    sb.AppendLine($"**Passive 2:** {profile.PassiveSkill2} {profile.PassiveRank2} - *{profile.PassiveEffect2}*");
-                    if (!String.IsNullOrWhiteSpace(profile.PassiveSkill3))
-                    {
-                        sb.AppendLine($"**Passive 3:** {profile.PassiveSkill3} {profile.PassiveRank3} - *{profile.PassiveEffect3}*");
-                        if (!String.IsNullOrWhiteSpace(profile.PassiveSkill4))
-                        {
-                            sb.AppendLine($"**Passive 4:** {profile.PassiveSkill4} {profile.PassiveRank4} - *{profile.PassiveEffect4}*");
-                        }
-                    }
+                    sb.AppendLine($"**Skill {a}:** {skill.SkillName} {skill.Rank} - *{skill.Effect}*");
+                    a++;
+                }
+            }
+            int p = 1;
+            foreach (var skill in profile.PassiveSkills)
+            {
+                if (!String.IsNullOrWhiteSpace(skill.SkillName))
+                {
+                    sb.AppendLine($"**Passive Skill {p}:** {skill.SkillName} {skill.Rank} - *{skill.Effect}*");
+                    p++;
                 }
             }
             sb.Append(profile.Image);

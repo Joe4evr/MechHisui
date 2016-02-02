@@ -1,0 +1,12 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "MechHisui.FfrkLib Class Library",
+  "authors": [ "Jonathan" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "frameworks": {
+    "net46": { }
+  }
+}

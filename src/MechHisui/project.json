@@ -23,6 +23,7 @@
         "Discord.Net.Commands": "0.8.1-beta2",
         "Discord.Net.Modules": "0.8.1-beta2",
         "MechHisui.FateGOLib": "",
+        "MechHisui.FfrkLib": "",
         "MechHisui.TriviaServiceLib": ""
     },
 
