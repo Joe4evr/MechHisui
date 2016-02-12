@@ -133,9 +133,16 @@ namespace MechHisui
                         {
                             //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
                             client.MessageReceived += (new Responder(channel, client).Respond);
-                            if (channel.Id != UInt64.Parse(config["API_testing"]) && channel.Id != UInt64.Parse(config["FGO_trivia"]))
+                            if (channel.Id != UInt64.Parse(config["API_testing"]))
                             {
-                                await channel.SendMessage(config["Hello"]);
+                                if (Debugger.IsAttached)
+                                {
+                                    await channel.SendMessage("MechHisui started in debug mode. Not all commands will be available.");
+                                }
+                                else
+                                {
+                                    await channel.SendMessage(config["Hello"]);
+                                }
                             }
                         }
                     }
