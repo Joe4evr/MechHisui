@@ -132,12 +132,17 @@ namespace MechHisui.Commands
                 MetadataReference.CreateFromFile(typeof(FgoHelpers).Assembly.Location)
             };
             client.Commands().CreateCommand("eval")
-                .Parameter("func", ParameterType.Required)
+                .Parameter("func", ParameterType.Unparsed)
                 .Hide()
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Do(async cea =>
                 {
                     string temp = cea.Args[0].Replace("\\", String.Empty);
+                    if (temp.Contains('^'))
+                    {
+                        await cea.Channel.SendMessage("**Note:** `^` is the Binary XOR operator. Use Math.Pow(base, exponent) if you wish to calculate an exponentiation.");
+                    }
+
                     string arg1;
                     string arg2;
                     if (temp.Contains(';') && temp.Contains("return"))
