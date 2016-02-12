@@ -38,16 +38,18 @@ namespace MechHisui
 
             IConfiguration config = builder.Build();
 
-            var client = new DiscordClient(new DiscordClientConfig
+            var client = new DiscordClient(new DiscordConfig
             {
-                LogLevel = LogMessageSeverity.Warning
+                AppName = "MechHisui",
+                AppVersion = "0.3.0",
+                LogLevel = LogSeverity.Warning
             });
 
-            client.Disconnected += (s, e) => Environment.Exit(0);
+            //client.Disconnected += (s, e) => Environment.Exit(0);
             Console.CancelKeyPress += async (s, e) => await RegisterCommands.Disconnect(client, config);
 
             //Display all log messages in the console
-            client.LogMessage += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
+            client.Log.Message += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
 
             //Add a ModuleService and CommandService
             client.AddService(new ModuleService());
@@ -65,13 +67,14 @@ namespace MechHisui
             client.RegisterInfoCommand(config);
             client.RegisterKnownChannelsCommand(config);
             client.RegisterLearnCommand(config);
-            client.RegisterMarkCommand(config);
+            client.RegisterPickCommand(config);
             //client.RegisterRecordingCommand(config);
             client.RegisterResetCommand(config);
             client.RegisterThemeCommand(config);
             client.RegisterWhereCommand(config);
             client.RegisterXmasCommand(config);
 
+            client.RegisterAPCommand(config);
             client.RegisterDailyCommand(config);
             client.RegisterEventCommand(config);
             client.RegisterFriendsCommand(config);
@@ -86,32 +89,32 @@ namespace MechHisui
 
 
             //Convert our sync method to an async one and block the Main function until the bot disconnects
-            client.Run(async () =>
+            client.ExecuteAndWait(async () =>
             {
                 //Connect to the Discord server using our email and password
                 await client.Connect(config["Email"], config["Password"]);
-                var server = client.AllServers.FirstOrDefault();
+                var server = client.Servers.FirstOrDefault();
                 if (server != null)
                 {
-                    Console.WriteLine($"Logged in as {client.GetUser(server, client.CurrentUserId).Name}");
+                    Console.WriteLine($"Logged in as {client.CurrentUser.Name}");
                 }
 
                 //Use a channel whitelist
-                client.Modules().Install(
+                client.Modules().Add(
                     new ChannelWhitelistModule(
-                        Helpers.ConvertStringArrayToLongArray(
+                        Helpers.ConvertStringArrayToULongArray(
                             //config["API_testing"]
                             //config["LTT_general"],
                             //config["LTT_testing"],
-                            config["FGO_trivia"],
+                            config["FGO_playground"],
                             config["FGO_general"]
                         )
                     ),
                     nameof(ChannelWhitelistModule),
-                    FilterType.ChannelWhitelist
+                    ModuleFilter.ChannelWhitelist
                 );
 
-                if (!client.AllServers.Any())
+                if (!client.Servers.Any())
                 {
                     Console.WriteLine("Not a member of any server");
                 }
@@ -119,20 +122,20 @@ namespace MechHisui
                 {
                     foreach (var prChannel in client.PrivateChannels)
                     {
-                        if (prChannel.Id == Int64.Parse(config["PrivChat"]))
+                        if (prChannel.Id == UInt64.Parse(config["PrivChat"]))
                         {
                             client.MessageReceived += (new Responder(prChannel, client).Respond);
                         }
                     }
-                    foreach (var channel in Helpers.IterateChannels(client.AllServers, printServerNames: true, printChannelNames: true))
+                    foreach (var channel in Helpers.IterateChannels(client.Servers, printServerNames: true, printChannelNames: true))
                     {
                         if (!channel.IsPrivate && Helpers.IsWhilested(channel, client))
                         {
                             //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
                             client.MessageReceived += (new Responder(channel, client).Respond);
-                            if (channel.Id != long.Parse(config["API_testing"]) && channel.Id != Int64.Parse(config["FGO_trivia"]))
+                            if (channel.Id != UInt64.Parse(config["API_testing"]) && channel.Id != UInt64.Parse(config["FGO_trivia"]))
                             {
-                                await client.SendMessage(channel, config["Hello"]);
+                                await channel.SendMessage(config["Hello"]);
                             }
                         }
                     }

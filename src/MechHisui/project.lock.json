@@ -3,62 +3,33 @@
   "version": 2,
   "targets": {
     "DNX,Version=v4.6": {
-      "Discord.Net/0.8.1-beta2": {
-        "type": "package",
+      "Discord.Net/0.9.0-alpha2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Newtonsoft.Json": "7.0.1",
+          "Newtonsoft.Json": "8.0.1",
+          "Nito.AsyncEx": "3.0.1",
           "RestSharp": "105.2.3",
-          "WebSocketSharp": "1.0.3-rc9"
+          "WebSocket4Net": "0.14.1"
         },
         "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core",
-          "System.Net.Http"
-        ],
-        "compile": {
-          "lib/dnx451/Discord.Net.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Discord.Net.dll": {}
+          "System.Runtime",
+          "System.Threading.Tasks"
+        ]
+      },
+      "Discord.Net.Commands/0.9.0-alpha2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
+        "dependencies": {
+          "Discord.Net": "0.9.0-alpha2"
         }
       },
-      "Discord.Net.Commands/0.8.1-beta2": {
-        "type": "package",
+      "Discord.Net.Modules/0.9.0-alpha2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.8.1-beta2"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/dnx451/Discord.Net.Commands.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Discord.Net.Commands.dll": {}
-        }
-      },
-      "Discord.Net.Modules/0.8.1-beta2": {
-        "type": "package",
-        "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/dnx451/Discord.Net.Modules.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Discord.Net.Modules.dll": {}
+          "Discord.Net": "0.9.0-alpha2",
+          "Discord.Net.Commands": "0.9.0-alpha2"
         }
       },
       "FuzzyString/1.0.0": {
@@ -136,11 +107,11 @@
           "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
         }
       },
-      "JiiLib/0.0.1": {
+      "JiiLib/0.1.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6"
       },
-      "JiiLib.Net/0.0.1": {
+      "JiiLib.Net/0.1.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
@@ -161,8 +132,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2",
+          "Discord.Net": "0.9.0-alpha2",
+          "Discord.Net.Commands": "0.9.0-alpha2",
           "Google.Apis.Script.v1": "1.9.2.10",
           "JiiLib": null,
           "JiiLib.Net": null,
@@ -177,8 +148,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2",
+          "Discord.Net": "0.9.0-alpha2",
+          "Discord.Net.Commands": "0.9.0-alpha2",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
       },
@@ -835,6 +806,19 @@
           "lib/net45/Newtonsoft.Json.dll": {}
         }
       },
+      "Nito.AsyncEx/3.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/net45/Nito.AsyncEx.Concurrent.dll": {},
+          "lib/net45/Nito.AsyncEx.dll": {},
+          "lib/net45/Nito.AsyncEx.Enlightenment.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Nito.AsyncEx.Concurrent.dll": {},
+          "lib/net45/Nito.AsyncEx.dll": {},
+          "lib/net45/Nito.AsyncEx.Enlightenment.dll": {}
+        }
+      },
       "RestSharp/105.2.3": {
         "type": "package",
         "compile": {
@@ -1046,13 +1030,13 @@
           "lib/net45/_._": {}
         }
       },
-      "WebSocketSharp/1.0.3-rc9": {
+      "WebSocket4Net/0.14.1": {
         "type": "package",
         "compile": {
-          "lib/websocket-sharp.dll": {}
+          "lib/net45/WebSocket4Net.dll": {}
         },
         "runtime": {
-          "lib/websocket-sharp.dll": {}
+          "lib/net45/WebSocket4Net.dll": {}
         }
       },
       "Zlib.Portable.Signed/1.11.0": {
@@ -1066,62 +1050,33 @@
       }
     },
     "DNX,Version=v4.6/win7-x86": {
-      "Discord.Net/0.8.1-beta2": {
-        "type": "package",
+      "Discord.Net/0.9.0-alpha2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Newtonsoft.Json": "7.0.1",
+          "Newtonsoft.Json": "8.0.1",
+          "Nito.AsyncEx": "3.0.1",
           "RestSharp": "105.2.3",
-          "WebSocketSharp": "1.0.3-rc9"
+          "WebSocket4Net": "0.14.1"
         },
         "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core",
-          "System.Net.Http"
-        ],
-        "compile": {
-          "lib/dnx451/Discord.Net.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Discord.Net.dll": {}
+          "System.Runtime",
+          "System.Threading.Tasks"
+        ]
+      },
+      "Discord.Net.Commands/0.9.0-alpha2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
+        "dependencies": {
+          "Discord.Net": "0.9.0-alpha2"
         }
       },
-      "Discord.Net.Commands/0.8.1-beta2": {
-        "type": "package",
+      "Discord.Net.Modules/0.9.0-alpha2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.8.1-beta2"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/dnx451/Discord.Net.Commands.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Discord.Net.Commands.dll": {}
-        }
-      },
-      "Discord.Net.Modules/0.8.1-beta2": {
-        "type": "package",
-        "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/dnx451/Discord.Net.Modules.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Discord.Net.Modules.dll": {}
+          "Discord.Net": "0.9.0-alpha2",
+          "Discord.Net.Commands": "0.9.0-alpha2"
         }
       },
       "FuzzyString/1.0.0": {
@@ -1199,11 +1154,11 @@
           "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
         }
       },
-      "JiiLib/0.0.1": {
+      "JiiLib/0.1.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6"
       },
-      "JiiLib.Net/0.0.1": {
+      "JiiLib.Net/0.1.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
@@ -1224,8 +1179,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2",
+          "Discord.Net": "0.9.0-alpha2",
+          "Discord.Net.Commands": "0.9.0-alpha2",
           "Google.Apis.Script.v1": "1.9.2.10",
           "JiiLib": null,
           "JiiLib.Net": null,
@@ -1240,8 +1195,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2",
+          "Discord.Net": "0.9.0-alpha2",
+          "Discord.Net.Commands": "0.9.0-alpha2",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
       },
@@ -1898,6 +1853,19 @@
           "lib/net45/Newtonsoft.Json.dll": {}
         }
       },
+      "Nito.AsyncEx/3.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/net45/Nito.AsyncEx.Concurrent.dll": {},
+          "lib/net45/Nito.AsyncEx.dll": {},
+          "lib/net45/Nito.AsyncEx.Enlightenment.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Nito.AsyncEx.Concurrent.dll": {},
+          "lib/net45/Nito.AsyncEx.dll": {},
+          "lib/net45/Nito.AsyncEx.Enlightenment.dll": {}
+        }
+      },
       "RestSharp/105.2.3": {
         "type": "package",
         "compile": {
@@ -2109,13 +2077,13 @@
           "lib/net45/_._": {}
         }
       },
-      "WebSocketSharp/1.0.3-rc9": {
+      "WebSocket4Net/0.14.1": {
         "type": "package",
         "compile": {
-          "lib/websocket-sharp.dll": {}
+          "lib/net45/WebSocket4Net.dll": {}
         },
         "runtime": {
-          "lib/websocket-sharp.dll": {}
+          "lib/net45/WebSocket4Net.dll": {}
         }
       },
       "Zlib.Portable.Signed/1.11.0": {
@@ -2129,62 +2097,33 @@
       }
     },
     "DNX,Version=v4.6/win7-x64": {
-      "Discord.Net/0.8.1-beta2": {
-        "type": "package",
+      "Discord.Net/0.9.0-alpha2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Newtonsoft.Json": "7.0.1",
+          "Newtonsoft.Json": "8.0.1",
+          "Nito.AsyncEx": "3.0.1",
           "RestSharp": "105.2.3",
-          "WebSocketSharp": "1.0.3-rc9"
+          "WebSocket4Net": "0.14.1"
         },
         "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core",
-          "System.Net.Http"
-        ],
-        "compile": {
-          "lib/dnx451/Discord.Net.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Discord.Net.dll": {}
+          "System.Runtime",
+          "System.Threading.Tasks"
+        ]
+      },
+      "Discord.Net.Commands/0.9.0-alpha2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
+        "dependencies": {
+          "Discord.Net": "0.9.0-alpha2"
         }
       },
-      "Discord.Net.Commands/0.8.1-beta2": {
-        "type": "package",
+      "Discord.Net.Modules/0.9.0-alpha2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.8.1-beta2"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/dnx451/Discord.Net.Commands.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Discord.Net.Commands.dll": {}
-        }
-      },
-      "Discord.Net.Modules/0.8.1-beta2": {
-        "type": "package",
-        "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/dnx451/Discord.Net.Modules.dll": {}
-        },
-        "runtime": {
-          "lib/dnx451/Discord.Net.Modules.dll": {}
+          "Discord.Net": "0.9.0-alpha2",
+          "Discord.Net.Commands": "0.9.0-alpha2"
         }
       },
       "FuzzyString/1.0.0": {
@@ -2262,11 +2201,11 @@
           "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
         }
       },
-      "JiiLib/0.0.1": {
+      "JiiLib/0.1.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6"
       },
-      "JiiLib.Net/0.0.1": {
+      "JiiLib.Net/0.1.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
@@ -2287,8 +2226,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2",
+          "Discord.Net": "0.9.0-alpha2",
+          "Discord.Net.Commands": "0.9.0-alpha2",
           "Google.Apis.Script.v1": "1.9.2.10",
           "JiiLib": null,
           "JiiLib.Net": null,
@@ -2303,8 +2242,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.8.1-beta2",
-          "Discord.Net.Commands": "0.8.1-beta2",
+          "Discord.Net": "0.9.0-alpha2",
+          "Discord.Net.Commands": "0.9.0-alpha2",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
       },
@@ -2961,6 +2900,19 @@
           "lib/net45/Newtonsoft.Json.dll": {}
         }
       },
+      "Nito.AsyncEx/3.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/net45/Nito.AsyncEx.Concurrent.dll": {},
+          "lib/net45/Nito.AsyncEx.dll": {},
+          "lib/net45/Nito.AsyncEx.Enlightenment.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Nito.AsyncEx.Concurrent.dll": {},
+          "lib/net45/Nito.AsyncEx.dll": {},
+          "lib/net45/Nito.AsyncEx.Enlightenment.dll": {}
+        }
+      },
       "RestSharp/105.2.3": {
         "type": "package",
         "compile": {
@@ -3172,13 +3124,13 @@
           "lib/net45/_._": {}
         }
       },
-      "WebSocketSharp/1.0.3-rc9": {
+      "WebSocket4Net/0.14.1": {
         "type": "package",
         "compile": {
-          "lib/websocket-sharp.dll": {}
+          "lib/net45/WebSocket4Net.dll": {}
         },
         "runtime": {
-          "lib/websocket-sharp.dll": {}
+          "lib/net45/WebSocket4Net.dll": {}
         }
       },
       "Zlib.Portable.Signed/1.11.0": {
@@ -3193,15 +3145,27 @@
     }
   },
   "libraries": {
+    "Discord.Net/0.9.0-alpha2": {
+      "type": "project",
+      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/project.json"
+    },
+    "Discord.Net.Commands/0.9.0-alpha2": {
+      "type": "project",
+      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/project.json"
+    },
+    "Discord.Net.Modules/0.9.0-alpha2": {
+      "type": "project",
+      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Modules/project.json"
+    },
     "FuzzyString/1.0.0": {
       "type": "project",
       "path": "../../wrap/FuzzyString/project.json"
     },
-    "JiiLib/0.0.1": {
+    "JiiLib/0.1.1": {
       "type": "project",
       "path": "../../../JiiLib/src/JiiLib/project.json"
     },
-    "JiiLib.Net/0.0.1": {
+    "JiiLib.Net/0.1.1": {
       "type": "project",
       "path": "../../../JiiLib/src/JiiLib.Net/project.json"
     },
@@ -3216,54 +3180,6 @@
     "MechHisui.TriviaServiceLib/0.0.1": {
       "type": "project",
       "path": "../MechHisui.TriviaServiceLib/project.json"
-    },
-    "Discord.Net/0.8.1-beta2": {
-      "type": "package",
-      "sha512": "ItIS7yr/tZXYa5I3aHP9QLwGR5jEEarLMkJfXXJgXZycpmiXOBeF3TE0WTnBX68gUpmXKKK9zm050gcQDJ7xug==",
-      "files": [
-        "Discord.Net.0.8.1-beta2.nupkg",
-        "Discord.Net.0.8.1-beta2.nupkg.sha512",
-        "Discord.Net.nuspec",
-        "lib/dnx451/Discord.Net.dll",
-        "lib/dnx451/Discord.Net.xml",
-        "lib/dnxcore50/Discord.Net.dll",
-        "lib/dnxcore50/Discord.Net.xml",
-        "lib/net45/Discord.Net.dll",
-        "lib/net45/Discord.Net.xml",
-        "repo.json"
-      ]
-    },
-    "Discord.Net.Commands/0.8.1-beta2": {
-      "type": "package",
-      "sha512": "HhtvOqUsuFP9hAij1+UQifs0Almt2Wxntnp3tSJL1qxR9NF3on2/MJPAvYDU+rbVkEDNxcdhZccdqkzVBK2fUQ==",
-      "files": [
-        "Discord.Net.Commands.0.8.1-beta2.nupkg",
-        "Discord.Net.Commands.0.8.1-beta2.nupkg.sha512",
-        "Discord.Net.Commands.nuspec",
-        "lib/dnx451/Discord.Net.Commands.dll",
-        "lib/dnx451/Discord.Net.Commands.xml",
-        "lib/dnxcore50/Discord.Net.Commands.dll",
-        "lib/dnxcore50/Discord.Net.Commands.xml",
-        "lib/net45/Discord.Net.Commands.dll",
-        "lib/net45/Discord.Net.Commands.xml",
-        "repo.json"
-      ]
-    },
-    "Discord.Net.Modules/0.8.1-beta2": {
-      "type": "package",
-      "sha512": "hSb9i7u4NEPWq9F6sTkpAFT5boAWrV95jaP/EsQPcG5mK0jxK7bY3bTE4pcQRvlFrYhTnYF7Jnrmyw75rOB37Q==",
-      "files": [
-        "Discord.Net.Modules.0.8.1-beta2.nupkg",
-        "Discord.Net.Modules.0.8.1-beta2.nupkg.sha512",
-        "Discord.Net.Modules.nuspec",
-        "lib/dnx451/Discord.Net.Modules.dll",
-        "lib/dnx451/Discord.Net.Modules.xml",
-        "lib/dnxcore50/Discord.Net.Modules.dll",
-        "lib/dnxcore50/Discord.Net.Modules.xml",
-        "lib/net45/Discord.Net.Modules.dll",
-        "lib/net45/Discord.Net.Modules.xml",
-        "repo.json"
-      ]
     },
     "Google.Apis/1.9.2": {
       "type": "package",
@@ -4133,6 +4049,87 @@
         "tools/install.ps1"
       ]
     },
+    "Nito.AsyncEx/3.0.1": {
+      "type": "package",
+      "sha512": "JSypx/S4sBY1+0wrXcSqcdV6p5nVNFeCfIVyC9LAy69hrle/bxMJf9oZsi5UDxZl7Bsq/bD2XwxMFFOx7zVPag==",
+      "files": [
+        "lib/MonoAndroid/Nito.AsyncEx.Concurrent.dll",
+        "lib/MonoAndroid/Nito.AsyncEx.Concurrent.xml",
+        "lib/MonoAndroid/Nito.AsyncEx.dll",
+        "lib/MonoAndroid/Nito.AsyncEx.Enlightenment.dll",
+        "lib/MonoAndroid/Nito.AsyncEx.Enlightenment.xml",
+        "lib/MonoAndroid/Nito.AsyncEx.xml",
+        "lib/net40/Nito.AsyncEx.Concurrent.dll",
+        "lib/net40/Nito.AsyncEx.Concurrent.xml",
+        "lib/net40/Nito.AsyncEx.dll",
+        "lib/net40/Nito.AsyncEx.Enlightenment.dll",
+        "lib/net40/Nito.AsyncEx.Enlightenment.xml",
+        "lib/net40/Nito.AsyncEx.xml",
+        "lib/net45/Nito.AsyncEx.Concurrent.dll",
+        "lib/net45/Nito.AsyncEx.Concurrent.xml",
+        "lib/net45/Nito.AsyncEx.dll",
+        "lib/net45/Nito.AsyncEx.Enlightenment.dll",
+        "lib/net45/Nito.AsyncEx.Enlightenment.xml",
+        "lib/net45/Nito.AsyncEx.xml",
+        "lib/netcore45/Nito.AsyncEx.Concurrent.dll",
+        "lib/netcore45/Nito.AsyncEx.Concurrent.xml",
+        "lib/netcore45/Nito.AsyncEx.dll",
+        "lib/netcore45/Nito.AsyncEx.Enlightenment.dll",
+        "lib/netcore45/Nito.AsyncEx.Enlightenment.xml",
+        "lib/netcore45/Nito.AsyncEx.xml",
+        "lib/portable-net40+netcore45/Nito.AsyncEx.Concurrent.dll",
+        "lib/portable-net40+netcore45/Nito.AsyncEx.Concurrent.xml",
+        "lib/portable-net40+netcore45/Nito.AsyncEx.dll",
+        "lib/portable-net40+netcore45/Nito.AsyncEx.xml",
+        "lib/portable-net40+netcore45+sl4+wp71/Nito.AsyncEx.dll",
+        "lib/portable-net40+netcore45+sl4+wp71/Nito.AsyncEx.xml",
+        "lib/portable-net40+netcore45+sl5+wp8+wpa81/Nito.AsyncEx.dll",
+        "lib/portable-net40+netcore45+sl5+wp8+wpa81/Nito.AsyncEx.xml",
+        "lib/portable-net45+netcore45+wp8+wpa81/Nito.AsyncEx.dll",
+        "lib/portable-net45+netcore45+wp8+wpa81/Nito.AsyncEx.xml",
+        "lib/portable-net45+netcore45+wpa81/Nito.AsyncEx.Concurrent.dll",
+        "lib/portable-net45+netcore45+wpa81/Nito.AsyncEx.Concurrent.xml",
+        "lib/portable-net45+netcore45+wpa81/Nito.AsyncEx.dll",
+        "lib/portable-net45+netcore45+wpa81/Nito.AsyncEx.xml",
+        "lib/sl4/Nito.AsyncEx.dll",
+        "lib/sl4/Nito.AsyncEx.Enlightenment.dll",
+        "lib/sl4/Nito.AsyncEx.Enlightenment.xml",
+        "lib/sl4/Nito.AsyncEx.xml",
+        "lib/sl5/Nito.AsyncEx.dll",
+        "lib/sl5/Nito.AsyncEx.Enlightenment.dll",
+        "lib/sl5/Nito.AsyncEx.Enlightenment.xml",
+        "lib/sl5/Nito.AsyncEx.xml",
+        "lib/wp71/Nito.AsyncEx.dll",
+        "lib/wp71/Nito.AsyncEx.Enlightenment.dll",
+        "lib/wp71/Nito.AsyncEx.Enlightenment.xml",
+        "lib/wp71/Nito.AsyncEx.xml",
+        "lib/wp8/Nito.AsyncEx.dll",
+        "lib/wp8/Nito.AsyncEx.Enlightenment.dll",
+        "lib/wp8/Nito.AsyncEx.Enlightenment.xml",
+        "lib/wp8/Nito.AsyncEx.xml",
+        "lib/wpa81/Nito.AsyncEx.Concurrent.dll",
+        "lib/wpa81/Nito.AsyncEx.Concurrent.xml",
+        "lib/wpa81/Nito.AsyncEx.dll",
+        "lib/wpa81/Nito.AsyncEx.Enlightenment.dll",
+        "lib/wpa81/Nito.AsyncEx.Enlightenment.xml",
+        "lib/wpa81/Nito.AsyncEx.xml",
+        "lib/Xamarin.iOS10/Nito.AsyncEx.Concurrent.dll",
+        "lib/Xamarin.iOS10/Nito.AsyncEx.Concurrent.xml",
+        "lib/Xamarin.iOS10/Nito.AsyncEx.dll",
+        "lib/Xamarin.iOS10/Nito.AsyncEx.Enlightenment.dll",
+        "lib/Xamarin.iOS10/Nito.AsyncEx.Enlightenment.xml",
+        "lib/Xamarin.iOS10/Nito.AsyncEx.xml",
+        "lib/Xamarin.Mac20/Nito.AsyncEx.Concurrent.dll",
+        "lib/Xamarin.Mac20/Nito.AsyncEx.Concurrent.xml",
+        "lib/Xamarin.Mac20/Nito.AsyncEx.dll",
+        "lib/Xamarin.Mac20/Nito.AsyncEx.Enlightenment.dll",
+        "lib/Xamarin.Mac20/Nito.AsyncEx.Enlightenment.xml",
+        "lib/Xamarin.Mac20/Nito.AsyncEx.xml",
+        "Nito.AsyncEx.3.0.1.nupkg",
+        "Nito.AsyncEx.3.0.1.nupkg.sha512",
+        "Nito.AsyncEx.nuspec"
+      ]
+    },
     "RestSharp/105.2.3": {
       "type": "package",
       "sha512": "50LkciOclb7Lza9QXqR9reKeUoPlDQiFD4iBdOmd6twOBmTtqEFIOXQgdDdsTHQg4HcGh6EvrM6gN1X72vkJLA==",
@@ -4918,15 +4915,23 @@
         "System.Threading.nuspec"
       ]
     },
-    "WebSocketSharp/1.0.3-rc9": {
+    "WebSocket4Net/0.14.1": {
       "type": "package",
-      "sha512": "+HHS2VBt9cQNtfmdXY/XcKejYYABiSIXbKkeZwK03ccyQiLpYVcuMY2g+E2sNxuAWPgDAclRRBMRLAHr9gnx6Q==",
+      "sha512": "01v/KxbZ9hTY8kXPL9erpU9HPCvd++OifmU29OvgTKzBaSDfZRIFZB9mdTrRjMY/Q+7Llq0VINWPpazpYNbx4g==",
       "files": [
-        "lib/websocket-sharp.dll",
-        "lib/websocket-sharp.xml",
-        "WebSocketSharp.1.0.3-rc9.nupkg",
-        "WebSocketSharp.1.0.3-rc9.nupkg.sha512",
-        "WebSocketSharp.nuspec"
+        "lib/monoandroid23/WebSocket4Net.dll",
+        "lib/monotouch10/WebSocket4Net.dll",
+        "lib/net20/WebSocket4Net.dll",
+        "lib/net35/WebSocket4Net.dll",
+        "lib/net40/WebSocket4Net.dll",
+        "lib/net45/WebSocket4Net.dll",
+        "lib/sl40/WebSocket4Net.dll",
+        "lib/sl50/WebSocket4Net.dll",
+        "lib/sl50-wp/WebSocket4Net.dll",
+        "lib/Xamarin.iOS10/WebSocket4Net.dll",
+        "WebSocket4Net.0.14.1.nupkg",
+        "WebSocket4Net.0.14.1.nupkg.sha512",
+        "WebSocket4Net.nuspec"
       ]
     },
     "Zlib.Portable.Signed/1.11.0": {
@@ -4951,9 +4956,9 @@
       "Microsoft.Extensions.Configuration.UserSecrets >= 1.0.0-rc1-final",
       "Microsoft.Extensions.DependencyInjection >= 1.0.0-rc1-final",
       "Microsoft.Extensions.PlatformAbstractions >= 1.0.0-*",
-      "Discord.Net >= 0.8.1-beta2",
-      "Discord.Net.Commands >= 0.8.1-beta2",
-      "Discord.Net.Modules >= 0.8.1-beta2",
+      "Discord.Net >= 0.9.0-alpha2",
+      "Discord.Net.Commands >= 0.9.0-alpha2",
+      "Discord.Net.Modules >= 0.9.0-alpha2",
       "MechHisui.FateGOLib ",
       "MechHisui.FfrkLib ",
       "MechHisui.TriviaServiceLib "

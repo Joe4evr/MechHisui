@@ -14,19 +14,19 @@ namespace MechHisui
             .EnabledChannels
             .Contains(channel) ?? false;
 
-        internal static long[] ConvertStringArrayToLongArray(params string[] strings)
+        internal static ulong[] ConvertStringArrayToULongArray(params string[] strings)
         {
-            var longs = new List<long>();
+            var ulongs = new List<ulong>();
             foreach (var s in strings)
             {
-                long temp;
-                if (Int64.TryParse(s, out temp))
+                ulong temp;
+                if (UInt64.TryParse(s, out temp))
                 {
-                    longs.Add(temp);
+                    ulongs.Add(temp);
                 }
             }
 
-            return longs.ToArray();
+            return ulongs.ToArray();
         }
         
         internal static IEnumerable<Channel> IterateChannels(IEnumerable<Server> servers, bool printServerNames = false, bool printChannelNames = false)
@@ -37,7 +37,7 @@ namespace MechHisui
                 {
                     Console.WriteLine("\n" + server.Name);
                 }
-                foreach (var channel in server.Channels)
+                foreach (var channel in server.AllChannels)
                 {
                     if (printChannelNames)
                     {

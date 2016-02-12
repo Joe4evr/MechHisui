@@ -54,7 +54,8 @@ namespace MechHisui.FateGOLib
             }
             else
             {
-                return FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Name.ToLowerInvariant() == servant.ToLowerInvariant());
+                return FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Name.ToLowerInvariant() == servant.ToLowerInvariant())
+                    ?? FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Name.ToLowerInvariant().Contains(servant.ToLowerInvariant()));
             }
         }
 

@@ -9,8 +9,8 @@ namespace MechHisui
 {
     internal static class ClientExtensions
     {
-        private static List<long> _recording = new List<long>();
-        internal static List<long> GetRecordingChannels(this DiscordClient client) => _recording;
+        private static List<ulong> _recording = new List<ulong>();
+        internal static List<ulong> GetRecordingChannels(this DiscordClient client) => _recording;
 
         private static List<Recorder> _recorders = new List<Recorder>();
         internal static List<Recorder> GetRecorders(this DiscordClient client) => _recorders;

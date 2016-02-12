@@ -16,6 +16,7 @@ namespace MechHisui.FateGOLib
             var mappedObj = new List<ServantProfile>();
             var activeSkills = new List<ServantSkill>();
             var passiveSkills = new List<ServantSkill>();
+            var traits = new List<string>();
             var tempProfile = new ServantProfile();
             var tempHolder = new SkillHolder();
             var objProps = typeof(ServantProfile).GetProperties().Select(p => p.Name.ToLower()).ToArray();
@@ -153,6 +154,12 @@ namespace MechHisui.FateGOLib
                                 tempHolder.passiveEffect4 = reader.Value.ToString();
                             }
                             break;
+                        case nameof(traits):
+                            if (reader.Read() && reader.TokenType == JsonToken.String)
+                            {
+                                traits = reader.Value.ToString().Split(',').ToList();
+                            }
+                            break;
                         default:
                             string readerValue = reader.Value.ToString().ToLower();
                             if (reader.Read())
@@ -184,6 +191,7 @@ namespace MechHisui.FateGOLib
 
                     tempProfile.ActiveSkills = activeSkills;
                     tempProfile.PassiveSkills = passiveSkills;
+                    tempProfile.Traits = traits;
                     mappedObj.Add(tempProfile);
 
                     activeSkills = new List<ServantSkill>();

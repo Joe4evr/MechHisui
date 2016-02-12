@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0-*",
+  "version": "0.3.0-*",
   "description": "Mech-Hisui Discord Bot",
   "authors": [ "Joe4evr" ],
   "tags": [ "Discord", "Bot" ],
@@ -19,9 +19,9 @@
         "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final",
         "Microsoft.Extensions.DependencyInjection": "1.0.0-rc1-final",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-*",
-        "Discord.Net": "0.8.1-beta2",
-        "Discord.Net.Commands": "0.8.1-beta2",
-        "Discord.Net.Modules": "0.8.1-beta2",
+        "Discord.Net": "0.9.0-alpha2",
+        "Discord.Net.Commands": "0.9.0-alpha2",
+        "Discord.Net.Modules": "0.9.0-alpha2",
         "MechHisui.FateGOLib": "",
         "MechHisui.FfrkLib": "",
         "MechHisui.TriviaServiceLib": ""

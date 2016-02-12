@@ -17,7 +17,7 @@ namespace MechHisui.TriviaService
         private readonly DiscordClient _client;
         private readonly int _winscore;
         public Channel Channel { get; }
-        private readonly ConcurrentDictionary<long, int> _scoreboard;
+        private readonly ConcurrentDictionary<ulong, int> _scoreboard;
         private readonly List<string> _asked;
         private readonly Random _rng;
         private bool _isAnswered = true;
@@ -29,10 +29,10 @@ namespace MechHisui.TriviaService
             _client = client;
             _winscore = rounds;
             Channel = channel;
-            _scoreboard = new ConcurrentDictionary<long, int>();
+            _scoreboard = new ConcurrentDictionary<ulong, int>();
             _asked = new List<string>();
             _rng = new Random();
-            _client.SendMessage(Channel, $"Trivia commencing. Play until {rounds} points to win. *Start the clock!*");
+            Channel.SendMessage($"Trivia commencing. Play until {rounds} points to win. *Start the clock!*");
             _client.MessageReceived += CheckTrivia;
         }
 
@@ -43,14 +43,14 @@ namespace MechHisui.TriviaService
         private async void TimeUp(object sender, ElapsedEventArgs e)
         {
             _isAnswered = true;
-            await _client.SendMessage(Channel, $"Time up.");
+            await Channel.SendMessage($"Time up.");
             if (_asked.Count == TriviaHelpers.Questions.Count)
             {
                 await OutOfQuestions();
             }
             else
             {
-                await _client.SendMessage(Channel, $"Next question commencing in 15 seconds.");
+                await Channel.SendMessage($"Next question commencing in 15 seconds.");
                 await Task.Delay(TimeSpan.FromSeconds(15));
                 await AskQuestion();
             }
@@ -59,21 +59,21 @@ namespace MechHisui.TriviaService
         private async Task OutOfQuestions()
         {
             _client.MessageReceived -= CheckTrivia;
-            await _client.SendMessage(Channel, $"Out of questions. {_client.GetUser(Channel.Server, _scoreboard.OrderByDescending(kv => kv.Value).First().Key).Name} has the most points.");
+            await Channel.SendMessage($"Out of questions. {Channel.GetUser(_scoreboard.OrderByDescending(kv => kv.Value).First().Key).Name} has the most points.");
             _client.GetTrivias().Remove(this);
         }
 
         public async Task EndTriviaEarly()
         {
             _client.MessageReceived -= CheckTrivia;
-            await _client.SendMessage(Channel, $"Aborting trivia. {_client.GetUser(Channel.Server, _scoreboard.OrderByDescending(kv => kv.Value).First().Key).Name} has the most points.");
+            await Channel.SendMessage($"Aborting trivia. {Channel.GetUser(_scoreboard.OrderByDescending(kv => kv.Value).First().Key).Name} has the most points.");
             _client.GetTrivias().Remove(this);
         }
 
         public async Task EndTrivia(User winner)
         {
             _client.MessageReceived -= CheckTrivia;
-            await _client.SendMessage(Channel, $"Trivia over, {winner.Name} has won with {_scoreboard.Single(kv => kv.Key == winner.Id).Value} points.");
+            await Channel.SendMessage($"Trivia over, {winner.Name} has won with {_scoreboard.Single(kv => kv.Key == winner.Id).Value} points.");
             _client.GetTrivias().Remove(this);
         }
 
@@ -84,7 +84,7 @@ namespace MechHisui.TriviaService
 
             _asked.Add(_currentQuestion.Key);
             _isAnswered = false;
-            await _client.SendMessage(Channel, _currentQuestion.Key);
+            await Channel.SendMessage(_currentQuestion.Key);
             _timer = new Timer(TimeSpan.FromSeconds(90).TotalMilliseconds)
             {
                 AutoReset = false,
@@ -101,7 +101,7 @@ namespace MechHisui.TriviaService
                 _timer.Stop();
                 _scoreboard.AddOrUpdate(e.User.Id, 1, (k, v) => ++v);
                 var userScore = _scoreboard.Single(kv => kv.Key == e.User.Id).Value;
-                await _client.SendMessage(Channel, $"Correct. {e.User.Name} is now at {userScore} point(s).");
+                await Channel.SendMessage($"Correct. {e.User.Name} is now at {userScore} point(s).");
                 if (userScore == _winscore)
                 {
                     await EndTrivia(e.User);
@@ -112,7 +112,7 @@ namespace MechHisui.TriviaService
                 }
                 else
                 {
-                    await _client.SendMessage(Channel, $"Next question commencing in 15 seconds.");
+                    await Channel.SendMessage($"Next question commencing in 15 seconds.");
                     await Task.Delay(TimeSpan.FromSeconds(15));
                     await AskQuestion();
                 }

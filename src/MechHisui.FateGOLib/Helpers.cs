@@ -11,6 +11,7 @@ namespace MechHisui.FateGOLib
     public static class FgoHelpers
     {
         public static readonly TimeZoneInfo JpnTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time");
+        public static readonly TimeSpan PerAP = TimeSpan.FromMinutes(5);
 
         public static List<ServantProfile> ServantProfiles = new List<ServantProfile>();
         public static List<ServantProfile> FakeServantProfiles = new List<ServantProfile>();
@@ -26,6 +27,8 @@ namespace MechHisui.FateGOLib
         public static List<NodeDrop> ItemDropsList = new List<NodeDrop>();
         public static List<string> Masters = new List<string>();
         public static List<NameOnlyServant> NameOnlyServants = new List<NameOnlyServant>();
+
+        public static List<UserAP> UsersAP = new List<UserAP>();
 
         public static void InitRandomHgw(IConfiguration config)
         {

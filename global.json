@@ -1,6 +1,7 @@
 {
     "projects": [
         "C:\\Users\\Jonathan\\Documents\\Visual Studio 2015\\Projects\\JiiLib\\src\\",
+        "C:\\Users\\Jonathan\\Documents\\Visual Studio 2015\\ReferenceProjects\\Discord.Net\\src\\",
         "src",
         "test",
         "wrap"

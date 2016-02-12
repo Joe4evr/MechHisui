@@ -28,14 +28,14 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Registering 'Add channel'...");
             client.Commands().CreateCommand("add")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Parameter("id", ParameterType.Required)
                 // .Parameter("services", ParameterType.Multiple)
                 .Do(async cea =>
                 {
-                    long ch;
-                    if (Int64.TryParse(cea.Args[0], out ch))
+                    ulong ch;
+                    if (UInt64.TryParse(cea.Args[0], out ch))
                     {
                         Channel chan = client.GetChannel(ch);
                         client.Modules().Modules
@@ -70,42 +70,42 @@ namespace MechHisui.Commands
                         //}
 
                         client.MessageReceived += (new Responder(chan, client).Respond);
-                        await client.SendMessage(cea.Channel, $"Now listening on channel `{chan.Name}` in `{chan.Server.Name}` until next shutdown.");
-                        await client.SendMessage(chan, config["Hello"]);
+                        await cea.Channel.SendMessage($"Now listening on channel `{chan.Name}` in `{chan.Server.Name}` until next shutdown.");
+                        await chan.SendMessage(config["Hello"]);
                     }
                     else
                     {
-                        await client.SendMessage(cea.Channel, "Could not parse channel ID.");
+                        await cea.Channel.SendMessage("Could not parse channel ID.");
                     }
                 });
         }
 
         public static void RegisterDeleteCommand(this DiscordClient client, IConfiguration config)
         {
-            Console.WriteLine("Registering 'Delete'...");
-            client.Commands().CreateCommand("del")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
-                .Parameter("number", ParameterType.Required)
-                .Hide()
-                .Do(async cea =>
-                {
-                    int n;
-                    if (Int32.TryParse(cea.Args[0], out n))
-                    {
-                        await client.DeleteMessages(
-                            (await client.DownloadMessages(cea.Channel, 20))
-                            .Where(m => m.IsAuthor)
-                            .OrderByDescending(m => m.Timestamp)
-                            .Take(n));
-                    }
-                });
+            //Console.WriteLine("Registering 'Delete'...");
+            //client.Commands().CreateCommand("del")
+            //    .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+            //    .Parameter("number", ParameterType.Required)
+            //    .Hide()
+            //    .Do(async cea =>
+            //    {
+            //        int n;
+            //        if (Int32.TryParse(cea.Args[0], out n))
+            //        {
+            //            await client.DeleteMessages(
+            //                (await client.DownloadMessages(cea.Channel, 20))
+            //                .Where(m => m.IsAuthor)
+            //                .OrderByDescending(m => m.Timestamp)
+            //                .Take(n));
+            //        }
+            //    });
         }
 
         public static void RegisterDisconnectCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Disconnect'...");
             client.Commands().CreateCommand("disconnect")
-                .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("code", ParameterType.Optional)
                 .Hide()
                 .Do(async cea =>
@@ -134,7 +134,7 @@ namespace MechHisui.Commands
             client.Commands().CreateCommand("eval")
                 .Parameter("func", ParameterType.Required)
                 .Hide()
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) || ch.Id == Int64.Parse(config["FGO_general"]))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]))
                 .Do(async cea =>
                 {
                     string temp = cea.Args[0].Replace("\\", String.Empty);
@@ -189,7 +189,7 @@ namespace DynamicCompile
                                 diagnostic.Severity == DiagnosticSeverity.Error);
 
                             Console.Error.WriteLine(String.Join("\n", failures.Select(f => $"{f.Id}: {f.GetMessage()}")));
-                            await client.SendMessage(cea.Channel, $"**Error:** {failures.First().GetMessage()}");
+                            await cea.Channel.SendMessage($"**Error:** {failures.First().GetMessage()}");
                         }
                         else
                         {
@@ -204,7 +204,7 @@ namespace DynamicCompile
                                 obj,
                                 new object[0]);
 
-                            await client.SendMessage(cea.Channel, $"**Result:** {(string)res}");
+                            await cea.Channel.SendMessage($"**Result:** {(string)res}");
                         }
                     }
                 });
@@ -217,23 +217,23 @@ namespace DynamicCompile
             //    Path.Combine(config["Imgur_Secrets_Path"], "imgur_token.json"));
 
             
-            Console.WriteLine("Registering 'Image'...");
-            client.Commands().CreateCommand("image")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]))
-                .Hide()
-                .Parameter("album", ParameterType.Optional)
-                .Do(async cea =>
-                {
-                    var imgs = (await client.DownloadMessages(cea.Channel, 20))
-                        .OrderByDescending(m => m.Timestamp)
-                        .FirstOrDefault(m => m.Attachments != null)
-                        .Attachments.Where(a => a.Height != null);
+            //Console.WriteLine("Registering 'Image'...");
+            //client.Commands().CreateCommand("image")
+            //    .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]))
+            //    .Hide()
+            //    .Parameter("album", ParameterType.Optional)
+            //    .Do(async cea =>
+            //    {
+            //        var imgs = (await client.DownloadMessages(cea.Channel, 20))
+            //            .OrderByDescending(m => m.Timestamp)
+            //            .FirstOrDefault(m => m.Attachments != null)
+            //            .Attachments.Where(a => a.Height != null);
 
-                    foreach (var img in imgs)
-                    {
+            //        foreach (var img in imgs)
+            //        {
                         
-                    }
-                });
+            //        }
+            //    });
         }
 
         public static void RegisterInfoCommand(this DiscordClient client, IConfiguration config)
@@ -244,7 +244,7 @@ namespace DynamicCompile
                 .Description("Relay info about myself.")
                 .Do(async cea =>
                 {
-                    await client.SendMessage(cea.Channel, "I am a bot made by Joe4evr. Find my source code here: https://github.com/Joe4evr/MechHisui/ ");
+                    await cea.Channel.SendMessage("I am a bot made by Joe4evr. Find my source code here: https://github.com/Joe4evr/MechHisui/ ");
                 });
         }
 
@@ -252,15 +252,15 @@ namespace DynamicCompile
         {
             Console.WriteLine("Registering 'Known'...");
             client.Commands().CreateCommand("known")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
                 {
-                    foreach (var channel in Helpers.IterateChannels(client.AllServers, printServerNames: true, printChannelNames: false))
+                    foreach (var channel in Helpers.IterateChannels(client.Servers, printServerNames: true, printChannelNames: false))
                     {
                         Console.WriteLine($"{channel.Name}:  {channel.Id}");
                     }
-                    await client.SendMessage(cea.Channel, "Known Channel IDs logged to console.");
+                    await cea.Channel.SendMessage("Known Channel IDs logged to console.");
                 });
         }
 
@@ -268,7 +268,7 @@ namespace DynamicCompile
         {
             Console.WriteLine("Registering 'Learn'...");
             client.Commands().CreateCommand("learn")
-                .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("trigger", ParameterType.Required)
                 .Parameter("response", ParameterType.Required)
                 .Parameter("kind", ParameterType.Optional)
@@ -296,20 +296,20 @@ namespace DynamicCompile
                         }
                         tw.Write(JsonConvert.SerializeObject(l, Formatting.Indented));
                     }
-                    await client.SendMessage(cea.Channel, $"Understood. Shall respond to `{triggger}` with `{response}`.");
+                    await cea.Channel.SendMessage($"Understood. Shall respond to `{triggger}` with `{response}`.");
                 });
         }
 
-        public static void RegisterMarkCommand(this DiscordClient client, IConfiguration config)
+        public static void RegisterPickCommand(this DiscordClient client, IConfiguration config)
         {
-            Console.WriteLine("Registering 'Mark'...");
-            client.Commands().CreateCommand("mark")
-                .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
-                .Hide()
+            Console.WriteLine("Registering 'Pick'...");
+            client.Commands().CreateCommand("pick")
+                .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
+                //.Parameter("items", ParameterType.Multiple)
                 .Do(async cea =>
                 {
-                    Console.WriteLine($"Marked at {DateTime.Now}");
-                    await client.SendMessage(cea.Channel, "Marked current activity in the console.");
+
+                    await cea.Channel.SendMessage("To be re-implemented.");
                 });
         }
 
@@ -317,14 +317,14 @@ namespace DynamicCompile
         {
             Console.WriteLine("Registering 'Recording'...");
             client.Commands().CreateCommand("record")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
                 {
                     var rec = client.GetRecordingChannels();
                     if (rec.Contains(cea.Channel.Id))
                     {
-                        await client.SendMessage(cea.Channel, $"Already recording here.");
+                        await cea.Channel.SendMessage($"Already recording here.");
                     }
                     else
                     {
@@ -335,14 +335,14 @@ namespace DynamicCompile
                 });
 
             client.Commands().CreateCommand("endrecord")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
                 {
                     var rec = client.GetRecordingChannels();
                     if (!rec.Contains(cea.Channel.Id))
                     {
-                        await client.SendMessage(cea.Channel, $"Not recording here.");
+                        await cea.Channel.SendMessage($"Not recording here.");
                     }
                     else
                     {
@@ -358,13 +358,13 @@ namespace DynamicCompile
         {
             Console.WriteLine("Registering 'Reset'...");
             client.Commands().CreateCommand("reset")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
                 {
                     var resp = client.GetResponders().Single(r => r.channel.Id == cea.Channel.Id);
                     resp.ResetTimeouts();
-                    await client.SendMessage(cea.Channel, "Timeouts reset.");
+                    await cea.Channel.SendMessage("Timeouts reset.");
                 });
         }
 
@@ -375,7 +375,7 @@ namespace DynamicCompile
                 .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
                 .Do(async cea =>
                 {
-                    await client.SendMessage(cea.Channel, "https://www.youtube.com/watch?v=mQmgIfP-3OQ");
+                    await cea.Channel.SendMessage("https://www.youtube.com/watch?v=mQmgIfP-3OQ");
                 });
         }
 
@@ -383,7 +383,7 @@ namespace DynamicCompile
         {
             Console.WriteLine("Registering 'Where'...");
             client.Commands().CreateCommand("where")
-                .AddCheck((c, u, ch) => u.Id == Int64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("item")
                 .Hide()
                 .Do(async cea =>
@@ -421,12 +421,12 @@ namespace DynamicCompile
                         var str = sb.ToString();
                         if (!String.IsNullOrWhiteSpace(str))
                         {
-                            await client.SendMessage(cea.Channel, str);
+                            await cea.Channel.SendMessage(str);
                         }
                     }
                     else
                     {
-                        await client.SendMessage(cea.Channel, "Invalid Argument.");
+                        await cea.Channel.SendMessage("Invalid Argument.");
                     }
                 });
         }
@@ -439,15 +439,15 @@ namespace DynamicCompile
                 xmasvids = JsonConvert.DeserializeObject<List<string>>(tr.ReadToEnd());
             }
             client.Commands().CreateCommand("xmas")
-                .AddCheck((c, u, ch) => ch.Id == long.Parse(config["FGO_general"]) && DateTime.UtcNow.Month == 12)
+                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) && DateTime.UtcNow.Month == 12)
                 .Hide()
                 .Do(async cea =>
                 {
-                    await client.SendMessage(cea.Channel, xmasvids.ElementAt(new Random().Next() % xmasvids.Count));
+                    await cea.Channel.SendMessage(xmasvids.ElementAt(new Random().Next() % xmasvids.Count));
                 });
 
             client.Commands().CreateCommand("addxmas")
-                .AddCheck((c, u, ch) => u.Id == long.Parse(config["Owner"]) && DateTime.UtcNow.Month == 12)
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && DateTime.UtcNow.Month == 12)
                 .Parameter("item", ParameterType.Required)
                 .Hide()
                 .Do(async cea =>
@@ -457,7 +457,7 @@ namespace DynamicCompile
                     {
                         tw.Write(JsonConvert.SerializeObject(xmasvids, Formatting.Indented));
                     }
-                    await client.SendMessage(cea.Channel, $"Added `{cea.Args[0]}` to `{nameof(xmasvids)}`.");
+                    await cea.Channel.SendMessage($"Added `{cea.Args[0]}` to `{nameof(xmasvids)}`.");
                 });
         }
 
@@ -471,10 +471,10 @@ namespace DynamicCompile
                 .Single(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())
                 .EnabledChannels)
             {
-                if (ch.Id != Int64.Parse(config["API_testing"]) && ch.Id != Int64.Parse(config["FGO_trivia"]))
+                if (ch.Id != UInt64.Parse(config["API_testing"]) && ch.Id != UInt64.Parse(config["FGO_trivia"]))
                 {
                     string msg = code == 1 ? "Shutting down for rebuild." : config["Goodbye"];
-                    await client.SendMessage(ch, msg);
+                    await ch.SendMessage(msg);
                 }
             }
 

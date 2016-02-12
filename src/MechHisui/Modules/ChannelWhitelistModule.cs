@@ -11,7 +11,7 @@ namespace MechHisui.Modules
     {
         private ModuleManager _manager;
 
-        private readonly long[] _whitelistedChannels;
+        private readonly ulong[] _whitelistedChannels;
 
         public void Install(ModuleManager manager)
         {
@@ -27,7 +27,7 @@ namespace MechHisui.Modules
             _manager = manager;
         }
 
-        public ChannelWhitelistModule(params long[] channels)
+        public ChannelWhitelistModule(params ulong[] channels)
         {
             _whitelistedChannels = channels;
         }

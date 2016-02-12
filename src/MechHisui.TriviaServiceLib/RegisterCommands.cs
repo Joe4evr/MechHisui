@@ -15,7 +15,7 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Registering 'Trivia'...");
             client.Commands().CreateCommand("trivia")
-               .AddCheck((c, u, ch) => ch.Id == long.Parse(config["PrivChat"]))
+               .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["PrivChat"]))
                .Parameter("rounds", ParameterType.Required)
                .Description("Would you like to play a game?")
                .Do(async cea =>
@@ -26,7 +26,7 @@ namespace MechHisui.Commands
                    }
                    if (client.GetTrivias().Any(t => t.Channel.Id == cea.Channel.Id))
                    {
-                       await client.SendMessage(cea.Channel, $"Trivia already running.");
+                       await cea.Channel.SendMessage($"Trivia already running.");
                        return;
                    }
                    int rounds;
@@ -34,7 +34,7 @@ namespace MechHisui.Commands
                    {
                        if (rounds > TriviaHelpers.Questions.Count)
                        {
-                           await client.SendMessage(cea.Channel, $"Could not start trivia, too many questions specified.");
+                           await cea.Channel.SendMessage($"Could not start trivia, too many questions specified.");
                        }
                        else
                        {
@@ -45,7 +45,7 @@ namespace MechHisui.Commands
                    }
                    else
                    {
-                       await client.SendMessage(cea.Channel, $"Could not start trivia, parameter was not a number.");
+                       await cea.Channel.SendMessage($"Could not start trivia, parameter was not a number.");
                    }
                });
         }
