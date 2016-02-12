@@ -310,11 +310,23 @@ namespace DynamicCompile
             Console.WriteLine("Registering 'Pick'...");
             client.Commands().CreateCommand("pick")
                 .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
-                //.Parameter("items", ParameterType.Multiple)
+                .Parameter("items", ParameterType.Multiple)
+                .Description("Randomly choose aomething from any number of items.")
                 .Do(async cea =>
                 {
+                    if (cea.Args.Length <= 1)
+                    {
+                        await cea.Channel.SendMessage("Provide at least two items.");
+                        return;
+                    }
 
-                    await cea.Channel.SendMessage("To be re-implemented.");
+                    var items = cea.Args.ToList();
+                    for (int i = 0; i < 28; i++)
+                    {
+                        items.Shuffle();
+                    }
+
+                    await cea.Channel.SendMessage($"**Picked:** {items.ElementAt(new Random().Next(maxValue: items.Count))}");
                 });
         }
 
