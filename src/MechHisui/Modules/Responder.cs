@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using Discord;
 using System.IO;
-using Newtonsoft.Json;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
+using Discord;
+using JiiLib;
+using Newtonsoft.Json;
 
 namespace MechHisui.Modules
 {
@@ -28,25 +29,28 @@ namespace MechHisui.Modules
             if (e.Channel.Id == channel.Id)
             {
                 string temp = (e.Message.Text.StartsWith("@", StringComparison.InvariantCultureIgnoreCase) ? new string(e.Message.Text.SkipWhile(c => !Char.IsWhiteSpace(c)).ToArray()) : e.Message.Text);
- 
-                string quickResponse = String.Empty;
-                Func<Response, bool> pred = (k => k.Call.Contains(temp.ToLowerInvariant().Trim()));
-                var resp = Responses.responseDict.SingleOrDefault(k => k.Key.Contains(temp.ToLowerInvariant().Trim()));
-                var sResp = Responses.spammableResponses.SingleOrDefault(pred);
 
-                if (resp.Key != null)
+                if (!String.IsNullOrEmpty(temp))
                 {
-                    DateTime last;
-                    var msgTime = e.Message.Timestamp.ToUniversalTime();
-                    if (!_lastResponses.TryGetValue(resp.Key, out last) || (DateTime.UtcNow - last) > TimeSpan.FromMinutes(1))
+                    string quickResponse = String.Empty;
+                    Func<Response, bool> pred = (k => k.Call.ContainsIgnoreCase(temp.Trim()));
+                    var resp = Responses.responseDict.SingleOrDefault(k => k.Key.ContainsIgnoreCase(temp.Trim()));
+                    var sResp = Responses.spammableResponses.SingleOrDefault(pred);
+
+                    if (resp.Key != null)
                     {
-                        _lastResponses.AddOrUpdate(resp.Key, msgTime, (k, v) => v = msgTime);
-                        await e.Channel.SendMessage(resp.Value[new Random().Next() % resp.Value.Length]);
+                        DateTime last;
+                        var msgTime = e.Message.Timestamp.ToUniversalTime();
+                        if (!_lastResponses.TryGetValue(resp.Key, out last) || (DateTime.UtcNow - last) > TimeSpan.FromMinutes(1))
+                        {
+                            _lastResponses.AddOrUpdate(resp.Key, msgTime, (k, v) => v = msgTime);
+                            await e.Channel.SendMessage(resp.Value[new Random().Next() % resp.Value.Length]);
+                        }
                     }
-                }
-                else if (sResp != null)
-                {
-                    await e.Channel.SendMessage(sResp.Resp[new Random().Next() % sResp.Resp.Length]);
+                    else if (sResp != null)
+                    {
+                        await e.Channel.SendMessage(sResp.Resp[new Random().Next() % sResp.Resp.Length]);
+                    }
                 }
             }
         }

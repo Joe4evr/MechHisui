@@ -53,7 +53,12 @@ namespace MechHisui
 
             //Add a ModuleService and CommandService
             client.AddService(new ModuleService());
-            client.AddService(new CommandService(new CommandServiceConfig { HelpMode = HelpMode.Public, CommandChar = '.' }));
+            client.AddService(new CommandService(
+                new CommandServiceConfig
+                {
+                    HelpMode = HelpMode.Public,
+                    CommandChar = '.'
+                }));
 
             //register commands
             client.RegisterAddChannelCommand(config);
@@ -98,6 +103,7 @@ namespace MechHisui
                 {
                     Console.WriteLine($"Logged in as {client.CurrentUser.Name}");
                 }
+                Console.WriteLine($"MH v. 0.3.0");
 
                 //Use a channel whitelist
                 client.Modules().Add(

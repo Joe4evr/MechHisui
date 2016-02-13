@@ -11,6 +11,7 @@ using JiiLib;
 using JiiLib.Net;
 using Newtonsoft.Json;
 using MechHisui.FateGOLib;
+using System.Globalization;
 
 namespace MechHisui.Commands
 {
@@ -26,8 +27,44 @@ namespace MechHisui.Commands
                 .Description("Track your current AP.")
                 .Do(async cea =>
                 {
+                    FgoHelpers.UsersAP.RemoveAll(ap => ap.CurrentAP >= 140);
+                    if (cea.Args.All(s => s == String.Empty))
+                    {
+                        var userap = FgoHelpers.UsersAP.SingleOrDefault(u => u.UserID == cea.User.Id);
+                        if (userap != null)
+                        {
+                            await cea.Channel.SendMessage($"{cea.User.Name} currently has {userap.CurrentAP} AP.");
+                        }
+                        else
+                        {
+                            await cea.Channel.SendMessage($"Currently not tracking {cea.User.Name}'s AP.");
+                        }
+                        return;
+                    }
 
-                    await cea.Channel.SendMessage("To be (re)-implemented");
+                    int startAmount;
+                    TimeSpan startTime;
+                    if (Int32.TryParse(cea.Args[0], out startAmount) && TimeSpan.TryParseExact(cea.Args[1], @"m\:%s", CultureInfo.InvariantCulture, out startTime))
+                    {
+                        var tmp = FgoHelpers.UsersAP.SingleOrDefault(ap => ap.UserID == cea.User.Id);
+                        if (tmp != null)
+                        {
+                            FgoHelpers.UsersAP.Remove(tmp);
+                        }
+
+                        FgoHelpers.UsersAP.Add(new UserAP
+                        {
+                            UserID = cea.User.Id,
+                            StartAP = startAmount,
+                            StartTimeLeft = startTime
+                        });
+
+                        await cea.Channel.SendMessage($"Now tracking AP for `{cea.User.Name}`.");
+                    }
+                    else
+                    {
+                        await cea.Channel.SendMessage("One or both arguments could not be parsed.");
+                    }
                 });
         }
 
@@ -214,6 +251,12 @@ namespace MechHisui.Commands
                        var spaces = new string(' ', (longestName - friend.User.Length) + 1);
                        sb.Append($"{friend.User}:{spaces}{friend.FriendCode}");
                        sb.AppendLine((!String.IsNullOrEmpty(friend.Servant)) ? $" - {friend.Servant}" : String.Empty);
+                       if (sb.Length > 1700)
+                       {
+                           sb.Append("\n```");
+                           await cea.Channel.SendMessage(sb.ToString());
+                           sb = new StringBuilder("```\n");
+                       }
                    }
                    sb.Append("\n```");
                    await cea.Channel.SendMessage(sb.ToString());
@@ -293,12 +336,17 @@ namespace MechHisui.Commands
                 "MechHisui",
                 config["Project_Key"],
                 "exportSheet",
-                new string[] { "https://www.googleapis.com/auth/spreadsheets.readonly" });
+                new string[] 
+                {
+                    "https://www.googleapis.com/auth/spreadsheets",
+                    "https://www.googleapis.com/auth/drive",
+                    "https://spreadsheets.google.com/feeds/"
+                });
 
             var statService = new StatService(apiService,
                 servantAliasPath: Path.Combine(config["AliasPath"], "servants.json"),
                 ceAliasPath: Path.Combine(config["AliasPath"], "ces.json"),
-                mysticAliasPath: Path.Combine(config["AliasPath"], "mystic.json"));
+                mysticAliasPath: Path.Combine(config["AliasPath"], "mystics.json"));
             try
             {
                 //Using .Wait() here since there is no proper async context that await works
@@ -322,13 +370,13 @@ namespace MechHisui.Commands
                 .Do(async cea =>
                 {
                     var arg = String.Join(" ", cea.Args);
-                    if (arg.ToLowerInvariant().Contains("waifu"))
+                    if (arg.ContainsIgnoreCase("waifu"))
                     {
                         await cea.Channel.SendMessage("It has come to my attention that your 'waifu' is equatable to fecal matter.");
                         return;
                     }
 
-                    if (new[] { "enkidu", "arc", "arcueid", "astolfo" }.Contains(arg.ToLowerInvariant()))
+                    if (new[] { "enkidu", "arc", "arcueid", "astolfo" }.ContainsIgnoreCase(arg))
                     {
                         await cea.Channel.SendMessage("Never ever.");
                         return;
@@ -379,7 +427,7 @@ namespace MechHisui.Commands
                     }
                     else
                     {
-                        var potentials = FgoHelpers.CEDict.Where(c => c.Alias.Any(a => a.Contains(arg.ToLowerInvariant())) || c.CE.ToLowerInvariant().Contains(arg.ToLowerInvariant()));
+                        var potentials = FgoHelpers.CEDict.Where(c => c.Alias.Any(a => a.ContainsIgnoreCase(arg)) || c.CE.ContainsIgnoreCase(arg));
                         if (potentials.Any())
                         {
                             if (potentials.Count() > 1)
@@ -408,7 +456,7 @@ namespace MechHisui.Commands
                 {
                     var arg = String.Join(" ", cea.Args);
 
-                    var ces = FgoHelpers.CEProfiles.Where(c => c.Effect.ToLowerInvariant().Contains(arg));
+                    var ces = FgoHelpers.CEProfiles.Where(c => c.Effect.ContainsIgnoreCase(arg));
                     if (ces.Count() > 0)
                     {
                         string matches = String.Join("\n", ces.Select(c => $"**{c.Name}** - {c.Effect}"));
@@ -628,8 +676,8 @@ namespace MechHisui.Commands
                 .Parameter("item", ParameterType.Unparsed)
                 .Do(async cea =>
                 {
-                    var arg = String.Join(" ", cea.Args).ToLowerInvariant();
-                    var potentials = FgoHelpers.ItemDropsList.Where(d => d.ItemDrops.ToLowerInvariant().Contains(arg));
+                    var arg = String.Join(" ", cea.Args);
+                    var potentials = FgoHelpers.ItemDropsList.Where(d => d.ItemDrops.ContainsIgnoreCase(arg));
                     if (potentials.Any())
                     {
                         string result = String.Join("\n", potentials.Select(p => $"**{p.Map} - {p.NodeJP} ({p.NodeEN}):** {p.ItemDrops}"));
@@ -909,10 +957,11 @@ Discuss.");
         {
             string aoe = profile.NoblePhantasmEffect.Contains("AoE") && Regex.Match(profile.NoblePhantasmEffect, "[0-9]+H").Success ? " (Hits is per enemy)" : String.Empty;
             StringBuilder sb = new StringBuilder()
-                .AppendLine($"**Servant:** {profile.Name}")
-                .AppendLine($"**Class:** {profile.Class}")
-                .AppendLine($"**Rarity:** {profile.Rarity}☆")
                 .AppendLine($"**Collection ID:** {profile.Id}")
+                .AppendLine($"**Rarity:** {profile.Rarity}☆")
+                .AppendLine($"**Class:** {profile.Class}")
+                .AppendLine($"**Servant:** {profile.Name}")
+                .AppendLine($"**Gender:** {profile.Gender}")
                 .AppendLine($"**Card pool:** {profile.CardPool} ({profile.B}/{profile.A}/{profile.Q}/{profile.EX}) (Fourth number is EX attack)")
                 .AppendLine($"**Max ATK:** {profile.Atk}")
                 .AppendLine($"**Max HP:** {profile.HP}")
@@ -921,7 +970,7 @@ Discuss.");
                 .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*{aoe}")
                 .AppendLine($"**NP Rank+:** *{profile.NoblePhantasmRankUpEffect}*{aoe}")
                 .AppendLine($"**Attribute:** {profile.Attribute}")
-                .AppendLine($"**Traits:** {profile.Traits}");
+                .AppendLine($"**Traits:** {String.Join(", ", profile.Traits)}");
             int a = 1;
             foreach (var skill in profile.ActiveSkills)
             {

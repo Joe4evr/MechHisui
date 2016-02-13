@@ -82,23 +82,24 @@ namespace MechHisui.Commands
 
         public static void RegisterDeleteCommand(this DiscordClient client, IConfiguration config)
         {
-            //Console.WriteLine("Registering 'Delete'...");
-            //client.Commands().CreateCommand("del")
-            //    .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
-            //    .Parameter("number", ParameterType.Required)
-            //    .Hide()
-            //    .Do(async cea =>
-            //    {
-            //        int n;
-            //        if (Int32.TryParse(cea.Args[0], out n))
-            //        {
-            //            await client.DeleteMessages(
-            //                (await client.DownloadMessages(cea.Channel, 20))
-            //                .Where(m => m.IsAuthor)
-            //                .OrderByDescending(m => m.Timestamp)
-            //                .Take(n));
-            //        }
-            //    });
+            Console.WriteLine("Registering 'Delete'...");
+            client.Commands().CreateCommand("del")
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .Parameter("number", ParameterType.Required)
+                .Hide()
+                .Do(async cea =>
+                {
+                    int n;
+                    if (Int32.TryParse(cea.Args[0], out n))
+                    {
+                        (await cea.Channel.DownloadMessages(limit: 30))
+                            .Where(m => m.IsAuthor)
+                            .OrderByDescending(m => m.Timestamp)
+                            .Take(n)
+                            .ToList()
+                            .ForEach(async m => await m.Delete());
+                    }
+                });
         }
 
         public static void RegisterDisconnectCommand(this DiscordClient client, IConfiguration config)
@@ -127,8 +128,10 @@ namespace MechHisui.Commands
             {
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(StreamReader).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(DiscordClient).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(DateTimeWithZone).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(JsonConvert).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(FgoHelpers).Assembly.Location)
             };
             client.Commands().CreateCommand("eval")
@@ -137,7 +140,7 @@ namespace MechHisui.Commands
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Do(async cea =>
                 {
-                    string temp = cea.Args[0].Replace("\\", String.Empty);
+                    string temp = cea.Args[0];//    .Replace("\\", String.Empty);
                     if (temp.Contains('^'))
                     {
                         await cea.Channel.SendMessage("**Note:** `^` is the Binary XOR operator. Use Math.Pow(base, exponent) if you wish to calculate an exponentiation.");
@@ -145,22 +148,24 @@ namespace MechHisui.Commands
 
                     string arg1;
                     string arg2;
-                    if (temp.Contains(';') && temp.Contains("return"))
+                    if (temp.Contains(';'))
                     {
-                        arg2 = temp;
                         arg1 = String.Empty;
+                        arg2 = temp;
                     }
                     else
                     {
                         arg1 = temp;
-                        arg2 = "return null;";
+                        arg2 = String.Empty;
                     }
 
                     SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(
 @"using System;
+using System.IO;
 using System.Linq;
 using Discord;
 using JiiLib;
+using Newtonsoft.Json;
 using MechHisui.FateGOLib;
 
 namespace DynamicCompile
@@ -172,6 +177,7 @@ namespace DynamicCompile
         public string EvalFull()
         {
             " + arg2 + @"
+            return " + "\"Done;\"" + @"
         }
     }
 }");
@@ -194,6 +200,7 @@ namespace DynamicCompile
                                 diagnostic.Severity == DiagnosticSeverity.Error);
 
                             Console.Error.WriteLine(String.Join("\n", failures.Select(f => $"{f.Id}: {f.GetMessage()}")));
+                            //var loc = cea.User.Id == UInt64.Parse(config["Owner"]) ? failures.First().Location.SourceSpan.Start.ToString() : "";
                             await cea.Channel.SendMessage($"**Error:** {failures.First().GetMessage()}");
                         }
                         else
@@ -326,7 +333,7 @@ namespace DynamicCompile
                         items.Shuffle();
                     }
 
-                    await cea.Channel.SendMessage($"**Picked:** {items.ElementAt(new Random().Next(maxValue: items.Count))}");
+                    await cea.Channel.SendMessage($"**Picked:** `{items.ElementAt(new Random().Next(maxValue: items.Count))}`");
                 });
         }
 
@@ -481,16 +488,16 @@ namespace DynamicCompile
         internal static async Task Disconnect(DiscordClient client, IConfiguration config, int code = 0)
         {
             StopReponders(client, client.GetResponders());
-            await StopRecorders(client, client.GetRecorders());
+            //await StopRecorders(client, client.GetRecorders());
             //await StopTrvias(client.GetTrivias());
+            string msg = code == 1 ? "Shutting down for rebuild." : config["Goodbye"];
 
             foreach (var ch in client.Modules().Modules
                 .Single(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())
                 .EnabledChannels)
             {
-                if (ch.Id != UInt64.Parse(config["API_testing"]) && ch.Id != UInt64.Parse(config["FGO_trivia"]))
+                if (ch.Id != UInt64.Parse(config["API_testing"]))
                 {
-                    string msg = code == 1 ? "Shutting down for rebuild." : config["Goodbye"];
                     await ch.SendMessage(msg);
                 }
             }

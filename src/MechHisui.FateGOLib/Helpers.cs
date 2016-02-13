@@ -55,9 +55,9 @@ namespace MechHisui.FateGOLib
             => profiles.SelectMany(p => p.PassiveSkills.Where(s => s.Effect.Contains(effect)).Select(t => new { Name = p.Name, Rank = t.Rank })).Select(a => $"{a.Name}: {a.Rank}");
 
 
-        private static void test()
-        {
-            FateGOLib.FgoHelpers.ServantProfiles.SelectMany(p => p.PassiveSkills.Where(s => s.SkillName == "Riding").Select(t => new { Name = p.Name, Rank = t.Rank })).OrderByDescending(a => a.Rank, new RankComparer()).Select(a => $"{a.Name}: {a.Rank}");
-        }
+        //private static string test()
+        //{
+        //    
+        //}
     }
 }

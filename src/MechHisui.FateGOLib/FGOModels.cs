@@ -109,6 +109,6 @@ namespace MechHisui.FateGOLib
         public ulong UserID { get; set; }
         public TimeSpan StartTimeLeft { get; set; }
         public DateTime StartTime { get; } = DateTime.UtcNow;
-        public int CurrentAP => StartAP + (int)Math.Floor((DateTime.UtcNow - StartTime - StartTimeLeft).TotalMinutes / FgoHelpers.PerAP.TotalMinutes);
+        public int CurrentAP => StartAP + (int)Math.Floor((DateTime.UtcNow - (StartTime - StartTimeLeft)).TotalMinutes / FgoHelpers.PerAP.TotalMinutes);
     }
 }

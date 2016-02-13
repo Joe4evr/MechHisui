@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using JiiLib;
 using JiiLib.Net;
 using Newtonsoft.Json;
 
@@ -36,7 +37,7 @@ namespace MechHisui.FateGOLib
 
         public string LookupServantName(string servant)
         {
-            var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.Contains(servant.ToLowerInvariant()));
+            var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.ContainsIgnoreCase(servant));
 
             return (serv != null) ?
                 serv.Servant :
@@ -45,7 +46,7 @@ namespace MechHisui.FateGOLib
 
         public ServantProfile LookupStats(string servant)
         {
-            var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.Contains(servant.ToLowerInvariant()));
+            var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.ContainsIgnoreCase(servant));
             if (serv != null)
             {
                 Func<ServantProfile, bool> pred = p => p.Name == serv.Servant;
@@ -55,13 +56,13 @@ namespace MechHisui.FateGOLib
             else
             {
                 return FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Name.ToLowerInvariant() == servant.ToLowerInvariant())
-                    ?? FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Name.ToLowerInvariant().Contains(servant.ToLowerInvariant()));
+                    ?? FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Name.ContainsIgnoreCase(servant));
             }
         }
 
         public CEProfile LookupCE(string name)
         {
-            var ce = FgoHelpers.CEDict.SingleOrDefault(k => k.Alias.Contains(name.ToLowerInvariant()));
+            var ce = FgoHelpers.CEDict.SingleOrDefault(k => k.Alias.ContainsIgnoreCase(name));
             if (ce != null)
             {
                 return FgoHelpers.CEProfiles.SingleOrDefault(p => p.Name == ce.CE);
@@ -74,7 +75,7 @@ namespace MechHisui.FateGOLib
 
         public MysticCode LookupMystic(string code)
         {
-            var mystic = FgoHelpers.MysticCodeDict.SingleOrDefault(m => m.Alias.Contains(code.ToLowerInvariant()));
+            var mystic = FgoHelpers.MysticCodeDict.SingleOrDefault(m => m.Alias.ContainsIgnoreCase(code));
             if (mystic != null)
             {
                 return FgoHelpers.MysticCodeList.SingleOrDefault(m => m.Code == mystic.Code);
