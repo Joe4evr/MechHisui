@@ -20,7 +20,7 @@ namespace MechHisui.Commands
         public static void RegisterAPCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'AP'...");
-            client.Commands().CreateCommand("ap")
+            client.Services.Get<CommandService>().CreateCommand("ap")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Parameter("current amount", ParameterType.Optional)
                 .Parameter("time left", ParameterType.Optional)
@@ -71,7 +71,7 @@ namespace MechHisui.Commands
         public static void RegisterDailyCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Daily'...");
-            client.Commands().CreateCommand("daily")
+            client.Services.Get<CommandService>().CreateCommand("daily")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Parameter("day", ParameterType.Optional)
                 .Description("Relay the information of daily quests for the specified day. Default to current day.")
@@ -130,7 +130,7 @@ namespace MechHisui.Commands
         public static void RegisterEventCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Event'...");
-            client.Commands().CreateCommand("event")
+            client.Services.Get<CommandService>().CreateCommand("event")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Description("Relay information on current or upcoming events.")
                 .Do(async cea =>
@@ -213,7 +213,7 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Registering 'Friends'...");
             FriendCodes.ReadFriendData(config["FriendcodePath"]);
-            client.Commands().CreateCommand("friendcode")
+            client.Services.Get<CommandService>().CreateCommand("friendcode")
                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                .Parameter("code", ParameterType.Required)
                .Parameter("servant", ParameterType.Optional)
@@ -239,7 +239,7 @@ namespace MechHisui.Commands
                    }
                });
 
-            client.Commands().CreateCommand("listcodes")
+            client.Services.Get<CommandService>().CreateCommand("listcodes")
                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                .Description("Display known friendcodes.")
                .Do(async cea =>
@@ -262,7 +262,7 @@ namespace MechHisui.Commands
                    await cea.Channel.SendMessage(sb.ToString());
                });
 
-            client.Commands().CreateCommand("updatefc")
+            client.Services.Get<CommandService>().CreateCommand("updatefc")
                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                .Parameter("newServant", ParameterType.Unparsed)
                .Description("Update the Support Servant displayed in your friendcode listing.")
@@ -295,7 +295,7 @@ namespace MechHisui.Commands
         public static void RegisterLoginBonusCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Login bonus'...");
-            client.Commands().CreateCommand("login")
+            client.Services.Get<CommandService>().CreateCommand("login")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Description("Relay the information of the arrival of the next login bonus.")
                 .Do(async cea =>
@@ -311,7 +311,7 @@ namespace MechHisui.Commands
         public static void RegisterQuartzCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Quartz'...");
-            client.Commands().CreateCommand("quartz")
+            client.Services.Get<CommandService>().CreateCommand("quartz")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Description("Relay the prices of different amounts of Saint Quartz.")
                 .Do(async cea =>
@@ -363,7 +363,7 @@ namespace MechHisui.Commands
             }
 
             Console.WriteLine("Registering 'Stats'...");
-            client.Commands().CreateCommand("stats")
+            client.Services.Get<CommandService>().CreateCommand("stats")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Parameter("servantname", ParameterType.Unparsed)
                 .Description($"Relay information on the specified Servant. Alternative names acceptable.")
@@ -412,7 +412,7 @@ namespace MechHisui.Commands
                 });
 
             Console.WriteLine("Registering 'CE'...");
-            client.Commands().CreateCommand("ce")
+            client.Services.Get<CommandService>().CreateCommand("ce")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Parameter("cename", ParameterType.Unparsed)
                 .Description($"Relay information on the specified Craft Essence. Alternative names acceptable.")
@@ -448,7 +448,7 @@ namespace MechHisui.Commands
                 });
 
             Console.WriteLine("Registering 'All CE'...");
-            client.Commands().CreateCommand("allce")
+            client.Services.Get<CommandService>().CreateCommand("allce")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Parameter("ceeffect", ParameterType.Unparsed)
                 .Description($"Relay information on CEs having the specified effect.")
@@ -469,7 +469,7 @@ namespace MechHisui.Commands
                 });
 
             Console.WriteLine("Registering 'Update'...");
-            client.Commands().CreateCommand("update")
+            client.Services.Get<CommandService>().CreateCommand("update")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
                 .Parameter("item", ParameterType.Optional)
                 .Hide()
@@ -520,7 +520,7 @@ namespace MechHisui.Commands
                 });
 
             Console.WriteLine("Registering 'Add alias'...");
-            client.Commands().CreateCommand("addalias")
+            client.Services.Get<CommandService>().CreateCommand("addalias")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
                 .Hide()
                 .Parameter("servant", ParameterType.Required)
@@ -557,7 +557,7 @@ namespace MechHisui.Commands
                 });
 
             Console.WriteLine("Registering 'CE alias'...");
-            client.Commands().CreateCommand("cealias")
+            client.Services.Get<CommandService>().CreateCommand("cealias")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
                 .Hide()
                 .Parameter("ce", ParameterType.Required)
@@ -594,7 +594,7 @@ namespace MechHisui.Commands
                 });
 
             Console.WriteLine("Registering 'Curve'...");
-            client.Commands().CreateCommand("curve")
+            client.Services.Get<CommandService>().CreateCommand("curve")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Hide()
                 .Do(async cea =>
@@ -606,7 +606,7 @@ namespace MechHisui.Commands
                             "Semi(reverse) S is like (reverse)S, except not quite as bad in the slow periods and not quite as good in the fast periods.If you graph it it'll go right between linear and non-semi.`")));
 
             Console.WriteLine("Registering 'Mystic Codes'...");
-            client.Commands().CreateCommand("mystic")
+            client.Services.Get<CommandService>().CreateCommand("mystic")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Description("Relay information on available Mystic Codes.")
                 .Parameter("code", ParameterType.Unparsed)
@@ -631,7 +631,7 @@ namespace MechHisui.Commands
                     }
                 });
 
-            client.Commands().CreateCommand("listmystic")
+            client.Services.Get<CommandService>().CreateCommand("listmystic")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Description("Relay the names of available Mystic Codes.")
                 .Do(async cea =>
@@ -645,7 +645,7 @@ namespace MechHisui.Commands
                 });
 
             Console.WriteLine("Registering 'Mystic alias'...");
-            client.Commands().CreateCommand("mysticalias")
+            client.Services.Get<CommandService>().CreateCommand("mysticalias")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
                 .Hide()
                 .Parameter("mystic", ParameterType.Required)
@@ -670,7 +670,7 @@ namespace MechHisui.Commands
                 });
 
             Console.WriteLine("Registering 'Drops'...");
-            client.Commands().CreateCommand("drops")
+            client.Services.Get<CommandService>().CreateCommand("drops")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Description("Relay information about item drop locations.")
                 .Parameter("item", ParameterType.Unparsed)
@@ -713,7 +713,7 @@ namespace MechHisui.Commands
 
             Console.WriteLine("Registering 'HGW'...");
             FgoHelpers.InitRandomHgw(config);
-            client.Commands().CreateCommand("hgw")
+            client.Services.Get<CommandService>().CreateCommand("hgw")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Description("Set up a random Holy Grail War. Discuss.")
                 .Do(async cea =>
@@ -851,7 +851,7 @@ Discuss.");
                 "Dragonkin",
             };
             #endregion
-            client.Commands().CreateCommand("roll")
+            client.Services.Get<CommandService>().CreateCommand("roll")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Description("Simulate gacha roll (not accurate wrt rarity ratios and rate ups). Accepetable parameters are `fp1`, `fp10`, `ticket`, `4`, and `40`")
                 .Parameter("what", ParameterType.Required)
@@ -927,7 +927,7 @@ Discuss.");
 
         public static void RegisterZoukenCommand(this DiscordClient client, IConfiguration config)
         {
-            client.Commands().CreateCommand("zouken")
+            client.Services.Get<CommandService>().CreateCommand("zouken")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Hide()
                 .Do(async cea =>

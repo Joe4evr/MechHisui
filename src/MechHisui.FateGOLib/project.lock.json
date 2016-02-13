@@ -3,9 +3,8 @@
   "version": 2,
   "targets": {
     ".NETFramework,Version=v4.6": {
-      "Discord.Net/0.9.0-alpha2": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
+      "Discord.Net/0.9.0": {
+        "type": "package",
         "dependencies": {
           "Newtonsoft.Json": "8.0.1",
           "Nito.AsyncEx": "3.0.1",
@@ -13,15 +12,36 @@
           "WebSocket4Net": "0.14.1"
         },
         "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core",
           "System.Runtime",
           "System.Threading.Tasks"
-        ]
+        ],
+        "compile": {
+          "lib/net45/Discord.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.dll": {}
+        }
       },
-      "Discord.Net.Commands/0.9.0-alpha2": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
+      "Discord.Net.Commands/0.9.0-rc3": {
+        "type": "package",
         "dependencies": {
-          "Discord.Net": "0.9.0-alpha2"
+          "Discord.Net": "0.9.0-rc3"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/Discord.Net.Commands.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.Commands.dll": {}
         }
       },
       "Google.Apis/1.9.2": {
@@ -327,9 +347,8 @@
       }
     },
     ".NETFramework,Version=v4.6/win7-x86": {
-      "Discord.Net/0.9.0-alpha2": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
+      "Discord.Net/0.9.0": {
+        "type": "package",
         "dependencies": {
           "Newtonsoft.Json": "8.0.1",
           "Nito.AsyncEx": "3.0.1",
@@ -337,15 +356,36 @@
           "WebSocket4Net": "0.14.1"
         },
         "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core",
           "System.Runtime",
           "System.Threading.Tasks"
-        ]
+        ],
+        "compile": {
+          "lib/net45/Discord.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.dll": {}
+        }
       },
-      "Discord.Net.Commands/0.9.0-alpha2": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
+      "Discord.Net.Commands/0.9.0-rc3": {
+        "type": "package",
         "dependencies": {
-          "Discord.Net": "0.9.0-alpha2"
+          "Discord.Net": "0.9.0-rc3"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/Discord.Net.Commands.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.Commands.dll": {}
         }
       },
       "Google.Apis/1.9.2": {
@@ -651,9 +691,8 @@
       }
     },
     ".NETFramework,Version=v4.6/win7-x64": {
-      "Discord.Net/0.9.0-alpha2": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
+      "Discord.Net/0.9.0": {
+        "type": "package",
         "dependencies": {
           "Newtonsoft.Json": "8.0.1",
           "Nito.AsyncEx": "3.0.1",
@@ -661,15 +700,36 @@
           "WebSocket4Net": "0.14.1"
         },
         "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core",
           "System.Runtime",
           "System.Threading.Tasks"
-        ]
+        ],
+        "compile": {
+          "lib/net45/Discord.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.dll": {}
+        }
       },
-      "Discord.Net.Commands/0.9.0-alpha2": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
+      "Discord.Net.Commands/0.9.0-rc3": {
+        "type": "package",
         "dependencies": {
-          "Discord.Net": "0.9.0-alpha2"
+          "Discord.Net": "0.9.0-rc3"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net45/Discord.Net.Commands.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.Commands.dll": {}
         }
       },
       "Google.Apis/1.9.2": {
@@ -976,14 +1036,6 @@
     }
   },
   "libraries": {
-    "Discord.Net/0.9.0-alpha2": {
-      "type": "project",
-      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/project.json"
-    },
-    "Discord.Net.Commands/0.9.0-alpha2": {
-      "type": "project",
-      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/project.json"
-    },
     "JiiLib/0.1.1": {
       "type": "project",
       "path": "../../../JiiLib/src/JiiLib/project.json"
@@ -991,6 +1043,32 @@
     "JiiLib.Net/0.1.1": {
       "type": "project",
       "path": "../../../JiiLib/src/JiiLib.Net/project.json"
+    },
+    "Discord.Net/0.9.0": {
+      "type": "package",
+      "sha512": "6z5mNP6DRfHsJce1TrZ+G/ojtUheCdB9HeE9O44mJFoeLdeWVYrQw7pjGNlC34N2+vwFTbsQjRBVrftjnpS8pQ==",
+      "files": [
+        "Discord.Net.0.9.0.nupkg",
+        "Discord.Net.0.9.0.nupkg.sha512",
+        "Discord.Net.nuspec",
+        "lib/dotnet5.4/Discord.Net.dll",
+        "lib/dotnet5.4/Discord.Net.xml",
+        "lib/net45/Discord.Net.dll",
+        "lib/net45/Discord.Net.xml"
+      ]
+    },
+    "Discord.Net.Commands/0.9.0-rc3": {
+      "type": "package",
+      "sha512": "aalMnQTrMh/iS9hCs1onccPvnO7ut0EdtNijWc56gpyHpLTSniw3TTv/7O5pIuckzpwme25l/1VymBqhtTd8vg==",
+      "files": [
+        "Discord.Net.Commands.0.9.0-rc3.nupkg",
+        "Discord.Net.Commands.0.9.0-rc3.nupkg.sha512",
+        "Discord.Net.Commands.nuspec",
+        "lib/dotnet5.4/Discord.Net.Commands.dll",
+        "lib/dotnet5.4/Discord.Net.Commands.xml",
+        "lib/net45/Discord.Net.Commands.dll",
+        "lib/net45/Discord.Net.Commands.xml"
+      ]
     },
     "Google.Apis/1.9.2": {
       "type": "package",
@@ -1620,8 +1698,8 @@
       "Google.Apis.Script.v1 >= 1.9.2.10",
       "JiiLib ",
       "JiiLib.Net ",
-      "Discord.Net >= 0.9.0-alpha2",
-      "Discord.Net.Commands >= 0.9.0-alpha2"
+      "Discord.Net >= 0.9.0-*",
+      "Discord.Net.Commands >= 0.9.0-*"
     ],
     ".NETFramework,Version=v4.6": []
   }

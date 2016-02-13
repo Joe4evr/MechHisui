@@ -14,7 +14,7 @@ namespace MechHisui.Commands
         public static void RegisterTriviaCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Trivia'...");
-            client.Commands().CreateCommand("trivia")
+            client.Services.Get<CommandService>().CreateCommand("trivia")
                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["PrivChat"]))
                .Parameter("rounds", ParameterType.Required)
                .Description("Would you like to play a game?")

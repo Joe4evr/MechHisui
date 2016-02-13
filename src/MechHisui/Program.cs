@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.AspNet.Hosting;
-using Microsoft.Dnx.Compilation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.PlatformAbstractions;
 using Discord;
@@ -38,11 +37,11 @@ namespace MechHisui
 
             IConfiguration config = builder.Build();
 
-            var client = new DiscordClient(new DiscordConfig
+            var client = new DiscordClient(conf =>
             {
-                AppName = "MechHisui",
-                AppVersion = "0.3.0",
-                LogLevel = LogSeverity.Warning
+                conf.AppName = "MechHisui";
+                conf.AppVersion = "0.3.0";
+                conf.LogLevel = LogSeverity.Warning;
             });
 
             //client.Disconnected += (s, e) => Environment.Exit(0);
@@ -53,12 +52,12 @@ namespace MechHisui
 
             //Add a ModuleService and CommandService
             client.AddService(new ModuleService());
-            client.AddService(new CommandService(
-                new CommandServiceConfig
-                {
-                    HelpMode = HelpMode.Public,
-                    CommandChar = '.'
-                }));
+            client.UsingCommands(conf =>
+            {
+                conf.AllowMentionPrefix = true;
+                conf.HelpMode = HelpMode.Public;
+                conf.PrefixChar = '.';
+            });
 
             //register commands
             client.RegisterAddChannelCommand(config);

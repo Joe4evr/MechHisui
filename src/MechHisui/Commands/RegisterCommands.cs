@@ -27,7 +27,7 @@ namespace MechHisui.Commands
         public static void RegisterAddChannelCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Add channel'...");
-            client.Commands().CreateCommand("add")
+            client.Services.Get<CommandService>().CreateCommand("add")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Parameter("id", ParameterType.Required)
@@ -83,7 +83,7 @@ namespace MechHisui.Commands
         public static void RegisterDeleteCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Delete'...");
-            client.Commands().CreateCommand("del")
+            client.Services.Get<CommandService>().CreateCommand("del")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("number", ParameterType.Required)
                 .Hide()
@@ -105,7 +105,7 @@ namespace MechHisui.Commands
         public static void RegisterDisconnectCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Disconnect'...");
-            client.Commands().CreateCommand("disconnect")
+            client.Services.Get<CommandService>().CreateCommand("disconnect")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("code", ParameterType.Optional)
                 .Hide()
@@ -134,7 +134,7 @@ namespace MechHisui.Commands
                 MetadataReference.CreateFromFile(typeof(JsonConvert).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(FgoHelpers).Assembly.Location)
             };
-            client.Commands().CreateCommand("eval")
+            client.Services.Get<CommandService>().CreateCommand("eval")
                 .Parameter("func", ParameterType.Unparsed)
                 .Hide()
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
@@ -230,7 +230,7 @@ namespace DynamicCompile
 
             
             //Console.WriteLine("Registering 'Image'...");
-            //client.Commands().CreateCommand("image")
+            //client.Services.Get<CommandService>().CreateCommand("image")
             //    .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]))
             //    .Hide()
             //    .Parameter("album", ParameterType.Optional)
@@ -251,7 +251,7 @@ namespace DynamicCompile
         public static void RegisterInfoCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Info'...");
-            client.Commands().CreateCommand("info")
+            client.Services.Get<CommandService>().CreateCommand("info")
                 .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
                 .Description("Relay info about myself.")
                 .Do(async cea =>
@@ -263,7 +263,7 @@ namespace DynamicCompile
         public static void RegisterKnownChannelsCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Known'...");
-            client.Commands().CreateCommand("known")
+            client.Services.Get<CommandService>().CreateCommand("known")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
@@ -279,7 +279,7 @@ namespace DynamicCompile
         public static void RegisterLearnCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Learn'...");
-            client.Commands().CreateCommand("learn")
+            client.Services.Get<CommandService>().CreateCommand("learn")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("trigger", ParameterType.Required)
                 .Parameter("response", ParameterType.Required)
@@ -315,7 +315,7 @@ namespace DynamicCompile
         public static void RegisterPickCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Pick'...");
-            client.Commands().CreateCommand("pick")
+            client.Services.Get<CommandService>().CreateCommand("pick")
                 .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
                 .Parameter("items", ParameterType.Multiple)
                 .Description("Randomly choose aomething from any number of items.")
@@ -340,7 +340,7 @@ namespace DynamicCompile
         public static void RegisterRecordingCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Recording'...");
-            client.Commands().CreateCommand("record")
+            client.Services.Get<CommandService>().CreateCommand("record")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
@@ -358,7 +358,7 @@ namespace DynamicCompile
                     }
                 });
 
-            client.Commands().CreateCommand("endrecord")
+            client.Services.Get<CommandService>().CreateCommand("endrecord")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
@@ -381,7 +381,7 @@ namespace DynamicCompile
         public static void RegisterResetCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Reset'...");
-            client.Commands().CreateCommand("reset")
+            client.Services.Get<CommandService>().CreateCommand("reset")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
@@ -395,7 +395,7 @@ namespace DynamicCompile
         public static void RegisterThemeCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Theme'...");
-            client.Commands().CreateCommand("theme")
+            client.Services.Get<CommandService>().CreateCommand("theme")
                 .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
                 .Do(async cea =>
                 {
@@ -406,7 +406,7 @@ namespace DynamicCompile
         public static void RegisterWhereCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Where'...");
-            client.Commands().CreateCommand("where")
+            client.Services.Get<CommandService>().CreateCommand("where")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("item")
                 .Hide()
@@ -462,7 +462,7 @@ namespace DynamicCompile
             {
                 xmasvids = JsonConvert.DeserializeObject<List<string>>(tr.ReadToEnd());
             }
-            client.Commands().CreateCommand("xmas")
+            client.Services.Get<CommandService>().CreateCommand("xmas")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) && DateTime.UtcNow.Month == 12)
                 .Hide()
                 .Do(async cea =>
@@ -470,7 +470,7 @@ namespace DynamicCompile
                     await cea.Channel.SendMessage(xmasvids.ElementAt(new Random().Next() % xmasvids.Count));
                 });
 
-            client.Commands().CreateCommand("addxmas")
+            client.Services.Get<CommandService>().CreateCommand("addxmas")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && DateTime.UtcNow.Month == 12)
                 .Parameter("item", ParameterType.Required)
                 .Hide()

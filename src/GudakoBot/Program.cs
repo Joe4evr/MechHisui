@@ -45,7 +45,7 @@ namespace GudakoBot
             Console.WriteLine($"Loaded {Randomlines.Count} lines.");
 
             var client = new DiscordClient(
-                new DiscordConfig
+                new DiscordConfigBuilder
                 {
                     AppName = "GudakoBot",
                     CacheToken = true,

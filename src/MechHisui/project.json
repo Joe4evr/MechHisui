@@ -19,9 +19,9 @@
         "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final",
         "Microsoft.Extensions.DependencyInjection": "1.0.0-rc1-final",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-*",
-        "Discord.Net": "0.9.0-alpha2",
-        "Discord.Net.Commands": "0.9.0-alpha2",
-        "Discord.Net.Modules": "0.9.0-alpha2",
+        "Discord.Net": "0.9.0-*",
+        "Discord.Net.Commands": "0.9.0-*",
+        "Discord.Net.Modules": "0.9.0-*",
         "MechHisui.FateGOLib": "",
         "MechHisui.FfrkLib": "",
         "MechHisui.TriviaServiceLib": ""

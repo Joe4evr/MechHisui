@@ -3,9 +3,8 @@
   "version": 2,
   "targets": {
     "DNX,Version=v4.6": {
-      "Discord.Net/0.9.0-alpha2": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
+      "Discord.Net/0.9.0": {
+        "type": "package",
         "dependencies": {
           "Newtonsoft.Json": "8.0.1",
           "Nito.AsyncEx": "3.0.1",
@@ -13,9 +12,19 @@
           "WebSocket4Net": "0.14.1"
         },
         "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core",
           "System.Runtime",
           "System.Threading.Tasks"
-        ]
+        ],
+        "compile": {
+          "lib/net45/Discord.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.dll": {}
+        }
       },
       "JiiLib/0.1.1": {
         "type": "project",
@@ -580,9 +589,8 @@
       }
     },
     "DNX,Version=v4.6/win7-x86": {
-      "Discord.Net/0.9.0-alpha2": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
+      "Discord.Net/0.9.0": {
+        "type": "package",
         "dependencies": {
           "Newtonsoft.Json": "8.0.1",
           "Nito.AsyncEx": "3.0.1",
@@ -590,9 +598,19 @@
           "WebSocket4Net": "0.14.1"
         },
         "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core",
           "System.Runtime",
           "System.Threading.Tasks"
-        ]
+        ],
+        "compile": {
+          "lib/net45/Discord.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.dll": {}
+        }
       },
       "JiiLib/0.1.1": {
         "type": "project",
@@ -1157,9 +1175,8 @@
       }
     },
     "DNX,Version=v4.6/win7-x64": {
-      "Discord.Net/0.9.0-alpha2": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
+      "Discord.Net/0.9.0": {
+        "type": "package",
         "dependencies": {
           "Newtonsoft.Json": "8.0.1",
           "Nito.AsyncEx": "3.0.1",
@@ -1167,9 +1184,19 @@
           "WebSocket4Net": "0.14.1"
         },
         "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core",
           "System.Runtime",
           "System.Threading.Tasks"
-        ]
+        ],
+        "compile": {
+          "lib/net45/Discord.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.dll": {}
+        }
       },
       "JiiLib/0.1.1": {
         "type": "project",
@@ -1735,13 +1762,22 @@
     }
   },
   "libraries": {
-    "Discord.Net/0.9.0-alpha2": {
-      "type": "project",
-      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/project.json"
-    },
     "JiiLib/0.1.1": {
       "type": "project",
       "path": "../../../JiiLib/src/JiiLib/project.json"
+    },
+    "Discord.Net/0.9.0": {
+      "type": "package",
+      "sha512": "6z5mNP6DRfHsJce1TrZ+G/ojtUheCdB9HeE9O44mJFoeLdeWVYrQw7pjGNlC34N2+vwFTbsQjRBVrftjnpS8pQ==",
+      "files": [
+        "Discord.Net.0.9.0.nupkg",
+        "Discord.Net.0.9.0.nupkg.sha512",
+        "Discord.Net.nuspec",
+        "lib/dotnet5.4/Discord.Net.dll",
+        "lib/dotnet5.4/Discord.Net.xml",
+        "lib/net45/Discord.Net.dll",
+        "lib/net45/Discord.Net.xml"
+      ]
     },
     "Microsoft.AspNet.FileProviders.Abstractions/1.0.0-rc1-final": {
       "type": "package",
@@ -2450,7 +2486,7 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "Discord.Net >= 0.9.0-alpha2",
+      "Discord.Net >= 0.9.0-*",
       "JiiLib ",
       "Microsoft.AspNet.Hosting >= 1.0.0-rc1-final",
       "Microsoft.AspNet.Hosting.Abstractions >= 1.0.0-rc1-final",

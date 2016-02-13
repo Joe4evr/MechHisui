@@ -10,8 +10,8 @@
         "Google.Apis.Script.v1": "1.9.2.10",
         "JiiLib": "",
         "JiiLib.Net": "",
-        "Discord.Net": "0.9.0-alpha2",
-        "Discord.Net.Commands": "0.9.0-alpha2"
+        "Discord.Net": "0.9.0-*",
+        "Discord.Net.Commands": "0.9.0-*"
     },
 
   "frameworks": {
