@@ -69,7 +69,8 @@ namespace MechHisui.FateGOLib
             }
             else
             {
-                return FgoHelpers.CEProfiles.SingleOrDefault(p => p.Name.ToLowerInvariant() == name.ToLowerInvariant());
+                return FgoHelpers.CEProfiles.SingleOrDefault(p => p.Name.ToLowerInvariant() == name.ToLowerInvariant())
+                    ?? FgoHelpers.CEProfiles.SingleOrDefault(p => p.Name.ContainsIgnoreCase(name.ToLowerInvariant()));
             }
         }
 
