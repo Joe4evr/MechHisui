@@ -42,6 +42,7 @@ namespace MechHisui
                 conf.AppName = "MechHisui";
                 conf.AppVersion = "0.3.0";
                 conf.LogLevel = LogSeverity.Warning;
+                conf.UseLargeThreshold = true;
             });
 
             //client.Disconnected += (s, e) => Environment.Exit(0);
