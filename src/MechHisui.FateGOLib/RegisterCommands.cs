@@ -240,7 +240,7 @@ namespace MechHisui.Commands
                });
 
             client.Services.Get<CommandService>().CreateCommand("listcodes")
-               .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+               .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
                .Description("Display known friendcodes.")
                .Do(async cea =>
                {
@@ -773,6 +773,44 @@ $@"**Team Saber:** {hgw.ElementAt(0).Key} + {hgw.ElementAt(0).Value}
 **Team Assassin:** {hgw.ElementAt(5).Key} + {hgw.ElementAt(5).Value}
 **Team Berserker:** {hgw.ElementAt(6).Key} + {hgw.ElementAt(6).Value}
 Discuss.");
+                });
+
+            client.Services.Get<CommandService>().CreateCommand("addhgw")
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
+                .Hide()
+                .Parameter("cat", ParameterType.Required)
+                .Parameter("name", ParameterType.Multiple)
+                .Do(async cea =>
+                {
+                    switch (cea.Args[0])
+                    {
+                        case "servant":
+                            var temp = cea.Args[1].Split(' ');
+                            var name = String.Join(" ", temp.Skip(1));
+                            FgoHelpers.NameOnlyServants.Add(
+                                new NameOnlyServant
+                                {
+                                    Class = temp[0],
+                                    Name = name
+                                });
+                            using (TextWriter tw = new StreamWriter(Path.Combine(config["other"], "nameonlyservants.json")))
+                            {
+                                tw.Write(JsonConvert.SerializeObject(FgoHelpers.NameOnlyServants, Formatting.Indented));
+                            }
+                            await cea.Channel.SendMessage($"Added `{name}` as a `{temp[0]}`.");
+                            break;
+                        case "master":
+                            FgoHelpers.Masters.Add(cea.Args[1]);
+                            using (TextWriter tw = new StreamWriter(Path.Combine(config["other"], "masters.json")))
+                            {
+                                tw.Write(JsonConvert.SerializeObject(FgoHelpers.Masters, Formatting.Indented));
+                            }
+                            await cea.Channel.SendMessage($"Added `{cea.Args[1]}` as a Master.");
+                            break;
+                        default:
+                            await cea.Channel.SendMessage("Unsupported catagory.");
+                            break;
+                    }
                 });
 
             Console.WriteLine("Registering 'Roll'...");
