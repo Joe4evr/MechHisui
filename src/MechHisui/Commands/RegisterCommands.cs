@@ -135,12 +135,12 @@ namespace MechHisui.Commands
                 MetadataReference.CreateFromFile(typeof(FgoHelpers).Assembly.Location)
             };
             client.Services.Get<CommandService>().CreateCommand("eval")
-                .Parameter("func", ParameterType.Unparsed)
+                .Parameter("func", ParameterType.Required)
                 .Hide()
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Do(async cea =>
                 {
-                    string temp = cea.Args[0];//    .Replace("\\", String.Empty);
+                    string temp = cea.Args[0].Replace("\\", String.Empty);
                     if (temp.Contains('^'))
                     {
                         await cea.Channel.SendMessage("**Note:** `^` is the Binary XOR operator. Use Math.Pow(base, exponent) if you wish to calculate an exponentiation.");
@@ -177,7 +177,7 @@ namespace DynamicCompile
         public string EvalFull()
         {
             " + arg2 + @"
-            return " + "\"Done;\"" + @"
+            return " + "\"Done\";" + @"
         }
     }
 }");
