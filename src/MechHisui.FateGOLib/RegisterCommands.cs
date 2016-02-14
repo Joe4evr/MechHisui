@@ -818,7 +818,7 @@ Discuss.");
             var rolltypes = new[] { "fp1", "fp10", "ticket", "4", "40" };
             var excluded = new[]
             {
-                "Jeanne d'Arc (Alter)",
+                "Jeanne d'Arc (Alter) (unobtainable)",
                 "Arturia Pendragon (Lily)",
                 "Gilgamesh",
                 "Sakata Kintoki",
