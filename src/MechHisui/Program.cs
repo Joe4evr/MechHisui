@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNet.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -8,7 +9,6 @@ using Discord.Commands;
 using Discord.Modules;
 using MechHisui.Commands;
 using MechHisui.Modules;
-using System.Diagnostics;
 
 namespace MechHisui
 {
@@ -88,6 +88,8 @@ namespace MechHisui
             client.RegisterQuartzCommand(config);
             client.RegisterZoukenCommand(config);
 
+            client.RegisterHisuiBetsCommands(config);
+
             client.RegisterTriviaCommand(config);
 
             Responses.InitResponses(config);
@@ -152,6 +154,7 @@ namespace MechHisui
                             }
                         }
                     }
+                    client.AddNewHisuiBetsUsers(config);
                     Console.WriteLine($"Started up at {DateTime.Now}.");
                 }
             });

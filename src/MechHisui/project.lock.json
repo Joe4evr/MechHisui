@@ -26,10 +26,10 @@
           "lib/net45/Discord.Net.dll": {}
         }
       },
-      "Discord.Net.Commands/0.9.0-rc3": {
+      "Discord.Net.Commands/0.9.0-rc3-1": {
         "type": "package",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3"
+          "Discord.Net": "0.9.0-rc3-3"
         },
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -174,6 +174,15 @@
       "MechHisui.FfrkLib/1.0.0": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6"
+      },
+      "MechHisui.HisuiBets/0.1.0": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6",
+        "dependencies": {
+          "Discord.Net": "0.9.0",
+          "Discord.Net.Commands": "0.9.0",
+          "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
+        }
       },
       "MechHisui.TriviaServiceLib/0.3.0": {
         "type": "project",
@@ -1104,10 +1113,10 @@
           "lib/net45/Discord.Net.dll": {}
         }
       },
-      "Discord.Net.Commands/0.9.0-rc3": {
+      "Discord.Net.Commands/0.9.0-rc3-1": {
         "type": "package",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3"
+          "Discord.Net": "0.9.0-rc3-3"
         },
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -1252,6 +1261,15 @@
       "MechHisui.FfrkLib/1.0.0": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6"
+      },
+      "MechHisui.HisuiBets/0.1.0": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6",
+        "dependencies": {
+          "Discord.Net": "0.9.0",
+          "Discord.Net.Commands": "0.9.0",
+          "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
+        }
       },
       "MechHisui.TriviaServiceLib/0.3.0": {
         "type": "project",
@@ -2182,10 +2200,10 @@
           "lib/net45/Discord.Net.dll": {}
         }
       },
-      "Discord.Net.Commands/0.9.0-rc3": {
+      "Discord.Net.Commands/0.9.0-rc3-1": {
         "type": "package",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3"
+          "Discord.Net": "0.9.0-rc3-3"
         },
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -2330,6 +2348,15 @@
       "MechHisui.FfrkLib/1.0.0": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6"
+      },
+      "MechHisui.HisuiBets/0.1.0": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6",
+        "dependencies": {
+          "Discord.Net": "0.9.0",
+          "Discord.Net.Commands": "0.9.0",
+          "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
+        }
       },
       "MechHisui.TriviaServiceLib/0.3.0": {
         "type": "project",
@@ -3258,6 +3285,10 @@
       "type": "project",
       "path": "../MechHisui.FfrkLib/project.json"
     },
+    "MechHisui.HisuiBets/0.1.0": {
+      "type": "project",
+      "path": "../MechHisui.HisuiBets/project.json"
+    },
     "MechHisui.TriviaServiceLib/0.3.0": {
       "type": "project",
       "path": "../MechHisui.TriviaServiceLib/project.json"
@@ -3275,12 +3306,12 @@
         "lib/net45/Discord.Net.xml"
       ]
     },
-    "Discord.Net.Commands/0.9.0-rc3": {
+    "Discord.Net.Commands/0.9.0-rc3-1": {
       "type": "package",
-      "sha512": "aalMnQTrMh/iS9hCs1onccPvnO7ut0EdtNijWc56gpyHpLTSniw3TTv/7O5pIuckzpwme25l/1VymBqhtTd8vg==",
+      "sha512": "JG1nDDvfocLnpVaJSGdhwzRLkatKgC9BnoXlk2VteKYjXqUQLJFzDfN/fmjL+SKjN55KLew7oVP+TKV+EJq0/w==",
       "files": [
-        "Discord.Net.Commands.0.9.0-rc3.nupkg",
-        "Discord.Net.Commands.0.9.0-rc3.nupkg.sha512",
+        "Discord.Net.Commands.0.9.0-rc3-1.nupkg",
+        "Discord.Net.Commands.0.9.0-rc3-1.nupkg.sha512",
         "Discord.Net.Commands.nuspec",
         "lib/dotnet5.4/Discord.Net.Commands.dll",
         "lib/dotnet5.4/Discord.Net.Commands.xml",
@@ -5081,6 +5112,7 @@
       "Discord.Net.Modules >= 0.9.0-*",
       "MechHisui.FateGOLib ",
       "MechHisui.FfrkLib ",
+      "MechHisui.HisuiBets ",
       "MechHisui.TriviaServiceLib "
     ],
     "DNX,Version=v4.6": [

@@ -25,6 +25,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MechHisui.FfrkLib", "src\Me
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "GudakoBot", "src\GudakoBot\GudakoBot.xproj", "{5453B1D5-07FF-4162-ADD1-3947EB144872}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MechHisui.HisuiBets", "src\MechHisui.HisuiBets\MechHisui.HisuiBets.xproj", "{40CC9313-FDE0-4348-9F7B-2723C7A8E8B9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,6 +91,14 @@ Global
 		{5453B1D5-07FF-4162-ADD1-3947EB144872}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5453B1D5-07FF-4162-ADD1-3947EB144872}.TestResponses|Any CPU.ActiveCfg = Debug|Any CPU
 		{5453B1D5-07FF-4162-ADD1-3947EB144872}.TestResponses|Any CPU.Build.0 = Debug|Any CPU
+		{40CC9313-FDE0-4348-9F7B-2723C7A8E8B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40CC9313-FDE0-4348-9F7B-2723C7A8E8B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40CC9313-FDE0-4348-9F7B-2723C7A8E8B9}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40CC9313-FDE0-4348-9F7B-2723C7A8E8B9}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
+		{40CC9313-FDE0-4348-9F7B-2723C7A8E8B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40CC9313-FDE0-4348-9F7B-2723C7A8E8B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40CC9313-FDE0-4348-9F7B-2723C7A8E8B9}.TestResponses|Any CPU.ActiveCfg = Debug|Any CPU
+		{40CC9313-FDE0-4348-9F7B-2723C7A8E8B9}.TestResponses|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -99,5 +109,6 @@ Global
 		{4A58457F-D45B-4569-BBC7-91C0EE17771E} = {15F298D4-4066-4FF0-8269-81813A4A0BFB}
 		{06BAFD87-1ADC-4C5C-ABB5-F5B7AF86C8A8} = {15F298D4-4066-4FF0-8269-81813A4A0BFB}
 		{5453B1D5-07FF-4162-ADD1-3947EB144872} = {15F298D4-4066-4FF0-8269-81813A4A0BFB}
+		{40CC9313-FDE0-4348-9F7B-2723C7A8E8B9} = {15F298D4-4066-4FF0-8269-81813A4A0BFB}
 	EndGlobalSection
 EndGlobal
