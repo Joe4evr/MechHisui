@@ -268,13 +268,13 @@ namespace MechHisui.Commands
                .Description("Update the Support Servant displayed in your friendcode listing.")
                .Do(async cea =>
                {
-                   if (!cea.Args.Any())
+                   var arg = cea.Args[0];
+                   if (arg.Length == 0)
                    {
                        await cea.Channel.SendMessage($"No argument specified.");
                        return;
                    }
 
-                   var arg = string.Join(" ", cea.Args);
                    Func<FriendData, bool> pred = c => c.User == cea.User.Name;
                    if (FriendCodes.friendData.Any(pred))
                    {
@@ -819,6 +819,7 @@ Discuss.");
             var excluded = new[]
             {
                 "Jeanne d'Arc (Alter) (unobtainable)",
+                "Mash Kyrielight",
                 "Arturia Pendragon (Lily)",
                 "Gilgamesh",
                 "Sakata Kintoki",

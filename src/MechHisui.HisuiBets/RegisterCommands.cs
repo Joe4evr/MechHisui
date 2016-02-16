@@ -13,6 +13,7 @@ namespace MechHisui.Commands
     public static class BetsExtensions
     {
         private static bool gameOpen = false;
+        private static bool betsOpen = false;
         private static Timer countDown;
         private static Timer upTimer;
         private static BankOfHisui bank = new BankOfHisui();
@@ -47,6 +48,7 @@ namespace MechHisui.Commands
                 {
                     ActiveBets = new List<Bet>();
                     gameOpen = true;
+                    betsOpen = true;
                     await cea.Channel.SendMessage("A new game is starting. You may place your bets now.");
                 });
 
@@ -58,7 +60,7 @@ namespace MechHisui.Commands
                 .Do(async cea =>
                 {
                     var userBucks = bank.Accounts.SingleOrDefault(u => u.UserId == cea.User.Id).Bucks;
-                    if (!gameOpen)
+                    if (!gameOpen || !betsOpen)
                     {
                         await cea.Channel.SendMessage("Bets are currently closed at this time.");
                         return;
@@ -140,6 +142,14 @@ namespace MechHisui.Commands
                         var betSpaces = new String(' ', (longestBet - bet.BettedAmount.ToString().Length));
 
                         sb.AppendLine($"{bet.UserName}:{nameSpaces}{symbol}{betSpaces}{bet.BettedAmount} - {bet.Tribute}");
+
+                        if (sb.Length > 1700)
+                        {
+
+                            sb.Append("```");
+                            await cea.Channel.SendMessage(sb.ToString());
+                            sb = new StringBuilder("```\n");
+                        }
                     }
                     sb.Append("```");
 
@@ -160,7 +170,7 @@ namespace MechHisui.Commands
 
                     countDown = new Timer(async cb =>
                     {
-                        gameOpen = false;
+                        betsOpen = false;
                         foreach (var bet in ActiveBets)
                         {
                             bank.Accounts.Single(u => u.UserId == bet.UserId).Bucks -= bet.BettedAmount;
@@ -177,6 +187,7 @@ namespace MechHisui.Commands
                 .Parameter("name", ParameterType.Required)
                 .Do(async cea =>
                 {
+                    gameOpen = false;
                     var winners = ActiveBets.Where(b => b.Tribute.Equals(cea.Args[0], StringComparison.InvariantCultureIgnoreCase)).Select(b => cea.Server.GetUser(b.UserId));
                     if (winners.Count() > 0)
                     {
@@ -189,7 +200,14 @@ namespace MechHisui.Commands
                         }
                         bank.WriteBank(config["bank"]);
 
-                        await cea.Channel.SendMessage($"{String.Join(", ", winners.Select(u => u.Name))} have won {symbol}{payout} each. {symbol}{rounding} has been lost due to rounding.");
+                        if (winners.Count() == 1)
+                        {
+                            await cea.Channel.SendMessage($"{winners.Single().Name} has won the whole pot of {symbol}{payout}.");
+                        }
+                        else
+                        {
+                            await cea.Channel.SendMessage($"{String.Join(", ", winners.Select(u => u.Name))} have won {symbol}{payout} each. {symbol}{rounding} has been lost due to rounding.");
+                        }
                     }
                     else
                     {

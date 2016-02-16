@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Microsoft.AspNet.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.PlatformAbstractions;
@@ -94,6 +95,15 @@ namespace MechHisui
 
             Responses.InitResponses(config);
 
+            client.MessageUpdated += async (s, e) =>
+            {
+                if (!(await e.Channel.DownloadMessages(20, e.Before.Id, Relative.After)).Any(m => m.IsAuthor))
+                {
+                    var msgReceived = typeof(DiscordClient).GetMethod("OnMessageReceived", BindingFlags.NonPublic | BindingFlags.Instance);
+                    msgReceived.Invoke(s, new object[] { e.After });
+                    //client.OnMessageReceived(e.After);
+                }
+            };
 
             //Convert our sync method to an async one and block the Main function until the bot disconnects
             client.ExecuteAndWait(async () =>

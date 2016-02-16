@@ -26,10 +26,10 @@
           "lib/net45/Discord.Net.dll": {}
         }
       },
-      "Discord.Net.Commands/0.9.0-rc3": {
+      "Discord.Net.Commands/0.9.0": {
         "type": "package",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3"
+          "Discord.Net": "0.9.0"
         },
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -370,10 +370,10 @@
           "lib/net45/Discord.Net.dll": {}
         }
       },
-      "Discord.Net.Commands/0.9.0-rc3": {
+      "Discord.Net.Commands/0.9.0": {
         "type": "package",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3"
+          "Discord.Net": "0.9.0"
         },
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -714,10 +714,10 @@
           "lib/net45/Discord.Net.dll": {}
         }
       },
-      "Discord.Net.Commands/0.9.0-rc3": {
+      "Discord.Net.Commands/0.9.0": {
         "type": "package",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3"
+          "Discord.Net": "0.9.0"
         },
         "frameworkAssemblies": [
           "Microsoft.CSharp",
@@ -1057,12 +1057,12 @@
         "lib/net45/Discord.Net.xml"
       ]
     },
-    "Discord.Net.Commands/0.9.0-rc3": {
+    "Discord.Net.Commands/0.9.0": {
       "type": "package",
-      "sha512": "aalMnQTrMh/iS9hCs1onccPvnO7ut0EdtNijWc56gpyHpLTSniw3TTv/7O5pIuckzpwme25l/1VymBqhtTd8vg==",
+      "sha512": "EhwtA0HMJ7YRbpVmWYgf4Mv08DA99eGuCw/ojmuXWV9SHqU6N/0yFsKqFONNHfFIp9L28FBddOHPWszYNU+u6w==",
       "files": [
-        "Discord.Net.Commands.0.9.0-rc3.nupkg",
-        "Discord.Net.Commands.0.9.0-rc3.nupkg.sha512",
+        "Discord.Net.Commands.0.9.0.nupkg",
+        "Discord.Net.Commands.0.9.0.nupkg.sha512",
         "Discord.Net.Commands.nuspec",
         "lib/dotnet5.4/Discord.Net.Commands.dll",
         "lib/dotnet5.4/Discord.Net.Commands.xml",

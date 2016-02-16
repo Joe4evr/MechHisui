@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using JiiLib;
+
 namespace MechHisui.FateGOLib
 {
     public static class FgoHelpers
@@ -42,18 +44,20 @@ namespace MechHisui.FateGOLib
             }
         }
 
-        public static IEnumerable<string> WhereActive(this IEnumerable<ServantProfile> profiles, string skill)
-            => profiles.SelectMany(p => p.ActiveSkills.Where(s => s.SkillName == skill).Select(t => new { Name = p.Name, Rank = t.Rank })).OrderByDescending(a => a.Rank, new RankComparer()).Select(a => $"{a.Name}: {a.Rank}");
+        public static IEnumerable<ServantProfile> WhereActive(this IEnumerable<ServantProfile> profiles, string skill)
+            => profiles.Where(p => p.ActiveSkills.Any(s => s.SkillName == skill));
 
-        public static IEnumerable<string> WhereActiveEffect(this IEnumerable<ServantProfile> profiles, string effect)
-            => profiles.SelectMany(p => p.ActiveSkills.Where(s => s.Effect.Contains(effect)).Select(t => new { Name = p.Name, Rank = t.Rank })).Select(a => $"{a.Name}: {a.Rank}");
+        public static IEnumerable<ServantProfile> WhereActiveEffect(this IEnumerable<ServantProfile> profiles, string effect)
+            => profiles.Where(p => p.ActiveSkills.Any(s => s.Effect.Contains(effect)));
 
-        public static IEnumerable<string> WherePassive(this IEnumerable<ServantProfile> profiles, string skill)
-            => profiles.SelectMany(p => p.PassiveSkills.Where(s => s.SkillName == skill).Select(t => new { Name = p.Name, Rank = t.Rank })).OrderByDescending(a => a.Rank, new RankComparer()).Select(a => $"{a.Name}: {a.Rank}");
+        public static IEnumerable<ServantProfile> WherePassive(this IEnumerable<ServantProfile> profiles, string skill)
+            => profiles.Where(p => p.PassiveSkills.Any(s => s.SkillName == skill));
 
-        public static IEnumerable<string> WherePassiveEffect(this IEnumerable<ServantProfile> profiles, string effect)
-            => profiles.SelectMany(p => p.PassiveSkills.Where(s => s.Effect.Contains(effect)).Select(t => new { Name = p.Name, Rank = t.Rank })).Select(a => $"{a.Name}: {a.Rank}");
+        public static IEnumerable<ServantProfile> WherePassiveEffect(this IEnumerable<ServantProfile> profiles, string effect)
+            => profiles.Where(p => p.PassiveSkills.Any(s => s.Effect.Contains(effect)));
 
+        public static IEnumerable<ServantProfile> WhereTrait(this IEnumerable<ServantProfile> profiles, string trait)
+            => profiles.Where(p => p.Traits.ContainsIgnoreCase(trait));
 
         //private static string test()
         //{

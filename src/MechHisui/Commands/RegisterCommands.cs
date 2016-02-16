@@ -123,7 +123,6 @@ namespace MechHisui.Commands
         public static void RegisterEvalCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Eval'...");
-            const string sep = "\", \", ";
             var references = new MetadataReference[]
             {
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
@@ -135,32 +134,27 @@ namespace MechHisui.Commands
                 MetadataReference.CreateFromFile(typeof(FgoHelpers).Assembly.Location)
             };
             client.Services.Get<CommandService>().CreateCommand("eval")
-                .Parameter("func", ParameterType.Required)
+                .Parameter("func", ParameterType.Unparsed)
                 .Hide()
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Do(async cea =>
                 {
-                    string temp = cea.Args[0].Replace("\\", String.Empty);
-                    if (temp.Contains('^'))
+                    string arg = cea.Args[0]; //.Replace("\\", String.Empty);
+                    if (arg.Contains('^'))
                     {
-                        await cea.Channel.SendMessage("**Note:** `^` is the Binary XOR operator. Use Math.Pow(base, exponent) if you wish to calculate an exponentiation.");
+                        await cea.Channel.SendMessage("**Note:** `^` is the Binary XOR operator. Use `Math.Pow(base, exponent)` if you wish to calculate an exponentiation.");
                     }
-
-                    string arg1;
-                    string arg2;
-                    if (temp.Contains(';'))
+                    if (!arg.StartsWith("return"))
                     {
-                        arg1 = String.Empty;
-                        arg2 = temp;
+                        arg = $"return {arg}";
                     }
-                    else
+                    if (!arg.EndsWith(";"))
                     {
-                        arg1 = temp;
-                        arg2 = String.Empty;
+                        arg += ';';
                     }
-
                     SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(
-@"using System;
+$@"using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Discord;
@@ -169,18 +163,16 @@ using Newtonsoft.Json;
 using MechHisui.FateGOLib;
 
 namespace DynamicCompile
-{
+{{
     public class DynEval
-    {
-        public string Eval() => String.Join(" + sep + arg1 + @");
+    {{
+        public string Eval<T>(Func<IEnumerable<T>> set) => String.Join("", "", set());
 
-        public string EvalFull()
-        {
-            " + arg2 + @"
-            return " + "\"Done\";" + @"
-        }
-    }
-}");
+        public string Eval<T>(Func<T> func) => func()?.ToString() ?? ""null"";
+
+        public string Exec() => Eval(() => {{ {arg} }});
+    }}
+}}");
 
                     string assemblyName = Path.GetRandomFileName();
                     CSharpCompilation compilation = CSharpCompilation.Create(
@@ -200,7 +192,6 @@ namespace DynamicCompile
                                 diagnostic.Severity == DiagnosticSeverity.Error);
 
                             Console.Error.WriteLine(String.Join("\n", failures.Select(f => $"{f.Id}: {f.GetMessage()}")));
-                            //var loc = cea.User.Id == UInt64.Parse(config["Owner"]) ? failures.First().Location.SourceSpan.Start.ToString() : "";
                             await cea.Channel.SendMessage($"**Error:** {failures.First().GetMessage()}");
                         }
                         else
@@ -210,7 +201,7 @@ namespace DynamicCompile
 
                             Type type = assembly.GetType("DynamicCompile.DynEval");
                             object obj = Activator.CreateInstance(type);
-                            var res = type.InvokeMember((arg1 != String.Empty ? "Eval" : "EvalFull"),
+                            var res = type.InvokeMember("Exec",
                                 BindingFlags.Default | BindingFlags.InvokeMethod,
                                 null,
                                 obj,
@@ -318,7 +309,7 @@ namespace DynamicCompile
             client.Services.Get<CommandService>().CreateCommand("pick")
                 .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
                 .Parameter("items", ParameterType.Multiple)
-                .Description("Randomly choose aomething from any number of items.")
+                .Description("Randomly choose something from any number of items.")
                 .Do(async cea =>
                 {
                     if (cea.Args.Length <= 1)
@@ -502,6 +493,9 @@ namespace DynamicCompile
                 }
             }
 
+            do await Task.Delay(200);
+            while (client.MessageQueue.Count > 0);
+
             Environment.Exit(code);
         }
 
@@ -546,5 +540,14 @@ namespace DynamicCompile
             Responder,
             Trivia
         }
+    }
+
+    public class DynEval
+    {
+        public string Eval<T>(Func<IEnumerable<T>> set) => String.Join(", ", set.Invoke());
+
+        public string Eval<T>(Func<T> func) => func.Invoke().ToString();
+
+        public string Exec() => Eval(() => { return Enumerable.Range(1, 10); });
     }
 }
