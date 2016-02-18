@@ -7,6 +7,7 @@ using Discord;
 using Discord.Commands;
 using MechHisui.HisuiBets;
 using System.Text;
+using System.Diagnostics;
 
 namespace MechHisui.Commands
 {
@@ -53,7 +54,17 @@ namespace MechHisui.Commands
                 });
 
             client.Services.Get<CommandService>().CreateCommand("bet")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]))
+                .AddCheck((c, u, ch) =>
+                {
+                    if (Debugger.IsAttached)
+                    {
+                        return ch.Id == UInt64.Parse(config["FGO_Hgames"]) && u.Id == UInt64.Parse(config["Owner"]);
+                    }
+                    else
+                    {
+                        return ch.Id == UInt64.Parse(config["FGO_Hgames"]);
+                    }
+                })
                 .Parameter("amount", ParameterType.Required)
                 .Parameter("tribute", ParameterType.Multiple)
                 .Description("Bet an amount of HisuiBucks on a specified tribute")

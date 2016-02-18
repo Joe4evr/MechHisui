@@ -110,11 +110,7 @@ namespace MechHisui
             {
                 //Connect to the Discord server using our email and password
                 await client.Connect(config["Email"], config["Password"]);
-                var server = client.Servers.FirstOrDefault();
-                if (server != null)
-                {
-                    Console.WriteLine($"Logged in as {client.CurrentUser.Name}");
-                }
+                Console.WriteLine($"Logged in as {client.CurrentUser.Name}");
                 Console.WriteLine($"MH v. 0.3.0");
 
                 //Use a channel whitelist
