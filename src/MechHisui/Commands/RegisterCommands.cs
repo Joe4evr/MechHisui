@@ -144,7 +144,7 @@ namespace MechHisui.Commands
                     {
                         await cea.Channel.SendMessage("**Note:** `^` is the Binary XOR operator. Use `Math.Pow(base, exponent)` if you wish to calculate an exponentiation.");
                     }
-                    if (!arg.StartsWith("return"))
+                    if (!arg.Contains("return"))
                     {
                         arg = $"return {arg}";
                     }

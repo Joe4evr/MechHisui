@@ -121,6 +121,7 @@ namespace MechHisui
                             //config["LTT_general"],
                             //config["LTT_testing"],
                             config["FGO_playground"],
+                            config["FGO_events"],
                             config["FGO_general"]
                         )
                     ),

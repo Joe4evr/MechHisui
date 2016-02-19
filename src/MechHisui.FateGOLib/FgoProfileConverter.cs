@@ -19,13 +19,15 @@ namespace MechHisui.FateGOLib
             var traits = new List<string>();
             var tempProfile = new ServantProfile();
             var tempHolder = new SkillHolder();
-            var objProps = typeof(ServantProfile).GetProperties().Select(p => p.Name.ToLower()).ToArray();
             PropertyInfo pi;
-            
+            var objProps = typeof(ServantProfile).GetProperties().Select(p => p.Name.ToLower()).ToArray();
+
             while (reader.Read())
             {
+
                 if (reader.TokenType == JsonToken.PropertyName)
                 {
+                    #region big switch
                     switch (reader.Value.ToString())
                     {
                         case nameof(SkillHolder.skill1):
@@ -173,10 +175,12 @@ namespace MechHisui.FateGOLib
                             }
                             break;
                     }
+                    #endregion
                 }
                 else if (reader.TokenType == JsonToken.EndObject && reader.Depth == 1)
                 {
-                    activeSkills.AddRange(new[] {
+                    activeSkills.AddRange(new[]
+                    {
                         new ServantSkill { SkillName = tempHolder.skill1, Rank = tempHolder.rank1, Effect = tempHolder.effect1 },
                         new ServantSkill { SkillName = tempHolder.skill2, Rank = tempHolder.rank2, Effect = tempHolder.effect2 },
                         new ServantSkill { SkillName = tempHolder.skill3, Rank = tempHolder.rank3, Effect = tempHolder.effect3 },
@@ -196,37 +200,39 @@ namespace MechHisui.FateGOLib
 
                     activeSkills = new List<ServantSkill>();
                     passiveSkills = new List<ServantSkill>();
+                    traits = new List<string>();
                     tempProfile = new ServantProfile();
                     tempHolder = new SkillHolder();
                 }
             }
-            
+
             return mappedObj;
+        }
+
+        private class SkillHolder
+        {
+            internal string skill1 { get; set; }
+            internal string rank1 { get; set; }
+            internal string effect1 { get; set; }
+            internal string skill2 { get; set; }
+            internal string rank2 { get; set; }
+            internal string effect2 { get; set; }
+            internal string skill3 { get; set; }
+            internal string rank3 { get; set; }
+            internal string effect3 { get; set; }
+            internal string passiveSkill1 { get; set; }
+            internal string passiveRank1 { get; set; }
+            internal string passiveEffect1 { get; set; }
+            internal string passiveSkill2 { get; set; }
+            internal string passiveRank2 { get; set; }
+            internal string passiveEffect2 { get; set; }
+            internal string passiveSkill3 { get; set; }
+            internal string passiveRank3 { get; set; }
+            internal string passiveEffect3 { get; set; }
+            internal string passiveSkill4 { get; set; }
+            internal string passiveRank4 { get; set; }
+            internal string passiveEffect4 { get; set; }
         }
     }
 
-    internal class SkillHolder
-    {
-        internal string skill1 { get; set; }
-        internal string rank1 { get; set; }
-        internal string effect1 { get; set; }
-        internal string skill2 { get; set; }
-        internal string rank2 { get; set; }
-        internal string effect2 { get; set; }
-        internal string skill3 { get; set; }
-        internal string rank3 { get; set; }
-        internal string effect3 { get; set; }
-        internal string passiveSkill1 { get; set; }
-        internal string passiveRank1 { get; set; }
-        internal string passiveEffect1 { get; set; }
-        internal string passiveSkill2 { get; set; }
-        internal string passiveRank2 { get; set; }
-        internal string passiveEffect2 { get; set; }
-        internal string passiveSkill3 { get; set; }
-        internal string passiveRank3 { get; set; }
-        internal string passiveEffect3 { get; set; }
-        internal string passiveSkill4 { get; set; }
-        internal string passiveRank4 { get; set; }
-        internal string passiveEffect4 { get; set; }
-    }
 }

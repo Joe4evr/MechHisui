@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -40,20 +41,34 @@ namespace GudakoBot
 
             IConfiguration config = builder.Build();
 
+            ulong owner = UInt64.Parse(config["Owner"]);
+            ulong fgogen = UInt64.Parse(config["FGO_general"]);
+
             Console.WriteLine("Loading chat lines...");
             LoadLines(config);
             Console.WriteLine($"Loaded {Randomlines.Count} lines.");
 
-            var client = new DiscordClient(
-                new DiscordConfigBuilder
-                {
-                    AppName = "GudakoBot",
-                    CacheToken = true,
-                    LogLevel = LogSeverity.Warning
-                });
+            var client = new DiscordClient(conf =>
+            {
+                conf.AppName = "GudakoBot";
+                conf.CacheToken = true;
+                conf.LogLevel = Debugger.IsAttached ? LogSeverity.Verbose : LogSeverity.Warning;
+                conf.UseLargeThreshold = true;
+            });
 
             //Display all log messages in the console
             client.Log.Message += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
+            client.MessageReceived += (s, e) =>
+            {
+                if (e.Message.User.Id == owner && e.Message.Text == "-new")
+                {
+                    Console.WriteLine($"{DateTime.Now}: Reloading lines");
+                    LoadLines(config);
+                    e.Channel.SendMessage(Randomlines.Last());
+                    timer.Change(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(30));
+                }
+            };
+
 
             client.ExecuteAndWait(async () =>
             {
@@ -66,10 +81,9 @@ namespace GudakoBot
                 var rng = new Random();
                 timer = new Timer(async s =>
                 {
-                    LoadLines(config);
                     Console.WriteLine($"{DateTime.Now}: Sending message.");
                     Randomlines.Shuffle();
-                    await client.GetChannel(UInt64.Parse(config["FGO_general"]))
+                    await client.GetChannel(fgogen)
                         .SendMessage(Randomlines.ElementAt(rng.Next(maxValue: Randomlines.Count)));
                 },
                 null,
@@ -86,8 +100,7 @@ namespace GudakoBot
             }
         }
 
-        private static Timer timer;
-
         private static List<string> Randomlines = new List<string>();
+        private static Timer timer;
     }
 }

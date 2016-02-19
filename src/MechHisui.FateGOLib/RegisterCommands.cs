@@ -131,7 +131,8 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Registering 'Event'...");
             client.Services.Get<CommandService>().CreateCommand("event")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+                .Alias("events")
+                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]) || ch.Id == UInt64.Parse(config["FGO_events"]))
                 .Description("Relay information on current or upcoming events.")
                 .Do(async cea =>
                 {
@@ -198,13 +199,14 @@ namespace MechHisui.Commands
                         }
                         else
                         {
-                            sb.Append($"**Next Event:** {nextEvent.EventName}, planned to start at an unknown time.");
+                            sb.AppendLine($"**Next Event:** {nextEvent.EventName}, planned to start at an unknown time.");
                         }
                     }
                     else
                     {
-                        sb.Append("No known upcoming events.");
+                        sb.AppendLine("No known upcoming events.");
                     }
+                    sb.Append("KanColle Collab never ever");
                     await cea.Channel.SendMessage(sb.ToString());
                 });
         }
@@ -364,6 +366,7 @@ namespace MechHisui.Commands
 
             Console.WriteLine("Registering 'Stats'...");
             client.Services.Get<CommandService>().CreateCommand("stats")
+                .Alias("stat")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Parameter("servantname", ParameterType.Unparsed)
                 .Description($"Relay information on the specified Servant. Alternative names acceptable.")
