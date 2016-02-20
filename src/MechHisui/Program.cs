@@ -97,7 +97,7 @@ namespace MechHisui
 
             client.MessageUpdated += async (s, e) =>
             {
-                if (!(await e.Channel.DownloadMessages(20, e.Before.Id, Relative.After)).Any(m => m.IsAuthor))
+                if (!(await e.Channel.DownloadMessages(10, e.Before.Id, Relative.After)).Any(m => m.IsAuthor))
                 {
                     var msgReceived = typeof(DiscordClient).GetMethod("OnMessageReceived", BindingFlags.NonPublic | BindingFlags.Instance);
                     msgReceived.Invoke(s, new object[] { e.After });

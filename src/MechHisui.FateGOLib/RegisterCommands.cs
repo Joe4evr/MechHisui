@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Discord;
 using Discord.Commands;
@@ -11,7 +13,6 @@ using JiiLib;
 using JiiLib.Net;
 using Newtonsoft.Json;
 using MechHisui.FateGOLib;
-using System.Globalization;
 
 namespace MechHisui.Commands
 {
@@ -209,6 +210,17 @@ namespace MechHisui.Commands
                     sb.Append("KanColle Collab never ever");
                     await cea.Channel.SendMessage(sb.ToString());
                 });
+
+            LoginBonusTimer = new Timer(async cb =>
+            {
+                Console.WriteLine("Announcing login bonusses.");
+                await ((DiscordClient)cb).GetChannel(UInt64.Parse(config["FGO_general"]))
+                    .SendMessage("Login bonusses have been distributed.");
+            },
+            client,
+            new DateTimeWithZone(DateTime.UtcNow, FgoHelpers.JpnTimeZone)
+                .TimeUntilNextLocalTimeAt(new TimeSpan(4, 0, 0)),
+            TimeSpan.FromDays(1));
         }
 
         public static void RegisterFriendsCommand(this DiscordClient client, IConfiguration config)
@@ -1045,5 +1057,7 @@ Discuss.");
                 .Append(code.Image);
             return sb.ToString();
         }
+
+        private static Timer LoginBonusTimer;
     }
 }

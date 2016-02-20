@@ -103,28 +103,37 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
       },
-      "Imgur.API/3.6.0": {
+      "JiiLib/0.1.1": {
         "type": "package",
-        "dependencies": {
-          "Newtonsoft.Json": "8.0.1"
-        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
         "compile": {
-          "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
+          "lib/net46/JiiLib.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
+          "lib/net46/JiiLib.dll": {}
         }
       },
-      "JiiLib/0.1.1": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.6"
-      },
       "JiiLib.Net/0.1.1": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.6",
+        "type": "package",
         "dependencies": {
-          "Google.Apis.Script.v1": "1.9.2.10",
-          "Imgur.API": "3.6.0"
+          "Google.Apis.Script.v1": "1.9.2.10"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net46/JiiLib.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net46/JiiLib.Net.dll": {}
         }
       },
       "log4net/2.0.3": {
@@ -447,28 +456,37 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
       },
-      "Imgur.API/3.6.0": {
+      "JiiLib/0.1.1": {
         "type": "package",
-        "dependencies": {
-          "Newtonsoft.Json": "8.0.1"
-        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
         "compile": {
-          "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
+          "lib/net46/JiiLib.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
+          "lib/net46/JiiLib.dll": {}
         }
       },
-      "JiiLib/0.1.1": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.6"
-      },
       "JiiLib.Net/0.1.1": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.6",
+        "type": "package",
         "dependencies": {
-          "Google.Apis.Script.v1": "1.9.2.10",
-          "Imgur.API": "3.6.0"
+          "Google.Apis.Script.v1": "1.9.2.10"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net46/JiiLib.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net46/JiiLib.Net.dll": {}
         }
       },
       "log4net/2.0.3": {
@@ -791,28 +809,37 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
       },
-      "Imgur.API/3.6.0": {
+      "JiiLib/0.1.1": {
         "type": "package",
-        "dependencies": {
-          "Newtonsoft.Json": "8.0.1"
-        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
         "compile": {
-          "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
+          "lib/net46/JiiLib.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll": {}
+          "lib/net46/JiiLib.dll": {}
         }
       },
-      "JiiLib/0.1.1": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.6"
-      },
       "JiiLib.Net/0.1.1": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.6",
+        "type": "package",
         "dependencies": {
-          "Google.Apis.Script.v1": "1.9.2.10",
-          "Imgur.API": "3.6.0"
+          "Google.Apis.Script.v1": "1.9.2.10"
+        },
+        "frameworkAssemblies": [
+          "Microsoft.CSharp",
+          "mscorlib",
+          "System",
+          "System.Core"
+        ],
+        "compile": {
+          "lib/net46/JiiLib.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net46/JiiLib.Net.dll": {}
         }
       },
       "log4net/2.0.3": {
@@ -1036,14 +1063,6 @@
     }
   },
   "libraries": {
-    "JiiLib/0.1.1": {
-      "type": "project",
-      "path": "../../../JiiLib/src/JiiLib/project.json"
-    },
-    "JiiLib.Net/0.1.1": {
-      "type": "project",
-      "path": "../../../JiiLib/src/JiiLib.Net/project.json"
-    },
     "Discord.Net/0.9.0": {
       "type": "package",
       "sha512": "6z5mNP6DRfHsJce1TrZ+G/ojtUheCdB9HeE9O44mJFoeLdeWVYrQw7pjGNlC34N2+vwFTbsQjRBVrftjnpS8pQ==",
@@ -1169,16 +1188,30 @@
         "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.xml"
       ]
     },
-    "Imgur.API/3.6.0": {
+    "JiiLib/0.1.1": {
       "type": "package",
-      "sha512": "sI1Fnesdc10YJaxBBD8FdqjWD+k3HxTIIEoQnuZSq4yO8JULqGUSGG314f4jw2UMKtm4O/zWvFTHqvRmMosSpQ==",
+      "sha512": "jv+JkwL5EN+dxxBpIQNcg7Zzw00rw7u5tv9cnUoLtJIGBZ8POjwtuPimL8gsRgDgI51NzMuW1a2gP+kb8k3Jbg==",
       "files": [
-        "Imgur.API.3.6.0.nupkg",
-        "Imgur.API.3.6.0.nupkg.sha512",
-        "Imgur.API.nuspec",
-        "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.dll",
-        "lib/portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10/Imgur.API.XML",
-        "tools/init.ps1"
+        "JiiLib.0.1.1.nupkg",
+        "JiiLib.0.1.1.nupkg.sha512",
+        "JiiLib.nuspec",
+        "lib/dotnet5.4/JiiLib.dll",
+        "lib/dotnet5.4/JiiLib.xml",
+        "lib/net46/JiiLib.dll",
+        "lib/net46/JiiLib.xml"
+      ]
+    },
+    "JiiLib.Net/0.1.1": {
+      "type": "package",
+      "sha512": "aky25mQVR13dFo4WdE+emVweAbjAIJKWe6JV2kfP14SMqnsDzlLt9jdtUFk7Hs8hhS+8lHeqcwfa2wSXcdD7GA==",
+      "files": [
+        "JiiLib.Net.0.1.1.nupkg",
+        "JiiLib.Net.0.1.1.nupkg.sha512",
+        "JiiLib.Net.nuspec",
+        "lib/dotnet5.4/JiiLib.Net.dll",
+        "lib/dotnet5.4/JiiLib.Net.xml",
+        "lib/net46/JiiLib.Net.dll",
+        "lib/net46/JiiLib.Net.xml"
       ]
     },
     "log4net/2.0.3": {
@@ -1696,8 +1729,8 @@
     "": [
       "Microsoft.Extensions.Configuration.UserSecrets >= 1.0.0-rc1-final",
       "Google.Apis.Script.v1 >= 1.9.2.10",
-      "JiiLib ",
-      "JiiLib.Net ",
+      "JiiLib >= 0.1.1",
+      "JiiLib.Net >= 0.1.1",
       "Discord.Net >= 0.9.0-*",
       "Discord.Net.Commands >= 0.9.0-*"
     ],
