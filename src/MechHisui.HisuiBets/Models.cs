@@ -22,18 +22,24 @@ namespace MechHisui.HisuiBets
     public class BankOfHisui
     {
         public IList<UserBucks> Accounts = new List<UserBucks>();
+        public string Path { get; }
 
-        public void ReadBank(string path)
+        public BankOfHisui(string path)
         {
-            using (TextReader tr = new StreamReader(path))
+            Path = path;
+        }
+
+        public void ReadBank(string path = null)
+        {
+            using (TextReader tr = new StreamReader(path ?? Path))
             {
                 Accounts = JsonConvert.DeserializeObject<List<UserBucks>>(tr.ReadToEnd());
             }
         }
 
-        public void WriteBank(string path)
+        public void WriteBank(string path = null)
         {
-            using (TextWriter tw = new StreamWriter(path))
+            using (TextWriter tw = new StreamWriter(path ?? Path))
             {
                 tw.Write(JsonConvert.SerializeObject(Accounts, Formatting.Indented));
             }

@@ -1,29 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Discord;
 using Discord.Commands;
 using MechHisui.HisuiBets;
-using System.Text;
-using System.Diagnostics;
 
 namespace MechHisui.Commands
 {
     public static class BetsExtensions
     {
-        private static bool gameOpen = false;
-        private static bool betsOpen = false;
-        private static Timer countDown;
         private static Timer upTimer;
-        private static BankOfHisui bank = new BankOfHisui();
-        private static List<Bet> ActiveBets = new List<Bet>();
+        private static BankOfHisui bank;
+        private static Game game;
 
         public static void RegisterHisuiBetsCommands(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'HiusiBets'...");
-            bank.ReadBank(config["bank"]);
+            bank = new BankOfHisui(config["bank"]);
+            bank.ReadBank();
 
             const char symbol = '\u050A';
 
@@ -46,14 +43,22 @@ namespace MechHisui.Commands
 
             client.Services.Get<CommandService>().CreateCommand("newgame")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"])))
+                .Parameter("gametype", ParameterType.Optional)
                 .Do(async cea =>
                 {
-                    if (!gameOpen)
+                    if (game?.GameOpen == false)
                     {
-                        ActiveBets = new List<Bet>();
-                        gameOpen = true;
-                        betsOpen = true;
-                        await cea.Channel.SendMessage("A new game is starting. You may place your bets now.");
+                        if (cea.Args.Length == 1 && (cea.Args[0].ToLowerInvariant() == "sb" || cea.Args[0].ToLowerInvariant() == "salty"))
+                        {
+                            await cea.Channel.SendMessage("Starting a SaltyBet game. Bets will close shortly.");
+                            game = new Game(bank, cea.Channel, GameType.SaltyBet);
+                            game.ClosingGame();
+                        }
+                        else
+                        {
+                            await cea.Channel.SendMessage("A new game is starting. You may place your bets now.");
+                            game = new Game(bank, cea.Channel, GameType.HungerGame);
+                        }
                     }
                     else
                     {
@@ -68,31 +73,24 @@ namespace MechHisui.Commands
                 .Description("Bet an amount of HisuiBucks on a specified tribute")
                 .Do(async cea =>
                 {
-                    var userBucks = bank.Accounts.SingleOrDefault(u => u.UserId == cea.User.Id).Bucks;
-                    if (!gameOpen || !betsOpen)
+                    if (game.Type == GameType.HungerGame && cea.User.Id == UInt64.Parse(config["Hgame_Master"]))
+                    {
+                        await cea.Channel.SendMessage("The game master is not allowed to bet in a Hunger Game.");
+                        return;
+                    }
+                    if (!game.GameOpen || !game.BetsOpen)
                     {
                         await cea.Channel.SendMessage("Bets are currently closed at this time.");
                         return;
                     }
-                    else if (userBucks == 0)
+
+                    var userBucks = bank.Accounts.SingleOrDefault(u => u.UserId == cea.User.Id).Bucks;
+                    if (userBucks == 0)
                     {
                         await cea.Channel.SendMessage("You currently have no HisuiBucks.");
                         return;
                     }
-                    else if (cea.User.Id == UInt64.Parse(config["Hgame_Master"]))
-                    {
-                        await cea.Channel.SendMessage("The game master is not allowed to bet.");
-                        return;
-                    }
-
-                    bool replace = false;
-                    var tmp = ActiveBets.SingleOrDefault(b => b.UserId == cea.User.Id);
-                    if (tmp != null)
-                    {
-                        ActiveBets.Remove(tmp);
-                        replace = true;
-                    }
-
+                    
                     int amount;
                     if (new[] { "all in", "allin" }.Contains(cea.Args[0].ToLowerInvariant()))
                     {
@@ -103,144 +101,97 @@ namespace MechHisui.Commands
                         await cea.Channel.SendMessage("Could not parse amount as a number.");
                         return;
                     }
-                    else if (amount <= 0)
-                    {
-                        await cea.Channel.SendMessage("Cannot make bets of 0 or less.");
-                        return;
-                    }
                     else if (amount > userBucks)
                     {
                         await cea.Channel.SendMessage($"**{cea.User.Name}** currently does not have enough HisuiBucks to make that bet.");
                         return;
                     }
 
-                    var bet = new Bet
+                    await cea.Channel.SendMessage(game.ProcessBet(new Bet
                     {
                         UserName = cea.User.Name,
                         UserId = cea.User.Id,
                         Tribute = String.Join(" ", cea.Args.Skip(1)),
                         BettedAmount = amount
-                    };
-                    ActiveBets.Add(bet);
-                    if (replace)
-                    {
-                        await cea.Channel.SendMessage($"Replaced **{cea.User.Name}**'s bet with {symbol}{amount} to {bet.Tribute}.");
-                    }
-                    else
-                    {
-                        await cea.Channel.SendMessage($"Added **{cea.User.Name}**'s bet of {symbol}{amount} to {bet.Tribute}.");
-                    }
+                    }));
                 });
 
-            client.Services.Get<CommandService>().CreateCommand("checkbets")
-                .AddCheck((c, u, ch) =>
-                {
-                    Console.WriteLine("Checking requisites for command 'checkbets'");
-                    Console.WriteLine($"Invoked channel is {ch.Name}, ID {ch.Id}");
-                    Console.WriteLine($"Invoked user is {u.Name}, ID: {u.Id}");
-                    return ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"]));
-                })
-                .Do(async cea =>
-                {
-                    Console.WriteLine("Checking for an open game");
-                    if (!gameOpen)
-                    {
-                        Console.WriteLine("No game open, aborting gracefully.");
-                        await cea.Channel.SendMessage("No game is going on at this time.");
-                        return;
-                    }
+            //client.Services.Get<CommandService>().CreateCommand("checkbets")
+            //    .AddCheck((c, u, ch) =>
+            //    {
+            //        Console.WriteLine("Checking requisites for command 'checkbets'");
+            //        Console.WriteLine($"Invoked channel is {ch.Name}, ID {ch.Id}");
+            //        Console.WriteLine($"Invoked user is {u.Name}, ID: {u.Id}");
+            //        return ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"]));
+            //    })
+            //    .Do(async cea =>
+            //    {
+            //        Console.WriteLine("Checking for an open game");
+            //        if (!gameOpen)
+            //        {
+            //            Console.WriteLine("No game open, aborting gracefully.");
+            //            await cea.Channel.SendMessage("No game is going on at this time.");
+            //            return;
+            //        }
 
-                    Console.WriteLine("Finding longest name in the active bets");
-                    int longestName = ActiveBets.OrderBy(b => b.UserName.Length).First().UserName.Length;
-                    Console.WriteLine($"Longest name is {longestName} chars");
-                    Console.WriteLine("Finding longest bet in active bets");
-                    int longestBet = ActiveBets.OrderBy(b => b.BettedAmount.ToString().Length).First().BettedAmount.ToString().Length;
-                    Console.WriteLine($"Longest bet is {longestBet} chars");
-                    Console.WriteLine("Constructing StringBuilder");
-                    var sb = new StringBuilder("The following bets have been made:\n```\n");
-                    Console.WriteLine("Looping through active bets");
-                    foreach (var bet in ActiveBets)
-                    {
-                        var nameSpaces = new String(' ', (longestName - bet.UserName.Length) + 1);
-                        var betSpaces = new String(' ', (longestBet - bet.BettedAmount.ToString().Length));
-                        var outstring = $"{bet.UserName}:{nameSpaces}{symbol}{betSpaces}{bet.BettedAmount} - {bet.Tribute}";
-                        Console.WriteLine(outstring);
-                        sb.AppendLine(outstring);
+            //        Console.WriteLine("Finding longest name in the active bets");
+            //        int longestName = ActiveBets.OrderBy(b => b.UserName.Length).First().UserName.Length;
+            //        Console.WriteLine($"Longest name is {longestName} chars");
+            //        Console.WriteLine("Finding longest bet in active bets");
+            //        int longestBet = ActiveBets.OrderBy(b => b.BettedAmount.ToString().Length).First().BettedAmount.ToString().Length;
+            //        Console.WriteLine($"Longest bet is {longestBet} chars");
+            //        Console.WriteLine("Constructing StringBuilder");
+            //        var sb = new StringBuilder("The following bets have been made:\n```\n");
+            //        Console.WriteLine("Looping through active bets");
+            //        foreach (var bet in ActiveBets)
+            //        {
+            //            var nameSpaces = new String(' ', (longestName - bet.UserName.Length) + 1);
+            //            var betSpaces = new String(' ', (longestBet - bet.BettedAmount.ToString().Length));
+            //            var outstring = $"{bet.UserName}:{nameSpaces}{symbol}{betSpaces}{bet.BettedAmount} - {bet.Tribute}";
+            //            Console.WriteLine(outstring);
+            //            sb.AppendLine(outstring);
 
-                        if (sb.Length > 1700)
-                        {
+            //            if (sb.Length > 1700)
+            //            {
 
-                            sb.Append("```");
-                            await cea.Channel.SendMessage(sb.ToString());
-                            sb = new StringBuilder("```\n");
-                        }
-                    }
-                    sb.Append("```");
-                    Console.WriteLine("Sending result to channel");
-                    await cea.Channel.SendMessage(sb.ToString());
-                });
+            //                sb.Append("```");
+            //                await cea.Channel.SendMessage(sb.ToString());
+            //                sb = new StringBuilder("```\n");
+            //            }
+            //        }
+            //        sb.Append("```");
+            //        Console.WriteLine("Sending result to channel");
+            //        await cea.Channel.SendMessage(sb.ToString());
+            //    });
 
             client.Services.Get<CommandService>().CreateCommand("closebets")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"])))
                 .Do(async cea =>
                 {
-                    if (!gameOpen)
+                    if (!game.GameOpen)
                     {
                         await cea.Channel.SendMessage("No game is going on at this time.");
                         return;
                     }
-                    if (!betsOpen)
+                    if (!game.BetsOpen)
                     {
                         await cea.Channel.SendMessage("Bets are already closed.");
                         return;
                     }
-                    await cea.Channel.SendMessage("Bets are going to close soon. Please place your final bets now.");
-
-                    countDown = new Timer(async cb =>
+                    if (game.Type == GameType.SaltyBet)
                     {
-                        betsOpen = false;
-                        foreach (var bet in ActiveBets)
-                        {
-                            bank.Accounts.Single(u => u.UserId == bet.UserId).Bucks -= bet.BettedAmount;
-                        }
-                        await cea.Channel.SendMessage($"Bets are closed. {ActiveBets.Count} bets are in. The pot is {symbol}{ActiveBets.Sum(b => b.BettedAmount)}.");
-                    },
-                    null,
-                    TimeSpan.FromSeconds(45),
-                    Timeout.InfiniteTimeSpan);
+                        await cea.Channel.SendMessage("This type of game closes automatically.");
+                        return;
+                    }
+                    await cea.Channel.SendMessage("Bets are going to close soon. Please place your final bets now.");
                 });
 
             client.Services.Get<CommandService>().CreateCommand("winner")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"])))
-                .Parameter("name", ParameterType.Required)
+                .Parameter("name", ParameterType.Unparsed)
                 .Do(async cea =>
                 {
-                    gameOpen = false;
-                    var winners = ActiveBets.Where(b => b.Tribute.Equals(cea.Args[0], StringComparison.InvariantCultureIgnoreCase)).Select(b => cea.Server.GetUser(b.UserId));
-                    if (winners.Count() > 0)
-                    {
-                        var payout = ActiveBets.Sum(b => b.BettedAmount) / winners.Count();
-                        var rounding = ActiveBets.Sum(b => b.BettedAmount) % winners.Count();
-
-                        foreach (var user in winners)
-                        {
-                            bank.Accounts.SingleOrDefault(u => u.UserId == user.Id).Bucks += payout;
-                        }
-                        bank.WriteBank(config["bank"]);
-
-                        if (winners.Count() == 1)
-                        {
-                            await cea.Channel.SendMessage($"{winners.Single().Name} has won the whole pot of {symbol}{payout}.");
-                        }
-                        else
-                        {
-                            await cea.Channel.SendMessage($"{String.Join(", ", winners.Select(u => u.Name))} have won {symbol}{payout} each. {symbol}{rounding} has been lost due to rounding.");
-                        }
-                    }
-                    else
-                    {
-                        await cea.Channel.SendMessage($"No bets were made on the winner of this game.");
-                    }
+                    await cea.Channel.SendMessage(game.Winner(cea.Args[0]));
                 });
 
             client.Services.Get<CommandService>().CreateCommand("donate")
@@ -303,7 +254,7 @@ namespace MechHisui.Commands
                 bank.WriteBank(config["bank"]);
             },
             null,
-            TimeSpan.FromMinutes(30),
+            TimeSpan.FromMinutes(60 - DateTime.Now.Minute),
             TimeSpan.FromHours(1));
         }
     }
