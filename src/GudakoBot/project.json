@@ -1,14 +1,14 @@
 ﻿{
-  "version": "1.0.0-*",
-  "description": "GudakoBot Console Application",
-  "authors": [ "Jonathan" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
+    "version": "1.0.0-*",
+    "description": "GudakoBot Console Application",
+    "authors": [ "Jonathan" ],
+    "tags": [ "" ],
+    "projectUrl": "",
+    "licenseUrl": "",
 
-  "compilationOptions": {
-    "emitEntryPoint": true
-  },
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
 
     "dependencies": {
         "Discord.Net": "0.9.0-*",
@@ -20,9 +20,9 @@
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final"
     },
 
-  "commands": {
-    "GudakoBot": "GudakoBot"
-  },
+    "commands": {
+        "GudakoBot": "GudakoBot"
+    },
 
     "frameworks": {
         "dnx46": { }

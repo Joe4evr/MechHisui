@@ -1,14 +1,14 @@
 {
-  "version": "0.3.0-*",
-  "description": "Mech-Hisui Discord Bot",
-  "authors": [ "Joe4evr" ],
-  "tags": [ "Discord", "Bot" ],
-  "projectUrl": "",
-  "licenseUrl": "",
+    "version": "0.3.0-*",
+    "description": "Mech-Hisui Discord Bot",
+    "authors": [ "Joe4evr" ],
+    "tags": [ "Discord", "Bot" ],
+    "projectUrl": "",
+    "licenseUrl": "",
 
-  "compilationOptions": {
-    "emitEntryPoint": true
-  },
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
 
     "dependencies": {
         "Microsoft.AspNet.Hosting": "1.0.0-rc1-final",
@@ -28,9 +28,9 @@
         "MechHisui.TriviaServiceLib": ""
     },
 
-  "commands": {
-    "MechHisui": "MechHisui"
-  },
+    "commands": {
+        "MechHisui": "MechHisui"
+    },
 
     "frameworks": {
         "dnx46": {
