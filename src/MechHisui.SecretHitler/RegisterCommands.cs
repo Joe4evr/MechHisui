@@ -11,7 +11,7 @@ namespace MechHisui.Commands
     public static class RegisterSecHitCommands
     {
         private static SecretHitler.SecretHitler game;
-        private static bool gameOpen = false;
+        internal static bool gameOpen = false;
         private static IList<User> players;
 
         public static void RegisterSecretHitler(this DiscordClient client, IConfiguration config)
@@ -117,11 +117,6 @@ namespace MechHisui.Commands
             client.Services.Get<CommandService>().CreateCommand("turn")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 .Do(async cea => await game.StartTurn());
-
-            client.Services.Get<CommandService>().CreateCommand("endsh")
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
-                .Hide()
-                .Do(cea => gameOpen = false);
         }
     }
 }

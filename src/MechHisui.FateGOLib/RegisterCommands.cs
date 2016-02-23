@@ -191,11 +191,11 @@ namespace MechHisui.Commands
                             string m = eta.Minutes == 1 ? "minute" : "minutes";
                             if (eta < TimeSpan.FromDays(1))
                             {
-                                sb.Append($"**Next Event:** {nextEvent.EventName}, planned to start in {eta.Hours} {h} and {eta.Minutes} {m}.");
+                                sb.AppendLine($"**Next Event:** {nextEvent.EventName}, planned to start in {eta.Hours} {h} and {eta.Minutes} {m}.");
                             }
                             else
                             {
-                                sb.Append($"**Next Event:** {nextEvent.EventName}, planned to start in {eta.Days} {d} and {eta.Hours} {h}.");
+                                sb.AppendLine($"**Next Event:** {nextEvent.EventName}, planned to start in {eta.Days} {d} and {eta.Hours} {h}.");
                             }
                         }
                         else
