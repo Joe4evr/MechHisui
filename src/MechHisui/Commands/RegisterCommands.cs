@@ -170,7 +170,7 @@ namespace DynamicCompile
 
         public string Eval<T>(Func<T> func) => func()?.ToString() ?? ""null"";
 
-        public string Exec() => Eval(() => {{ {arg} }});
+        public string Exec(DiscordClient client) => Eval(() => {{ {arg} }});
     }}
 }}");
 
@@ -205,7 +205,7 @@ namespace DynamicCompile
                                 BindingFlags.Default | BindingFlags.InvokeMethod,
                                 null,
                                 obj,
-                                new object[0]);
+                                new object[1] { client } );
 
                             await cea.Channel.SendMessage($"**Result:** {(string)res}");
                         }
@@ -542,12 +542,12 @@ namespace DynamicCompile
         }
     }
 
-    public class DynEval
-    {
-        public string Eval<T>(Func<IEnumerable<T>> set) => String.Join(", ", set.Invoke());
+    //public class DynEval
+    //{
+    //    public string Eval<T>(Func<IEnumerable<T>> set) => String.Join(", ", set.Invoke());
 
-        public string Eval<T>(Func<T> func) => func.Invoke().ToString();
+    //    public string Eval<T>(Func<T> func) => func.Invoke().ToString();
 
-        public string Exec() => Eval(() => { return Enumerable.Range(1, 10); });
-    }
+    //    public string Exec(DiscordClient client) => Eval(() => { return Enumerable.Range(1, 10); });
+    //}
 }

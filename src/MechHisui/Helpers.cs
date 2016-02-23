@@ -7,7 +7,7 @@ using MechHisui.Modules;
 
 namespace MechHisui
 {
-    internal static class Helpers
+    public static class Helpers
     {
         internal static bool IsWhilested(Channel channel, DiscordClient client) => client.Modules().Modules
             .SingleOrDefault(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())?
@@ -47,6 +47,5 @@ namespace MechHisui
                 }
             }
         }
-
     }
 }

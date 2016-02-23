@@ -50,7 +50,7 @@ namespace MechHisui
             Console.CancelKeyPress += async (s, e) => await RegisterCommands.Disconnect(client, config);
 
             //Display all log messages in the console
-            client.Log.Message += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
+            client.Log.Message += (s, e) => Console.WriteLine($"{DateTime.Now} - [{e.Severity}] {e.Source}: {e.Message} {e.Exception}");
 
             //Add a ModuleService and CommandService
             client.AddService(new ModuleService());
