@@ -34,7 +34,7 @@ namespace MechHisui.Commands
 
             client.Services.Get<CommandService>().CreateCommand("mybucks")
                 .Alias("bucks")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]))
+                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Do(async cea =>
                 {
                     var bucks = bank.Accounts.Single(u => u.UserId == cea.User.Id).Bucks;
@@ -194,39 +194,44 @@ namespace MechHisui.Commands
                     await cea.Channel.SendMessage(game.Winner(cea.Args[0]));
                 });
 
-            client.Services.Get<CommandService>().CreateCommand("donate")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]))
-                .Parameter("amount", ParameterType.Required)
-                .Parameter("donatee",ParameterType.Required)
-                .Do(async cea =>
-                {
-                    int bucks;
-                    if (Int32.TryParse(cea.Args[0], out bucks))
-                    {
-                        if (bucks <= 0)
-                        {
-                            await cea.Channel.SendMessage("Cannot make a donation of 0 or less.");
-                            return;
-                        }
+            //client.Services.Get<CommandService>().CreateCommand("donate")
+            //    .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]))
+            //    .Parameter("amount", ParameterType.Required)
+            //    .Parameter("donatee",ParameterType.Required)
+            //    .Do(async cea =>
+            //    {
+            //        int bucks;
+            //        if (Int32.TryParse(cea.Args[0], out bucks))
+            //        {
+            //            if (bucks <= 0)
+            //            {
+            //                await cea.Channel.SendMessage("Cannot make a donation of 0 or less.");
+            //                return;
+            //            }
+            //            if (bucks > bank.Accounts.Single(u => u.UserId == cea.User.Id).Bucks)
+            //            {
+            //                await cea.Channel.SendMessage($"**{cea.User.Name}** currently does not have enough HisuiBucks to make that donation.");
+            //                return;
+            //            }
 
-                        var target = cea.Server.FindUsers(cea.Args[1]).FirstOrDefault();
-                        if (target != null)
-                        {
-                            bank.Accounts.Single(p => p.UserId == cea.User.Id).Bucks -= bucks;
-                            bank.Accounts.Single(p => p.UserId == target.Id).Bucks += bucks;
-                            await cea.Channel.SendMessage($"**{cea.User.Name}** donated {symbol}{bucks} to **{target.Name}**.");
-                            bank.WriteBank(config["bank"]);
-                        }
-                        else
-                        {
-                            await cea.Channel.SendMessage("Could not find that user.");
-                        }
-                    }
-                    else
-                    {
-                        await cea.Channel.SendMessage("Could not parse amount as a number.");
-                    }
-                });
+            //            var target = cea.Server.FindUsers(cea.Args[1]).FirstOrDefault();
+            //            if (target != null)
+            //            {
+            //                bank.Accounts.Single(p => p.UserId == cea.User.Id).Bucks -= bucks;
+            //                bank.Accounts.Single(p => p.UserId == target.Id).Bucks += bucks;
+            //                await cea.Channel.SendMessage($"**{cea.User.Name}** donated {symbol}{bucks} to **{target.Name}**.");
+            //                bank.WriteBank(config["bank"]);
+            //            }
+            //            else
+            //            {
+            //                await cea.Channel.SendMessage("Could not find that user.");
+            //            }
+            //        }
+            //        else
+            //        {
+            //            await cea.Channel.SendMessage("Could not parse amount as a number.");
+            //        }
+            //    });
         }
 
         public static void AddNewHisuiBetsUsers(this DiscordClient client, IConfiguration config)

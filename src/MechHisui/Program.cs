@@ -43,7 +43,7 @@ namespace MechHisui
                 conf.AppName = "MechHisui";
                 conf.AppVersion = "0.3.0";
                 conf.LogLevel = LogSeverity.Warning;
-                conf.UseLargeThreshold = true;
+                //conf.UseLargeThreshold = true;
             });
 
             //client.Disconnected += (s, e) => Environment.Exit(0);
@@ -85,11 +85,19 @@ namespace MechHisui
             client.RegisterEventCommand(config);
             client.RegisterFriendsCommand(config);
             client.RegisterLoginBonusCommand(config);
-            client.RegisterStatsCommands(config);
+            if (!Debugger.IsAttached)
+            {
+                client.RegisterStatsCommands(config);
+            }
             client.RegisterQuartzCommand(config);
             client.RegisterZoukenCommand(config);
 
-            client.RegisterHisuiBetsCommands(config);
+            if (!Debugger.IsAttached)
+            {
+                client.RegisterHisuiBetsCommands(config);
+            }
+
+            client.RegisterSecretHitler(config);
 
             client.RegisterTriviaCommand(config);
 
@@ -152,7 +160,7 @@ namespace MechHisui
                             {
                                 if (Debugger.IsAttached)
                                 {
-                                    await channel.SendMessage("MechHisui started in debug mode. Not all commands will be available.");
+                                   // await channel.SendMessage("MechHisui started in debug mode. Not all commands will be available.");
                                 }
                                 else
                                 {
@@ -161,7 +169,10 @@ namespace MechHisui
                             }
                         }
                     }
-                    client.AddNewHisuiBetsUsers(config);
+                    if (!Debugger.IsAttached)
+                    {
+                        client.AddNewHisuiBetsUsers(config);
+                    }
                     Console.WriteLine($"Started up at {DateTime.Now}.");
                 }
             });

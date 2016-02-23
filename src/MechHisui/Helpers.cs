@@ -35,7 +35,7 @@ namespace MechHisui
             {
                 if (printServerNames)
                 {
-                    Console.WriteLine("\n" + server.Name);
+                    Console.WriteLine("\n" + server?.Name);
                 }
                 foreach (var channel in server.AllChannels)
                 {

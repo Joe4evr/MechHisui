@@ -52,10 +52,10 @@ namespace GudakoBot
             {
                 conf.AppName = "GudakoBot";
                 conf.CacheToken = true;
-                conf.LogLevel = Debugger.IsAttached ? LogSeverity.Verbose : LogSeverity.Warning;
-                conf.UseLargeThreshold = true;
+                conf.LogLevel = /*Debugger.IsAttached ? LogSeverity.Verbose :*/ LogSeverity.Warning;
+                //conf.UseLargeThreshold = true;
             });
-
+            
             //Display all log messages in the console
             client.Log.Message += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
             client.MessageReceived += (s, e) =>
@@ -82,7 +82,7 @@ namespace GudakoBot
                 timer = new Timer(async s =>
                 {
                     Console.WriteLine($"{DateTime.Now}: Sending message.");
-                    Randomlines.Shuffle();
+                    Randomlines = (List<string>)Randomlines.Shuffle();
                     await client.GetChannel(fgogen)
                         .SendMessage(Randomlines.ElementAt(rng.Next(maxValue: Randomlines.Count)));
                 },

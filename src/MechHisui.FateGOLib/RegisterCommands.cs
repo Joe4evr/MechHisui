@@ -210,17 +210,6 @@ namespace MechHisui.Commands
                     sb.Append("KanColle Collab never ever");
                     await cea.Channel.SendMessage(sb.ToString());
                 });
-
-            LoginBonusTimer = new Timer(async cb =>
-            {
-                Console.WriteLine("Announcing login bonusses.");
-                await ((DiscordClient)cb).GetChannel(UInt64.Parse(config["FGO_general"]))
-                    .SendMessage("Login bonusses have been distributed.");
-            },
-            client,
-            new DateTimeWithZone(DateTime.UtcNow, FgoHelpers.JpnTimeZone)
-                .TimeUntilNextLocalTimeAt(new TimeSpan(4, 0, 0)),
-            TimeSpan.FromDays(1));
         }
 
         public static void RegisterFriendsCommand(this DiscordClient client, IConfiguration config)
@@ -320,6 +309,17 @@ namespace MechHisui.Commands
                     string m = eta.Minutes == 1 ? "minute" : "minutes";
                     await cea.Channel.SendMessage($"Next login bonus drop **ETA {eta.Hours} {h} and {eta.Minutes} {m}.**");
                 });
+
+            LoginBonusTimer = new Timer(async cb =>
+            {
+                Console.WriteLine("Announcing login bonuses.");
+                await ((DiscordClient)cb).GetChannel(UInt64.Parse(config["FGO_general"]))
+                    .SendMessage("Login bonuses have been distributed.");
+            },
+            client,
+            new DateTimeWithZone(DateTime.UtcNow, FgoHelpers.JpnTimeZone)
+                .TimeUntilNextLocalTimeAt(new TimeSpan(4, 0, 0)),
+            TimeSpan.FromDays(1));
         }
 
         public static void RegisterQuartzCommand(this DiscordClient client, IConfiguration config)
@@ -737,7 +737,7 @@ namespace MechHisui.Commands
                     var masters = new List<string>();
                     for (int i = 0; i < 7; i++)
                     {
-                        FgoHelpers.Masters.Shuffle();
+                        FgoHelpers.Masters = (List<string>)FgoHelpers.Masters.Shuffle();
                         string temp;
                         do temp = FgoHelpers.Masters.ElementAt(rng.Next(maxValue: FgoHelpers.Masters.Count));
                         while (masters.Contains(temp));
@@ -755,13 +755,12 @@ namespace MechHisui.Commands
                     var templist = FgoHelpers.ServantProfiles.Concat(FgoHelpers.FakeServantProfiles)
                         .Where(pred)
                         .Select(p => new NameOnlyServant { Class = p.Class, Name = p.Name })
-                        .Concat(FgoHelpers.NameOnlyServants)
-                        .ToList();
+                        .Concat(FgoHelpers.NameOnlyServants);
 
                     var servants = new List<NameOnlyServant>();
                     for (int i = 0; i < 7; i++)
                     {
-                        templist.Shuffle();
+                        templist = templist.Shuffle();
                         NameOnlyServant temp;
                         do temp = templist.ElementAt(rng.Next(maxValue: templist.Count()));
                         while (servants.Select(s => s.Class).Contains(temp.Class));
@@ -848,7 +847,7 @@ Discuss.");
                 "Karna",
                 "Mysterious Heroine X",
                 "Brynhildr",
-                //"Nero Claudius (Bride)"
+                "Nero Claudius (Bride)",
 
                 "Journey's Beginning",
                 "Nightless Rose",
@@ -865,8 +864,8 @@ Discuss.");
                 "Launch Order!",
                 "GUDAGUDA Poster Girl",
                 "GUDAO",
-                "Okita (CE EXP)",
-                "Nobu (CE EXP)",
+                "Okita",
+                "Nobu",
                 "Lightning Reindeer",
                 "March of Saints",
                 "Present for My Master",
@@ -882,12 +881,12 @@ Discuss.");
                 "Trueshot",
                 "Mikotto! Training to be a Bride",
                 "Crimson Fortress of Shadow",
-                "Mysterious Lifeform Alpha (CE EXP)",
-                "Mysterious Lifeform Beta (CE EXP)",
+                "Mysterious Lifeform Alpha",
+                "Mysterious Lifeform Beta",
                 "Heroic Spirit Portrait",
-                //"Tears of Valentine Dojo",
-                //"Kitchen ☆ Patissiere",
-                //"Street Choco-Maid",
+                "Tears of Valentine Dojo",
+                "Kitchen ☆ Patissiere",
+                "Street Choco-Maid",
                 "Melty Sweetheart",
                 "Valentine Chocolate"
             };
@@ -925,16 +924,20 @@ Discuss.");
                         pool = FgoHelpers.ServantProfiles
                             .Where(p => p.Rarity <= 3)
                             .Concat(FgoHelpers.ServantProfiles
-                                .Where(p => p.Rarity <= 2))
+                                .Where(p => p.Rarity <= 2)
+                                .RepeatSeq(5))
                             .Concat(FgoHelpers.ServantProfiles
-                                .Where(p => p.Rarity == 1))
+                                .Where(p => p.Rarity == 1)
+                                .RepeatSeq(5))
                             .Select(p => p.Name)
                             .Concat(FgoHelpers.CEProfiles
                                 .Where(ce => ce.Rarity <= 3)
                                 .Concat(FgoHelpers.CEProfiles
-                                    .Where(ce => ce.Rarity <= 2))
+                                    .Where(ce => ce.Rarity <= 2)
+                                    .RepeatSeq(5))
                                 .Concat(FgoHelpers.CEProfiles
-                                    .Where(ce => ce.Rarity == 1))
+                                    .Where(ce => ce.Rarity == 1)
+                                    .RepeatSeq(5))
                                 .Select(ce => ce.Name))
                             .Except(excluded)
                             .ToList();
@@ -944,33 +947,41 @@ Discuss.");
                         pool = FgoHelpers.ServantProfiles
                             .Where(p => p.Rarity >= 3)
                             .Concat(FgoHelpers.ServantProfiles
-                                .Where(p => p.Rarity >= 3 && p.Rarity <= 4))
+                                .Where(p => p.Rarity >= 3 && p.Rarity <= 4)
+                                .RepeatSeq(5))
                             .Concat(FgoHelpers.ServantProfiles
-                                .Where(p => p.Rarity == 3))
+                                .Where(p => p.Rarity == 3)
+                                .RepeatSeq(5))
                             .Select(p => p.Name)
                             .Concat(FgoHelpers.CEProfiles
                                 .Where(ce => ce.Rarity >= 3)
                                 .Concat(FgoHelpers.CEProfiles
-                                    .Where(ce => ce.Rarity >= 3 && ce.Rarity <= 4))
+                                    .Where(ce => ce.Rarity >= 3 && ce.Rarity <= 4)
+                                    .RepeatSeq(5))
                                 .Concat(FgoHelpers.CEProfiles
-                                    .Where(ce => ce.Rarity == 3))
+                                    .Where(ce => ce.Rarity == 3)
+                                    .RepeatSeq(5))
                                 .Select(ce => ce.Name))
                             .Except(excluded)
                             .Except(fpOnly)
                             .ToList();
                     }
 
-                    pool.Shuffle();
+                    for (int i = 0; i < 28; i++)
+                    {
+                        pool = (List<string>)pool.Shuffle();
+                    }
+                    
                     if (cea.Args[0] == "fp" || cea.Args[0] == "ticket" || cea.Args[0] == "4")
                     {
-                        pool.Shuffle();
+                        pool = (List<string>)pool.Shuffle();
                         picks.Add(pool.ElementAt(rng.Next(maxValue: pool.Count)));
                     }
                     else //10-roll
                     {
-                        for (int i = 1; i < 10; i++)
+                        for (int i = 0; i < 10; i++)
                         {
-                            pool.Shuffle();
+                            pool = (List<string>)pool.Shuffle();
                             picks.Add(pool.ElementAt(rng.Next(maxValue: pool.Count)));
                         }
                     }

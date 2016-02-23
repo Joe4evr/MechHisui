@@ -3,8 +3,9 @@
   "version": 2,
   "targets": {
     ".NETFramework,Version=v4.6": {
-      "Discord.Net/0.9.0": {
-        "type": "package",
+      "Discord.Net/0.9.0-rc3-3": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
           "Newtonsoft.Json": "8.0.1",
           "Nito.AsyncEx": "3.0.1",
@@ -12,36 +13,15 @@
           "WebSocket4Net": "0.14.1"
         },
         "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core",
           "System.Runtime",
           "System.Threading.Tasks"
-        ],
-        "compile": {
-          "lib/net45/Discord.Net.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Discord.Net.dll": {}
-        }
+        ]
       },
-      "Discord.Net.Commands/0.9.0": {
-        "type": "package",
+      "Discord.Net.Commands/0.9.0-rc3-1": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.9.0"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net45/Discord.Net.Commands.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Discord.Net.Commands.dll": {}
+          "Discord.Net": "0.9.0-rc3-3"
         }
       },
       "Google.Apis/1.9.2": {
@@ -103,37 +83,15 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
       },
-      "JiiLib/0.1.1": {
-        "type": "package",
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net46/JiiLib.dll": {}
-        },
-        "runtime": {
-          "lib/net46/JiiLib.dll": {}
-        }
+      "JiiLib/0.1.2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6"
       },
-      "JiiLib.Net/0.1.1": {
-        "type": "package",
+      "JiiLib.Net/0.1.2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
           "Google.Apis.Script.v1": "1.9.2.10"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net46/JiiLib.Net.dll": {}
-        },
-        "runtime": {
-          "lib/net46/JiiLib.Net.dll": {}
         }
       },
       "log4net/2.0.3": {
@@ -356,8 +314,9 @@
       }
     },
     ".NETFramework,Version=v4.6/win7-x86": {
-      "Discord.Net/0.9.0": {
-        "type": "package",
+      "Discord.Net/0.9.0-rc3-3": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
           "Newtonsoft.Json": "8.0.1",
           "Nito.AsyncEx": "3.0.1",
@@ -365,36 +324,15 @@
           "WebSocket4Net": "0.14.1"
         },
         "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core",
           "System.Runtime",
           "System.Threading.Tasks"
-        ],
-        "compile": {
-          "lib/net45/Discord.Net.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Discord.Net.dll": {}
-        }
+        ]
       },
-      "Discord.Net.Commands/0.9.0": {
-        "type": "package",
+      "Discord.Net.Commands/0.9.0-rc3-1": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.9.0"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net45/Discord.Net.Commands.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Discord.Net.Commands.dll": {}
+          "Discord.Net": "0.9.0-rc3-3"
         }
       },
       "Google.Apis/1.9.2": {
@@ -456,37 +394,15 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
       },
-      "JiiLib/0.1.1": {
-        "type": "package",
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net46/JiiLib.dll": {}
-        },
-        "runtime": {
-          "lib/net46/JiiLib.dll": {}
-        }
+      "JiiLib/0.1.2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6"
       },
-      "JiiLib.Net/0.1.1": {
-        "type": "package",
+      "JiiLib.Net/0.1.2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
           "Google.Apis.Script.v1": "1.9.2.10"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net46/JiiLib.Net.dll": {}
-        },
-        "runtime": {
-          "lib/net46/JiiLib.Net.dll": {}
         }
       },
       "log4net/2.0.3": {
@@ -709,8 +625,9 @@
       }
     },
     ".NETFramework,Version=v4.6/win7-x64": {
-      "Discord.Net/0.9.0": {
-        "type": "package",
+      "Discord.Net/0.9.0-rc3-3": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
           "Newtonsoft.Json": "8.0.1",
           "Nito.AsyncEx": "3.0.1",
@@ -718,36 +635,15 @@
           "WebSocket4Net": "0.14.1"
         },
         "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core",
           "System.Runtime",
           "System.Threading.Tasks"
-        ],
-        "compile": {
-          "lib/net45/Discord.Net.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Discord.Net.dll": {}
-        }
+        ]
       },
-      "Discord.Net.Commands/0.9.0": {
-        "type": "package",
+      "Discord.Net.Commands/0.9.0-rc3-1": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.9.0"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net45/Discord.Net.Commands.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Discord.Net.Commands.dll": {}
+          "Discord.Net": "0.9.0-rc3-3"
         }
       },
       "Google.Apis/1.9.2": {
@@ -809,37 +705,15 @@
           "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
         }
       },
-      "JiiLib/0.1.1": {
-        "type": "package",
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net46/JiiLib.dll": {}
-        },
-        "runtime": {
-          "lib/net46/JiiLib.dll": {}
-        }
+      "JiiLib/0.1.2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6"
       },
-      "JiiLib.Net/0.1.1": {
-        "type": "package",
+      "JiiLib.Net/0.1.2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
           "Google.Apis.Script.v1": "1.9.2.10"
-        },
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "mscorlib",
-          "System",
-          "System.Core"
-        ],
-        "compile": {
-          "lib/net46/JiiLib.Net.dll": {}
-        },
-        "runtime": {
-          "lib/net46/JiiLib.Net.dll": {}
         }
       },
       "log4net/2.0.3": {
@@ -1063,31 +937,21 @@
     }
   },
   "libraries": {
-    "Discord.Net/0.9.0": {
-      "type": "package",
-      "sha512": "6z5mNP6DRfHsJce1TrZ+G/ojtUheCdB9HeE9O44mJFoeLdeWVYrQw7pjGNlC34N2+vwFTbsQjRBVrftjnpS8pQ==",
-      "files": [
-        "Discord.Net.0.9.0.nupkg",
-        "Discord.Net.0.9.0.nupkg.sha512",
-        "Discord.Net.nuspec",
-        "lib/dotnet5.4/Discord.Net.dll",
-        "lib/dotnet5.4/Discord.Net.xml",
-        "lib/net45/Discord.Net.dll",
-        "lib/net45/Discord.Net.xml"
-      ]
+    "Discord.Net/0.9.0-rc3-3": {
+      "type": "project",
+      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/project.json"
     },
-    "Discord.Net.Commands/0.9.0": {
-      "type": "package",
-      "sha512": "EhwtA0HMJ7YRbpVmWYgf4Mv08DA99eGuCw/ojmuXWV9SHqU6N/0yFsKqFONNHfFIp9L28FBddOHPWszYNU+u6w==",
-      "files": [
-        "Discord.Net.Commands.0.9.0.nupkg",
-        "Discord.Net.Commands.0.9.0.nupkg.sha512",
-        "Discord.Net.Commands.nuspec",
-        "lib/dotnet5.4/Discord.Net.Commands.dll",
-        "lib/dotnet5.4/Discord.Net.Commands.xml",
-        "lib/net45/Discord.Net.Commands.dll",
-        "lib/net45/Discord.Net.Commands.xml"
-      ]
+    "Discord.Net.Commands/0.9.0-rc3-1": {
+      "type": "project",
+      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/project.json"
+    },
+    "JiiLib/0.1.2": {
+      "type": "project",
+      "path": "../../../JiiLib/src/JiiLib/project.json"
+    },
+    "JiiLib.Net/0.1.2": {
+      "type": "project",
+      "path": "../../../JiiLib/src/JiiLib.Net/project.json"
     },
     "Google.Apis/1.9.2": {
       "type": "package",
@@ -1186,32 +1050,6 @@
         "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll",
         "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.pdb",
         "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.xml"
-      ]
-    },
-    "JiiLib/0.1.1": {
-      "type": "package",
-      "sha512": "jv+JkwL5EN+dxxBpIQNcg7Zzw00rw7u5tv9cnUoLtJIGBZ8POjwtuPimL8gsRgDgI51NzMuW1a2gP+kb8k3Jbg==",
-      "files": [
-        "JiiLib.0.1.1.nupkg",
-        "JiiLib.0.1.1.nupkg.sha512",
-        "JiiLib.nuspec",
-        "lib/dotnet5.4/JiiLib.dll",
-        "lib/dotnet5.4/JiiLib.xml",
-        "lib/net46/JiiLib.dll",
-        "lib/net46/JiiLib.xml"
-      ]
-    },
-    "JiiLib.Net/0.1.1": {
-      "type": "package",
-      "sha512": "aky25mQVR13dFo4WdE+emVweAbjAIJKWe6JV2kfP14SMqnsDzlLt9jdtUFk7Hs8hhS+8lHeqcwfa2wSXcdD7GA==",
-      "files": [
-        "JiiLib.Net.0.1.1.nupkg",
-        "JiiLib.Net.0.1.1.nupkg.sha512",
-        "JiiLib.Net.nuspec",
-        "lib/dotnet5.4/JiiLib.Net.dll",
-        "lib/dotnet5.4/JiiLib.Net.xml",
-        "lib/net46/JiiLib.Net.dll",
-        "lib/net46/JiiLib.Net.xml"
       ]
     },
     "log4net/2.0.3": {
@@ -1729,10 +1567,10 @@
     "": [
       "Microsoft.Extensions.Configuration.UserSecrets >= 1.0.0-rc1-final",
       "Google.Apis.Script.v1 >= 1.9.2.10",
-      "JiiLib >= 0.1.1",
-      "JiiLib.Net >= 0.1.1",
-      "Discord.Net >= 0.9.0-*",
-      "Discord.Net.Commands >= 0.9.0-*"
+      "JiiLib >= 0.1.2",
+      "JiiLib.Net >= 0.1.2",
+      "Discord.Net >= 0.9.0-rc3-3",
+      "Discord.Net.Commands >= 0.9.0-rc3-1"
     ],
     ".NETFramework,Version=v4.6": []
   }

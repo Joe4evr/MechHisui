@@ -1,17 +1,16 @@
 ﻿{
-    "version": "0.3.1-*",
-    "description": "StatsService Class Library",
-    "authors": [ "Joe4evr" ],
+    "version": "1.0.0-*",
+    "description": "MechHisui.SecretHitler Class Library",
+    "authors": [ "Jonathan" ],
     "tags": [ "" ],
     "projectUrl": "",
     "licenseUrl": "",
+
     "dependencies": {
         "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final",
-        "Google.Apis.Script.v1": "1.9.2.10",
-        "JiiLib": "0.1.2",
-        "JiiLib.Net": "0.1.2",
         "Discord.Net": "0.9.0-rc3-3",
-        "Discord.Net.Commands": "0.9.0-rc3-1"
+        "Discord.Net.Commands": "0.9.0-rc3-1",
+        "JiiLib": "0.1.2"
     },
 
     "frameworks": {

@@ -255,7 +255,7 @@ namespace DynamicCompile
         {
             Console.WriteLine("Registering 'Known'...");
             client.Services.Get<CommandService>().CreateCommand("known")
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]))
                 .Hide()
                 .Do(async cea =>
                 {
@@ -318,13 +318,13 @@ namespace DynamicCompile
                         return;
                     }
 
-                    var items = cea.Args.ToList();
+                    var items = (IEnumerable<string>)cea.Args;
                     for (int i = 0; i < 28; i++)
                     {
-                        items.Shuffle();
+                        items = items.Shuffle();
                     }
 
-                    await cea.Channel.SendMessage($"**Picked:** `{items.ElementAt(new Random().Next(maxValue: items.Count))}`");
+                    await cea.Channel.SendMessage($"**Picked:** `{items.ElementAt(new Random().Next(maxValue: items.Count()))}`");
                 });
         }
 
