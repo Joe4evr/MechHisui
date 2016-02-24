@@ -272,22 +272,22 @@ namespace MechHisui.SecretHitler
             if (_votes.Count(v => v.Vote == Vote.No) >= _votes.Count(v => v.Vote == Vote.Yes))
             {
                 _electionTracker++;
-                sb.Append($"The vote has **not** gone through. {_config.Parliament} is stalled and");
+                sb.Append($"The vote has **not** gone through. {_config.Parliament} is stalled and ");
                 switch (_electionTracker)
                 {
                     case 1:
-                        sb.Append($" {_config.ThePeople} are disappointed.");
+                        sb.Append(_config.ThePeopleOne);
                         await _channel.SendMessage(sb.ToString());
                         break;
                     case 2:
-                        sb.Append($" {_config.ThePeople} are upset.");
+                        sb.Append(_config.ThePeopleTwo);
                         await _channel.SendMessage(sb.ToString());
                         break;
                     case 3:
-                        sb.AppendLine($" {_config.ThePeople} are enacting their own {_config.Policy}.");
+                        sb.AppendLine(_config.ThePeopleThree);
                         _electionTracker = 0;
                         var pol = Deck.Pop();
-                        sb.Append($"{_config.ThePeople} have encated a **{pol.ToString()}** {_config.Policy}.");
+                        sb.AppendFormat(_config.ThePeopleEnacted, pol.ToString());
                         await _channel.SendMessage(sb.ToString());
                         if (pol == PolicyType.Fascist)
                         {
@@ -406,6 +406,7 @@ namespace MechHisui.SecretHitler
                         await _channel.SendMessage($"The {_config.President} may investigate one player's Party affinity.");
                         return;
                     case BoardSpaceType.ChooseNextCandidate:
+                        _state = GameState.SpecialElection;
                         await _channel.SendMessage($"The current {_config.President} may choose the next turn's {_config.President}.");
                         return;
                     case BoardSpaceType.Execution:
@@ -418,11 +419,11 @@ namespace MechHisui.SecretHitler
                         await _channel.SendMessage($"The {_config.President} may choose another player to kill. Also, the {_config.President} and {_config.Chancellor} may veto.");
                         return;
                     case BoardSpaceType.FascistWin:
-                        await _channel.SendMessage($"{_config.FascistParty} wins.");
+                        await _channel.SendMessage(_config.FascistsWin);
                         await EndGame();
                         return;
                     case BoardSpaceType.LiberalWin:
-                        await _channel.SendMessage($"{_config.LiberalParty} wins.");
+                        await _channel.SendMessage(_config.LiberalsWin);
                         await EndGame();
                         return;
                 }
@@ -571,11 +572,14 @@ namespace MechHisui.SecretHitler
                         if (e.User.Id == _currentPresident && e.Message.Text.ToLowerInvariant().StartsWith("elect"))
                         {
                             var target = e.Message.MentionedUsers.FirstOrDefault();
-                            if (target != null && _players.Select(p => p.User.Id).Contains(target.Id))
+                            if (target != null && _players.Where(p => p.IsAlive && p.User.Id != _currentChancellor && p.User.Id != _currentPresident).Select(p => p.User.Id).Contains(target.Id))
                             {
                                 _specialElected = target.Id;
                                 await _channel.SendMessage($"The {_config.President} has Special Elected **{target.Name}**.");
-
+                            }
+                            else
+                            {
+                                await _channel.SendMessage("Ineligable for nomination.");
                             }
                         }
                         break;
@@ -587,16 +591,16 @@ namespace MechHisui.SecretHitler
                             {
                                 var player = _players.Single(p => p.User.Id == target.Id);
                                 player.IsAlive = false;
-                                await _channel.SendMessage($"The {_config.President} has put a {_config.Bullet} through **{target.Name}**'s head.");
+                                await _channel.SendMessage(String.Format(_config.Kill, target.Name));
                                 await Task.Delay(500);
                                 if (player.Role == _config.Hitler)
                                 {
-                                    await _channel.GetUser(_currentPresident).PrivateChannel.SendMessage(_config.HitlerWasKilled());
+                                    await _channel.GetUser(_currentPresident).PrivateChannel.SendMessage(String.Format(_config.HitlerWasKilled, _config.Hitler, _config.LiberalParty));
                                     await EndGame();
                                 }
                                 else
                                 {
-                                    await _channel.GetUser(_currentPresident).PrivateChannel.SendMessage(_config.HitlerNotKilled(player.User.Name));
+                                    await _channel.GetUser(_currentPresident).PrivateChannel.SendMessage(String.Format(_config.HitlerNotKilled, player.User.Name, _config.Hitler));
                                 }
                             }
                         }
@@ -665,7 +669,7 @@ namespace MechHisui.SecretHitler
                 .AppendLine($"Turn state is {_state.ToString()}.")
                 .AppendLine($"{LiberalTrack.Count(s => !s.IsEmpty)} {_config.Liberal} {_config.Policies} passed.")
                 .AppendLine($"{FascistTrack.Count(s => !s.IsEmpty)} {_config.Fascist} {_config.Policies} passed.")
-                .AppendLine($"{_config.ThePeople} are {3 - _electionTracker} stalls away from enacting their own {_config.Policy}.")
+                //.AppendLine($"{_config.ThePeople} are {3 - _electionTracker} stalls away from enacting their own {_config.Policy}.")
                 .AppendLine($"{Deck.Count} {_config.Policies} in the deck.")
                 .AppendLine($"{Discards.Count} {_config.Policies} discarded.");
             foreach (var user in _confirmedNot)

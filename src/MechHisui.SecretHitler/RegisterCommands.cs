@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Discord;
 using Discord.Commands;
 using MechHisui.SecretHitler;
+using System.Text;
 
 namespace MechHisui.Commands
 {
@@ -16,6 +17,23 @@ namespace MechHisui.Commands
 
         public static void RegisterSecretHitler(this DiscordClient client, IConfiguration config)
         {
+            client.Services.Get<CommandService>().CreateCommand("rules")
+                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
+                .Description("Quick summary of the rules.")
+                .Do(async cea =>
+                {
+                    var sb = new StringBuilder("How to play:")
+                        .AppendLine("There are three roles: Liberal, Fascist, and Hitler.")
+                        .AppendLine("Hitler does not know who his fellow Fascists are, but the Fascists know who Hitler is (except in 5 or 6 player games).")
+                        .AppendLine("Liberals will always start off not knowing anything.")
+                        .AppendLine("If 6 Fascist Policies are enacted, or Hitler is chosen as Chancellor in the late-game, the Fascists win.")
+                        .AppendLine("If 5 Liberal Policies are enacted, or Hitler is successfully killed, the Liberals win.")
+                        .AppendLine("The following themes are available too: `jjba`")
+                        .Append("Good luck, have fun.");
+                    
+                    await cea.Channel.SendMessage(sb.ToString());
+                });
+
             client.Services.Get<CommandService>().CreateCommand("opensh")
                 .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 //.Parameter("type", ParameterType.Optional)
@@ -107,13 +125,18 @@ namespace MechHisui.Commands
                             var gameConfig = SecretHitlerConfig.Default;
                             switch (cea.Args[0])
                             {
-                                case "angrymanjew":
-                                    gameConfig = SecretHitlerConfig.AngryManjew;
+                                //case "am":
+                                //case "angrymanjew":
+                                //    gameConfig = SecretHitlerConfig.AngryManjew;
+                                //    break;
+                                case "jjba":
+                                case "jojo":
+                                    gameConfig = SecretHitlerConfig.JojosBizarreAdventure;
                                     break;
                                 default:
                                     break;
                             }
-                            game = new SecretHitler.SecretHitler(SecretHitlerConfig.Default, cea.Channel, players);
+                            game = new SecretHitler.SecretHitler(gameConfig, cea.Channel, players);
                             await game.SetupGame();
                         }
                     }

@@ -84,7 +84,7 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Registering 'Delete'...");
             client.Services.Get<CommandService>().CreateCommand("del")
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => (u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client)) || ch.Id == u.PrivateChannel.Id)
                 .Parameter("number", ParameterType.Required)
                 .Hide()
                 .Do(async cea =>
