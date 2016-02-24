@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using JiiLib;
-using System.Threading;
 
 namespace MechHisui.SecretHitler
 {
@@ -35,6 +35,7 @@ namespace MechHisui.SecretHitler
         private List<PlayerVote> _votes;
         private bool _takenVeto = false;
         private ulong _specialElected = 0;
+        private int _deadCounter = 0;
 
         private event PropertyChangedEventHandler PropertyChanged;
 
@@ -197,11 +198,14 @@ namespace MechHisui.SecretHitler
             _takenVeto = false;
             if (_specialElected <= 1)
             {
-                int i = (_turn - (int)_specialElected) % _players.Count();
+                int i = ((_turn - (int)_specialElected) + _deadCounter) % _players.Count();
                 do
                 {
+                    if (!_players.ElementAt(i).IsAlive)
+                    {
+                        _deadCounter++;
+                    }
                     _currentPresident = _players.ElementAt(i).User.Id;
-                    i++;
                 } while (_players.Where(p => !p.IsAlive).Select(p => p.User.Id).Contains(_currentPresident));
             }
             else
