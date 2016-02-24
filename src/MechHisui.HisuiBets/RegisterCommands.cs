@@ -46,18 +46,20 @@ namespace MechHisui.Commands
                 .Parameter("gametype", ParameterType.Optional)
                 .Do(async cea =>
                 {
-                    if (game?.GameOpen == false)
+                    if (game == null || !game.GameOpen)
                     {
-                        if (cea.Args.Length == 1 && (cea.Args[0].ToLowerInvariant() == "sb" || cea.Args[0].ToLowerInvariant() == "salty"))
+                        switch (cea.Args[0].ToLowerInvariant())
                         {
-                            await cea.Channel.SendMessage("Starting a SaltyBet game. Bets will close shortly.");
-                            game = new Game(bank, cea.Channel, GameType.SaltyBet);
-                            game.ClosingGame();
-                        }
-                        else
-                        {
-                            await cea.Channel.SendMessage("A new game is starting. You may place your bets now.");
-                            game = new Game(bank, cea.Channel, GameType.HungerGame);
+                            case "sb":
+                            case "salty":
+                                await cea.Channel.SendMessage("Starting a SaltyBet game. Bets will close shortly.");
+                                game = new Game(bank, cea.Channel, GameType.SaltyBet);
+                                game.ClosingGame();
+                                break;
+                            default:
+                                await cea.Channel.SendMessage("A new game is starting. You may place your bets now.");
+                                game = new Game(bank, cea.Channel, GameType.HungerGame);
+                                break;
                         }
                     }
                     else
@@ -73,12 +75,12 @@ namespace MechHisui.Commands
                 .Description("Bet an amount of HisuiBucks on a specified tribute")
                 .Do(async cea =>
                 {
-                    if (game.Type == GameType.HungerGame && cea.User.Id == UInt64.Parse(config["Hgame_Master"]))
+                    if (game?.Type == GameType.HungerGame && cea.User.Id == UInt64.Parse(config["Hgame_Master"]))
                     {
                         await cea.Channel.SendMessage("The game master is not allowed to bet in a Hunger Game.");
                         return;
                     }
-                    if (!game.GameOpen || !game.BetsOpen)
+                    if (game?.GameOpen == false || game?.BetsOpen == false)
                     {
                         await cea.Channel.SendMessage("Bets are currently closed at this time.");
                         return;
@@ -168,17 +170,17 @@ namespace MechHisui.Commands
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"])))
                 .Do(async cea =>
                 {
-                    if (!game.GameOpen)
+                    if (game?.GameOpen == false)
                     {
                         await cea.Channel.SendMessage("No game is going on at this time.");
                         return;
                     }
-                    if (!game.BetsOpen)
+                    if (game?.BetsOpen == false)
                     {
                         await cea.Channel.SendMessage("Bets are already closed.");
                         return;
                     }
-                    if (game.Type == GameType.SaltyBet)
+                    if (game?.Type == GameType.SaltyBet)
                     {
                         await cea.Channel.SendMessage("This type of game closes automatically.");
                         return;
@@ -191,7 +193,10 @@ namespace MechHisui.Commands
                 .Parameter("name", ParameterType.Unparsed)
                 .Do(async cea =>
                 {
-                    await cea.Channel.SendMessage(game.Winner(cea.Args[0]));
+                    if (game?.GameOpen == true)
+                    {
+                        await cea.Channel.SendMessage(game.Winner(cea.Args[0]));
+                    }
                 });
 
             //client.Services.Get<CommandService>().CreateCommand("donate")

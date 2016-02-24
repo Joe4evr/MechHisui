@@ -28,13 +28,13 @@ namespace MechHisui.Modules
         {
             if (e.Channel.Id == channel.Id)
             {
-                string temp = (e.Message.Text.StartsWith("@", StringComparison.InvariantCultureIgnoreCase) ? new string(e.Message.Text.SkipWhile(c => !Char.IsWhiteSpace(c)).ToArray()) : e.Message.Text);
+                string temp = (e?.Message?.Text?.StartsWith("@", StringComparison.InvariantCultureIgnoreCase) ?? false ? new string(e.Message.Text.SkipWhile(c => !Char.IsWhiteSpace(c)).ToArray()) : e.Message.Text);
 
                 if (!String.IsNullOrEmpty(temp))
                 {
                     string quickResponse = String.Empty;
-                    Func<Response, bool> pred = (k => k.Call.ContainsIgnoreCase(temp.Trim()));
-                    var resp = Responses.responseDict.SingleOrDefault(k => k.Key.ContainsIgnoreCase(temp.Trim()));
+                    Func<Response, bool> pred = (k => k?.Call?.ContainsIgnoreCase(temp.Trim()) ?? false);
+                    var resp = Responses.responseDict.SingleOrDefault(k => k.Key?.ContainsIgnoreCase(temp.Trim()) ?? false);
                     var sResp = Responses.spammableResponses.SingleOrDefault(pred);
 
                     if (resp.Key != null)

@@ -1,7 +1,10 @@
 ﻿namespace MechHisui.SecretHitler
 {
-    public partial class SecretHitlerConfig
+    public class SecretHitlerConfig
     {
+        public static SecretHitlerConfig Default = new SecretHitlerConfig();
+
+        public string Key { get; set; } = "default";
         public string President { get; set; } = "President";
         //public string Presidency { get; set; } = "Presidency";
         public string Chancellor { get; set; } = "Chancellor";
@@ -16,6 +19,7 @@
         public string Policies { get; set; } = "Policies";
         public string Yes { get; set; } = "Ja";
         public string No { get; set; } = "Nein";
+        public string ThePeopleState { get; set; } = "The People are {0} stalls away from enacting their own Policy.";
         public string ThePeopleOne { get; set; } = "The People are disappointed.";
         public string ThePeopleTwo { get; set; } = "The People are upset.";
         public string ThePeopleThree { get; set; } = "The People are enacting their own Policy.";

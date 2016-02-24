@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.Extensions.Configuration;
 using Discord;
 using Discord.Commands;
+using Newtonsoft.Json;
 using MechHisui.SecretHitler;
-using System.Text;
 
 namespace MechHisui.Commands
 {
@@ -14,21 +16,25 @@ namespace MechHisui.Commands
         private static SecretHitler.SecretHitler game;
         internal static bool gameOpen = false;
         private static IList<User> players;
+        private static IList<SecretHitlerConfig> configs;
 
         public static void RegisterSecretHitler(this DiscordClient client, IConfiguration config)
         {
+            Console.WriteLine("Registering 'Secret Hitler'...");
+            ReloadConfigs(Path.Combine(config["other"], "shitler.json"));
+
             client.Services.Get<CommandService>().CreateCommand("rules")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 .Description("Quick summary of the rules.")
                 .Do(async cea =>
                 {
-                    var sb = new StringBuilder("How to play:")
+                    var sb = new StringBuilder("How to play:\n")
                         .AppendLine("There are three roles: Liberal, Fascist, and Hitler.")
                         .AppendLine("Hitler does not know who his fellow Fascists are, but the Fascists know who Hitler is (except in 5 or 6 player games).")
                         .AppendLine("Liberals will always start off not knowing anything.")
                         .AppendLine("If 6 Fascist Policies are enacted, or Hitler is chosen as Chancellor in the late-game, the Fascists win.")
                         .AppendLine("If 5 Liberal Policies are enacted, or Hitler is successfully killed, the Liberals win.")
-                        .AppendLine("The following themes are available too: `jjba`")
+                        .AppendLine($"The following themes are available too: `{String.Join("`, `", configs.Select(c => c.Key))}`")
                         .Append("Good luck, have fun.");
                     
                     await cea.Channel.SendMessage(sb.ToString());
@@ -38,7 +44,6 @@ namespace MechHisui.Commands
                 .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 //.Parameter("type", ParameterType.Optional)
                 .Description("Open up a game of Secret ~~Angry Manjew~~ Hitler for people to join.")
-                .Hide()
                 .Do(async cea =>
                 {
                     if (!gameOpen)
@@ -47,6 +52,11 @@ namespace MechHisui.Commands
                         await cea.Channel.SendMessage("Opening up a round of Secret Hitler.");
                     }
                 });
+
+            client.Services.Get<CommandService>().CreateCommand("reload")
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
+                .Hide()
+                .Do(cea => ReloadConfigs(Path.Combine(config["other"], "shitler.json")));
 
             //client.Services.Get<CommandService>().CreateCommand("testsh")
             //    .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]))
@@ -122,20 +132,7 @@ namespace MechHisui.Commands
                         {
                             gameOpen = true;
                             await cea.Channel.SendMessage($"Setting up game with {players.Count} players.");
-                            var gameConfig = SecretHitlerConfig.Default;
-                            switch (cea.Args[0])
-                            {
-                                //case "am":
-                                //case "angrymanjew":
-                                //    gameConfig = SecretHitlerConfig.AngryManjew;
-                                //    break;
-                                case "jjba":
-                                case "jojo":
-                                    gameConfig = SecretHitlerConfig.JojosBizarreAdventure;
-                                    break;
-                                default:
-                                    break;
-                            }
+                            var gameConfig = configs.SingleOrDefault(c => c.Key == cea.Args[0]) ?? SecretHitlerConfig.Default;
                             game = new SecretHitler.SecretHitler(gameConfig, cea.Channel, players);
                             await game.SetupGame();
                         }
@@ -169,6 +166,11 @@ namespace MechHisui.Commands
                     await game.EndGame();
                     gameOpen = true;
                 });
+        }
+
+        private static void ReloadConfigs(string path)
+        {
+            configs = JsonConvert.DeserializeObject<List<SecretHitlerConfig>>(File.ReadAllText(path));
         }
     }
 }

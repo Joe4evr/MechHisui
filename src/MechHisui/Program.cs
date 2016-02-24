@@ -91,11 +91,8 @@ namespace MechHisui
             }
             client.RegisterQuartzCommand(config);
             client.RegisterZoukenCommand(config);
-
-            if (!Debugger.IsAttached)
-            {
-                client.RegisterHisuiBetsCommands(config);
-            }
+            
+            client.RegisterHisuiBetsCommands(config);
 
             client.RegisterSecretHitler(config);
 
