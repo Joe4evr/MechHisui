@@ -27,7 +27,7 @@ namespace MechHisui.Commands
         public static void RegisterAddChannelCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Add channel'...");
-            client.Services.Get<CommandService>().CreateCommand("add")
+            client.GetService<CommandService>().CreateCommand("add")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Parameter("id", ParameterType.Required)
@@ -38,7 +38,7 @@ namespace MechHisui.Commands
                     if (UInt64.TryParse(cea.Args[0], out ch))
                     {
                         Channel chan = client.GetChannel(ch);
-                        client.Modules().Modules
+                        client.GetService<ModuleService>().Modules
                             .SingleOrDefault(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())
                             .EnableChannel(chan);
 
@@ -83,7 +83,7 @@ namespace MechHisui.Commands
         public static void RegisterDeleteCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Delete'...");
-            client.Services.Get<CommandService>().CreateCommand("del")
+            client.GetService<CommandService>().CreateCommand("del")
                 .AddCheck((c, u, ch) => (u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client)) || ch.Id == u.PrivateChannel.Id)
                 .Parameter("number", ParameterType.Required)
                 .Hide()
@@ -105,7 +105,7 @@ namespace MechHisui.Commands
         public static void RegisterDisconnectCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Disconnect'...");
-            client.Services.Get<CommandService>().CreateCommand("disconnect")
+            client.GetService<CommandService>().CreateCommand("disconnect")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("code", ParameterType.Optional)
                 .Hide()
@@ -133,7 +133,7 @@ namespace MechHisui.Commands
                 MetadataReference.CreateFromFile(typeof(JsonConvert).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(FgoHelpers).Assembly.Location)
             };
-            client.Services.Get<CommandService>().CreateCommand("eval")
+            client.GetService<CommandService>().CreateCommand("eval")
                 .Parameter("func", ParameterType.Unparsed)
                 .Hide()
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
@@ -221,7 +221,7 @@ namespace DynamicCompile
 
             
             //Console.WriteLine("Registering 'Image'...");
-            //client.Services.Get<CommandService>().CreateCommand("image")
+            //client.GetService<CommandService>().CreateCommand("image")
             //    .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]))
             //    .Hide()
             //    .Parameter("album", ParameterType.Optional)
@@ -242,7 +242,7 @@ namespace DynamicCompile
         public static void RegisterInfoCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Info'...");
-            client.Services.Get<CommandService>().CreateCommand("info")
+            client.GetService<CommandService>().CreateCommand("info")
                 .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
                 .Description("Relay info about myself.")
                 .Do(async cea =>
@@ -254,7 +254,7 @@ namespace DynamicCompile
         public static void RegisterKnownChannelsCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Known'...");
-            client.Services.Get<CommandService>().CreateCommand("known")
+            client.GetService<CommandService>().CreateCommand("known")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]))
                 .Hide()
                 .Do(async cea =>
@@ -270,7 +270,7 @@ namespace DynamicCompile
         public static void RegisterLearnCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Learn'...");
-            client.Services.Get<CommandService>().CreateCommand("learn")
+            client.GetService<CommandService>().CreateCommand("learn")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("trigger", ParameterType.Required)
                 .Parameter("response", ParameterType.Required)
@@ -306,7 +306,7 @@ namespace DynamicCompile
         public static void RegisterPickCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Pick'...");
-            client.Services.Get<CommandService>().CreateCommand("pick")
+            client.GetService<CommandService>().CreateCommand("pick")
                 .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
                 .Parameter("items", ParameterType.Multiple)
                 .Description("Randomly choose something from any number of items.")
@@ -331,7 +331,7 @@ namespace DynamicCompile
         public static void RegisterRecordingCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Recording'...");
-            client.Services.Get<CommandService>().CreateCommand("record")
+            client.GetService<CommandService>().CreateCommand("record")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
@@ -349,7 +349,7 @@ namespace DynamicCompile
                     }
                 });
 
-            client.Services.Get<CommandService>().CreateCommand("endrecord")
+            client.GetService<CommandService>().CreateCommand("endrecord")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
@@ -372,7 +372,7 @@ namespace DynamicCompile
         public static void RegisterResetCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Reset'...");
-            client.Services.Get<CommandService>().CreateCommand("reset")
+            client.GetService<CommandService>().CreateCommand("reset")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Hide()
                 .Do(async cea =>
@@ -386,7 +386,7 @@ namespace DynamicCompile
         public static void RegisterThemeCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Theme'...");
-            client.Services.Get<CommandService>().CreateCommand("theme")
+            client.GetService<CommandService>().CreateCommand("theme")
                 .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
                 .Do(async cea =>
                 {
@@ -397,7 +397,7 @@ namespace DynamicCompile
         public static void RegisterWhereCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Where'...");
-            client.Services.Get<CommandService>().CreateCommand("where")
+            client.GetService<CommandService>().CreateCommand("where")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
                 .Parameter("item")
                 .Hide()
@@ -453,7 +453,7 @@ namespace DynamicCompile
             {
                 xmasvids = JsonConvert.DeserializeObject<List<string>>(tr.ReadToEnd());
             }
-            client.Services.Get<CommandService>().CreateCommand("xmas")
+            client.GetService<CommandService>().CreateCommand("xmas")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) && DateTime.UtcNow.Month == 12)
                 .Hide()
                 .Do(async cea =>
@@ -461,7 +461,7 @@ namespace DynamicCompile
                     await cea.Channel.SendMessage(xmasvids.ElementAt(new Random().Next() % xmasvids.Count));
                 });
 
-            client.Services.Get<CommandService>().CreateCommand("addxmas")
+            client.GetService<CommandService>().CreateCommand("addxmas")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && DateTime.UtcNow.Month == 12)
                 .Parameter("item", ParameterType.Required)
                 .Hide()
@@ -483,7 +483,7 @@ namespace DynamicCompile
             //await StopTrvias(client.GetTrivias());
             string msg = code == 1 ? "Shutting down for rebuild." : config["Goodbye"];
 
-            foreach (var ch in client.Modules().Modules
+            foreach (var ch in client.GetService<ModuleService>().Modules
                 .Single(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())
                 .EnabledChannels)
             {

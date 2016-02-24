@@ -23,7 +23,7 @@ namespace MechHisui.Commands
             Console.WriteLine("Registering 'Secret Hitler'...");
             ReloadConfigs(Path.Combine(config["other"], "shitler.json"));
 
-            client.Services.Get<CommandService>().CreateCommand("rules")
+            client.GetService<CommandService>().CreateCommand("rules")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 .Description("Quick summary of the rules.")
                 .Do(async cea =>
@@ -40,7 +40,7 @@ namespace MechHisui.Commands
                     await cea.Channel.SendMessage(sb.ToString());
                 });
 
-            client.Services.Get<CommandService>().CreateCommand("opensh")
+            client.GetService<CommandService>().CreateCommand("opensh")
                 .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 //.Parameter("type", ParameterType.Optional)
                 .Description("Open up a game of Secret ~~Angry Manjew~~ Hitler for people to join.")
@@ -53,12 +53,12 @@ namespace MechHisui.Commands
                     }
                 });
 
-            client.Services.Get<CommandService>().CreateCommand("reload")
+            client.GetService<CommandService>().CreateCommand("reload")
                 .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 .Hide()
                 .Do(cea => ReloadConfigs(Path.Combine(config["other"], "shitler.json")));
 
-            //client.Services.Get<CommandService>().CreateCommand("testsh")
+            //client.GetService<CommandService>().CreateCommand("testsh")
             //    .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]))
             //    .Hide()
             //    .Do(async cea =>
@@ -72,7 +72,7 @@ namespace MechHisui.Commands
             //        game = Game;
             //    });
 
-            client.Services.Get<CommandService>().CreateCommand("players")
+            client.GetService<CommandService>().CreateCommand("players")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 .Description("Display the currently joined players.")
                 .Do(async cea =>
@@ -80,7 +80,7 @@ namespace MechHisui.Commands
                     await cea.Channel.SendMessage($"Current players are {String.Join(", ", players.Select(p => p.Name))}.");
                 });
 
-            client.Services.Get<CommandService>().CreateCommand("join")
+            client.GetService<CommandService>().CreateCommand("join")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 .Description("Join the game when it is open to play. At least 5 and at most 10 people can play. Using Voice is advised.")
                 .Do(async cea =>
@@ -105,7 +105,7 @@ namespace MechHisui.Commands
                     }
                 });
 
-            client.Services.Get<CommandService>().CreateCommand("leave")
+            client.GetService<CommandService>().CreateCommand("leave")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 .Description("Leave a game if it has not been started yet.")
                 .Do(async cea =>
@@ -120,7 +120,7 @@ namespace MechHisui.Commands
                     }
                 });
 
-            client.Services.Get<CommandService>().CreateCommand("startsh")
+            client.GetService<CommandService>().CreateCommand("startsh")
                 .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 .Parameter("type", ParameterType.Optional)
                 .Description("Start a game. `.opensh` has to be called before this and at least 5 people must join.")
@@ -139,7 +139,7 @@ namespace MechHisui.Commands
                     }
                 });
 
-            client.Services.Get<CommandService>().CreateCommand("state")
+            client.GetService<CommandService>().CreateCommand("state")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 .Description("Display the current state of the game.")
                 .Do(async cea =>
@@ -154,12 +154,12 @@ namespace MechHisui.Commands
                     }
                 });
 
-            client.Services.Get<CommandService>().CreateCommand("turn")
+            client.GetService<CommandService>().CreateCommand("turn")
                 .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 .Description("Advance to the next turn.")
                 .Do(async cea => await game.StartTurn());
 
-            client.Services.Get<CommandService>().CreateCommand("endsh")
+            client.GetService<CommandService>().CreateCommand("endsh")
                 .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 .Description("End the game early.")
                 .Do(async cea => {

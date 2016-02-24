@@ -119,7 +119,7 @@ namespace MechHisui
                 Console.WriteLine($"MH v. 0.3.0");
 
                 //Use a channel whitelist
-                client.Modules().Add(
+                client.GetService<ModuleService>().Add(
                     new ChannelWhitelistModule(
                         Helpers.ConvertStringArrayToULongArray(
                             //config["API_testing"]

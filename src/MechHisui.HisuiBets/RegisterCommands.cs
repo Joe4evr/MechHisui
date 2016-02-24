@@ -32,7 +32,7 @@ namespace MechHisui.Commands
                 }
             };
 
-            client.Services.Get<CommandService>().CreateCommand("mybucks")
+            client.GetService<CommandService>().CreateCommand("mybucks")
                 .Alias("bucks")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Do(async cea =>
@@ -41,7 +41,7 @@ namespace MechHisui.Commands
                     await cea.Channel.SendMessage($"**{cea.User.Name}** currently has {symbol}{bucks}.");
                 });
 
-            client.Services.Get<CommandService>().CreateCommand("newgame")
+            client.GetService<CommandService>().CreateCommand("newgame")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"])))
                 .Parameter("gametype", ParameterType.Optional)
                 .Do(async cea =>
@@ -68,7 +68,7 @@ namespace MechHisui.Commands
                     }
                 });
 
-            client.Services.Get<CommandService>().CreateCommand("bet")
+            client.GetService<CommandService>().CreateCommand("bet")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]) /*&& !(Debugger.IsAttached && u.Id == UInt64.Parse(config["Owner"]))*/)
                 .Parameter("amount", ParameterType.Required)
                 .Parameter("tribute", ParameterType.Multiple)
@@ -118,7 +118,7 @@ namespace MechHisui.Commands
                     }));
                 });
 
-            //client.Services.Get<CommandService>().CreateCommand("checkbets")
+            //client.GetService<CommandService>().CreateCommand("checkbets")
             //    .AddCheck((c, u, ch) =>
             //    {
             //        Console.WriteLine("Checking requisites for command 'checkbets'");
@@ -166,7 +166,7 @@ namespace MechHisui.Commands
             //        await cea.Channel.SendMessage(sb.ToString());
             //    });
 
-            client.Services.Get<CommandService>().CreateCommand("closebets")
+            client.GetService<CommandService>().CreateCommand("closebets")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"])))
                 .Do(async cea =>
                 {
@@ -188,7 +188,7 @@ namespace MechHisui.Commands
                     await cea.Channel.SendMessage("Bets are going to close soon. Please place your final bets now.");
                 });
 
-            client.Services.Get<CommandService>().CreateCommand("winner")
+            client.GetService<CommandService>().CreateCommand("winner")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"])))
                 .Parameter("name", ParameterType.Unparsed)
                 .Do(async cea =>
@@ -199,7 +199,7 @@ namespace MechHisui.Commands
                     }
                 });
 
-            //client.Services.Get<CommandService>().CreateCommand("donate")
+            //client.GetService<CommandService>().CreateCommand("donate")
             //    .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]))
             //    .Parameter("amount", ParameterType.Required)
             //    .Parameter("donatee",ParameterType.Required)

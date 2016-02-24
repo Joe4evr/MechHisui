@@ -9,7 +9,7 @@ namespace MechHisui
 {
     public static class Helpers
     {
-        internal static bool IsWhilested(Channel channel, DiscordClient client) => client.Modules().Modules
+        internal static bool IsWhilested(Channel channel, DiscordClient client) => client.GetService<ModuleService>().Modules
             .SingleOrDefault(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())?
             .EnabledChannels
             .Contains(channel) ?? false;
