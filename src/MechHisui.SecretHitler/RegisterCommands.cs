@@ -35,6 +35,7 @@ namespace MechHisui.Commands
                         .AppendLine("If 6 Fascist Policies are enacted, or Hitler is chosen as Chancellor in the late-game, the Fascists win.")
                         .AppendLine("If 5 Liberal Policies are enacted, or Hitler is successfully killed, the Liberals win.")
                         .AppendLine($"The following themes are available too: `{String.Join("`, `", configs.Select(c => c.Key))}`")
+                        .AppendLine("For more details: https://dl.dropboxusercontent.com/u/502769/Secret_Hitler_Rules.pdf ")
                         .Append("Good luck, have fun.");
                     
                     await cea.Channel.SendMessage(sb.ToString());
@@ -77,7 +78,7 @@ namespace MechHisui.Commands
                 .Description("Display the currently joined players.")
                 .Do(async cea =>
                 {
-                    await cea.Channel.SendMessage($"Current players are {String.Join(", ", players.Select(p => p.Name))}.");
+                    await cea.Channel.SendMessage($"Current players are {String.Join(", ", players.Select(p => p.Name))}. ({players.Count})");
                 });
 
             client.GetService<CommandService>().CreateCommand("join")
@@ -165,6 +166,15 @@ namespace MechHisui.Commands
                 .Do(async cea => {
                     await game.EndGame();
                     gameOpen = true;
+                });
+
+            client.GetService<CommandService>().CreateCommand("cancel")
+                .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
+                .Hide()
+                .Do(async cea =>
+                {
+                    gameOpen = false;
+                    await cea.Channel.SendMessage("Game canceled.");
                 });
         }
 

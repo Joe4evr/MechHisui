@@ -318,7 +318,7 @@ namespace DynamicCompile
                         return;
                     }
 
-                    var items = (IEnumerable<string>)cea.Args;
+                    IEnumerable<string> items = cea.Args;
                     for (int i = 0; i < 28; i++)
                     {
                         items = items.Shuffle();

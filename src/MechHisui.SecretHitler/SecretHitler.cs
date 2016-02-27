@@ -198,9 +198,10 @@ namespace MechHisui.SecretHitler
             _takenVeto = false;
             if (_specialElected <= 1)
             {
-                int i = ((_turn - (int)_specialElected) + _deadCounter) % _players.Count();
+                //Console.WriteLine($"Turn: {_turn} - SE: {_specialElected} - Dead counter: {_deadCounter} - Players: {_players.Count} - i: {i}");
                 do
                 {
+                    int i = ((_turn - (int)_specialElected) + _deadCounter) % _players.Count();
                     if (!_players.ElementAt(i).IsAlive)
                     {
                         _deadCounter++;
@@ -699,7 +700,7 @@ namespace MechHisui.SecretHitler
                 {
                     sb.Append($"*{player.User.Name}*");
                 }
-                else if (player.User.Id == _lastChancellor || player.User.Id == _lastPresident)
+                else if (player.User.Id == _lastChancellor || (player.User.Id == _lastPresident && _players.Count > 5))
                 {
                     sb.Append($"**{player.User.Name}**");
                 }
@@ -713,6 +714,7 @@ namespace MechHisui.SecretHitler
                     sb.Append(" -> ");
                 }
             }
+            sb.AppendFormat($"\n(*Italic* = current {_config.President}/{_config.Chancellor}, **bold** = last {_config.President}/{_config.Chancellor}.)");
 
             return sb.ToString();
         }
@@ -733,5 +735,12 @@ namespace MechHisui.SecretHitler
         }
 
         // private Timer _timer;
+    }
+
+    [Flags]
+    public enum HouseRules
+    {
+        None              = 0,
+        SkipFirstElection = 1,
     }
 }

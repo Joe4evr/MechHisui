@@ -1021,8 +1021,10 @@ Discuss.");
         internal static string FormatServantProfile(ServantProfile profile)
         {
             string aoe = profile.NoblePhantasmEffect.Contains("AoE") && Regex.Match(profile.NoblePhantasmEffect, "[0-9]+H").Success ? " (Hits is per enemy)" : String.Empty;
-            StringBuilder sb = new StringBuilder()
-                .AppendLine($"**Collection ID:** {profile.Id}")
+            StringBuilder sb = new StringBuilder();
+            if (profile.Id == -3) sb.Append("~~");
+
+            sb.AppendLine($"**Collection ID:** {profile.Id}")
                 .AppendLine($"**Rarity:** {profile.Rarity}☆")
                 .AppendLine($"**Class:** {profile.Class}")
                 .AppendLine($"**Servant:** {profile.Name}")
@@ -1055,6 +1057,8 @@ Discuss.");
                 }
             }
             sb.Append(profile.Image);
+            if (profile.Id == -3) sb.Append("~~");
+
             return sb.ToString();
         }
 

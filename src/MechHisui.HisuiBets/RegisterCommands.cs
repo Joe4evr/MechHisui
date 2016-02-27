@@ -186,6 +186,7 @@ namespace MechHisui.Commands
                         return;
                     }
                     await cea.Channel.SendMessage("Bets are going to close soon. Please place your final bets now.");
+                    game.ClosingGame();
                 });
 
             client.GetService<CommandService>().CreateCommand("winner")
