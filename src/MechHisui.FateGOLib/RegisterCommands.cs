@@ -318,7 +318,7 @@ namespace MechHisui.Commands
             },
             client,
             new DateTimeWithZone(DateTime.UtcNow, FgoHelpers.JpnTimeZone)
-                .TimeUntilNextLocalTimeAt(new TimeSpan(4, 0, 0)),
+                .TimeUntilNextLocalTimeAt(new TimeSpan(hours: 3, minutes: 59, seconds: 57)),
             TimeSpan.FromDays(1));
         }
 
@@ -350,7 +350,7 @@ namespace MechHisui.Commands
                 "MechHisui",
                 config["Project_Key"],
                 "exportSheet",
-                new string[] 
+                new string[]
                 {
                     "https://www.googleapis.com/auth/spreadsheets",
                     "https://www.googleapis.com/auth/drive",
@@ -363,16 +363,16 @@ namespace MechHisui.Commands
                 mysticAliasPath: Path.Combine(config["AliasPath"], "mystics.json"));
             try
             {
-                //Using .Wait() here since there is no proper async context that await works
-                statService.UpdateProfileListsAsync().Wait();
-                statService.UpdateCEListAsync().Wait();
-                statService.UpdateEventListAsync().Wait();
-                statService.UpdateMysticCodesListAsync().Wait();
-                statService.UpdateDropsListAsync().Wait();
+                //Using .GetAwaiter().GetResult() here since there is no proper async context that await works
+                statService.UpdateProfileListsAsync().GetAwaiter().GetResult();
+                statService.UpdateCEListAsync().GetAwaiter().GetResult();
+                statService.UpdateEventListAsync().GetAwaiter().GetResult();
+                statService.UpdateMysticCodesListAsync().GetAwaiter().GetResult();
+                statService.UpdateDropsListAsync().GetAwaiter().GetResult();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine($"{DateTime.Now}: {ex.Message}");
                 Environment.Exit(0);
             }
 
@@ -384,14 +384,13 @@ namespace MechHisui.Commands
                 .Description($"Relay information on the specified Servant. Alternative names acceptable.")
                 .Do(async cea =>
                 {
-                    var arg = String.Join(" ", cea.Args);
-                    if (arg.ContainsIgnoreCase("waifu"))
+                    if (cea.Args[0].ContainsIgnoreCase("waifu"))
                     {
                         await cea.Channel.SendMessage("It has come to my attention that your 'waifu' is equatable to fecal matter.");
                         return;
                     }
 
-                    if (new[] { "enkidu", "arc", "arcueid", "astolfo" }.ContainsIgnoreCase(arg))
+                    if (new[] { "enkidu", "arc", "arcueid" }.ContainsIgnoreCase(cea.Args[0]))
                     {
                         await cea.Channel.SendMessage("Never ever.");
                         return;
@@ -399,13 +398,13 @@ namespace MechHisui.Commands
 
                     ServantProfile profile;
                     int id;
-                    if (Int32.TryParse(arg, out id))
+                    if (Int32.TryParse(cea.Args[0], out id))
                     {
                         profile = FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Id == id);
                     }
                     else
                     {
-                        profile = statService.LookupStats(arg);
+                        profile = statService.LookupStats(cea.Args[0]);
                     }
 
                     if (profile != null)
@@ -414,7 +413,7 @@ namespace MechHisui.Commands
                     }
                     else
                     {
-                        var name = statService.LookupServantName(arg);
+                        var name = statService.LookupServantName(cea.Args[0]);
                         if (name != null)
                         {
                             await cea.Channel.SendMessage($"**Servant:** {name}\nMore information TBA.");
@@ -433,16 +432,24 @@ namespace MechHisui.Commands
                 .Description($"Relay information on the specified Craft Essence. Alternative names acceptable.")
                 .Do(async cea =>
                 {
-                    var arg = String.Join(" ", cea.Args);
+                    CEProfile ce;
+                    int id;
+                    if (Int32.TryParse(cea.Args[0], out id) && id <= FgoHelpers.CEProfiles.Max(p => p.Id))
+                    {
+                        ce = FgoHelpers.CEProfiles.SingleOrDefault(p => p.Id == id);
+                    }
+                    else
+                    {
+                        ce = statService.LookupCE(cea.Args[0]);
+                    }
 
-                    var ce = statService.LookupCE(arg);
                     if (ce != null)
                     {
                         await cea.Channel.SendMessage(FormatCEProfile(ce));
                     }
                     else
                     {
-                        var potentials = FgoHelpers.CEDict.Where(c => c.Alias.Any(a => a.ContainsIgnoreCase(arg)) || c.CE.ContainsIgnoreCase(arg));
+                        var potentials = FgoHelpers.CEDict.Where(c => c.Alias.Any(a => a.ContainsIgnoreCase(cea.Args[0])) || c.CE.ContainsIgnoreCase(cea.Args[0]));
                         if (potentials.Any())
                         {
                             if (potentials.Count() > 1)
@@ -536,7 +543,7 @@ namespace MechHisui.Commands
 
             Console.WriteLine("Registering 'Add alias'...");
             client.GetService<CommandService>().CreateCommand("addalias")
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
+                .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
                 .Hide()
                 .Parameter("servant", ParameterType.Required)
                 .Parameter("alias", ParameterType.Required)
@@ -564,16 +571,14 @@ namespace MechHisui.Commands
                             return;
                         }
                     }
-                    using (TextWriter tw = new StreamWriter(Path.Combine(config["AliasPath"], "servants.json")))
-                    {
-                        tw.Write(JsonConvert.SerializeObject(FgoHelpers.ServantDict, Formatting.Indented));
-                    }
+
+                    File.WriteAllText(Path.Combine(config["AliasPath"], "servants.json"), JsonConvert.SerializeObject(FgoHelpers.ServantDict, Formatting.Indented));
                     await cea.Channel.SendMessage($"Added alias `{cea.Args[1]}` for `{newAlias.Servant}`.");
                 });
 
             Console.WriteLine("Registering 'CE alias'...");
             client.GetService<CommandService>().CreateCommand("cealias")
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
+                .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
                 .Hide()
                 .Parameter("ce", ParameterType.Required)
                 .Parameter("alias", ParameterType.Required)
@@ -601,10 +606,8 @@ namespace MechHisui.Commands
                             return;
                         }
                     }
-                    using (TextWriter tw = new StreamWriter(Path.Combine(config["AliasPath"], "ces.json")))
-                    {
-                        tw.Write(JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
-                    }
+
+                    File.WriteAllText(Path.Combine(config["AliasPath"], "ces.json"), JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
                     await cea.Channel.SendMessage($"Added alias `{cea.Args[1]}` for `{newAlias.CE}`.");
                 });
 
@@ -661,7 +664,7 @@ namespace MechHisui.Commands
 
             Console.WriteLine("Registering 'Mystic alias'...");
             client.GetService<CommandService>().CreateCommand("mysticalias")
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
+                .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
                 .Hide()
                 .Parameter("mystic", ParameterType.Required)
                 .Parameter("alias", ParameterType.Required)
@@ -677,10 +680,8 @@ namespace MechHisui.Commands
                         await cea.Channel.SendMessage("Could not find Mystic Code to add alias for.");
                         return;
                     }
-                    using (TextWriter tw = new StreamWriter(Path.Combine(config["AliasPath"], "mystic.json")))
-                    {
-                        tw.Write(JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
-                    }
+
+                    File.WriteAllText(Path.Combine(config["AliasPath"], "mystic.json"), JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
                     await cea.Channel.SendMessage($"Added alias `{cea.Args[1]}` for `{newAlias.Code}`.");
                 });
 
@@ -692,6 +693,12 @@ namespace MechHisui.Commands
                 .Do(async cea =>
                 {
                     var arg = String.Join(" ", cea.Args);
+                    if (String.IsNullOrWhiteSpace(arg))
+                    {
+                        await cea.Channel.SendMessage("Provide an item to find among drops.");
+                        return;
+                    }
+
                     var potentials = FgoHelpers.ItemDropsList.Where(d => d.ItemDrops.ContainsIgnoreCase(arg));
                     if (potentials.Any())
                     {
@@ -744,7 +751,7 @@ namespace MechHisui.Commands
                         masters.Add(temp);
                     }
 
-                    Func<ServantProfile, bool> pred = p => 
+                    Func<ServantProfile, bool> pred = p =>
                         p.Class == ServantClass.Saber.ToString() ||
                         p.Class == ServantClass.Archer.ToString() ||
                         p.Class == ServantClass.Lancer.ToString() ||
@@ -828,68 +835,8 @@ Discuss.");
                 });
 
             Console.WriteLine("Registering 'Roll'...");
-            #region long vars
+            #region vars
             var rolltypes = new[] { "fp1", "fp10", "ticket", "4", "40" };
-            var excluded = new[]
-            {
-                "Jeanne d'Arc (Alter) (unobtainable)",
-                "Mash Kyrielight",
-                "Arturia Pendragon (Lily)",
-                "Gilgamesh",
-                "Sakata Kintoki",
-                "Elizabeth Bathory (Halloween)",
-                "Okita Souji",
-                "Oda Nobunaga",
-                "Scathach",
-                "Arturia Pendragon (Santa Alter)",
-                "Hyde",
-                "Arjuna",
-                "Karna",
-                "Mysterious Heroine X",
-                "Brynhildr",
-                "Nero Claudius (Bride)",
-
-                "Journey's Beginning",
-                "Nightless Rose",
-                "Moony Jewel",
-                "Bathing Moon Goddess",
-                "Moonlight Fest",
-                "Jack-O'-Lantern",
-                "Trick or Treat",
-                "Halloween Arrangement",
-                "Halloween Princess",
-                "Halloween Petite Devil",
-                "Maid in Halloween",
-                "Fate GUDAGUDA Order",
-                "Launch Order!",
-                "GUDAGUDA Poster Girl",
-                "GUDAO",
-                "Okita",
-                "Nobu",
-                "Lightning Reindeer",
-                "March of Saints",
-                "Present for My Master",
-                "Holy Night Sign",
-                "Peace of 2016",
-                "Heroic New Year",
-                "Law of the Jungle",
-                "Grand New Year",
-                "Mona Lisa",
-                "Happy x3 Order",
-                "Purely Bloom",
-                "Artoria Star",
-                "Trueshot",
-                "Mikotto! Training to be a Bride",
-                "Crimson Fortress of Shadow",
-                "Mysterious Lifeform Alpha",
-                "Mysterious Lifeform Beta",
-                "Heroic Spirit Portrait",
-                "Tears of Valentine Dojo",
-                "Kitchen ☆ Patissiere",
-                "Street Choco-Maid",
-                "Melty Sweetheart",
-                "Valentine Chocolate"
-            };
             var fpOnly = new[]
             {
                 "Azoth Blade",
@@ -903,6 +850,47 @@ Discuss.");
                 "Magic Crystal",
                 "Dragonkin",
             };
+            var premiumPool = FgoHelpers.ServantProfiles
+                .Where(p => p.Obtainable)
+                .Where(p => p.Rarity >= 3)
+                .Concat(FgoHelpers.ServantProfiles
+                    .Where(p => p.Rarity >= 3 && p.Rarity <= 4)
+                    .RepeatSeq(5))
+                .Concat(FgoHelpers.ServantProfiles
+                    .Where(p => p.Rarity == 3)
+                    .RepeatSeq(5))
+                .Select(p => p.Name)
+                .Concat(FgoHelpers.CEProfiles
+                    .Where(ce => ce.Obtainable)
+                    .Where(ce => ce.Rarity >= 3)
+                    .Concat(FgoHelpers.CEProfiles
+                        .Where(ce => ce.Rarity >= 3 && ce.Rarity <= 4)
+                        .RepeatSeq(5))
+                    .Concat(FgoHelpers.CEProfiles
+                        .Where(ce => ce.Rarity == 3)
+                        .RepeatSeq(5))
+                    .Select(ce => ce.Name));
+            var fpPool = FgoHelpers.ServantProfiles
+                .Where(p => p.Obtainable)
+                .Where(p => p.Rarity <= 3)
+                .Concat(FgoHelpers.ServantProfiles
+                    .Where(p => p.Rarity <= 2)
+                    .RepeatSeq(5))
+                .Concat(FgoHelpers.ServantProfiles
+                    .Where(p => p.Rarity == 1)
+                    .RepeatSeq(5))
+                .Select(p => p.Name)
+                .Concat(FgoHelpers.CEProfiles
+                    .Where(ce => ce.Obtainable)
+                    .Where(ce => ce.Rarity <= 3)
+                    .Concat(FgoHelpers.CEProfiles
+                        .Where(ce => ce.Rarity <= 2)
+                        .RepeatSeq(5))
+                    .Concat(FgoHelpers.CEProfiles
+                        .Where(ce => ce.Rarity == 1)
+                        .RepeatSeq(5))
+                    .Select(ce => ce.Name))
+                .Concat(fpOnly.RepeatSeq(5));
             #endregion
             client.GetService<CommandService>().CreateCommand("roll")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
@@ -910,6 +898,7 @@ Discuss.");
                 .Parameter("what", ParameterType.Required)
                 .Do(async cea =>
                 {
+                    //await cea.Channel.SendMessage("This command temporarily disabled.");
                     if (!rolltypes.Contains(cea.Args[0]))
                     {
                         await cea.Channel.SendMessage("Unaccaptable parameter.");
@@ -917,76 +906,97 @@ Discuss.");
                     }
 
                     var rng = new Random();
-                    List<string> pool;
+                    IEnumerable<string> pool = (cea.Args[0] == "fp" || cea.Args[0] == "fp10") ? fpPool : premiumPool;
                     List<string> picks = new List<string>();
-                    if (cea.Args[0] == "fp" || cea.Args[0] == "fp10")
-                    {
-                        pool = FgoHelpers.ServantProfiles
-                            .Where(p => p.Rarity <= 3)
-                            .Concat(FgoHelpers.ServantProfiles
-                                .Where(p => p.Rarity <= 2)
-                                .RepeatSeq(5))
-                            .Concat(FgoHelpers.ServantProfiles
-                                .Where(p => p.Rarity == 1)
-                                .RepeatSeq(5))
-                            .Select(p => p.Name)
-                            .Concat(FgoHelpers.CEProfiles
-                                .Where(ce => ce.Rarity <= 3)
-                                .Concat(FgoHelpers.CEProfiles
-                                    .Where(ce => ce.Rarity <= 2)
-                                    .RepeatSeq(5))
-                                .Concat(FgoHelpers.CEProfiles
-                                    .Where(ce => ce.Rarity == 1)
-                                    .RepeatSeq(5))
-                                .Select(ce => ce.Name))
-                            .Except(excluded)
-                            .ToList();
-                    }
-                    else //premium roll
-                    {
-                        pool = FgoHelpers.ServantProfiles
-                            .Where(p => p.Rarity >= 3)
-                            .Concat(FgoHelpers.ServantProfiles
-                                .Where(p => p.Rarity >= 3 && p.Rarity <= 4)
-                                .RepeatSeq(5))
-                            .Concat(FgoHelpers.ServantProfiles
-                                .Where(p => p.Rarity == 3)
-                                .RepeatSeq(5))
-                            .Select(p => p.Name)
-                            .Concat(FgoHelpers.CEProfiles
-                                .Where(ce => ce.Rarity >= 3)
-                                .Concat(FgoHelpers.CEProfiles
-                                    .Where(ce => ce.Rarity >= 3 && ce.Rarity <= 4)
-                                    .RepeatSeq(5))
-                                .Concat(FgoHelpers.CEProfiles
-                                    .Where(ce => ce.Rarity == 3)
-                                    .RepeatSeq(5))
-                                .Select(ce => ce.Name))
-                            .Except(excluded)
-                            .Except(fpOnly)
-                            .ToList();
-                    }
 
                     for (int i = 0; i < 28; i++)
                     {
-                        pool = (List<string>)pool.Shuffle();
+                        pool = pool.Shuffle();
                     }
-                    
+
                     if (cea.Args[0] == "fp" || cea.Args[0] == "ticket" || cea.Args[0] == "4")
                     {
-                        pool = (List<string>)pool.Shuffle();
-                        picks.Add(pool.ElementAt(rng.Next(maxValue: pool.Count)));
+                        pool = pool.Shuffle();
+                        picks.Add(pool.ElementAt(rng.Next(maxValue: pool.Count())));
                     }
                     else //10-roll
                     {
                         for (int i = 0; i < 10; i++)
                         {
-                            pool = (List<string>)pool.Shuffle();
-                            picks.Add(pool.ElementAt(rng.Next(maxValue: pool.Count)));
+                            pool = pool.Shuffle();
+                            picks.Add(pool.ElementAt(rng.Next(maxValue: pool.Count())));
                         }
                     }
 
                     await cea.Channel.SendMessage($"**{cea.User.Name} rolled:** {String.Join(", ", picks)}");
+                });
+
+            Console.WriteLine("Registering 'Simulate'...");
+            client.GetService<CommandService>().CreateCommand("simdmg")
+                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
+                .Description("Roughly approximate an attacks damage (not accounting for NP, Crit, buffs/debuffs).")
+                .Parameter("servant", ParameterType.Required)
+                .Parameter("enemyClass", ParameterType.Required)
+                .Parameter("atk", ParameterType.Required)
+                .Parameter("atkCard", ParameterType.Required)
+                .Parameter("atkIndex", ParameterType.Required)
+                .Do(async cea =>
+                {
+                    int atk;
+                    if (!Int32.TryParse(cea.GetArg("atk"), out atk))
+                    {
+                        await cea.Channel.SendMessage("Could not parse `atk` parameter as number.");
+                        return;
+                    }
+
+                    Card atkCard;
+                    if (!Enum.TryParse<Card>(cea.GetArg("atkCard"), true, out atkCard))
+                    {
+                        await cea.Channel.SendMessage("Could not parse `atkCard` parameter as a valid attack type.");
+                        return;
+                    }
+                    
+                    int index;
+                    if (atkCard != Card.Extra)
+                    {
+                        if (!Int32.TryParse(cea.GetArg("atkIndex"), out index))
+                        {
+                            await cea.Channel.SendMessage("Could not parse `atkIndex` parameter as a number.");
+                            return;
+                        }
+                        else if (index < 1 || index > 3)
+                        {
+                            await cea.Channel.SendMessage("Parameter `atkIndex` not in valid range.");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        index = 4;
+                    }
+
+
+                    ServantProfile profile;
+                    int id;
+                    if (Int32.TryParse(cea.GetArg("servant"), out id))
+                    {
+                        profile = FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Id == id);
+                    }
+                    else
+                    {
+                        profile = statService.LookupStats(cea.GetArg("servant"));
+                    }
+
+                    if (profile == null)
+                    {
+                        await cea.Channel.SendMessage("Could not find specified Servant.");
+                        return;
+                    }
+                    else
+                    {
+                        await cea.Channel.SendMessage($"**Approximate damage dealt:** {SimulateDmg(profile, cea.GetArg("enemyClass"), atk, atkCard, index):N3}");
+                        return;
+                    }
                 });
         }
 
@@ -1020,7 +1030,7 @@ Discuss.");
 
         internal static string FormatServantProfile(ServantProfile profile)
         {
-            string aoe = profile.NoblePhantasmEffect.Contains("AoE") && Regex.Match(profile.NoblePhantasmEffect, "[0-9]+H").Success ? " (Hits is per enemy)" : String.Empty;
+            string aoe = ((profile.NoblePhantasmEffect?.Contains("AoE") == true) && Regex.Match(profile.NoblePhantasmEffect, "([2-9]|10)H").Success) ? " (Hits is per enemy)" : String.Empty;
             StringBuilder sb = new StringBuilder();
             if (profile.Id == -3) sb.Append("~~");
 
@@ -1034,9 +1044,12 @@ Discuss.");
                 .AppendLine($"**Max HP:** {profile.HP}")
                 .AppendLine($"**Starweight:** {profile.Starweight}")
                 .AppendLine($"**Growth type:** {profile.GrowthCurve} (Use `.curve` for explanation)")
-                .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*{aoe}")
-                .AppendLine($"**NP Rank+:** *{profile.NoblePhantasmRankUpEffect}*{aoe}")
-                .AppendLine($"**Attribute:** {profile.Attribute}")
+                .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*{aoe}");
+            if (!String.IsNullOrWhiteSpace(profile.NoblePhantasmRankUpEffect))
+            {
+                sb.AppendLine($"**NP Rank+:** *{profile.NoblePhantasmRankUpEffect}*{aoe}");
+            }
+            sb.AppendLine($"**Attribute:** {profile.Attribute}")
                 .AppendLine($"**Traits:** {String.Join(", ", profile.Traits)}");
             int a = 1;
             foreach (var skill in profile.ActiveSkills)
@@ -1044,6 +1057,10 @@ Discuss.");
                 if (!String.IsNullOrWhiteSpace(skill.SkillName))
                 {
                     sb.AppendLine($"**Skill {a}:** {skill.SkillName} {skill.Rank} - *{skill.Effect}*");
+                    if (!String.IsNullOrWhiteSpace(skill.RankUpEffect))
+                    {
+                        sb.AppendLine($"**Skill {a} Rank+:** *{skill.RankUpEffect}*");
+                    }
                     a++;
                 }
             }
@@ -1074,5 +1091,303 @@ Discuss.");
         }
 
         private static Timer LoginBonusTimer;
+
+        private static decimal SimulateDmg(ServantProfile srv, string enemyClass, int servantAtk, Card atkCard, int atkIndex)
+        {
+            var npDamageMultiplier = 1.0m;
+            var firstCardBonus = atkCard == Card.Buster ? 0.5m : 0m;
+            var cardDamageValue = calcCardDmg(atkCard, (--atkIndex));
+            var cardMod = 0m;
+            var classAtkBonus = getClassBonus(srv.Class);
+            var triangleModifier = getTriMod(srv.Class, enemyClass);
+            var attributeModifier = 1.0m;
+            var rng = new Random();
+
+            double rand;
+            do rand = rng.NextDouble();
+            while (rand < 0.9d || rand > 1.1d);
+
+            var randomModifier = Convert.ToDecimal(rand);
+            var atkMod = 0m;
+            var defMod = 0m;
+            var criticalModifier = 1.0m;
+            var extraCardModifier = atkCard == Card.Extra ? 2.0m : 1.0m;
+            var powerMod = 0m;
+            var selfDamageMod = 0m;
+            var critDamageMod = 0m;
+            var isCrit = 0;
+            var npDamageMod = 1.0m;
+            var isNP = 0;
+            var superEffectiveModifier = 1.0m;
+            var isSuperEffective = 0;
+            var dmgPlusAdd = 0;
+            var selfDmgCutAdd = 0;
+            var busterChainMod = 0;
+
+            return (servantAtk * npDamageMultiplier *
+                (firstCardBonus +
+                    (cardDamageValue *
+                        (1 + cardMod))) *
+                classAtkBonus * triangleModifier * attributeModifier * randomModifier * 0.23m *
+                (1 + atkMod - defMod) *
+                criticalModifier * extraCardModifier *
+                (1 + powerMod + selfDamageMod +
+                    (critDamageMod * isCrit) +
+                    (npDamageMod * isNP)) *
+                (1 + ((superEffectiveModifier - 1) *
+                    isSuperEffective))) +
+            dmgPlusAdd + selfDmgCutAdd + (servantAtk * busterChainMod);
+        }
+
+        private static decimal getClassBonus(string srvClass)
+        {
+            switch (srvClass)
+            {
+                case "Archer":
+                    return 0.95m;
+                case "Caster":
+                case "Assassin":
+                    return 0.9m;
+                case "Saber":
+                case "Rider":
+                case "Shielder":
+                case "Alter-Ego":
+                case "Avenger":
+                case "Beast":
+                default:
+                    return 1.0m;
+                case "Lancer":
+                    return 1.05m;
+                case "Berserker":
+                case "Ruler":
+                    return 1.1m;
+            }
+        }
+
+        private static decimal getTriMod(string attacker, string defender)
+        {
+            switch (attacker)
+            {
+                case "Saber":
+                    switch (defender)
+                    {
+                        case "Archer":
+                        case "Ruler":
+                            return 0.5m;
+                        case "Saber":
+                        case "Rider":
+                        case "Caster":
+                        case "Assassin":
+                        case "Shielder":
+                        case "Beast":
+                        default:
+                            return 1.0m;
+                        case "Lancer":
+                        case "Berserker":
+                        case "Alter-Ego":
+                        case "Avenger":
+                            return 2.0m;
+                    }
+                case "Archer":
+                    switch (defender)
+                    {
+                        case "Lancer":
+                        case "Ruler":
+                            return 0.5m;
+                        case "Archer":
+                        case "Caster":
+                        case "Assassin":
+                        case "Rider":
+                        case "Shielder":
+                        case "Beast":
+                        default:
+                            return 1.0m;
+                        case "Saber":
+                        case "Berserker":
+                        case "Alter-Ego":
+                        case "Avenger":
+                            return 2.0m;
+                    }
+                case "Lancer":
+                    switch (defender)
+                    {
+                        case "Saber":
+                        case "Ruler":
+                            return 0.5m;
+                        case "Lancer":
+                        case "Rider":
+                        case "Caster":
+                        case "Assassin":
+                        case "Shielder":
+                        case "Beast":
+                        default:
+                            return 1.0m;
+                        case "Archer":
+                        case "Berserker":
+                        case "Alter-Ego":
+                        case "Avenger":
+                            return 2.0m;
+                    }
+                case "Rider":
+                    switch (defender)
+                    {
+                        case "Assassin":
+                        case "Ruler":
+                            return 0.5m;
+                        case "Saber":
+                        case "Archer":
+                        case "Lancer":
+                        case "Rider":
+                        case "Shielder":
+                        case "Alter-Ego":
+                        default:
+                            return 1.0m;
+                        case "Caster":
+                        case "Berserker":
+                        case "Avenger":
+                        case "Beast":
+                            return 2.0m;
+                    }
+                case "Caster":
+                    switch (defender)
+                    {
+                        case "Rider":
+                        case "Ruler":
+                            return 0.5m;
+                        case "Saber":
+                        case "Archer":
+                        case "Lancer":
+                        case "Caster":
+                        case "Shielder":
+                        default:
+                            return 1.0m;
+                        case "Assassin":
+                        case "Berserker":
+                        case "Alter-Ego":
+                        case "Avenger":
+                        case "Beast":
+                            return 2.0m;
+                    }
+                case "Assassin":
+                    switch (defender)
+                    {
+                        case "Caster":
+                        case "Ruler":
+                            return 0.5m;
+                        case "Saber":
+                        case "Archer":
+                        case "Lancer":
+                        case "Assassin":
+                        case "Shielder":
+                        default:
+                            return 1.0m;
+                        case "Rider":
+                        case "Berserker":
+                        case "Alter-Ego":
+                        case "Avenger":
+                        case "Beast":
+                            return 2.0m;
+                    }
+                case "Berserker":
+                    return defender == "Shielder" ? 1.0m : 1.5m;
+                case "Shielder":
+                    return 1.0m;
+                case "Ruler":
+                    switch (defender)
+                    {
+                        case "Saber":
+                        case "Archer":
+                        case "Lancer":
+                        case "Rider":
+                        case "Caster":
+                        case "Assassin":
+                        case "Shielder":
+                        case "Ruler":
+                        case "Alter-Ego":
+                        case "Beast":
+                        default:
+                            return 1.0m;
+                        case "Berserker":
+                        case "Avenger":
+                            return 2.0m;
+                    }
+                case "Alter-Ego":
+                    switch (defender)
+                    {
+                        case "Saber":
+                        case "Archer":
+                        case "Lancer":
+                        case "Shielder":
+                        case "Ruler":
+                        case "Alter-Ego":
+                        case "Beast":
+                        default:
+                            return 1.0m;
+                        case "Rider":
+                        case "Caster":
+                        case "Assassin":
+                        case "Berserker":
+                        case "Avenger":
+                            return 2.0m;
+                    }
+                case "Avenger":
+                    switch (defender)
+                    {
+                        case "Beast":
+                            return 0.5m;
+                        case "Saber":
+                        case "Archer":
+                        case "Lancer":
+                        case "Rider":
+                        case "Caster":
+                        case "Assassin":
+                        case "Shielder":
+                        case "Avenger":
+                        default:
+                            return 1.0m;
+                        case "Berserker":
+                        case "Ruler":
+                        case "Alter-Ego":
+                            return 2.0m;
+                    }
+                case "Beast":
+                    switch (defender)
+                    {
+                        case "Avenger":
+                            return 0.5m;
+                        case "Rider":
+                        case "Caster":
+                        case "Assassin":
+                        case "Shielder":
+                        case "Ruler":
+                        case "Alter-Ego":
+                        case "Beast":
+                        default:
+                            return 1.0m;
+                        case "Saber":
+                        case "Archer":
+                        case "Lancer":
+                        case "Berserker":
+                            return 2.0m;
+                    }
+                default:
+                    return 1.0m;
+            }
+        }
+
+        private static decimal calcCardDmg(Card atk, int index)
+        {
+            switch (atk)
+            {
+                case Card.Arts:
+                    return 1.0m + (0.2m * index);
+                case Card.Buster:
+                    return 1.5m + (0.3m * index);
+                case Card.Quick:
+                    return 0.8m + (0.16m * index);
+                default:
+                    return 1.0m;
+            }
+        }
     }
 }

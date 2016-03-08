@@ -20,11 +20,10 @@ namespace MechHisui.FateGOLib
             var tempProfile = new ServantProfile();
             var tempHolder = new SkillHolder();
             PropertyInfo pi;
-            var objProps = typeof(ServantProfile).GetProperties().Select(p => p.Name.ToLower()).ToArray();
+            var objProps = typeof(ServantProfile).GetProperties().Select(p => p.Name.ToLower());
 
             while (reader.Read())
             {
-
                 if (reader.TokenType == JsonToken.PropertyName)
                 {
                     #region big switch
@@ -48,6 +47,12 @@ namespace MechHisui.FateGOLib
                                 tempHolder.effect1 = reader.Value.ToString();
                             }
                             break;
+                        case nameof(SkillHolder.effect1RankUp):
+                            if (reader.Read() && reader.TokenType == JsonToken.String)
+                            {
+                                tempHolder.effect1RankUp = reader.Value.ToString();
+                            }
+                            break;
                         case nameof(SkillHolder.skill2):
                             if (reader.Read() && reader.TokenType == JsonToken.String)
                             {
@@ -66,6 +71,12 @@ namespace MechHisui.FateGOLib
                                 tempHolder.effect2 = reader.Value.ToString();
                             }
                             break;
+                        case nameof(SkillHolder.effect2RankUp):
+                            if (reader.Read() && reader.TokenType == JsonToken.String)
+                            {
+                                tempHolder.effect2RankUp = reader.Value.ToString();
+                            }
+                            break;
                         case nameof(SkillHolder.skill3):
                             if (reader.Read() && reader.TokenType == JsonToken.String)
                             {
@@ -82,6 +93,12 @@ namespace MechHisui.FateGOLib
                             if (reader.Read() && reader.TokenType == JsonToken.String)
                             {
                                 tempHolder.effect3 = reader.Value.ToString();
+                            }
+                            break;
+                        case nameof(SkillHolder.effect3RankUp):
+                            if (reader.Read() && reader.TokenType == JsonToken.String)
+                            {
+                                tempHolder.effect3RankUp = reader.Value.ToString();
                             }
                             break;
                         case nameof(SkillHolder.passiveSkill1):
@@ -181,9 +198,9 @@ namespace MechHisui.FateGOLib
                 {
                     activeSkills.AddRange(new[]
                     {
-                        new ServantSkill { SkillName = tempHolder.skill1, Rank = tempHolder.rank1, Effect = tempHolder.effect1 },
-                        new ServantSkill { SkillName = tempHolder.skill2, Rank = tempHolder.rank2, Effect = tempHolder.effect2 },
-                        new ServantSkill { SkillName = tempHolder.skill3, Rank = tempHolder.rank3, Effect = tempHolder.effect3 },
+                        new ServantSkill { SkillName = tempHolder.skill1, Rank = tempHolder.rank1, Effect = tempHolder.effect1, RankUpEffect = tempHolder.effect1RankUp },
+                        new ServantSkill { SkillName = tempHolder.skill2, Rank = tempHolder.rank2, Effect = tempHolder.effect2, RankUpEffect = tempHolder.effect2RankUp },
+                        new ServantSkill { SkillName = tempHolder.skill3, Rank = tempHolder.rank3, Effect = tempHolder.effect3, RankUpEffect = tempHolder.effect3RankUp },
                     });
                     passiveSkills.AddRange(new[]
                     {
@@ -214,12 +231,15 @@ namespace MechHisui.FateGOLib
             internal string skill1 { get; set; }
             internal string rank1 { get; set; }
             internal string effect1 { get; set; }
+            internal string effect1RankUp { get; set; }
             internal string skill2 { get; set; }
             internal string rank2 { get; set; }
             internal string effect2 { get; set; }
+            internal string effect2RankUp { get; set; }
             internal string skill3 { get; set; }
             internal string rank3 { get; set; }
             internal string effect3 { get; set; }
+            internal string effect3RankUp { get; set; }
             internal string passiveSkill1 { get; set; }
             internal string passiveRank1 { get; set; }
             internal string passiveEffect1 { get; set; }

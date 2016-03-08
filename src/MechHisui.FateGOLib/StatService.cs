@@ -50,8 +50,8 @@ namespace MechHisui.FateGOLib
             if (serv != null)
             {
                 Func<ServantProfile, bool> pred = p => p.Name == serv.Servant;
-                return FgoHelpers.ServantProfiles.SingleOrDefault(pred) ??
-                       FgoHelpers.FakeServantProfiles.SingleOrDefault(pred);
+                return FgoHelpers.ServantProfiles.SingleOrDefault(pred)
+                     ?? FgoHelpers.FakeServantProfiles.SingleOrDefault(pred);
             }
             else
             {

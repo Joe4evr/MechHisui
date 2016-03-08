@@ -14,9 +14,10 @@ namespace MechHisui.Commands
     public static class RegisterSecHitCommands
     {
         private static SecretHitler.SecretHitler game;
-        internal static bool gameOpen = false;
         private static IList<User> players;
         private static IList<SecretHitlerConfig> configs;
+        internal static bool gameOpen = false;
+        private static HouseRules rules;
 
         public static void RegisterSecretHitler(this DiscordClient client, IConfiguration config)
         {
@@ -49,6 +50,7 @@ namespace MechHisui.Commands
                 {
                     if (!gameOpen)
                     {
+                        rules = HouseRules.None;
                         players = new List<User>();
                         await cea.Channel.SendMessage("Opening up a round of Secret Hitler.");
                     }
@@ -138,6 +140,32 @@ namespace MechHisui.Commands
                             await game.SetupGame();
                         }
                     }
+                });
+
+            client.GetService<CommandService>().CreateCommand("house")
+                .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
+                .Parameter("rule", ParameterType.Unparsed)
+                .Description("Apply a House Rule.")
+                .Do(async cea =>
+                {
+                    if (gameOpen)
+                    {
+                        await cea.Channel.SendMessage("Cannot change rules while game is in progress.");
+                        return;
+                    }
+
+                    switch (cea.Args[0])
+                    {
+                        case "skipfirst":
+                            rules |= HouseRules.SkipFirstElection;
+                            await cea.Channel.SendMessage("House rule added.");
+                            break;
+                        default:
+                            await cea.Channel.SendMessage("Unknown parameter.");
+                            break;
+                    }
+
+
                 });
 
             client.GetService<CommandService>().CreateCommand("state")

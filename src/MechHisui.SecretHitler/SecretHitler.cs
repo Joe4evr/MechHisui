@@ -36,10 +36,11 @@ namespace MechHisui.SecretHitler
         private bool _takenVeto = false;
         private ulong _specialElected = 0;
         private int _deadCounter = 0;
+        private HouseRules _houseRules;
 
         private event PropertyChangedEventHandler PropertyChanged;
 
-        public SecretHitler(SecretHitlerConfig config, Channel mainChannel, IList<User> users)
+        public SecretHitler(SecretHitlerConfig config, Channel mainChannel, IList<User> users, HouseRules house = HouseRules.None)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             if (mainChannel == null) throw new ArgumentNullException(nameof(mainChannel));
@@ -49,6 +50,7 @@ namespace MechHisui.SecretHitler
             _config = config;
             _channel = mainChannel;
             _players = new List<Player>();
+            _houseRules = house;
             int fas = 0;
             switch (users.Count)
             {
@@ -229,6 +231,11 @@ namespace MechHisui.SecretHitler
 
         public async Task NominatedChancellor(User nominee)
         {
+            if (_turn == 1 && (_houseRules & HouseRules.SkipFirstElection) == HouseRules.SkipFirstElection)
+            {
+                await _channel.SendMessage($"Because of the applied house rule, this vote will be skipped.");
+                return;
+            }
             if (nominee.Id == _lastChancellor)
             {
                 await _channel.SendMessage($"**{nominee.Name}** has has been the {_config.Chancellor} last time and is therefore ineligable.");
@@ -452,202 +459,202 @@ namespace MechHisui.SecretHitler
         {
             if (_players.Select(p => p.User.Id).Contains(e.User.Id))
             {
-                try
-                {
-                    await ReallyProcessMessage(sender, e);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.StackTrace);
-                    Environment.Exit(0);
-                }
+                await ReallyProcessMessage(sender, e);
             }
         }
 
         public async Task ReallyProcessMessage(object sender, MessageEventArgs e)
         {
-            if (e.Channel.IsPrivate && _players.Select(p => p.User.PrivateChannel.Id).Contains(e.Channel.Id))
+            try
             {
-                switch (_state)
+                if (e.Channel.IsPrivate && _players.Select(p => p.User.PrivateChannel.Id).Contains(e.Channel.Id))
                 {
-                    case GameState.VoteForGovernment:
-                        if (!_votes.Any(p => p.Username == e.User.Name) && _players.Where(p => p.IsAlive).Select(p => p.User.Id).Contains(e.User.Id))
-                        {
-                            Vote v;
-                            if (e.Message.Text.ToLowerInvariant() == _config.Yes.ToLowerInvariant())
+                    switch (_state)
+                    {
+                        case GameState.VoteForGovernment:
+                            if (!_votes.Any(p => p.Username == e.User.Name) && _players.Where(p => p.IsAlive).Select(p => p.User.Id).Contains(e.User.Id))
                             {
-                                v = Vote.Yes;
-                            }
-                            else if (e.Message.Text.ToLowerInvariant() == _config.No.ToLowerInvariant())
-                            {
-                                v = Vote.No;
-                            }
-                            else
-                            {
-                                await e.Channel.SendMessage("Unnacceptable parameter.");
-                                return;
-                            }
-                            _votes.Add(new PlayerVote(e.User.Name, v));
-                            PropertyChanged(_votes, new PropertyChangedEventArgs(nameof(_votes)));
-                            while (_channel.Client.MessageQueue.Count > 10) await Task.Delay(100);
-
-                            await e.Channel.SendMessage("Your vote has been recorded.");
-                        }
-                        return;
-                    case GameState.PresidentPicks:
-                        int i;
-                        if (e.User.Id == _currentPresident && Int32.TryParse(e.Message.Text, out i))
-                        {
-                            switch (i)
-                            {
-                                case 1:
-                                case 2:
-                                case 3:
-                                    await e.Channel.SendMessage($"Removing a {(_policies[i - 1] == PolicyType.Fascist ? _config.Fascist : _config.Liberal)} {_config.Policy}.");
-                                    Discards.Push(_policies[i - 1]);
-                                    _policies.RemoveAt(i - 1);
-                                    await _channel.SendMessage($"The {_config.President} has discarded one {_config.Policy}.");
-                                    await Task.Delay(1000);
-                                    await ChancellorPick();
-                                    return;
-                                default:
-                                    await e.Channel.SendMessage("Out of range.");
-                                    return;
-                            }
-                        }
-                        return;
-                    case GameState.ChancellorPicks:
-                        int j;
-                        if (e.User.Id == _currentChancellor && Int32.TryParse(e.Message.Text, out j))
-                        {
-                            switch (j)
-                            {
-                                case 1:
-                                case 2:
-                                    await e.Channel.SendMessage($"Removing a {(_policies[j - 1] == PolicyType.Fascist ? _config.Fascist : _config.Liberal)} {_config.Policy}.");
-                                    Discards.Push(_policies[j - 1]);
-                                    _policies.RemoveAt(j - 1);
-                                    await _channel.SendMessage($"The {_config.Chancellor} has discarded one {_config.Policy} and played a **{(_policies.Single() == PolicyType.Fascist ? _config.Fascist : _config.Liberal)}** {_config.Policy}.");
-                                    await Task.Delay(1000);
-                                    var space = (_policies.Single() == PolicyType.Fascist)
-                                        ? FascistTrack.First(s => s.IsEmpty)
-                                        : LiberalTrack.First(s => s.IsEmpty);
-                                    await ResolveEffect(space);
-                                    if (Deck.Count < 3)
-                                    {
-                                        ReshuffleDeck();
-                                    }
-                                    return;
-                                default:
-                                    await e.Channel.SendMessage("Out of range.");
-                                    return;
-                            }
-                        }
-                        else if (_vetoUnlocked && e.Message.Text.ToLowerInvariant() == "veto")
-                        {
-                            if (!_takenVeto)
-                            {
-                                _state = GameState.ChancellorVetod;
-                                await _channel.SendMessage($"The {_config.Chancellor} has opted to veto. Do you consent, Mr./Mrs. {_config.President}?");
-                                return;
-                            }
-                            else
-                            {
-                                await e.Channel.SendMessage($"You have already attempted to veto.");
-                                return;
-                            }
-                        }
-                        return;
-                    default:
-                        return;
-                }
-            }
-            else if (e.Channel.Id == _channel.Id && e.User.Id == _currentPresident)
-            {
-                switch (_state)
-                {
-                    case GameState.StartOfTurn:
-                        if (e.Message.Text.ToLowerInvariant().StartsWith("nominate"))
-                        {
-                            var nom = e.Message.MentionedUsers.FirstOrDefault();
-                            if (nom != null && _players.Select(p => p.User.Id).Contains(nom.Id))
-                            {
-                                await NominatedChancellor(nom);
-                            }
-                        }
-                        break;
-                    case GameState.SpecialElection:
-                        if (e.User.Id == _currentPresident && e.Message.Text.ToLowerInvariant().StartsWith("elect"))
-                        {
-                            var target = e.Message.MentionedUsers.FirstOrDefault();
-                            if (target != null && _players.Where(p => p.IsAlive && p.User.Id != _currentChancellor && p.User.Id != _currentPresident).Select(p => p.User.Id).Contains(target.Id))
-                            {
-                                _specialElected = target.Id;
-                                await _channel.SendMessage($"The {_config.President} has Special Elected **{target.Name}**.");
-                            }
-                            else
-                            {
-                                await _channel.SendMessage("Ineligable for nomination.");
-                            }
-                        }
-                        break;
-                    case GameState.Kill:
-                        if (e.User.Id == _currentPresident && e.Message.Text.ToLowerInvariant().StartsWith("kill"))
-                        {
-                            var target = e.Message.MentionedUsers.FirstOrDefault();
-                            if (target != null && _players.Any(p => p.User.Id == target.Id))
-                            {
-                                var player = _players.Single(p => p.User.Id == target.Id);
-                                player.IsAlive = false;
-                                await _channel.SendMessage(String.Format(_config.Kill, target.Name));
-                                await Task.Delay(1500);
-                                if (player.Role == _config.Hitler)
+                                Vote v;
+                                if (e.Message.Text.ToLowerInvariant() == _config.Yes.ToLowerInvariant())
                                 {
-                                    await _channel.SendMessage(String.Format(_config.HitlerWasKilled, _config.Hitler, _config.LiberalParty));
-                                    await EndGame();
+                                    v = Vote.Yes;
+                                }
+                                else if (e.Message.Text.ToLowerInvariant() == _config.No.ToLowerInvariant())
+                                {
+                                    v = Vote.No;
                                 }
                                 else
                                 {
-                                    _confirmedNot.Add(target);
-                                    await _channel.SendMessage(String.Format(_config.HitlerNotKilled, player.User.Name, _config.Hitler));
+                                    await e.Channel.SendMessage("Unnacceptable parameter.");
+                                    return;
+                                }
+                                _votes.Add(new PlayerVote(e.User.Name, v));
+                                PropertyChanged(_votes, new PropertyChangedEventArgs(nameof(_votes)));
+                                while (_channel.Client.MessageQueue.Count > 10) await Task.Delay(100);
+
+                                await e.Channel.SendMessage("Your vote has been recorded.");
+                            }
+                            return;
+                        case GameState.PresidentPicks:
+                            int i;
+                            if (e.User.Id == _currentPresident && Int32.TryParse(e.Message.Text, out i))
+                            {
+                                switch (i)
+                                {
+                                    case 1:
+                                    case 2:
+                                    case 3:
+                                        await e.Channel.SendMessage($"Removing a {(_policies[i - 1] == PolicyType.Fascist ? _config.Fascist : _config.Liberal)} {_config.Policy}.");
+                                        Discards.Push(_policies[i - 1]);
+                                        _policies.RemoveAt(i - 1);
+                                        await _channel.SendMessage($"The {_config.President} has discarded one {_config.Policy}.");
+                                        await Task.Delay(1000);
+                                        await ChancellorPick();
+                                        return;
+                                    default:
+                                        await e.Channel.SendMessage("Out of range.");
+                                        return;
                                 }
                             }
-                        }
-                        break;
-                    case GameState.Investigating:
-                        if (e.User.Id == _currentPresident && e.Message.Text.ToLowerInvariant().StartsWith("investigate"))
-                        {
-                            var target = e.Message.MentionedUsers.FirstOrDefault();
-                            if (target != null && _players.Any(p => p.User.Id == target.Id))
+                            return;
+                        case GameState.ChancellorPicks:
+                            int j;
+                            if (e.User.Id == _currentChancellor && Int32.TryParse(e.Message.Text, out j))
                             {
-                                await _channel.SendMessage($"The {_config.President} is investigating **{target.Name}**'s loyalty.");
-                                await Task.Delay(1000);
-                                var player = _players.Single(p => p.User.Id == target.Id);
-                                await _channel.GetUser(_currentPresident).PrivateChannel.SendMessage($"**{player.User.Name}** belongs to the **{player.Party}**. You are not required to answer truthfully.");
+                                switch (j)
+                                {
+                                    case 1:
+                                    case 2:
+                                        await e.Channel.SendMessage($"Removing a {(_policies[j - 1] == PolicyType.Fascist ? _config.Fascist : _config.Liberal)} {_config.Policy}.");
+                                        Discards.Push(_policies[j - 1]);
+                                        _policies.RemoveAt(j - 1);
+                                        await _channel.SendMessage($"The {_config.Chancellor} has discarded one {_config.Policy} and played a **{(_policies.Single() == PolicyType.Fascist ? _config.Fascist : _config.Liberal)}** {_config.Policy}.");
+                                        await Task.Delay(1000);
+                                        var space = (_policies.Single() == PolicyType.Fascist)
+                                            ? FascistTrack.First(s => s.IsEmpty)
+                                            : LiberalTrack.First(s => s.IsEmpty);
+                                        await ResolveEffect(space);
+                                        if (Deck.Count < 3)
+                                        {
+                                            ReshuffleDeck();
+                                        }
+                                        return;
+                                    default:
+                                        await e.Channel.SendMessage("Out of range.");
+                                        return;
+                                }
                             }
-                        }
-                        break;
-                    case GameState.ChancellorVetod:
-                        if (!_takenVeto && e.User.Id == _currentPresident && e.Message.Text.ToLowerInvariant().StartsWith("veto"))
-                        {
-                            var s = e.Message.Text.ToLowerInvariant().Split(' ')[1];
-                            if (s == "approved")
+                            else if (_vetoUnlocked && e.Message.Text.ToLowerInvariant() == "veto")
                             {
-                                _electionTracker++;
-                                _takenVeto = true;
-                                await _channel.SendMessage($"The {_config.President} has approved the {_config.Chancellor}'s veto.");
+                                if (!_takenVeto)
+                                {
+                                    _state = GameState.ChancellorVetod;
+                                    await _channel.SendMessage($"The {_config.Chancellor} has opted to veto. Do you consent, Mr./Mrs. {_config.President}?");
+                                    return;
+                                }
+                                else
+                                {
+                                    await e.Channel.SendMessage($"You have already attempted to veto.");
+                                    return;
+                                }
                             }
-                            else if (s == "denied")
-                            {
-                                _state = GameState.ChancellorPicks;
-                                _takenVeto = true;
-                                await _channel.SendMessage($"The {_config.President} has denied veto and the {_config.Chancellor} must play.");
-                            }
-                        }
-                        break;
-                    default:
-                        break;
+                            return;
+                        default:
+                            return;
+                    }
                 }
+                else if (e.Channel.Id == _channel.Id && e.User.Id == _currentPresident)
+                {
+                    switch (_state)
+                    {
+                        case GameState.StartOfTurn:
+                            if (e.Message.Text.ToLowerInvariant().StartsWith("nominate"))
+                            {
+                                var nom = e.Message.MentionedUsers.FirstOrDefault();
+                                if (nom != null && _players.Select(p => p.User.Id).Contains(nom.Id))
+                                {
+                                    await NominatedChancellor(nom);
+                                }
+                            }
+                            break;
+                        case GameState.SpecialElection:
+                            if (e.User.Id == _currentPresident && e.Message.Text.ToLowerInvariant().StartsWith("elect"))
+                            {
+                                var target = e.Message.MentionedUsers.FirstOrDefault();
+                                if (target != null && _players.Where(p => p.IsAlive && p.User.Id != _currentChancellor && p.User.Id != _currentPresident).Select(p => p.User.Id).Contains(target.Id))
+                                {
+                                    _specialElected = target.Id;
+                                    await _channel.SendMessage($"The {_config.President} has Special Elected **{target.Name}**.");
+                                }
+                                else
+                                {
+                                    await _channel.SendMessage("Ineligable for nomination.");
+                                }
+                            }
+                            break;
+                        case GameState.Kill:
+                            if (e.User.Id == _currentPresident && e.Message.Text.ToLowerInvariant().StartsWith("kill"))
+                            {
+                                var target = e.Message.MentionedUsers.FirstOrDefault();
+                                if (target != null && _players.Any(p => p.User.Id == target.Id))
+                                {
+                                    var player = _players.Single(p => p.User.Id == target.Id);
+                                    player.IsAlive = false;
+                                    await _channel.SendMessage(String.Format(_config.Kill, target.Name));
+                                    await Task.Delay(1500);
+                                    if (player.Role == _config.Hitler)
+                                    {
+                                        await _channel.SendMessage(String.Format(_config.HitlerWasKilled, _config.Hitler, _config.LiberalParty));
+                                        await EndGame();
+                                    }
+                                    else
+                                    {
+                                        _confirmedNot.Add(target);
+                                        await _channel.SendMessage(String.Format(_config.HitlerNotKilled, player.User.Name, _config.Hitler));
+                                    }
+                                }
+                            }
+                            break;
+                        case GameState.Investigating:
+                            if (e.User.Id == _currentPresident && e.Message.Text.ToLowerInvariant().StartsWith("investigate"))
+                            {
+                                var target = e.Message.MentionedUsers.FirstOrDefault();
+                                if (target != null && _players.Any(p => p.User.Id == target.Id))
+                                {
+                                    await _channel.SendMessage($"The {_config.President} is investigating **{target.Name}**'s loyalty.");
+                                    await Task.Delay(1000);
+                                    var player = _players.Single(p => p.User.Id == target.Id);
+                                    await _channel.GetUser(_currentPresident).PrivateChannel.SendMessage($"**{player.User.Name}** belongs to the **{player.Party}**. You are not required to answer truthfully.");
+                                }
+                            }
+                            break;
+                        case GameState.ChancellorVetod:
+                            if (!_takenVeto && e.User.Id == _currentPresident && e.Message.Text.ToLowerInvariant().StartsWith("veto"))
+                            {
+                                var s = e.Message.Text.ToLowerInvariant().Split(' ')[1];
+                                if (s == "approved")
+                                {
+                                    _electionTracker++;
+                                    _takenVeto = true;
+                                    await _channel.SendMessage($"The {_config.President} has approved the {_config.Chancellor}'s veto.");
+                                }
+                                else if (s == "denied")
+                                {
+                                    _state = GameState.ChancellorPicks;
+                                    _takenVeto = true;
+                                    await _channel.SendMessage($"The {_config.President} has denied veto and the {_config.Chancellor} must play.");
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.StackTrace);
+                //Environment.Exit(0);
             }
         }
 
@@ -740,7 +747,7 @@ namespace MechHisui.SecretHitler
     [Flags]
     public enum HouseRules
     {
-        None              = 0,
+        None = 0,
         SkipFirstElection = 1,
     }
 }

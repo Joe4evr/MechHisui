@@ -129,7 +129,7 @@ namespace MechHisui.Commands
                 MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(StreamReader).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(DiscordClient).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(DateTimeWithZone).Assembly.Location),
+                //MetadataReference.CreateFromFile(typeof(DateTimeWithZone).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(JsonConvert).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(FgoHelpers).Assembly.Location)
             };
@@ -158,7 +158,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Discord;
-using JiiLib;
 using Newtonsoft.Json;
 using MechHisui.FateGOLib;
 
@@ -250,6 +249,21 @@ namespace DynamicCompile
                     await cea.Channel.SendMessage("I am a bot made by Joe4evr. Find my source code here: https://github.com/Joe4evr/MechHisui/ ");
                 });
         }
+
+        //public static void RegisterJoinCommand(this DiscordClient client, IConfiguration config)
+        //{
+        //    Console.WriteLine("Registering 'Join'...");
+        //    client.GetService<CommandService>().CreateCommand("join")
+        //        .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]))
+        //        .Parameter("invite", ParameterType.Required)
+        //        .Hide()
+        //        .Do(async cea =>
+        //        {
+        //            var invite = await client.GetInvite(cea.Args[0]);
+        //            await invite.Accept();
+        //            await cea.Channel.SendMessage($"Now joined server: `{invite.Server.Name}`.");
+        //        });
+        //}
 
         public static void RegisterKnownChannelsCommand(this DiscordClient client, IConfiguration config)
         {

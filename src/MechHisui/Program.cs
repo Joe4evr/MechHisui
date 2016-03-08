@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNet.Hosting;
@@ -42,7 +43,7 @@ namespace MechHisui
             {
                 conf.AppName = "MechHisui";
                 conf.AppVersion = "0.3.0";
-                conf.LogLevel = LogSeverity.Warning;
+                conf.LogLevel = LogSeverity.Info;
                 //conf.UseLargeThreshold = true;
             });
 
@@ -85,13 +86,10 @@ namespace MechHisui
             client.RegisterEventCommand(config);
             client.RegisterFriendsCommand(config);
             client.RegisterLoginBonusCommand(config);
-            if (!Debugger.IsAttached)
-            {
-                client.RegisterStatsCommands(config);
-            }
+            client.RegisterStatsCommands(config);
             client.RegisterQuartzCommand(config);
             client.RegisterZoukenCommand(config);
-            
+
             client.RegisterHisuiBetsCommands(config);
 
             client.RegisterSecretHitler(config);
@@ -99,6 +97,12 @@ namespace MechHisui
             client.RegisterTriviaCommand(config);
 
             Responses.InitResponses(config);
+
+            int lastcode = 0;
+            if (args.Length > 0 && Int32.TryParse(args[0], out lastcode) && lastcode != 0)
+            {
+                Console.WriteLine($"Last exit code was {lastcode}");
+            }
 
             client.MessageUpdated += async (s, e) =>
             {
@@ -110,69 +114,78 @@ namespace MechHisui
                 }
             };
 
-            //Convert our sync method to an async one and block the Main function until the bot disconnects
-            client.ExecuteAndWait(async () =>
+            try
             {
-                //Connect to the Discord server using our email and password
-                await client.Connect(config["Email"], config["Password"]);
-                Console.WriteLine($"Logged in as {client.CurrentUser.Name}");
-                Console.WriteLine($"MH v. 0.3.0");
-
-                //Use a channel whitelist
-                client.GetService<ModuleService>().Add(
-                    new ChannelWhitelistModule(
-                        Helpers.ConvertStringArrayToULongArray(
-                            //config["API_testing"]
-                            //config["LTT_general"],
-                            //config["LTT_testing"],
-                            config["FGO_playground"],
-                            config["FGO_events"],
-                            config["FGO_general"]
-                        )
-                    ),
-                    nameof(ChannelWhitelistModule),
-                    ModuleFilter.ChannelWhitelist
-                );
-
-                if (!client.Servers.Any())
+                //Convert our sync method to an async one and block the Main function until the bot disconnects
+                client.ExecuteAndWait(async () =>
                 {
-                    Console.WriteLine("Not a member of any server");
-                }
-                else
-                {
-                    foreach (var prChannel in client.PrivateChannels)
+                    //Connect to the Discord server using our email and password
+                    await client.Connect(config["Email"], config["Password"]);
+                    Console.WriteLine($"Logged in as {client.CurrentUser.Name}");
+                    Console.WriteLine($"MH v. 0.3.0");
+
+                    //Use a channel whitelist
+                    client.GetService<ModuleService>().Add(
+                            new ChannelWhitelistModule(
+                                Helpers.ConvertStringArrayToULongArray(
+                                    //config["API_testing"]
+                                    //config["LTT_general"],
+                                    //config["LTT_testing"],
+                                    config["FGO_playground"],
+                                    config["FGO_Hgames"],
+                                    config["FGO_events"],
+                                    config["FGO_general"]
+                                )
+                            ),
+                            nameof(ChannelWhitelistModule),
+                            ModuleFilter.ChannelWhitelist
+                        );
+
+                    if (!client.Servers.Any())
                     {
-                        if (prChannel.Id == UInt64.Parse(config["PrivChat"]))
-                        {
-                            client.MessageReceived += (new Responder(prChannel, client).Respond);
-                        }
+                        Console.WriteLine("Not a member of any server");
                     }
-                    foreach (var channel in Helpers.IterateChannels(client.Servers, printServerNames: true, printChannelNames: true))
+                    else
                     {
-                        if (!channel.IsPrivate && Helpers.IsWhilested(channel, client))
+                        foreach (var prChannel in client.PrivateChannels)
                         {
-                            //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
-                            client.MessageReceived += (new Responder(channel, client).Respond);
-                            if (channel.Id != UInt64.Parse(config["API_testing"]))
+                            if (prChannel.Id == UInt64.Parse(config["PrivChat"]))
                             {
-                                if (Debugger.IsAttached)
+                                client.MessageReceived += (new Responder(prChannel, client).Respond);
+                            }
+                        }
+                        foreach (var channel in Helpers.IterateChannels(client.Servers, printServerNames: true, printChannelNames: true))
+                        {
+                            if (!channel.IsPrivate && Helpers.IsWhilested(channel, client))
+                            {
+                                //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
+                                client.MessageReceived += (new Responder(channel, client).Respond);
+                                if (channel.Id != UInt64.Parse(config["API_testing"]))
                                 {
-                                   // await channel.SendMessage("MechHisui started in debug mode. Not all commands will be available.");
-                                }
-                                else
-                                {
-                                    await channel.SendMessage(config["Hello"]);
+                                    if (Debugger.IsAttached)
+                                    {
+                                        // await channel.SendMessage("MechHisui started in debug mode. Not all commands will be available.");
+                                    }
+                                    else if (lastcode != -1 && channel.Id != UInt64.Parse(config["FGO_events"]))
+                                    {
+                                        await channel.SendMessage(config["Hello"]);
+                                    }
                                 }
                             }
                         }
+                        if (!Debugger.IsAttached)
+                        {
+                            client.AddNewHisuiBetsUsers(config);
+                        }
+                        Console.WriteLine($"Started up at {DateTime.Now}.");
                     }
-                    if (!Debugger.IsAttached)
-                    {
-                        client.AddNewHisuiBetsUsers(config);
-                    }
-                    Console.WriteLine($"Started up at {DateTime.Now}.");
-                }
-            });
+                });
+            }
+            catch (Exception ex)
+            {
+                File.AppendAllText(Path.Combine(config["Logs"], "crashlogs.txt"), $"{DateTime.Now} - {ex.Message}\n{ex.StackTrace}\n");
+                Environment.Exit(-1);
+            }
         }
     }
 }

@@ -137,6 +137,7 @@
         "dependencies": {
           "Discord.Net": "0.9.0-rc3-3",
           "Discord.Net.Commands": "0.9.0-rc3-1",
+          "JiiLib": "0.1.2",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
       },
@@ -1190,6 +1191,7 @@
         "dependencies": {
           "Discord.Net": "0.9.0-rc3-3",
           "Discord.Net.Commands": "0.9.0-rc3-1",
+          "JiiLib": "0.1.2",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
       },
@@ -2243,6 +2245,7 @@
         "dependencies": {
           "Discord.Net": "0.9.0-rc3-3",
           "Discord.Net.Commands": "0.9.0-rc3-1",
+          "JiiLib": "0.1.2",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
       },

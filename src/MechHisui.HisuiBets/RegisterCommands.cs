@@ -6,6 +6,7 @@ using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Discord;
 using Discord.Commands;
+using JiiLib;
 using MechHisui.HisuiBets;
 
 namespace MechHisui.Commands
@@ -28,6 +29,7 @@ namespace MechHisui.Commands
             {
                 if (e.Server.Id == UInt64.Parse(config["FGO_server"]) && !bank.Accounts.Any(u => u.UserId == e.User.Id))
                 {
+                    Console.WriteLine($"{DateTime.Now} - Registering {e.User.Name} for a bank account.");
                     bank.Accounts.Add(new UserBucks { UserId = e.User.Id, Bucks = 100 });
                 }
             };
@@ -68,6 +70,8 @@ namespace MechHisui.Commands
                     }
                 });
 
+            var allins = new[] { "all", "all in", "allin" };
+            var sbColors = new[] { "red", "blue" };
             client.GetService<CommandService>().CreateCommand("bet")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]) /*&& !(Debugger.IsAttached && u.Id == UInt64.Parse(config["Owner"]))*/)
                 .Parameter("amount", ParameterType.Required)
@@ -75,7 +79,7 @@ namespace MechHisui.Commands
                 .Description("Bet an amount of HisuiBucks on a specified tribute")
                 .Do(async cea =>
                 {
-                    if (game?.Type == GameType.HungerGame && cea.User.Id == UInt64.Parse(config["Hgame_Master"]))
+                    if (game?.GType == GameType.HungerGame && cea.User.Id == UInt64.Parse(config["Hgame_Master"]))
                     {
                         await cea.Channel.SendMessage("The game master is not allowed to bet in a Hunger Game.");
                         return;
@@ -94,7 +98,7 @@ namespace MechHisui.Commands
                     }
                     
                     int amount;
-                    if (new[] { "all in", "allin" }.Contains(cea.Args[0].ToLowerInvariant()))
+                    if (allins.Contains(cea.Args[0].ToLowerInvariant()))
                     {
                         amount = userBucks;
                     }
@@ -109,16 +113,24 @@ namespace MechHisui.Commands
                         return;
                     }
 
+                    var target = String.Join(" ", cea.Args.Skip(1));
+                    if (game?.GType == GameType.SaltyBet && !sbColors.ContainsIgnoreCase(target))
+                    {
+                        await cea.Channel.SendMessage("Argument must be `red` or `blue` in a SaltyBet.");
+                        return;
+                    }
+
                     await cea.Channel.SendMessage(game.ProcessBet(new Bet
                     {
                         UserName = cea.User.Name,
                         UserId = cea.User.Id,
-                        Tribute = String.Join(" ", cea.Args.Skip(1)),
+                        Tribute = target,
                         BettedAmount = amount
                     }));
                 });
 
             //client.GetService<CommandService>().CreateCommand("checkbets")
+            //    .Alias("betstats")
             //    .AddCheck((c, u, ch) =>
             //    {
             //        Console.WriteLine("Checking requisites for command 'checkbets'");
@@ -180,7 +192,7 @@ namespace MechHisui.Commands
                         await cea.Channel.SendMessage("Bets are already closed.");
                         return;
                     }
-                    if (game?.Type == GameType.SaltyBet)
+                    if (game?.GType == GameType.SaltyBet)
                     {
                         await cea.Channel.SendMessage("This type of game closes automatically.");
                         return;
@@ -191,12 +203,16 @@ namespace MechHisui.Commands
 
             client.GetService<CommandService>().CreateCommand("winner")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"])))
-                .Parameter("name", ParameterType.Unparsed)
+                .Parameter("name", ParameterType.Multiple)
                 .Do(async cea =>
                 {
+                    if (game?.BetsOpen == true)
+                    {
+                        game.CloseOff();
+                    }
                     if (game?.GameOpen == true)
                     {
-                        await cea.Channel.SendMessage(game.Winner(cea.Args[0]));
+                        await cea.Channel.SendMessage(game.Winner(String.Join(" ", cea.Args)));
                     }
                 });
 
@@ -243,9 +259,10 @@ namespace MechHisui.Commands
         public static void AddNewHisuiBetsUsers(this DiscordClient client, IConfiguration config)
         {
             var fgo = client.GetServer(UInt64.Parse(config["FGO_server"]));
+            var accounts = bank.Accounts.Select(u => u.UserId);
             foreach (var user in fgo.Users)
             {
-                if (!bank.Accounts.Any(u => u.UserId == user.Id) && user.Id != 0)
+                if (!accounts.Contains(user.Id) && user.Id != 0)
                 {
                     bank.Accounts.Add(new UserBucks { UserId = user.Id, Bucks = 100 });
                 }

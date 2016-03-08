@@ -9,7 +9,7 @@ namespace MechHisui.HisuiBets
     public class Game
     {
         public IList<Bet> ActiveBets { get; }
-        public GameType Type { get; }
+        public GameType GType { get; }
         public bool GameOpen { get; private set; }
         public bool BetsOpen { get; private set; }
 
@@ -23,7 +23,7 @@ namespace MechHisui.HisuiBets
             ActiveBets = new List<Bet>();
             _bank = bank;
             _channel = channel;
-            Type = gameType;
+            GType = gameType;
             GameOpen = true;
             BetsOpen = true;
         }
@@ -32,27 +32,41 @@ namespace MechHisui.HisuiBets
         {
             _countDown = new Timer(async cb =>
             {
-                BetsOpen = false;
-                foreach (var bet in ActiveBets)
-                {
-                    _bank.Accounts.Single(u => u.UserId == bet.UserId).Bucks -= bet.BettedAmount;
-                }
-                _bank.WriteBank();
+                CloseOff();
                 await _channel.SendMessage($"Bets are closed. {ActiveBets.Count} bets are in. The pot is {symbol}{ActiveBets.Sum(b => b.BettedAmount)}.");
             },
             null,
-            TimeSpan.FromSeconds((Type == GameType.SaltyBet ? 30 : 45 )),
+            TimeSpan.FromSeconds((GType == GameType.SaltyBet ? 30 : 45 )),
             Timeout.InfiniteTimeSpan);
+        }
+
+        internal void CloseOff()
+        {
+            BetsOpen = false;
+            foreach (var bet in ActiveBets)
+            {
+                _bank.Accounts.Single(u => u.UserId == bet.UserId).Bucks -= bet.BettedAmount;
+            }
+            _bank.WriteBank();
         }
 
         public string ProcessBet(Bet bet)
         {
-            if (bet.BettedAmount <= 0) return "Cannot make bets of 0 or less.";
+            if (bet.BettedAmount < 50) return "Minimum bet must be 50.";
 
             bool replace = false;
             var tmp = ActiveBets.SingleOrDefault(b => b.UserId == bet.UserId);
             if (tmp != null)
             {
+                if (GType == GameType.SaltyBet)
+                {
+                    return "Can only bet once per game in this format.";
+                }
+                else if (bet.BettedAmount < tmp.BettedAmount)
+                {
+                    return "Not allowed to replace an existing bet with less than previous bet.";
+                }
+
                 ActiveBets.Remove(tmp);
                 replace = true;
             }

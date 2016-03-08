@@ -31,18 +31,12 @@ namespace MechHisui.HisuiBets
 
         public void ReadBank(string path = null)
         {
-            using (TextReader tr = new StreamReader(path ?? Path))
-            {
-                Accounts = JsonConvert.DeserializeObject<List<UserBucks>>(tr.ReadToEnd());
-            }
+            Accounts = JsonConvert.DeserializeObject<List<UserBucks>>(File.ReadAllText(path ?? Path));
         }
 
         public void WriteBank(string path = null)
         {
-            using (TextWriter tw = new StreamWriter(path ?? Path))
-            {
-                tw.Write(JsonConvert.SerializeObject(Accounts, Formatting.Indented));
-            }
+            File.WriteAllText((path ?? Path), JsonConvert.SerializeObject(Accounts, Formatting.Indented));
         }
     }
 }

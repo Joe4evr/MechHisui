@@ -24,6 +24,10 @@
           "Discord.Net": "0.9.0-rc3-3"
         }
       },
+      "JiiLib/0.1.2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6"
+      },
       "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -193,6 +197,10 @@
         "dependencies": {
           "Discord.Net": "0.9.0-rc3-3"
         }
+      },
+      "JiiLib/0.1.2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6"
       },
       "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
         "type": "package",
@@ -364,6 +372,10 @@
           "Discord.Net": "0.9.0-rc3-3"
         }
       },
+      "JiiLib/0.1.2": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.6"
+      },
       "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
         "type": "package",
         "dependencies": {
@@ -521,6 +533,10 @@
     "Discord.Net.Commands/0.9.0-rc3-1": {
       "type": "project",
       "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/project.json"
+    },
+    "JiiLib/0.1.2": {
+      "type": "project",
+      "path": "../../../JiiLib/src/JiiLib/project.json"
     },
     "Microsoft.Extensions.Configuration/1.0.0-rc1-final": {
       "type": "package",
@@ -779,7 +795,8 @@
     "": [
       "Microsoft.Extensions.Configuration.UserSecrets >= 1.0.0-rc1-final",
       "Discord.Net >= 0.9.0-rc3-3",
-      "Discord.Net.Commands >= 0.9.0-rc3-1"
+      "Discord.Net.Commands >= 0.9.0-rc3-1",
+      "JiiLib >= 0.1.2"
     ],
     ".NETFramework,Version=v4.6": []
   }

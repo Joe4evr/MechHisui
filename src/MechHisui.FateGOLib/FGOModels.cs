@@ -27,6 +27,7 @@ namespace MechHisui.FateGOLib
         public ICollection<ServantSkill> ActiveSkills { get; set; }
         public ICollection<ServantSkill> PassiveSkills { get; set; }
         public string Image { get; set; }
+        public bool Obtainable { get; set; }
     }
 
     public class ServantSkill
@@ -34,6 +35,7 @@ namespace MechHisui.FateGOLib
         public string SkillName { get; set; }
         public string Rank { get; set; }
         public string Effect { get; set; }
+        public string RankUpEffect { get; set; }
     }
 
     public class ServantAlias
@@ -55,6 +57,7 @@ namespace MechHisui.FateGOLib
         public int HPMax { get; set; }
         public string EffectMax { get; set; }
         public string Image { get; set; }
+        public bool Obtainable { get; set; }
     }
 
     public class CEAlias
@@ -110,5 +113,13 @@ namespace MechHisui.FateGOLib
         public TimeSpan StartTimeLeft { get; set; }
         public DateTime StartTime { get; } = DateTime.UtcNow;
         public int CurrentAP => StartAP + (int)Math.Floor((DateTime.UtcNow - (StartTime - StartTimeLeft)).TotalMinutes / FgoHelpers.PerAP.TotalMinutes);
+    }
+
+    public enum Card
+    {
+        Arts,
+        Buster,
+        Quick,
+        Extra
     }
 }
