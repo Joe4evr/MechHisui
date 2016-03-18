@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Discord;
 using Discord.Commands;
@@ -785,15 +786,16 @@ namespace MechHisui.Commands
                         { masters.ElementAt(6), servants.Single(p => p.Class == ServantClass.Berserker.ToString()).Name }
                     };
 
-                    await cea.Channel.SendMessage(
-$@"**Team Saber:** {hgw.ElementAt(0).Key} + {hgw.ElementAt(0).Value}
-**Team Archer:** {hgw.ElementAt(1).Key} + {hgw.ElementAt(1).Value}
-**Team Lancer:** {hgw.ElementAt(2).Key} + {hgw.ElementAt(2).Value}
-**Team Rider:** {hgw.ElementAt(3).Key} + {hgw.ElementAt(3).Value}
-**Team Caster:** {hgw.ElementAt(4).Key} + {hgw.ElementAt(4).Value}
-**Team Assassin:** {hgw.ElementAt(5).Key} + {hgw.ElementAt(5).Value}
-**Team Berserker:** {hgw.ElementAt(6).Key} + {hgw.ElementAt(6).Value}
-Discuss.");
+                    var sb = new StringBuilder($"**Team Saber:** {hgw.ElementAt(0).Key} + {hgw.ElementAt(0).Value}\n")
+                        .AppendLine($"**Team Archer:** {hgw.ElementAt(1).Key} + {hgw.ElementAt(1).Value}")
+                        .AppendLine($"**Team Lancer:** {hgw.ElementAt(2).Key} + {hgw.ElementAt(2).Value}")
+                        .AppendLine($"**Team Rider:** {hgw.ElementAt(3).Key} + {hgw.ElementAt(3).Value}")
+                        .AppendLine($"**Team Caster:** {hgw.ElementAt(4).Key} + {hgw.ElementAt(4).Value}")
+                        .AppendLine($"**Team Assassin:** {hgw.ElementAt(5).Key} + {hgw.ElementAt(5).Value}")
+                        .AppendLine($"**Team Berserker:** {hgw.ElementAt(6).Key} + {hgw.ElementAt(6).Value}")
+                        .Append("Discuss.");
+
+                    await cea.Channel.SendMessage(sb.ToString());
                 });
 
             client.GetService<CommandService>().CreateCommand("addhgw")
@@ -836,7 +838,7 @@ Discuss.");
 
             Console.WriteLine("Registering 'Roll'...");
             #region vars
-            var rolltypes = new[] { "fp1", "fp10", "ticket", "4", "40" };
+            var rolltypes = new[] { "fp1", "fp10", "ticket", "4q", "40q" };
             var fpOnly = new[]
             {
                 "Azoth Blade",
@@ -892,43 +894,43 @@ Discuss.");
                     .Select(ce => ce.Name))
                 .Concat(fpOnly.RepeatSeq(5));
             #endregion
-            client.GetService<CommandService>().CreateCommand("roll")
+            client.GetService<CommandService>().CreateCommand("gacha")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Description("Simulate gacha roll (not accurate wrt rarity ratios and rate ups). Accepetable parameters are `fp1`, `fp10`, `ticket`, `4`, and `40`")
-                .Parameter("what", ParameterType.Required)
+                .Parameter("what", ParameterType.Optional)
                 .Do(async cea =>
                 {
-                    //await cea.Channel.SendMessage("This command temporarily disabled.");
-                    if (!rolltypes.Contains(cea.Args[0]))
-                    {
-                        await cea.Channel.SendMessage("Unaccaptable parameter.");
-                        return;
-                    }
+                    await cea.Channel.SendMessage("This command temporarily disabled.");
+                    //if (!rolltypes.Contains(cea.Args[0]))
+                    //{
+                    //    await cea.Channel.SendMessage("Unaccaptable parameter.");
+                    //    return;
+                    //}
 
-                    var rng = new Random();
-                    IEnumerable<string> pool = (cea.Args[0] == "fp" || cea.Args[0] == "fp10") ? fpPool : premiumPool;
-                    List<string> picks = new List<string>();
+                    //var rng = new Random();
+                    //IEnumerable<string> pool = (cea.Args[0] == "fp" || cea.Args[0] == "fp10") ? fpPool : premiumPool;
+                    //List<string> picks = new List<string>();
 
-                    for (int i = 0; i < 28; i++)
-                    {
-                        pool = pool.Shuffle();
-                    }
+                    //for (int i = 0; i < 28; i++)
+                    //{
+                    //    pool = pool.Shuffle();
+                    //}
 
-                    if (cea.Args[0] == "fp" || cea.Args[0] == "ticket" || cea.Args[0] == "4")
-                    {
-                        pool = pool.Shuffle();
-                        picks.Add(pool.ElementAt(rng.Next(maxValue: pool.Count())));
-                    }
-                    else //10-roll
-                    {
-                        for (int i = 0; i < 10; i++)
-                        {
-                            pool = pool.Shuffle();
-                            picks.Add(pool.ElementAt(rng.Next(maxValue: pool.Count())));
-                        }
-                    }
+                    //if (cea.Args[0] == "fp" || cea.Args[0] == "ticket" || cea.Args[0] == "4")
+                    //{
+                    //    pool = pool.Shuffle();
+                    //    picks.Add(pool.ElementAt(rng.Next(maxValue: pool.Count())));
+                    //}
+                    //else //10-roll
+                    //{
+                    //    for (int i = 0; i < 10; i++)
+                    //    {
+                    //        pool = pool.Shuffle();
+                    //        picks.Add(pool.ElementAt(rng.Next(maxValue: pool.Count())));
+                    //    }
+                    //}
 
-                    await cea.Channel.SendMessage($"**{cea.User.Name} rolled:** {String.Join(", ", picks)}");
+                    //await cea.Channel.SendMessage($"**{cea.User.Name} rolled:** {String.Join(", ", picks)}");
                 });
 
             Console.WriteLine("Registering 'Simulate'...");
@@ -955,7 +957,7 @@ Discuss.");
                         await cea.Channel.SendMessage("Could not parse `atkCard` parameter as a valid attack type.");
                         return;
                     }
-                    
+
                     int index;
                     if (atkCard != Card.Extra)
                     {
@@ -1073,6 +1075,10 @@ Discuss.");
                     p++;
                 }
             }
+            if (!String.IsNullOrWhiteSpace(profile.Additional))
+            {
+                sb.AppendLine($"**Additional info:** {profile.Additional}");
+            }
             sb.Append(profile.Image);
             if (profile.Id == -3) sb.Append("~~");
 
@@ -1152,7 +1158,6 @@ Discuss.");
                 case "Rider":
                 case "Shielder":
                 case "Alter-Ego":
-                case "Avenger":
                 case "Beast":
                 default:
                     return 1.0m;
@@ -1160,6 +1165,7 @@ Discuss.");
                     return 1.05m;
                 case "Berserker":
                 case "Ruler":
+                case "Avenger":
                     return 1.1m;
             }
         }
@@ -1333,8 +1339,6 @@ Discuss.");
                 case "Avenger":
                     switch (defender)
                     {
-                        case "Beast":
-                            return 0.5m;
                         case "Saber":
                         case "Archer":
                         case "Lancer":
@@ -1342,12 +1346,13 @@ Discuss.");
                         case "Caster":
                         case "Assassin":
                         case "Shielder":
+                        case "Alter-Ego":
                         case "Avenger":
+                        case "Beast":
                         default:
                             return 1.0m;
                         case "Berserker":
                         case "Ruler":
-                        case "Alter-Ego":
                             return 2.0m;
                     }
                 case "Beast":

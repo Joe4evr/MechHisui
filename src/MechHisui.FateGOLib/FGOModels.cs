@@ -26,6 +26,7 @@ namespace MechHisui.FateGOLib
         public string Attribute { get; set; }
         public ICollection<ServantSkill> ActiveSkills { get; set; }
         public ICollection<ServantSkill> PassiveSkills { get; set; }
+        public string Additional { get; set; }
         public string Image { get; set; }
         public bool Obtainable { get; set; }
     }
