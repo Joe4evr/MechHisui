@@ -55,7 +55,7 @@ namespace GudakoBot
                 conf.LogLevel = /*Debugger.IsAttached ? LogSeverity.Verbose :*/ LogSeverity.Warning;
                 //conf.UseLargeThreshold = true;
             });
-            
+
             //Display all log messages in the console
             client.Log.Message += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
             client.MessageReceived += (s, e) =>
@@ -81,10 +81,17 @@ namespace GudakoBot
                 var rng = new Random();
                 timer = new Timer(async s =>
                 {
-                    Console.WriteLine($"{DateTime.Now}: Sending message.");
-                    Randomlines = (List<string>)Randomlines.Shuffle();
-                    await client.GetChannel(fgogen)
-                        .SendMessage(Randomlines.ElementAt(rng.Next(maxValue: Randomlines.Count)));
+                    var channel = client.GetChannel(fgogen);
+                    if (channel == null)
+                    {
+                        Console.WriteLine($"Channel was null. Waiting for next interval.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{DateTime.Now}: Sending message.");
+                        Randomlines = (List<string>)Randomlines.Shuffle();
+                        await channel.SendMessage(Randomlines.ElementAt(rng.Next(maxValue: Randomlines.Count)));
+                    }
                 },
                 null,
                 TimeSpan.FromMinutes(10),
