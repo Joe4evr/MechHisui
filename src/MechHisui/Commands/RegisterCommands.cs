@@ -130,6 +130,7 @@ namespace MechHisui.Commands
                 MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(StreamReader).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(DiscordClient).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(CommandEventArgs).Assembly.Location),
                 //MetadataReference.CreateFromFile(typeof(DateTimeWithZone).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(JsonConvert).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(FgoHelpers).Assembly.Location)
@@ -159,6 +160,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Discord;
+using Discord.Commands;
 using Newtonsoft.Json;
 using MechHisui.FateGOLib;
 
@@ -170,7 +172,7 @@ namespace DynamicCompile
 
         public string Eval<T>(Func<T> func) => func()?.ToString() ?? ""null"";
 
-        public string Exec(DiscordClient client) => Eval(() => {{ {arg} }});
+        public string Exec(DiscordClient client, CommandEventArgs e) => Eval(() => {{ {arg} }});
     }}
 }}");
 
@@ -205,7 +207,7 @@ namespace DynamicCompile
                                 BindingFlags.Default | BindingFlags.InvokeMethod,
                                 null,
                                 obj,
-                                new object[1] { client } );
+                                new object[2] { client, cea } );
 
                             await cea.Channel.SendMessage($"**Result:** {(string)res}");
                         }
