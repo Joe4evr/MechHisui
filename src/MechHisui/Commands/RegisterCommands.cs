@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -394,6 +395,48 @@ namespace DynamicCompile
                     var resp = client.GetResponders().Single(r => r.channel.Id == cea.Channel.Id);
                     resp.ResetTimeouts();
                     await cea.Channel.SendMessage("Timeouts reset.");
+                });
+        }
+
+        public static void RegisterRollCommand(this DiscordClient client, IConfiguration config)
+        {
+            Console.WriteLine("Registering 'Roll'...");
+            client.GetService<CommandService>().CreateCommand("roll")
+                .Description("Roll one or more dice of variable length.")
+                .Parameter("dice", ParameterType.Required)
+                .Do(async cea =>
+                {
+                    if (client.GetService<CommandService>().AllCommands.Any(c => c.Text == "gacha"))
+                    {
+                        await cea.Channel.SendMessage("**Info:** Previous roll command has been renamed to `gacha`.");
+                    }
+
+                    if (!Regex.Match(cea.Args[0], "[0-9]+d[0-9]+").Success)
+                    {
+                        await cea.Channel.SendMessage("Invalid format specified.");
+                        return;
+                    }
+
+                    var splits = cea.Args[0].Split('d');
+                    int amount;
+                    int range;
+                    if (Int32.TryParse(splits[0], out amount) && Int32.TryParse(splits[1], out range) && amount > 0 && range > 0)
+                    {
+                        var rng = new Random();
+                        var dice = Enumerable.Range(1, range);
+                        var results = new List<int>();
+                        for (int i = 0; i < amount; i++)
+                        {
+                            for (int j = 0; j < 28; j++)
+                            {
+                                dice = dice.Shuffle();
+                            }
+                            results.Add(dice.ElementAt(rng.Next(maxValue: range)));
+                        }
+
+                        await cea.Channel.SendMessage($"**Rolled:** {String.Join(", ", results)}");
+                    }
+
                 });
         }
 

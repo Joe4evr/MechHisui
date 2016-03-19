@@ -77,6 +77,7 @@ namespace MechHisui
             client.RegisterPickCommand(config);
             //client.RegisterRecordingCommand(config);
             client.RegisterResetCommand(config);
+            client.RegisterRollCommand(config);
             client.RegisterThemeCommand(config);
             client.RegisterWhereCommand(config);
             client.RegisterXmasCommand(config);

@@ -836,7 +836,7 @@ namespace MechHisui.Commands
                     }
                 });
 
-            Console.WriteLine("Registering 'Roll'...");
+            Console.WriteLine("Registering 'Gacha'...");
             #region vars
             var rolltypes = new[] { "fp1", "fp10", "ticket", "4q", "40q" };
             var fpOnly = new[]
@@ -897,7 +897,7 @@ namespace MechHisui.Commands
             client.GetService<CommandService>().CreateCommand("gacha")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Description("Simulate gacha roll (not accurate wrt rarity ratios and rate ups). Accepetable parameters are `fp1`, `fp10`, `ticket`, `4`, and `40`")
-                .Parameter("what", ParameterType.Optional)
+                .Parameter("type", ParameterType.Optional)
                 .Do(async cea =>
                 {
                     await cea.Channel.SendMessage("This command temporarily disabled.");

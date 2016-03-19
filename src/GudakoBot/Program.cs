@@ -46,7 +46,7 @@ namespace GudakoBot
 
             Console.WriteLine("Loading chat lines...");
             LoadLines(config);
-            Console.WriteLine($"Loaded {Randomlines.Count} lines.");
+            Console.WriteLine($"Loaded {Randomlines.Count()} lines.");
 
             var client = new DiscordClient(conf =>
             {
@@ -89,8 +89,8 @@ namespace GudakoBot
                     else
                     {
                         Console.WriteLine($"{DateTime.Now}: Sending message.");
-                        Randomlines = (List<string>)Randomlines.Shuffle();
-                        await channel.SendMessage(Randomlines.ElementAt(rng.Next(maxValue: Randomlines.Count)));
+                        Randomlines = Randomlines.Shuffle();
+                        await channel.SendMessage(Randomlines.ElementAt(rng.Next(maxValue: Randomlines.Count())));
                     }
                 },
                 null,
@@ -107,7 +107,7 @@ namespace GudakoBot
             }
         }
 
-        private static List<string> Randomlines = new List<string>();
+        private static IEnumerable<string> Randomlines = new List<string>();
         private static Timer timer;
     }
 }
