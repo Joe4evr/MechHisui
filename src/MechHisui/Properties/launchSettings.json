@@ -1,12 +1,12 @@
 {
-  "profiles": {
-    "MechHisui": {
-      "commandName": "MechHisui",
-        "environmentVariables": {
-            "ASPNET_ENV": "Development",
-            "ASPNET_ENVIRONMENT": "Development",
-            "Hosting:Environment": "Development"
-        }
-    }
-  }
+	"profiles": {
+		"MechHisui": {
+			"commandName": "MechHisui",
+			"environmentVariables": {
+				"ASPNET_ENV": "Development",
+				"ASPNET_ENVIRONMENT": "Development",
+				"Hosting:Environment": "Development"
+			}
+		}
+	}
 }

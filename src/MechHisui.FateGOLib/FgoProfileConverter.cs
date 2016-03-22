@@ -14,9 +14,6 @@ namespace MechHisui.FateGOLib
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var mappedObj = new List<ServantProfile>();
-            var activeSkills = new List<ServantSkill>();
-            var passiveSkills = new List<ServantSkill>();
-            var traits = new List<string>();
             var tempProfile = new ServantProfile();
             var tempHolder = new SkillHolder();
             PropertyInfo pi;
@@ -173,22 +170,19 @@ namespace MechHisui.FateGOLib
                                 tempHolder.passiveEffect4 = reader.Value.ToString();
                             }
                             break;
-                        case nameof(traits):
+                        case "traits":
                             if (reader.Read() && reader.TokenType == JsonToken.String)
                             {
-                                traits = reader.Value.ToString().Split(',').ToList();
+                                tempProfile.Traits = reader.Value.ToString().Split(',').ToList();
                             }
                             break;
                         default:
                             string readerValue = reader.Value.ToString().ToLower();
-                            if (reader.Read())
+                            if (reader.Read() && objProps.Contains(readerValue))
                             {
-                                if (objProps.Contains(readerValue))
-                                {
-                                    pi = tempProfile.GetType().GetProperty(readerValue, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                                    var convertedValue = Convert.ChangeType(reader.Value, pi.PropertyType);
-                                    pi.SetValue(tempProfile, convertedValue, null);
-                                }
+                                pi = tempProfile.GetType().GetProperty(readerValue, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                                var convertedValue = Convert.ChangeType(reader.Value, pi.PropertyType);
+                                pi.SetValue(tempProfile, convertedValue, null);
                             }
                             break;
                     }
@@ -196,28 +190,21 @@ namespace MechHisui.FateGOLib
                 }
                 else if (reader.TokenType == JsonToken.EndObject && reader.Depth == 1)
                 {
-                    activeSkills.AddRange(new[]
+                    tempProfile.ActiveSkills = new List<ServantSkill>
                     {
                         new ServantSkill { SkillName = tempHolder.skill1, Rank = tempHolder.rank1, Effect = tempHolder.effect1, RankUpEffect = tempHolder.effect1RankUp },
                         new ServantSkill { SkillName = tempHolder.skill2, Rank = tempHolder.rank2, Effect = tempHolder.effect2, RankUpEffect = tempHolder.effect2RankUp },
                         new ServantSkill { SkillName = tempHolder.skill3, Rank = tempHolder.rank3, Effect = tempHolder.effect3, RankUpEffect = tempHolder.effect3RankUp },
-                    });
-                    passiveSkills.AddRange(new[]
+                    };
+                    tempProfile.PassiveSkills = new List<ServantSkill>
                     {
                         new ServantSkill { SkillName = tempHolder.passiveSkill1, Rank = tempHolder.passiveRank1, Effect = tempHolder.passiveEffect1 },
                         new ServantSkill { SkillName = tempHolder.passiveSkill2, Rank = tempHolder.passiveRank2, Effect = tempHolder.passiveEffect2 },
                         new ServantSkill { SkillName = tempHolder.passiveSkill3, Rank = tempHolder.passiveRank3, Effect = tempHolder.passiveEffect3 },
                         new ServantSkill { SkillName = tempHolder.passiveSkill4, Rank = tempHolder.passiveRank4, Effect = tempHolder.passiveEffect4 },
-                    });
-
-                    tempProfile.ActiveSkills = activeSkills;
-                    tempProfile.PassiveSkills = passiveSkills;
-                    tempProfile.Traits = traits;
+                    };
                     mappedObj.Add(tempProfile);
 
-                    activeSkills = new List<ServantSkill>();
-                    passiveSkills = new List<ServantSkill>();
-                    traits = new List<string>();
                     tempProfile = new ServantProfile();
                     tempHolder = new SkillHolder();
                 }

@@ -159,6 +159,7 @@ $@"using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Newtonsoft.Json;
@@ -168,11 +169,11 @@ namespace DynamicCompile
 {{
     public class DynEval
     {{
-        public string Eval<T>(Func<IEnumerable<T>> set) => String.Join("", "", set());
+        public async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join("", "", await set());
 
-        public string Eval<T>(Func<T> func) => func()?.ToString() ?? ""null"";
+        public async Task<string> Eval<T>(Func<Task<T>> func) => (await func())?.ToString() ?? ""null"";
 
-        public string Exec(DiscordClient client, CommandEventArgs e) => Eval(() => {{ {arg} }});
+        public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(async () => {{ {arg} }});
     }}
 }}");
 
@@ -187,16 +188,7 @@ namespace DynamicCompile
                     {
                         EmitResult result = compilation.Emit(ms);
 
-                        if (!result.Success)
-                        {
-                            IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
-                                diagnostic.IsWarningAsError ||
-                                diagnostic.Severity == DiagnosticSeverity.Error);
-
-                            Console.Error.WriteLine(String.Join("\n", failures.Select(f => $"{f.Id}: {f.GetMessage()}")));
-                            await cea.Channel.SendMessage($"**Error:** {failures.First().GetMessage()}");
-                        }
-                        else
+                        if (result.Success)
                         {
                             ms.Seek(0, SeekOrigin.Begin);
                             Assembly assembly = Assembly.Load(ms.ToArray());
@@ -209,7 +201,16 @@ namespace DynamicCompile
                                 obj,
                                 new object[2] { client, cea } );
 
-                            await cea.Channel.SendMessage($"**Result:** {(string)res}");
+                            await cea.Channel.SendMessage($"**Result:** {((Task<string>)res).GetAwaiter().GetResult()}");
+                        }
+                        else
+                        {
+                            IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
+                                diagnostic.IsWarningAsError ||
+                                diagnostic.Severity == DiagnosticSeverity.Error);
+
+                            Console.Error.WriteLine(String.Join("\n", failures.Select(f => $"{f.Id}: {f.GetMessage()}")));
+                            await cea.Channel.SendMessage($"**Error:** {failures.First().GetMessage()}");
                         }
                     }
                 });
@@ -408,14 +409,10 @@ namespace DynamicCompile
                 .Parameter("dice", ParameterType.Required)
                 .Do(async cea =>
                 {
-                    if (client.GetService<CommandService>().AllCommands.Any(c => c.Text == "gacha"))
-                    {
-                        await cea.Channel.SendMessage("**Info:** Previous roll command has been renamed to `gacha`.");
-                    }
-
                     if (!Regex.Match(cea.Args[0], "[0-9]+d[0-9]+").Success)
                     {
-                        await cea.Channel.SendMessage("Invalid format specified.");
+                        await cea.Channel.SendMessage("**Info:** Previous roll command has been renamed to `gacha`.");
+                        //await cea.Channel.SendMessage("Invalid format specified.");
                         return;
                     }
 
@@ -603,10 +600,10 @@ namespace DynamicCompile
 
     //public class DynEval
     //{
-    //    public string Eval<T>(Func<IEnumerable<T>> set) => String.Join(", ", set.Invoke());
+    //    public async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join(", ", await set());
 
-    //    public string Eval<T>(Func<T> func) => func.Invoke().ToString();
+    //    public async Task<string> Eval<T>(Func<Task<T>> func) => (await func())?.ToString() ?? "null";
 
-    //    public string Exec(DiscordClient client) => Eval(() => { return Enumerable.Range(1, 10); });
+    //    public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(async () => { await Task.Delay(500); return 42; });
     //}
 }

@@ -378,10 +378,11 @@ namespace MechHisui.Commands
             }
 
             Console.WriteLine("Registering 'Stats'...");
-            client.GetService<CommandService>().CreateCommand("stats")
+            client.GetService<CommandService>().CreateCommand("servant")
                 .Alias("stat")
+                .Alias("stats")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
-                .Parameter("servantname", ParameterType.Unparsed)
+                .Parameter("name", ParameterType.Unparsed)
                 .Description($"Relay information on the specified Servant. Alternative names acceptable.")
                 .Do(async cea =>
                 {
@@ -551,9 +552,10 @@ namespace MechHisui.Commands
                 .Do(async cea =>
                 {
                     ServantAlias newAlias = FgoHelpers.ServantDict.SingleOrDefault(p => p.Servant == cea.Args[0]);
+                    var arg = cea.Args[1].ToLowerInvariant();
                     if (newAlias != null)
                     {
-                        newAlias.Alias.Add(cea.Args[1]);
+                        newAlias.Alias.Add(arg);
                     }
                     else
                     {
@@ -562,7 +564,7 @@ namespace MechHisui.Commands
                         {
                             newAlias = new ServantAlias
                             {
-                                Alias = new List<string> { cea.Args[1] },
+                                Alias = new List<string> { arg },
                                 Servant = profile.Name
                             };
                         }
@@ -574,7 +576,7 @@ namespace MechHisui.Commands
                     }
 
                     File.WriteAllText(Path.Combine(config["AliasPath"], "servants.json"), JsonConvert.SerializeObject(FgoHelpers.ServantDict, Formatting.Indented));
-                    await cea.Channel.SendMessage($"Added alias `{cea.Args[1]}` for `{newAlias.Servant}`.");
+                    await cea.Channel.SendMessage($"Added alias `{arg}` for `{newAlias.Servant}`.");
                 });
 
             Console.WriteLine("Registering 'CE alias'...");

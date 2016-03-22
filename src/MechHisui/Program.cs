@@ -51,7 +51,13 @@ namespace MechHisui
             Console.CancelKeyPress += async (s, e) => await RegisterCommands.Disconnect(client, config);
 
             //Display all log messages in the console
-            client.Log.Message += (s, e) => Console.WriteLine($"{DateTime.Now} - [{e.Severity}] {e.Source}: {e.Message} {e.Exception}");
+            client.Log.Message += (s, e) =>
+            {
+                if (!e.Message.Contains("Discord API (Unofficial)/"))
+                {
+                    Console.WriteLine($"{DateTime.Now} - [{e.Severity}] {e.Source}: {e.Message} {e.Exception}");
+                }
+            };
 
             //Add a ModuleService and CommandService
             client.AddService(new ModuleService());
@@ -104,6 +110,16 @@ namespace MechHisui
             {
                 Console.WriteLine($"Last exit code was {lastcode}");
             }
+
+            //client.MessageReceived += async (s, e) =>
+            //{
+            //    if (e.Message.MentionedUsers.Select(m => m.Id).Contains(UInt64.Parse(config["Owner"]))
+            //        && e.Server.GetUser(UInt64.Parse(config["Owner"])).Status == UserStatus.Offline)
+            //    {
+            //        var text = e.Message.Text.Replace('@', '~');
+            //        await client.GetChannel(UInt64.Parse(config["PrivChat"])).SendMessage($"You were pinged at **{DateTime.Now}** in **{e.Server.Name}/{e.Channel.Name}** by **{e.User.Name}**:\n\"{text}\"");
+            //    }
+            //};
 
             client.MessageUpdated += async (s, e) =>
             {
