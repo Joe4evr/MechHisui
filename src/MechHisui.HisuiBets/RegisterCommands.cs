@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -129,54 +130,54 @@ namespace MechHisui.Commands
                     }));
                 });
 
-            //client.GetService<CommandService>().CreateCommand("checkbets")
-            //    .Alias("betstats")
-            //    .AddCheck((c, u, ch) =>
-            //    {
-            //        Console.WriteLine("Checking requisites for command 'checkbets'");
-            //        Console.WriteLine($"Invoked channel is {ch.Name}, ID {ch.Id}");
-            //        Console.WriteLine($"Invoked user is {u.Name}, ID: {u.Id}");
-            //        return ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"]));
-            //    })
-            //    .Do(async cea =>
-            //    {
-            //        Console.WriteLine("Checking for an open game");
-            //        if (!gameOpen)
-            //        {
-            //            Console.WriteLine("No game open, aborting gracefully.");
-            //            await cea.Channel.SendMessage("No game is going on at this time.");
-            //            return;
-            //        }
+            client.GetService<CommandService>().CreateCommand("checkbets")
+                .Alias("betstats")
+                .AddCheck((c, u, ch) =>
+                {
+                    Console.WriteLine("Checking requisites for command 'checkbets'");
+                    Console.WriteLine($"Invoked channel is {ch.Name}, ID {ch.Id}");
+                    Console.WriteLine($"Invoked user is {u.Name}, ID: {u.Id}");
+                    return ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"]));
+                })
+                .Do(async cea =>
+                {
+                    Console.WriteLine("Checking for an open game");
+                    if (game?.GameOpen == false)
+                    {
+                        Console.WriteLine("No game open, aborting gracefully.");
+                        await cea.Channel.SendMessage("No game is going on at this time.");
+                        return;
+                    }
 
-            //        Console.WriteLine("Finding longest name in the active bets");
-            //        int longestName = ActiveBets.OrderBy(b => b.UserName.Length).First().UserName.Length;
-            //        Console.WriteLine($"Longest name is {longestName} chars");
-            //        Console.WriteLine("Finding longest bet in active bets");
-            //        int longestBet = ActiveBets.OrderBy(b => b.BettedAmount.ToString().Length).First().BettedAmount.ToString().Length;
-            //        Console.WriteLine($"Longest bet is {longestBet} chars");
-            //        Console.WriteLine("Constructing StringBuilder");
-            //        var sb = new StringBuilder("The following bets have been made:\n```\n");
-            //        Console.WriteLine("Looping through active bets");
-            //        foreach (var bet in ActiveBets)
-            //        {
-            //            var nameSpaces = new String(' ', (longestName - bet.UserName.Length) + 1);
-            //            var betSpaces = new String(' ', (longestBet - bet.BettedAmount.ToString().Length));
-            //            var outstring = $"{bet.UserName}:{nameSpaces}{symbol}{betSpaces}{bet.BettedAmount} - {bet.Tribute}";
-            //            Console.WriteLine(outstring);
-            //            sb.AppendLine(outstring);
+                    Console.WriteLine("Finding longest name in the active bets");
+                    int longestName = game.ActiveBets.OrderBy(b => b.UserName.Length).First().UserName.Length;
+                    Console.WriteLine($"Longest name is {longestName} chars");
+                    Console.WriteLine("Finding longest bet in active bets");
+                    int longestBet = game.ActiveBets.OrderBy(b => b.BettedAmount.ToString().Length).First().BettedAmount.ToString().Length;
+                    Console.WriteLine($"Longest bet is {longestBet} chars");
+                    Console.WriteLine("Constructing StringBuilder");
+                    var sb = new StringBuilder("The following bets have been made:\n```\n");
+                    Console.WriteLine("Looping through active bets");
+                    foreach (var bet in game.ActiveBets)
+                    {
+                        var nameSpaces = new String(' ', (longestName - bet.UserName.Length) + 1);
+                        var betSpaces = new String(' ', (longestBet - bet.BettedAmount.ToString().Length));
+                        var outstring = $"{bet.UserName}:{nameSpaces}{symbol}{betSpaces}{bet.BettedAmount} - {bet.Tribute}";
+                        Console.WriteLine(outstring);
+                        sb.AppendLine(outstring);
 
-            //            if (sb.Length > 1700)
-            //            {
+                        if (sb.Length > 1700)
+                        {
 
-            //                sb.Append("```");
-            //                await cea.Channel.SendMessage(sb.ToString());
-            //                sb = new StringBuilder("```\n");
-            //            }
-            //        }
-            //        sb.Append("```");
-            //        Console.WriteLine("Sending result to channel");
-            //        await cea.Channel.SendMessage(sb.ToString());
-            //    });
+                            sb.Append("```");
+                            await cea.Channel.SendMessage(sb.ToString());
+                            sb = new StringBuilder("```\n");
+                        }
+                    }
+                    sb.Append("```");
+                    Console.WriteLine("Sending result to channel");
+                    await cea.Channel.SendMessage(sb.ToString());
+                });
 
             client.GetService<CommandService>().CreateCommand("closebets")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"])))
@@ -216,45 +217,70 @@ namespace MechHisui.Commands
                     }
                 });
 
-            //client.GetService<CommandService>().CreateCommand("donate")
-            //    .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]))
-            //    .Parameter("amount", ParameterType.Required)
-            //    .Parameter("donatee",ParameterType.Required)
-            //    .Do(async cea =>
-            //    {
-            //        int bucks;
-            //        if (Int32.TryParse(cea.Args[0], out bucks))
-            //        {
-            //            if (bucks <= 0)
-            //            {
-            //                await cea.Channel.SendMessage("Cannot make a donation of 0 or less.");
-            //                return;
-            //            }
-            //            if (bucks > bank.Accounts.Single(u => u.UserId == cea.User.Id).Bucks)
-            //            {
-            //                await cea.Channel.SendMessage($"**{cea.User.Name}** currently does not have enough HisuiBucks to make that donation.");
-            //                return;
-            //            }
+            client.GetService<CommandService>().CreateCommand("donate")
+                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_Hgames"]))
+                .Parameter("amount", ParameterType.Required)
+                .Parameter("donatee", ParameterType.Required)
+                .Do(async cea =>
+                {
+                    DateTime lastDonation;
+                    if (_donationTimeouts.TryGetValue(cea.User.Id, out lastDonation))
+                    {
+                        if ((DateTime.UtcNow - lastDonation).TotalMilliseconds == TimeSpan.FromMinutes(10).TotalMilliseconds)
+                        {
+                            await cea.Channel.SendMessage("You are currently in donation timeout.");
+                            return;
+                        }
+                        else
+                        {
+                            _donationTimeouts.Remove(cea.User.Id);
+                        }
+                    }
 
-            //            var target = cea.Server.FindUsers(cea.Args[1]).FirstOrDefault();
-            //            if (target != null)
-            //            {
-            //                bank.Accounts.Single(p => p.UserId == cea.User.Id).Bucks -= bucks;
-            //                bank.Accounts.Single(p => p.UserId == target.Id).Bucks += bucks;
-            //                await cea.Channel.SendMessage($"**{cea.User.Name}** donated {symbol}{bucks} to **{target.Name}**.");
-            //                bank.WriteBank(config["bank"]);
-            //            }
-            //            else
-            //            {
-            //                await cea.Channel.SendMessage("Could not find that user.");
-            //            }
-            //        }
-            //        else
-            //        {
-            //            await cea.Channel.SendMessage("Could not parse amount as a number.");
-            //        }
-            //    });
+                    int bucks;
+                    if (Int32.TryParse(cea.Args[0], out bucks))
+                    {
+                        if (bucks <= 0)
+                        {
+                            await cea.Channel.SendMessage("Cannot make a donation of 0 or less.");
+                            return;
+                        }
+                        if (bucks > bank.Accounts.Single(u => u.UserId == cea.User.Id).Bucks)
+                        {
+                            await cea.Channel.SendMessage($"**{cea.User.Name}** currently does not have enough HisuiBucks to make that donation.");
+                            return;
+                        }
+
+                        var target = cea.Server.FindUsers(cea.Args[1]).FirstOrDefault();
+                        if (target != null)
+                        {
+                            bank.Accounts.Single(p => p.UserId == cea.User.Id).Bucks -= bucks;
+                            bank.Accounts.Single(p => p.UserId == target.Id).Bucks += bucks;
+                            await cea.Channel.SendMessage($"**{cea.User.Name}** donated {symbol}{bucks} to **{target.Name}**.");
+                            bank.WriteBank(config["bank"]);
+
+                            _donationCounters.AddOrUpdate(cea.User.Id, 1, (k, v) => v++);
+                            int d;
+                            if (_donationCounters.TryGetValue(cea.User.Id, out d) && d == 10)
+                            {
+                                _donationTimeouts.Add(cea.User.Id, DateTime.UtcNow);
+                                _donationCounters.TryRemove(cea.User.Id, out d);
+                            }
+                        }
+                        else
+                        {
+                            await cea.Channel.SendMessage("Could not find that user.");
+                        }
+                    }
+                    else
+                    {
+                        await cea.Channel.SendMessage("Could not parse amount as a number.");
+                    }
+                });
         }
+
+        private static ConcurrentDictionary<ulong, int> _donationCounters = new ConcurrentDictionary<ulong, int>();
+        private static Dictionary<ulong, DateTime> _donationTimeouts = new Dictionary<ulong, DateTime>();
 
         public static void AddNewHisuiBetsUsers(this DiscordClient client, IConfiguration config)
         {

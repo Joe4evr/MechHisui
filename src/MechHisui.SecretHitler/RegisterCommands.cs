@@ -192,7 +192,7 @@ namespace MechHisui.Commands
                 .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && ch.Id == UInt64.Parse(config["FGO_SecretHitler"]))
                 .Description("End the game early.")
                 .Do(async cea => {
-                    await game.EndGame();
+                    await game.EndGame("Game was ended early by admin.");
                     gameOpen = true;
                 });
 

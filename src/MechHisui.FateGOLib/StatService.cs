@@ -49,14 +49,18 @@ namespace MechHisui.FateGOLib
             var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.ContainsIgnoreCase(servant));
             if (serv != null)
             {
-                Func<ServantProfile, bool> pred = p => p.Name == serv.Servant;
-                return FgoHelpers.ServantProfiles.SingleOrDefault(pred)
-                     ?? FgoHelpers.FakeServantProfiles.SingleOrDefault(pred);
+                Func<ServantProfile, bool> eqServ = p => p.Name.ToLowerInvariant() == serv.Servant.ToLowerInvariant();
+                return FgoHelpers.ServantProfiles.SingleOrDefault(eqServ)
+                    ?? FgoHelpers.FakeServantProfiles.SingleOrDefault(eqServ);
             }
             else
             {
-                return FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Name.ToLowerInvariant() == servant.ToLowerInvariant())
-                    ?? FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Name.ContainsIgnoreCase(servant));
+                Func<ServantProfile, bool> eqArg = p => p.Name.ToLowerInvariant() == servant.ToLowerInvariant();
+                Func<ServantProfile, bool> containsArg = p => p.Name.ContainsIgnoreCase(servant);
+                return FgoHelpers.ServantProfiles.SingleOrDefault(eqArg)
+                    ?? FgoHelpers.ServantProfiles.SingleOrDefault(containsArg)
+                    ?? FgoHelpers.FakeServantProfiles.SingleOrDefault(eqArg)
+                    ?? FgoHelpers.FakeServantProfiles.SingleOrDefault(containsArg);
             }
         }
 

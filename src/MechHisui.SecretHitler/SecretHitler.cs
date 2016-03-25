@@ -333,8 +333,8 @@ namespace MechHisui.SecretHitler
                     var chosen = _channel.GetUser(_currentChancellor);
                     if (_players.Single(p => p.Role == _config.Hitler).User.Id == _currentChancellor)
                     {
-                        await _channel.SendMessage($"**{chosen.Name}** is, in fact, {_config.Hitler}. {_config.FascistsWin}");
-                        await EndGame();
+                        await _channel.SendMessage($"**{chosen.Name}** is, in fact, {_config.Hitler}.");
+                        await EndGame(_config.FascistsWin);
                     }
                     else
                     {
@@ -394,14 +394,21 @@ namespace MechHisui.SecretHitler
 
             if (peopleEnacted)
             {
-                if (space.Type == BoardSpaceType.ExecutionVeto)
+                switch (space.Type)
                 {
-                    _vetoUnlocked = true;
-                    await _channel.SendMessage($"The {_config.President} and {_config.Chancellor} may veto from now.");
-                }
-                else
-                {
-                    await _channel.SendMessage($"No action is taken.");
+                    case BoardSpaceType.ExecutionVeto:
+                        _vetoUnlocked = true;
+                        await _channel.SendMessage($"The {_config.President} and {_config.Chancellor} may veto from now.");
+                        return;
+                    case BoardSpaceType.FascistWin:
+                        await EndGame(_config.FascistsWin);
+                        return;
+                    case BoardSpaceType.LiberalWin:
+                        await EndGame(_config.LiberalsWin);
+                        return;
+                    default:
+                        await _channel.SendMessage($"No action is taken.");
+                        return;
                 }
             }
             else
@@ -434,22 +441,21 @@ namespace MechHisui.SecretHitler
                         await _channel.SendMessage($"The {_config.President} may choose another player to kill. Also, the {_config.President} and {_config.Chancellor} may veto.");
                         return;
                     case BoardSpaceType.FascistWin:
-                        await _channel.SendMessage(_config.FascistsWin);
-                        await EndGame();
+                        await EndGame(_config.FascistsWin);
                         return;
                     case BoardSpaceType.LiberalWin:
-                        await _channel.SendMessage(_config.LiberalsWin);
-                        await EndGame();
+                        await EndGame(_config.LiberalsWin);
                         return;
                 }
             }
         }
 
-        public async Task EndGame()
+        public async Task EndGame(string endmsg)
         {
             _channel.Client.MessageReceived -= ProcessMessage;
             Commands.RegisterSecHitCommands.gameOpen = false;
-            var sb = new StringBuilder("The game is over.\n")
+            var sb = new StringBuilder(endmsg)
+                .AppendLine("\nThe game is over.")
                 .AppendLine($"The {_config.Fascist}s were **{String.Join("**, **", _players.Where(p => p.Party == _config.FascistParty).Select(p => p.User.Name))}**.")
                 .AppendLine($"The {_config.Liberal}s were **{String.Join("**, **", _players.Where(p => p.Party == _config.LiberalParty).Select(p => p.User.Name))}**.");
             await _channel.SendMessage(sb.ToString());
@@ -604,8 +610,7 @@ namespace MechHisui.SecretHitler
                                     await Task.Delay(1500);
                                     if (player.Role == _config.Hitler)
                                     {
-                                        await _channel.SendMessage(String.Format(_config.HitlerWasKilled, _config.Hitler, _config.LiberalParty));
-                                        await EndGame();
+                                        await EndGame(String.Format(_config.HitlerWasKilled, _config.Hitler, _config.LiberalParty));
                                     }
                                     else
                                     {

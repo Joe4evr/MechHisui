@@ -73,6 +73,7 @@ namespace MechHisui.FateGOLib
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
         public string EventGacha { get; set; }
+        public string InfoLink { get; set; }
     }
 
     public class MysticCode

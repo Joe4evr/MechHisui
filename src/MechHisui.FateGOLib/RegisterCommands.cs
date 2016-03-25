@@ -17,7 +17,7 @@ using MechHisui.FateGOLib;
 
 namespace MechHisui.Commands
 {
-    public static class ClientExtensions
+    public static class FgoExtensions
     {
         public static void RegisterAPCommand(this DiscordClient client, IConfiguration config)
         {
@@ -174,6 +174,11 @@ namespace MechHisui.Commands
                             {
                                 sb.AppendLine("\tNo event gacha for this event.");
                             }
+
+                            //if (!String.IsNullOrEmpty(ev.InfoLink))
+                            //{
+                            //    sb.AppendLine($"\t{ev.InfoLink}");
+                            //}
                         }
                     }
                     else
@@ -202,6 +207,11 @@ namespace MechHisui.Commands
                         else
                         {
                             sb.AppendLine($"**Next Event:** {nextEvent.EventName}, planned to start at an unknown time.");
+                        }
+
+                        if (!String.IsNullOrEmpty(nextEvent.InfoLink))
+                        {
+                            sb.AppendLine(nextEvent.InfoLink);
                         }
                     }
                     else
@@ -1015,9 +1025,9 @@ namespace MechHisui.Commands
                 });
         }
 
-        private static string FormatCEProfile(CEProfile ce)
+        public static string FormatCEProfile(CEProfile ce)
         {
-            StringBuilder sb = new StringBuilder()
+            return new StringBuilder()
                 .AppendLine($"**Collection ID:** {ce.Id}")
                 .AppendLine($"**Rarity:** {ce.Rarity}☆")
                 .AppendLine($"**CE:** {ce.Name}")
@@ -1028,17 +1038,18 @@ namespace MechHisui.Commands
                 .AppendLine($"**Max ATK:** {ce.AtkMax}")
                 .AppendLine($"**Max HP:** {ce.HPMax}")
                 .AppendLine($"**Max Effect:** {ce.EffectMax}")
-                .Append(ce.Image);
-            return sb.ToString();
+                .Append(ce.Image)
+                .ToString();
         }
 
-        internal static string FormatServantProfile(ServantProfile profile)
+        public static string FormatServantProfile(ServantProfile profile)
         {
             string aoe = ((profile.NoblePhantasmEffect?.Contains("AoE") == true) && Regex.Match(profile.NoblePhantasmEffect, "([2-9]|10)H").Success) ? " (Hits is per enemy)" : String.Empty;
-            StringBuilder sb = new StringBuilder();
-            if (profile.Id == -3) sb.Append("~~");
-
-            sb.AppendLine($"**Collection ID:** {profile.Id}")
+            int a = 1;
+            int p = 1;
+            return new StringBuilder()
+                .AppendWhen(() => profile.Id == -3, b => b.Append("~~"))
+                .AppendLine($"**Collection ID:** {profile.Id}")
                 .AppendLine($"**Rarity:** {profile.Rarity}☆")
                 .AppendLine($"**Class:** {profile.Class}")
                 .AppendLine($"**Servant:** {profile.Name}")
@@ -1048,46 +1059,37 @@ namespace MechHisui.Commands
                 .AppendLine($"**Max HP:** {profile.HP}")
                 .AppendLine($"**Starweight:** {profile.Starweight}")
                 .AppendLine($"**Growth type:** {profile.GrowthCurve} (Use `.curve` for explanation)")
-                .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*{aoe}");
-            if (!String.IsNullOrWhiteSpace(profile.NoblePhantasmRankUpEffect))
-            {
-                sb.AppendLine($"**NP Rank+:** *{profile.NoblePhantasmRankUpEffect}*{aoe}");
-            }
-            sb.AppendLine($"**Attribute:** {profile.Attribute}")
-                .AppendLine($"**Traits:** {String.Join(", ", profile.Traits)}");
-            int a = 1;
-            foreach (var skill in profile.ActiveSkills)
-            {
-                if (!String.IsNullOrWhiteSpace(skill.SkillName))
-                {
-                    sb.AppendLine($"**Skill {a}:** {skill.SkillName} {skill.Rank} - *{skill.Effect}*");
-                    if (!String.IsNullOrWhiteSpace(skill.RankUpEffect))
+                .AppendLine($"**NP:** {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*{aoe}")
+                .AppendWhen(() => !String.IsNullOrWhiteSpace(profile.NoblePhantasmRankUpEffect),
+                    b => b.AppendLine($"**NP Rank+:** *{profile.NoblePhantasmRankUpEffect}*{aoe}"))
+                .AppendLine($"**Attribute:** {profile.Attribute}")
+                .AppendLine($"**Traits:** {String.Join(", ", profile.Traits)}")
+                .AppendSequence(profile.ActiveSkills,
+                    (b, s) =>
                     {
-                        sb.AppendLine($"**Skill {a} Rank+:** *{skill.RankUpEffect}*");
-                    }
-                    a++;
-                }
-            }
-            int p = 1;
-            foreach (var skill in profile.PassiveSkills)
-            {
-                if (!String.IsNullOrWhiteSpace(skill.SkillName))
-                {
-                    sb.AppendLine($"**Passive Skill {p}:** {skill.SkillName} {skill.Rank} - *{skill.Effect}*");
-                    p++;
-                }
-            }
-            if (!String.IsNullOrWhiteSpace(profile.Additional))
-            {
-                sb.AppendLine($"**Additional info:** {profile.Additional}");
-            }
-            sb.Append(profile.Image);
-            if (profile.Id == -3) sb.Append("~~");
-
-            return sb.ToString();
+                        var t = b.AppendWhen(() => !String.IsNullOrWhiteSpace(s.SkillName),
+                            bu => bu.AppendLine($"**Skill {a}:** {s.SkillName} {s.Rank} - *{s.Effect}*")
+                                .AppendWhen(() => !String.IsNullOrWhiteSpace(s.RankUpEffect),
+                                    stb => stb.AppendLine($"**Skill {a} Rank+:** *{s.RankUpEffect}*")));
+                        a++;
+                        return t;
+                    })
+                .AppendSequence(profile.PassiveSkills,
+                    (b, s) =>
+                    {
+                        var t = b.AppendWhen(() => !String.IsNullOrWhiteSpace(s.SkillName),
+                            bu => bu.AppendLine($"**Passive Skill {p}:** {s.SkillName} {s.Rank} - *{s.Effect}*"));
+                        p++;
+                        return t;
+                    })
+                    .AppendWhen(() => !String.IsNullOrWhiteSpace(profile.Additional),
+                        b => b.AppendLine($"**Additional info:** {profile.Additional}"))
+                    .Append(profile.Image)
+                    .AppendWhen(() => profile.Id == -3, b => b.Append("~~"))
+                    .ToString();
         }
 
-        private static string FormatMysticCodeProfile(MysticCode code)
+        public static string FormatMysticCodeProfile(MysticCode code)
         {
             StringBuilder sb = new StringBuilder()
                 .AppendLine($"**Name:** {code.Code}")

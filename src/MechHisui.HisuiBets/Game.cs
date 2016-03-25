@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 
 namespace MechHisui.HisuiBets
@@ -36,7 +37,7 @@ namespace MechHisui.HisuiBets
                 await _channel.SendMessage($"Bets are closed. {ActiveBets.Count} bets are in. The pot is {symbol}{ActiveBets.Sum(b => b.BettedAmount)}.");
             },
             null,
-            TimeSpan.FromSeconds((GType == GameType.SaltyBet ? 30 : 45 )),
+            TimeSpan.FromSeconds((GType == GameType.SaltyBet ? 30 : 45)),
             Timeout.InfiniteTimeSpan);
         }
 
@@ -85,26 +86,34 @@ namespace MechHisui.HisuiBets
         public string Winner(string winner)
         {
             GameOpen = false;
-            var winners = ActiveBets.Where(b => b.Tribute.Equals(winner, StringComparison.InvariantCultureIgnoreCase))
-                .Select(b => _channel.Server.GetUser(b.UserId));
+            var wholeSum = ActiveBets.Sum(b => b.BettedAmount);
+            var winners = ActiveBets
+                .Where(b => b.Tribute.Equals(winner, StringComparison.InvariantCultureIgnoreCase));
             if (winners.Count() > 0)
             {
-                var payout = ActiveBets.Sum(b => b.BettedAmount) / winners.Count();
-                var rounding = ActiveBets.Sum(b => b.BettedAmount) % winners.Count();
-
-                foreach (var user in winners)
-                {
-                    _bank.Accounts.SingleOrDefault(u => u.UserId == user.Id).Bucks += payout;
-                }
-                _bank.WriteBank();
-
                 if (winners.Count() == 1)
                 {
-                    return $"{winners.Single().Name} has won the whole pot of {symbol}{payout}.";
+                    return $"**{winners.Single().UserName}** has won the whole pot of {symbol}{wholeSum}.";
                 }
                 else
                 {
-                    return $"{String.Join(", ", winners.Select(u => u.Name))} have won {symbol}{payout} each. {symbol}{rounding} has been lost due to rounding.";
+                    decimal loserSum = ActiveBets
+                        .Where(b => !b.Tribute.Equals(winner, StringComparison.InvariantCultureIgnoreCase))
+                        .Sum(b => b.BettedAmount);
+                    decimal winnerSum = wholeSum - loserSum;
+
+                    var sb = new StringBuilder("This game's winners: ");
+                    int t = 0;
+                    foreach (var user in winners)
+                    {
+                        var payout = (int)((loserSum / winnerSum) * user.BettedAmount);
+                        _bank.Accounts.SingleOrDefault(u => u.UserId == user.UserId).Bucks += payout;
+                        t += payout;
+                        sb.Append($"**{user.UserName}** ({symbol}{payout}), ");
+                    }
+                    _bank.WriteBank();
+
+                    return sb.Append($"and {symbol}{wholeSum - t} has been lost due to rounding.").ToString();
                 }
             }
             else
