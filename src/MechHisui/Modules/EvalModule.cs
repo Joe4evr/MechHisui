@@ -11,19 +11,45 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.Extensions.Configuration;
 using JiiLib;
-using Discord;
 using Discord.Commands;
 using Discord.Modules;
 
 namespace MechHisui.Modules
 {
+    /// <summary>
+    /// Module for runtime evaluation of code.
+    /// Use <see cref="EvalModule.Builder"/> to create an instance of this class.
+    /// </summary>
     public class EvalModule : IModule
     {
+        /// <summary>
+        /// Regex string to detect markdown code blocks.
+        /// </summary>
         private const string regex = @"`{3}(?:\S*$)((?:.*\n)*)`{3}";
+
+        /// <summary>
+        /// An <see cref="IConfiguration"/> object that holds additional data.
+        /// </summary>
         private readonly IConfiguration _config;
+
+        /// <summary>
+        /// The assemblies referenced during evaluation.
+        /// </summary>
         private readonly IEnumerable<MetadataReference> _references;
+
+        /// <summary>
+        /// The text that gets parsed into a
+        /// <see cref="SyntaxTree"/> upon execution.
+        /// </summary>
         private readonly string _syntaxText;
 
+        /// <summary>
+        /// Creates a new <see cref="EvalModule"/>.
+        /// </summary>
+        /// <param name="config">An <see cref="IConfiguration"/> object that
+        /// holds additional data.</param>
+        /// <param name="references">The list of assemblis to reference.</param>
+        /// <param name="syntax">The text to parse into a <see cref="SyntaxTree"/>.</param>
         private EvalModule(
             IConfiguration config,
             IEnumerable<MetadataReference> references,
@@ -33,7 +59,7 @@ namespace MechHisui.Modules
             _references = references;
             _syntaxText = syntax;
         }
-
+        
         public void Install(ModuleManager manager)
         {
             Console.WriteLine("Registering 'Eval'...");
@@ -94,11 +120,20 @@ namespace MechHisui.Modules
                 });
         }
 
+        /// <summary>
+        /// Builder for an <see cref="EvalModule"/>.
+        /// </summary>
         public class Builder
         {
             private List<MetadataReference> _references = new List<MetadataReference>();
             private List<string> _usings = new List<string>();
 
+            /// <summary>
+            /// Creates a <see cref="Builder"/> for an <see cref="EvalModule"/> with
+            /// predefined references to <see cref="System"/>, 
+            /// <see cref="System.Collections.Generic"/>,
+            /// <see cref="System.Threading.Tasks"/>, and <see cref="System.Linq"/>.
+            /// </summary>
             public static Builder BuilderWithSystemAndLinq()
             {
                 return new Builder()
@@ -110,6 +145,12 @@ namespace MechHisui.Modules
                         "System.Linq"));
             }
 
+            /// <summary>
+            /// Adds an <see cref="EvalReference"/> to the
+            /// <see cref="Builder"/> instance.
+            /// </summary>
+            /// <param name="reference">An instance of <see cref="EvalReference"/>
+            /// to add to the Module.</param>
             public Builder Add(EvalReference reference)
             {
                 _references.Add(reference.Reference);
@@ -117,6 +158,12 @@ namespace MechHisui.Modules
                 return this;
             }
 
+            /// <summary>
+            /// Builds the <see cref="EvalModule"/> from the current <see cref="Builder"/> instance.
+            /// </summary>
+            /// <param name="config">An <see cref="IConfiguration"/> containing
+            /// information that may be used inside of the 
+            /// <see cref="EvalModule"/>.</param>
             public EvalModule Build(IConfiguration config)
             {
                 var sb = new StringBuilder()
@@ -139,11 +186,28 @@ namespace MechHisui.Modules
         }
     }
 
+    /// <summary>
+    /// Container for a <see cref="MetadataReference"/> and associated namespaces.
+    /// </summary>
     public class EvalReference
     {
+        /// <summary>
+        /// The set of namespaces to be imported for evaluation.
+        /// </summary>
         public IEnumerable<string> Namespaces { get; }
+
+        /// <summary>
+        /// The <see cref="MetadataReference"/> contained in this instance.
+        /// </summary>
         public MetadataReference Reference { get; }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="EvalReference"/>.
+        /// </summary>
+        /// <param name="reference">A <see cref="MetadataReference"/>
+        /// pointing to the assembly you wish to reference.</param>
+        /// <param name="namespaces">One or more namespaces defined in the
+        /// referenced assembly to import.</param>
         public EvalReference(MetadataReference reference, params string[] namespaces)
         {
             Reference = reference;
@@ -151,20 +215,20 @@ namespace MechHisui.Modules
         }
     }
 
-    public class DynEval
-    {
-        public async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join(", ", await set());
+    //public class DynEval
+    //{
+    //    public async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join(", ", await set());
 
-        public async Task<string> Eval<T>(Func<Task<T>> func) => (await func())?.ToString() ?? "null";
+    //    public async Task<string> Eval<T>(Func<Task<T>> func) => (await func())?.ToString() ?? "null";
 
-        public async Task<string> Eval(Func<Task> func) => (await func()?.ContinueWith(t => "Executed")) ?? "null";
+    //    public async Task<string> Eval(Func<Task> func) => (await func()?.ContinueWith(t => "Executed")) ?? "null";
 
-        public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(
-            async () => await Task.Run(
-                () => {
-                    var str1 = "This is a multi-line eval";
-                    var str2 = "Now it's easier to eval some more complex things";
-                    return String.Concat(str1, "\n", str2);
-                }));
-    }
+    //    public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(
+    //        async () => await Task.Run(
+    //            () => {
+    //                var str1 = "This is a multi-line eval";
+    //                var str2 = "Now it's easier to eval some more complex things";
+    //                return String.Concat(str1, "\n", str2);
+    //            }));
+    //}
 }
