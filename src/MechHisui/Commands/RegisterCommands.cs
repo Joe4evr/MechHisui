@@ -621,15 +621,4 @@ namespace MechHisui.Commands
             Trivia
         }
     }
-
-    //public class DynEval
-    //{
-    //    public async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join(", ", await set());
-
-    //    public async Task<string> Eval<T>(Func<Task<T>> func) => (await func())?.ToString() ?? "null";
-
-    //    public async Task<string> Eval(Func<Task> func) => (await func()?.ContinueWith(t => "Executed")) ?? "null";
-
-    //    public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(null);
-    //}
 }

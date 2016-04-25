@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -12,8 +14,6 @@ using JiiLib;
 using Discord;
 using Discord.Commands;
 using Discord.Modules;
-using System.IO;
-using System.Reflection;
 
 namespace MechHisui.Modules
 {
@@ -129,9 +129,9 @@ namespace MechHisui.Modules
 
         public async Task<string> Eval<T>(Func<Task<T>> func) => (await func())?.ToString() ?? ""null"";
 
-        public async Task<string> Eval(Action<Task> func) => (await func()?.ContinueWith(t => ""Executed"")) ?? ""null"";
+        public async Task<string> Eval(Func<Task> func) => (await func()?.ContinueWith(t => ""Executed"")) ?? ""null"";
 
-        public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(async () => {0});
+        public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(async () => await Task.Run(() => {0}));
     }}
 }}");
                 return new EvalModule(config, _references, sb.ToString());
@@ -150,4 +150,15 @@ namespace MechHisui.Modules
             Namespaces = namespaces;
         }
     }
+
+    //public class DynEval
+    //{
+    //    public async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join(", ", await set());
+
+    //    public async Task<string> Eval<T>(Func<Task<T>> func) => (await func())?.ToString() ?? "null";
+
+    //    public async Task<string> Eval(Func<Task> func) => (await func()?.ContinueWith(t => "Executed")) ?? "null";
+
+    //    public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(async () => await Task.Run(() => Console.WriteLine("")));
+    //}
 }
