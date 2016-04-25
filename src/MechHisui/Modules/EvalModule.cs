@@ -50,7 +50,7 @@ namespace MechHisui.Modules
                     }
                     if (Regex.Match(arg, regex, RegexOptions.Multiline).Success)
                     {
-                        Regex.Replace(arg, regex, @"{ \1 }");
+                        arg = Regex.Replace(arg, regex, @"{ \1 }");
                     }
 
                     SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(String.Format(_syntaxText, arg));
@@ -151,14 +151,20 @@ namespace MechHisui.Modules
         }
     }
 
-    //public class DynEval
-    //{
-    //    public async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join(", ", await set());
+    public class DynEval
+    {
+        public async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join(", ", await set());
 
-    //    public async Task<string> Eval<T>(Func<Task<T>> func) => (await func())?.ToString() ?? "null";
+        public async Task<string> Eval<T>(Func<Task<T>> func) => (await func())?.ToString() ?? "null";
 
-    //    public async Task<string> Eval(Func<Task> func) => (await func()?.ContinueWith(t => "Executed")) ?? "null";
+        public async Task<string> Eval(Func<Task> func) => (await func()?.ContinueWith(t => "Executed")) ?? "null";
 
-    //    public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(async () => await Task.Run(() => Console.WriteLine("")));
-    //}
+        public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(
+            async () => await Task.Run(
+                () => {
+                    var str1 = "This is a multi-line eval";
+                    var str2 = "Now it's easier to eval some more complex things";
+                    return String.Concat(str1, "\n", str2);
+                }));
+    }
 }
