@@ -46,14 +46,14 @@ namespace MechHisui.Modules
         /// <summary>
         /// Creates a new <see cref="EvalModule"/>.
         /// </summary>
-        /// <param name="config">An <see cref="IConfiguration"/> object that
-        /// holds additional data.</param>
         /// <param name="references">The list of assemblis to reference.</param>
         /// <param name="syntax">The text to parse into a <see cref="SyntaxTree"/>.</param>
+        /// <param name="config">An optional <see cref="IConfiguration"/>
+        /// object that holds additional data.</param>
         private EvalModule(
-            IConfiguration config,
             IEnumerable<MetadataReference> references,
-            string syntax)
+            string syntax,
+            IConfiguration config = null)
         {
             _config = config;
             _references = references;
@@ -161,10 +161,10 @@ namespace MechHisui.Modules
             /// <summary>
             /// Builds the <see cref="EvalModule"/> from the current <see cref="Builder"/> instance.
             /// </summary>
-            /// <param name="config">An <see cref="IConfiguration"/> containing
-            /// information that may be used inside of the 
+            /// <param name="config">An optional <see cref="IConfiguration"/>
+            /// containing information that may be used inside of the 
             /// <see cref="EvalModule"/>.</param>
-            public EvalModule Build(IConfiguration config)
+            public EvalModule Build(IConfiguration config = null)
             {
                 var sb = new StringBuilder()
                     .AppendSequence(_usings, (s, str) => s.AppendLine($"using {str};"))
@@ -181,7 +181,7 @@ namespace MechHisui.Modules
         public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(async () => await Task.Run(() => {0}));
     }}
 }}");
-                return new EvalModule(config, _references, sb.ToString());
+                return new EvalModule(_references, sb.ToString(), config);
             }
         }
     }
