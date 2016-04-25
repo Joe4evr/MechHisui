@@ -50,7 +50,7 @@ namespace MechHisui.Modules
                     }
                     if (Regex.Match(arg, regex, RegexOptions.Multiline).Success)
                     {
-                        arg = Regex.Replace(arg, regex, @"{ \1 }");
+                        arg = Regex.Replace(arg, regex, @"{$1}", RegexOptions.Multiline);
                     }
 
                     SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(String.Format(_syntaxText, arg));
