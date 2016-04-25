@@ -12,45 +12,36 @@ namespace MechHisui.Modules
 {
     public class Responder
     {
-        public Channel channel { get; }
-
         private ConcurrentDictionary<string[], DateTime> _lastResponses = new ConcurrentDictionary<string[], DateTime>();
-
-        public Responder(Channel channel, DiscordClient client)
-        {
-            this.channel = channel;
-            client.GetResponders().Add(this);
-        }
-
+        
         internal void ResetTimeouts() => _lastResponses = new ConcurrentDictionary<string[], DateTime>();
 
         internal async void Respond(object sender, MessageEventArgs e)
         {
-            if (e.Channel.Id == channel.Id)
+            string temp = (e?.Message?.Text?.StartsWith("@") ?? false
+                ? new string(e.Message.Text.SkipWhile(c => !Char.IsWhiteSpace(c)).ToArray())
+                : e.Message.Text);
+
+            if (!String.IsNullOrEmpty(temp))
             {
-                string temp = (e?.Message?.Text?.StartsWith("@", StringComparison.InvariantCultureIgnoreCase) ?? false ? new string(e.Message.Text.SkipWhile(c => !Char.IsWhiteSpace(c)).ToArray()) : e.Message.Text);
+                string quickResponse = String.Empty;
+                Func<Response, bool> pred = (k => k?.Call?.ContainsIgnoreCase(temp.Trim()) ?? false);
+                var resp = Responses.responseDict.SingleOrDefault(k => k.Key?.ContainsIgnoreCase(temp.Trim()) ?? false);
+                var sResp = Responses.spammableResponses.SingleOrDefault(pred);
 
-                if (!String.IsNullOrEmpty(temp))
+                if (resp.Key != null)
                 {
-                    string quickResponse = String.Empty;
-                    Func<Response, bool> pred = (k => k?.Call?.ContainsIgnoreCase(temp.Trim()) ?? false);
-                    var resp = Responses.responseDict.SingleOrDefault(k => k.Key?.ContainsIgnoreCase(temp.Trim()) ?? false);
-                    var sResp = Responses.spammableResponses.SingleOrDefault(pred);
-
-                    if (resp.Key != null)
+                    DateTime last;
+                    var msgTime = e.Message.Timestamp.ToUniversalTime();
+                    if (!_lastResponses.TryGetValue(resp.Key, out last) || (DateTime.UtcNow - last) > TimeSpan.FromMinutes(1))
                     {
-                        DateTime last;
-                        var msgTime = e.Message.Timestamp.ToUniversalTime();
-                        if (!_lastResponses.TryGetValue(resp.Key, out last) || (DateTime.UtcNow - last) > TimeSpan.FromMinutes(1))
-                        {
-                            _lastResponses.AddOrUpdate(resp.Key, msgTime, (k, v) => v = msgTime);
-                            await e.Channel.SendMessage(resp.Value[new Random().Next() % resp.Value.Length]);
-                        }
+                        _lastResponses.AddOrUpdate(resp.Key, msgTime, (k, v) => v = msgTime);
+                        await e.Channel.SendMessage(resp.Value[new Random().Next() % resp.Value.Length]);
                     }
-                    else if (sResp != null)
-                    {
-                        await e.Channel.SendMessage(sResp.Resp[new Random().Next() % sResp.Resp.Length]);
-                    }
+                }
+                else if (sResp != null)
+                {
+                    await e.Channel.SendMessage(sResp.Resp[new Random().Next() % sResp.Resp.Length]);
                 }
             }
         }
@@ -66,18 +57,13 @@ namespace MechHisui.Modules
     {
         public static void InitResponses(IConfiguration config)
         {
-            using (TextReader tr = new StreamReader(config["ResponsesPath"]))
+            var temp = JsonConvert.DeserializeObject<List<Response>>(File.ReadAllText(config["ResponsesPath"])) ?? new List<Response>();
+            foreach (var item in temp)
             {
-                var temp = JsonConvert.DeserializeObject<List<Response>>(tr.ReadToEnd()) ?? new List<Response>();
-                foreach (var item in temp)
-                {
-                    responseDict.AddOrUpdate(item.Call, item.Resp, (k, v) => v = item.Resp);
-                }
+                responseDict.AddOrUpdate(item.Call, item.Resp, (k, v) => v = item.Resp);
             }
-            using (TextReader tr = new StreamReader(config["SpamResponsesPath"]))
-            {
-                spammableResponses = JsonConvert.DeserializeObject<List<Response>>(tr.ReadToEnd()) ?? new List<Response>();
-            }
+            
+            spammableResponses = JsonConvert.DeserializeObject<List<Response>>(File.ReadAllText(config["SpamResponsesPath"])) ?? new List<Response>();
         }
 
         internal static ConcurrentDictionary<string[], string[]> responseDict = new ConcurrentDictionary<string[], string[]>();

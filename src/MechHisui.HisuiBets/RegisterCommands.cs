@@ -132,13 +132,7 @@ namespace MechHisui.Commands
 
             client.GetService<CommandService>().CreateCommand("checkbets")
                 .Alias("betstats")
-                .AddCheck((c, u, ch) =>
-                {
-                    Console.WriteLine("Checking requisites for command 'checkbets'");
-                    Console.WriteLine($"Invoked channel is {ch.Name}, ID {ch.Id}");
-                    Console.WriteLine($"Invoked user is {u.Name}, ID: {u.Id}");
-                    return ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"]));
-                })
+                .AddCheck((c, u, ch) =>ch.Id == UInt64.Parse(config["FGO_Hgames"]) && (u.Id == UInt64.Parse(config["Hgame_Master"]) || u.Id == UInt64.Parse(config["Owner"])))
                 .Do(async cea =>
                 {
                     Console.WriteLine("Checking for an open game");
@@ -213,7 +207,7 @@ namespace MechHisui.Commands
                     }
                     if (game?.GameOpen == true)
                     {
-                        await cea.Channel.SendMessage(game.Winner(String.Join(" ", cea.Args)));
+                        await cea.Channel.SendMessage(await game.Winner(String.Join(" ", cea.Args)));
                     }
                 });
 

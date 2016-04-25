@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace MechHisui.HisuiBets
 {
@@ -18,6 +19,7 @@ namespace MechHisui.HisuiBets
         private readonly BankOfHisui _bank;
         private readonly Channel _channel;
         const char symbol = '\u050A';
+        private bool _isClosing;
 
         public Game(BankOfHisui bank, Channel channel, GameType gameType = GameType.HungerGame)
         {
@@ -31,14 +33,26 @@ namespace MechHisui.HisuiBets
 
         public void ClosingGame()
         {
-            _countDown = new Timer(async cb =>
-            {
-                CloseOff();
-                await _channel.SendMessage($"Bets are closed. {ActiveBets.Count} bets are in. The pot is {symbol}{ActiveBets.Sum(b => b.BettedAmount)}.");
-            },
-            null,
+            _isClosing = true;
+            _countDown = new Timer(async cb => await close(), null,
             TimeSpan.FromSeconds((GType == GameType.SaltyBet ? 30 : 45)),
             Timeout.InfiniteTimeSpan);
+        }
+
+        private async Task close()
+        {
+            _isClosing = false;
+            CloseOff();
+            var highest = ActiveBets.OrderByDescending(b => b.BettedAmount).First();
+            var most = ActiveBets.GroupBy(b => b.Tribute, StringComparer.OrdinalIgnoreCase)
+                .Select(b => new { Count = b.Count(), Tribute = b.Key })
+                .OrderByDescending(b => b.Count)
+                .First();
+            var sb = new StringBuilder($"Bets are closed. {ActiveBets.Count} bets are in. The pot is {symbol}{ActiveBets.Sum(b => b.BettedAmount)}.\n")
+                .AppendLine($"The highest bet is {symbol}{highest.BettedAmount} on `{highest.Tribute}`.")
+                .Append($"The most bets are {most.Count} on `{most.Tribute}`.");
+
+            await _channel.SendMessage(sb.ToString());
         }
 
         internal void CloseOff()
@@ -83,8 +97,13 @@ namespace MechHisui.HisuiBets
             }
         }
 
-        public string Winner(string winner)
+        public async Task<string> Winner(string winner)
         {
+            if (_isClosing)
+            {
+                _countDown.Change(Timeout.Infinite, Timeout.Infinite);
+                await close();
+            }
             GameOpen = false;
             var wholeSum = ActiveBets.Sum(b => b.BettedAmount);
             var winners = ActiveBets
@@ -93,6 +112,7 @@ namespace MechHisui.HisuiBets
             {
                 if (winners.Count() == 1)
                 {
+                    _bank.Accounts.SingleOrDefault(u => u.UserId == winners.Single().UserId).Bucks += wholeSum;
                     return $"**{winners.Single().UserName}** has won the whole pot of {symbol}{wholeSum}.";
                 }
                 else
@@ -106,7 +126,7 @@ namespace MechHisui.HisuiBets
                     int t = 0;
                     foreach (var user in winners)
                     {
-                        var payout = (int)((loserSum / winnerSum) * user.BettedAmount);
+                        var payout = (int)((loserSum / winnerSum) * user.BettedAmount) + user.BettedAmount;
                         _bank.Accounts.SingleOrDefault(u => u.UserId == user.UserId).Bucks += payout;
                         t += payout;
                         sb.Append($"**{user.UserName}** ({symbol}{payout}), ");

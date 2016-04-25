@@ -73,7 +73,7 @@ namespace GudakoBot
             client.ExecuteAndWait(async () =>
             {
                 //Connect to the Discord server using our email and password
-                await client.Connect(config["Email"], config["Password"]);
+                await client.Connect(config["LoginToken"]);
                 //client.Token = (await client.Send(new LoginRequest { Email = config["Email"], Password = config["Password"] })).Token;
                 Console.WriteLine($"Logged in as {client.CurrentUser.Name}");
                 Console.WriteLine($"Started up at {DateTime.Now}.");

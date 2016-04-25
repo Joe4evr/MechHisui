@@ -29,6 +29,11 @@ namespace MechHisui.FateGOLib
         public string Additional { get; set; }
         public string Image { get; set; }
         public bool Obtainable { get; set; }
+
+        public override string ToString()
+        {
+            return this.Name;
+        }
     }
 
     public class ServantSkill
@@ -59,6 +64,11 @@ namespace MechHisui.FateGOLib
         public string EffectMax { get; set; }
         public string Image { get; set; }
         public bool Obtainable { get; set; }
+
+        public override string ToString()
+        {
+            return this.Name;
+        }
     }
 
     public class CEAlias
@@ -114,7 +124,18 @@ namespace MechHisui.FateGOLib
         public ulong UserID { get; set; }
         public TimeSpan StartTimeLeft { get; set; }
         public DateTime StartTime { get; } = DateTime.UtcNow;
-        public int CurrentAP => StartAP + (int)Math.Floor((DateTime.UtcNow - (StartTime - StartTimeLeft)).TotalMinutes / FgoHelpers.PerAP.TotalMinutes);
+        public int CurrentAP => StartAP + (int)Math.Floor(
+            (DateTime.UtcNow - (StartTime - StartTimeLeft))
+            .TotalMinutes / FgoHelpers.PerAP.TotalMinutes);
+    }
+
+    public class FriendData
+    {
+        public int Id { get; set; }
+        public string User { get; set; }
+        public string FriendCode { get; set; }
+        public string Class { get; set; }
+        public string Servant { get; set; }
     }
 
     public enum Card

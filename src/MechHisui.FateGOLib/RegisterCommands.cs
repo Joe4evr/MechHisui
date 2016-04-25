@@ -19,6 +19,8 @@ namespace MechHisui.Commands
 {
     public static class FgoExtensions
     {
+        private static StatService statService;
+
         public static void RegisterAPCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'AP'...");
@@ -65,7 +67,7 @@ namespace MechHisui.Commands
                     }
                     else
                     {
-                        await cea.Channel.SendMessage("One or both arguments could not be parsed.");
+                        await cea.Channel.SendMessage("One or both arguments could not be parsed correctly.");
                     }
                 });
         }
@@ -74,7 +76,7 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Registering 'Daily'...");
             client.GetService<CommandService>().CreateCommand("daily")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+                .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(config["FGO_server"]))
                 .Parameter("day", ParameterType.Optional)
                 .Description("Relay the information of daily quests for the specified day. Default to current day.")
                 .Do(async cea =>
@@ -134,7 +136,7 @@ namespace MechHisui.Commands
             Console.WriteLine("Registering 'Event'...");
             client.GetService<CommandService>().CreateCommand("event")
                 .Alias("events")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]) || ch.Id == UInt64.Parse(config["FGO_events"]))
+                .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(config["FGO_server"]))
                 .Description("Relay information on current or upcoming events.")
                 .Do(async cea =>
                 {
@@ -225,27 +227,44 @@ namespace MechHisui.Commands
 
         public static void RegisterFriendsCommand(this DiscordClient client, IConfiguration config)
         {
+            //statService = statService ?? InitStatService(config);
             Console.WriteLine("Registering 'Friends'...");
             FriendCodes.ReadFriendData(config["FriendcodePath"]);
-            client.GetService<CommandService>().CreateCommand("friendcode")
-               .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+            client.GetService<CommandService>().CreateCommand("addfc")
+               .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
                .Parameter("code", ParameterType.Required)
+               .Parameter("class", ParameterType.Required)
                .Parameter("servant", ParameterType.Optional)
                .Description("Add your friendcode to the list. Enter your code with quotes as `\"XXX XXX XXX\"`. You may optionally add your support Servant as well. If you do, enclose that in `\"\"`s as well.")
                .Do(async cea =>
                {
-                   if (FriendCodes.friendData.Any(fc => fc.User == cea.User.Name))
+                   if (FriendCodes.friendData.Any(fc => fc.User == cea.User.Name
+                           && fc.Class.Equals(cea.Args[1], StringComparison.OrdinalIgnoreCase)))
                    {
                        await cea.Channel.SendMessage($"Already in the Friendcode list. Please use `.updatefc` to update your description.");
                        return;
                    }
 
+                   SupportClass support;
+                   if (!Enum.TryParse(cea.GetArg("class"), true, out support))
+                   {
+                       await cea.Channel.SendMessage("Could not parse `class` parameter as valid suport slot.");
+                       return;
+                   }
+
                    if (Regex.Match(cea.Args[0], @"[0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9]").Success)
                    {
-                       var friend = new FriendData { Id = FriendCodes.friendData.Count + 1, User = cea.User.Name, FriendCode = cea.Args[0], Servant = (cea.Args.Length > 1) ? cea.Args[1] : String.Empty };
+                       var friend = new FriendData
+                       {
+                           Id = FriendCodes.friendData.Count + 1,
+                           User = cea.User.Name,
+                           FriendCode = cea.Args[0],
+                           Class = support.ToString(),
+                           Servant = (cea.Args.Length > 2) ? cea.Args[2] : String.Empty
+                       };
                        FriendCodes.friendData.Add(friend);
                        FriendCodes.WriteFriendData(config["FriendcodePath"]);
-                       await cea.Channel.SendMessage($"Added `{friend.FriendCode}` for `{friend.User}`.");
+                       await cea.Channel.SendMessage($"Added {support.ToString()} support for `{friend.User}`.");
                    }
                    else
                    {
@@ -253,14 +272,27 @@ namespace MechHisui.Commands
                    }
                });
 
-            client.GetService<CommandService>().CreateCommand("listcodes")
+            client.GetService<CommandService>().CreateCommand("listfcs")
                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
+               .Parameter("filter", ParameterType.Required)
                .Description("Display known friendcodes.")
                .Do(async cea =>
                {
+                   var data = Enumerable.Empty<FriendData>();
+                   SupportClass support;
+                   if (Enum.TryParse(cea.Args[0], true, out support))
+                   {
+                       data = FriendCodes.friendData.Where(f => f.Class == support.ToString());
+                   }
+                   else
+                   {
+                       await cea.Channel.SendMessage("Could not parse parameter as a valid filter.");
+                       return;
+                   }
+
                    var sb = new StringBuilder("```\n");
-                   int longestName = FriendCodes.friendData.OrderByDescending(f => f.User.Length).First().User.Length;
-                   foreach (var friend in FriendCodes.friendData.OrderBy(f => f.Id))
+                   int longestName = data.OrderByDescending(f => f.User.Length).First().User.Length;
+                   foreach (var friend in data.OrderBy(f => f.Id))
                    {
                        var spaces = new string(' ', (longestName - friend.User.Length) + 1);
                        sb.Append($"{friend.User}:{spaces}{friend.FriendCode}");
@@ -269,7 +301,7 @@ namespace MechHisui.Commands
                        {
                            sb.Append("\n```");
                            await cea.Channel.SendMessage(sb.ToString());
-                           sb = new StringBuilder("```\n");
+                           sb = sb.Clear().AppendLine("```");
                        }
                    }
                    sb.Append("\n```");
@@ -278,30 +310,32 @@ namespace MechHisui.Commands
 
             client.GetService<CommandService>().CreateCommand("updatefc")
                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
-               .Parameter("newServant", ParameterType.Unparsed)
+               .Parameter("class", ParameterType.Required)
+               .Parameter("newServant", ParameterType.Required)
                .Description("Update the Support Servant displayed in your friendcode listing.")
                .Do(async cea =>
                {
-                   var arg = cea.Args[0];
-                   if (arg.Length == 0)
+                   SupportClass support;
+                   if (!Enum.TryParse(cea.GetArg("class"), true, out support))
                    {
-                       await cea.Channel.SendMessage($"No argument specified.");
+                       await cea.Channel.SendMessage("Could not parse `class` parameter as valid support slot.");
                        return;
                    }
 
-                   Func<FriendData, bool> pred = c => c.User == cea.User.Name;
+                   Func<FriendData, bool> pred = c => c.User == cea.User.Name && c.Class == support.ToString();
                    if (FriendCodes.friendData.Any(pred))
                    {
                        var temp = FriendCodes.friendData.Single(pred);
                        FriendCodes.friendData.Remove(FriendCodes.friendData.Single(pred));
-                       temp.Servant = arg;
+                       temp.Class = support.ToString();
+                       temp.Servant = cea.GetArg("newServant");
                        FriendCodes.friendData.Add(temp);
                        FriendCodes.WriteFriendData(config["FriendcodePath"]);
-                       await cea.Channel.SendMessage($"Updated `{temp.User}`'s Servant to be `{temp.Servant}`.");
+                       await cea.Channel.SendMessage($"Updated `{temp.User}`'s {support.ToString()} Suppport Servant to be `{temp.Servant}`.");
                    }
                    else
                    {
-                       await cea.Channel.SendMessage("Profile not found. Please add your profile using `.friendcode`.");
+                       await cea.Channel.SendMessage("Profile not found. Please add your profile using `.addfc`.");
                    }
                });
         }
@@ -310,7 +344,7 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Registering 'Login bonus'...");
             client.GetService<CommandService>().CreateCommand("login")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+                .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(config["FGO_server"]))
                 .Description("Relay the information of the arrival of the next login bonus.")
                 .Do(async cea =>
                 {
@@ -337,14 +371,14 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Registering 'Quartz'...");
             client.GetService<CommandService>().CreateCommand("quartz")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+                .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(config["FGO_server"]))
                 .Description("Relay the prices of different amounts of Saint Quartz.")
                 .Do(async cea =>
                     await cea.Channel.SendMessage(
 @"Prices for Quartz:
 ```
-  1Q: 120 JPY
-  5Q: 480 JPY
+  1Q:  120 JPY
+  5Q:  480 JPY
  16Q: 1400 JPY
  36Q: 2900 JPY
  65Q: 4800 JPY
@@ -354,44 +388,13 @@ namespace MechHisui.Commands
 
         public static void RegisterStatsCommands(this DiscordClient client, IConfiguration config)
         {
-            Console.WriteLine("Connecting to data service...");
-            var apiService = new GoogleScriptApiService(
-                Path.Combine(config["Google_Secrets_Path"], "client_secret.json"),
-                Path.Combine(config["Google_Secrets_Path"], "scriptcreds"),
-                "MechHisui",
-                config["Project_Key"],
-                "exportSheet",
-                new string[]
-                {
-                    "https://www.googleapis.com/auth/spreadsheets",
-                    "https://www.googleapis.com/auth/drive",
-                    "https://spreadsheets.google.com/feeds/"
-                });
-
-            var statService = new StatService(apiService,
-                servantAliasPath: Path.Combine(config["AliasPath"], "servants.json"),
-                ceAliasPath: Path.Combine(config["AliasPath"], "ces.json"),
-                mysticAliasPath: Path.Combine(config["AliasPath"], "mystics.json"));
-            try
-            {
-                //Using .GetAwaiter().GetResult() here since there is no proper async context that await works
-                statService.UpdateProfileListsAsync().GetAwaiter().GetResult();
-                statService.UpdateCEListAsync().GetAwaiter().GetResult();
-                statService.UpdateEventListAsync().GetAwaiter().GetResult();
-                statService.UpdateMysticCodesListAsync().GetAwaiter().GetResult();
-                statService.UpdateDropsListAsync().GetAwaiter().GetResult();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"{DateTime.Now}: {ex.Message}");
-                Environment.Exit(0);
-            }
+            statService = statService ?? InitStatService(config);
 
             Console.WriteLine("Registering 'Stats'...");
             client.GetService<CommandService>().CreateCommand("servant")
                 .Alias("stat")
                 .Alias("stats")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+                .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(config["FGO_server"]))
                 .Parameter("name", ParameterType.Unparsed)
                 .Description($"Relay information on the specified Servant. Alternative names acceptable.")
                 .Do(async cea =>
@@ -412,7 +415,8 @@ namespace MechHisui.Commands
                     int id;
                     if (Int32.TryParse(cea.Args[0], out id))
                     {
-                        profile = FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Id == id);
+                        profile = FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Id == id) ??
+                            FgoHelpers.FakeServantProfiles.SingleOrDefault(p => p.Id == id);
                     }
                     else
                     {
@@ -439,7 +443,7 @@ namespace MechHisui.Commands
 
             Console.WriteLine("Registering 'CE'...");
             client.GetService<CommandService>().CreateCommand("ce")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+                .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(config["FGO_server"]))
                 .Parameter("cename", ParameterType.Unparsed)
                 .Description($"Relay information on the specified Craft Essence. Alternative names acceptable.")
                 .Do(async cea =>
@@ -481,30 +485,45 @@ namespace MechHisui.Commands
                     }
                 });
 
-            Console.WriteLine("Registering 'All CE'...");
-            client.GetService<CommandService>().CreateCommand("allce")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
-                .Parameter("ceeffect", ParameterType.Unparsed)
-                .Description($"Relay information on CEs having the specified effect.")
-                .Do(async cea =>
-                {
-                    var arg = String.Join(" ", cea.Args);
-
-                    var ces = FgoHelpers.CEProfiles.Where(c => c.Effect.ContainsIgnoreCase(arg));
-                    if (ces.Count() > 0)
-                    {
-                        string matches = String.Join("\n", ces.Select(c => $"**{c.Name}** - {c.Effect}"));
-                        await cea.Channel.SendMessage(matches);
-                    }
-                    else
-                    {
-                        await cea.Channel.SendMessage("No such CEs found. Please try another term.");
-                    }
-                });
+            //Console.WriteLine("Registering 'All CE'...");
+            //client.GetService<CommandService>().CreateCommand("allce")
+            //    .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(config["FGO_server"]))
+            //    .Parameter("ceeffect", ParameterType.Unparsed)
+            //    .Description($"Relay information on CEs having the specified effect.")
+            //    .Do(async cea =>
+            //    {
+            //        Console.WriteLine($"{DateTime.Now}: Command `allce` invoked.");
+            //        var arg = cea.Args[0];
+            //        Console.WriteLine($"Argument: {arg}.");
+            //        var ces = FgoHelpers.CEProfiles.Where(c => c.Effect.ContainsIgnoreCase(arg));
+            //        Console.WriteLine($"Amount of results: {ces.Count()}.");
+            //        if (ces.Count() > 0)
+            //        {
+            //            Console.WriteLine("Making StringBuilder.");
+            //            var sb = new StringBuilder($"`{arg}`:\n");
+            //            foreach (var c in ces)
+            //            {
+            //                Console.WriteLine("Appending to StringBuilder.");
+            //                sb.AppendLine($"**{c.Name}** - {c.Effect}");
+            //                if (sb.Length > 1700)
+            //                {
+            //                    Console.WriteLine("Sending and Clearing.");
+            //                    await cea.Channel.SendMessage(sb.ToString());
+            //                    sb = sb.Clear();
+            //                }
+            //            }
+            //            Console.WriteLine("Sending.");
+            //            await cea.Channel.SendMessage(sb.ToString());
+            //        }
+            //        else
+            //        {
+            //            await cea.Channel.SendMessage("No such CEs found. Please try another term.");
+            //        }
+            //    });
 
             Console.WriteLine("Registering 'Update'...");
             client.GetService<CommandService>().CreateCommand("update")
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]))
                 .Parameter("item", ParameterType.Optional)
                 .Hide()
                 .Do(async cea =>
@@ -555,7 +574,7 @@ namespace MechHisui.Commands
 
             Console.WriteLine("Registering 'Add alias'...");
             client.GetService<CommandService>().CreateCommand("addalias")
-                .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
+                .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && ch.Server.Id == UInt64.Parse(config["FGO_server"]))
                 .Hide()
                 .Parameter("servant", ParameterType.Required)
                 .Parameter("alias", ParameterType.Required)
@@ -563,7 +582,13 @@ namespace MechHisui.Commands
                 {
                     ServantAlias newAlias = FgoHelpers.ServantDict.SingleOrDefault(p => p.Servant == cea.Args[0]);
                     var arg = cea.Args[1].ToLowerInvariant();
-                    if (newAlias != null)
+                    var test = FgoHelpers.ServantDict.Where(a => a.Alias.Contains(arg)).FirstOrDefault();
+                    if (test != null)
+                    {
+                        await cea.Channel.SendMessage($"Alias `{arg}` already exists for Servant `{test.Servant}`.");
+                        return;
+                    }
+                    else if (newAlias != null)
                     {
                         newAlias.Alias.Add(arg);
                     }
@@ -591,16 +616,23 @@ namespace MechHisui.Commands
 
             Console.WriteLine("Registering 'CE alias'...");
             client.GetService<CommandService>().CreateCommand("cealias")
-                .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
+                .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && ch.Server.Id == UInt64.Parse(config["FGO_server"]))
                 .Hide()
                 .Parameter("ce", ParameterType.Required)
                 .Parameter("alias", ParameterType.Required)
                 .Do(async cea =>
                 {
                     CEAlias newAlias = FgoHelpers.CEDict.SingleOrDefault(p => p.CE == cea.Args[0]);
-                    if (newAlias != null)
+                    var arg = cea.Args[1].ToLowerInvariant();
+                    var test = FgoHelpers.CEDict.Where(a => a.Alias.Contains(arg)).FirstOrDefault();
+                    if (test != null)
                     {
-                        newAlias.Alias.Add(cea.Args[1]);
+                        await cea.Channel.SendMessage($"Alias `{arg}` already exists for CE `{test.CE}`.");
+                        return;
+                    }
+                    else if (newAlias != null)
+                    {
+                        newAlias.Alias.Add(arg);
                     }
                     else
                     {
@@ -609,7 +641,7 @@ namespace MechHisui.Commands
                         {
                             newAlias = new CEAlias
                             {
-                                Alias = new List<string> { cea.Args[1] },
+                                Alias = new List<string> { arg },
                                 CE = ce.Name
                             };
                         }
@@ -621,12 +653,12 @@ namespace MechHisui.Commands
                     }
 
                     File.WriteAllText(Path.Combine(config["AliasPath"], "ces.json"), JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
-                    await cea.Channel.SendMessage($"Added alias `{cea.Args[1]}` for `{newAlias.CE}`.");
+                    await cea.Channel.SendMessage($"Added alias `{arg}` for `{newAlias.CE}`.");
                 });
 
             Console.WriteLine("Registering 'Curve'...");
             client.GetService<CommandService>().CreateCommand("curve")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+                .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(config["FGO_server"]))
                 .Hide()
                 .Do(async cea =>
                     await cea.Channel.SendMessage(
@@ -638,7 +670,7 @@ namespace MechHisui.Commands
 
             Console.WriteLine("Registering 'Mystic Codes'...");
             client.GetService<CommandService>().CreateCommand("mystic")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+                .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(config["FGO_server"]))
                 .Description("Relay information on available Mystic Codes.")
                 .Parameter("code", ParameterType.Unparsed)
                 .Do(async cea =>
@@ -663,7 +695,7 @@ namespace MechHisui.Commands
                 });
 
             client.GetService<CommandService>().CreateCommand("listmystic")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+                .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(config["FGO_server"]))
                 .Description("Relay the names of available Mystic Codes.")
                 .Do(async cea =>
                 {
@@ -677,16 +709,24 @@ namespace MechHisui.Commands
 
             Console.WriteLine("Registering 'Mystic alias'...");
             client.GetService<CommandService>().CreateCommand("mysticalias")
-                .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
+                .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(config["FGO_Admins"])) && ch.Server.Id == UInt64.Parse(config["FGO_server"]))
                 .Hide()
                 .Parameter("mystic", ParameterType.Required)
                 .Parameter("alias", ParameterType.Required)
                 .Do(async cea =>
                 {
                     var newAlias = FgoHelpers.MysticCodeDict.SingleOrDefault(p => p.Code == cea.Args[0]);
+                    var arg = cea.Args[1].ToLowerInvariant();
+                    var test = FgoHelpers.MysticCodeDict.Where(a => a.Alias.Contains(arg)).FirstOrDefault();
+                    if (test != null)
+                    {
+                        await cea.Channel.SendMessage($"Alias `{arg}` already exists for CE `{test.Code}`.");
+                        return;
+                    }
+                    else
                     if (newAlias != null)
                     {
-                        newAlias.Alias.Add(cea.Args[1]);
+                        newAlias.Alias.Add(arg);
                     }
                     else
                     {
@@ -695,12 +735,12 @@ namespace MechHisui.Commands
                     }
 
                     File.WriteAllText(Path.Combine(config["AliasPath"], "mystic.json"), JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
-                    await cea.Channel.SendMessage($"Added alias `{cea.Args[1]}` for `{newAlias.Code}`.");
+                    await cea.Channel.SendMessage($"Added alias `{arg}` for `{newAlias.Code}`.");
                 });
 
             Console.WriteLine("Registering 'Drops'...");
             client.GetService<CommandService>().CreateCommand("drops")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Description("Relay information about item drop locations.")
                 .Parameter("item", ParameterType.Unparsed)
                 .Do(async cea =>
@@ -749,7 +789,7 @@ namespace MechHisui.Commands
             Console.WriteLine("Registering 'HGW'...");
             FgoHelpers.InitRandomHgw(config);
             client.GetService<CommandService>().CreateCommand("hgw")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
                 .Description("Set up a random Holy Grail War. Discuss.")
                 .Do(async cea =>
                 {
@@ -811,7 +851,7 @@ namespace MechHisui.Commands
                 });
 
             client.GetService<CommandService>().CreateCommand("addhgw")
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && (ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && ch.Server.Id == UInt64.Parse(config["FGO_server"]))
                 .Hide()
                 .Parameter("cat", ParameterType.Required)
                 .Parameter("name", ParameterType.Multiple)
@@ -845,6 +885,40 @@ namespace MechHisui.Commands
                         default:
                             await cea.Channel.SendMessage("Unsupported catagory.");
                             break;
+                    }
+                });
+
+            Console.WriteLine("Registering 'Trait'...");
+            client.GetService<CommandService>().CreateCommand("trait")
+                .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(config["FGO_server"]))
+                .Description("Find Servants by trait.")
+                .Parameter("trait", ParameterType.Required)
+                .Do(async cea =>
+                {
+                    string trait = null;
+                    var servants = FgoHelpers.ServantProfiles
+                        .SelectMany(p => p.Traits.Where(t =>
+                        {
+                            var r = t.ContainsIgnoreCase(cea.Args[0]);
+                            if (r)
+                            {
+                                trait = t;
+                            }
+                            return r;
+                        })
+                        .Select(s => p.Name))
+                        .ToList();
+                    if (trait == null)
+                    {
+                        await cea.Channel.SendMessage("Could not find trait.");
+                    }
+                    else if (servants.Count == 0)
+                    {
+                        await cea.Channel.SendMessage("No results for that query.");
+                    }
+                    else
+                    {
+                        await cea.Channel.SendMessage($"**{trait}:** {String.Join(", ", servants)}.");
                     }
                 });
 
@@ -1014,6 +1088,44 @@ namespace MechHisui.Commands
                 });
         }
 
+        private static StatService InitStatService(IConfiguration config)
+        {
+            Console.WriteLine("Connecting to data service...");
+            var apiService = new GoogleScriptApiService(
+                Path.Combine(config["Google_Secrets_Path"], "client_secret.json"),
+                Path.Combine(config["Google_Secrets_Path"], "scriptcreds"),
+                "MechHisui",
+                config["Project_Key"],
+                "exportSheet",
+                new string[]
+                {
+                    "https://www.googleapis.com/auth/spreadsheets",
+                    "https://www.googleapis.com/auth/drive",
+                    "https://spreadsheets.google.com/feeds/"
+                });
+
+            var statService = new StatService(apiService,
+                servantAliasPath: Path.Combine(config["AliasPath"], "servants.json"),
+                ceAliasPath: Path.Combine(config["AliasPath"], "ces.json"),
+                mysticAliasPath: Path.Combine(config["AliasPath"], "mystics.json"));
+            try
+            {
+                //Using .GetAwaiter().GetResult() here since there is no proper async context that await works
+                statService.UpdateProfileListsAsync().GetAwaiter().GetResult();
+                statService.UpdateCEListAsync().GetAwaiter().GetResult();
+                statService.UpdateEventListAsync().GetAwaiter().GetResult();
+                statService.UpdateMysticCodesListAsync().GetAwaiter().GetResult();
+                statService.UpdateDropsListAsync().GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{DateTime.Now}: {ex.Message}");
+                Environment.Exit(0);
+            }
+
+            return statService;
+        }
+
         public static void RegisterZoukenCommand(this DiscordClient client, IConfiguration config)
         {
             client.GetService<CommandService>().CreateCommand("zouken")
@@ -1101,6 +1213,18 @@ namespace MechHisui.Commands
         }
 
         private static Timer LoginBonusTimer;
+
+        private enum SupportClass
+        {
+            Omni,
+            Saber,
+            Archer,
+            Lancer,
+            Rider,
+            Caster,
+            Assassin,
+            Berserker
+        }
 
         private static decimal SimulateDmg(ServantProfile srv, string enemyClass, int servantAtk, Card atkCard, int atkIndex)
         {

@@ -30,6 +30,7 @@ namespace MechHisui.FateGOLib
         public static List<string> Masters = new List<string>();
         public static List<NameOnlyServant> NameOnlyServants = new List<NameOnlyServant>();
 
+        public const int MaxAP = 140;
         public static List<UserAP> UsersAP = new List<UserAP>();
 
         public static void InitRandomHgw(IConfiguration config)
