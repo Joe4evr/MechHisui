@@ -60,7 +60,7 @@ namespace MechHisui.Modules
             _syntaxText = syntax;
         }
         
-        public void Install(ModuleManager manager)
+        void IModule.Install(ModuleManager manager)
         {
             Console.WriteLine("Registering 'Eval'...");
             manager.Client.GetService<CommandService>().CreateCommand("eval")
