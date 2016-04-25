@@ -46,7 +46,7 @@ namespace MechHisui.Modules
         /// <summary>
         /// Creates a new <see cref="EvalModule"/>.
         /// </summary>
-        /// <param name="references">The list of assemblis to reference.</param>
+        /// <param name="references">The list of assemblies to reference.</param>
         /// <param name="syntax">The text to parse into a <see cref="SyntaxTree"/>.</param>
         /// <param name="config">An optional <see cref="IConfiguration"/>
         /// object that holds additional data.</param>
@@ -153,8 +153,17 @@ namespace MechHisui.Modules
             /// to add to the Module.</param>
             public Builder Add(EvalReference reference)
             {
-                _references.Add(reference.Reference);
-                _usings.AddRange(reference.Namespaces);
+                if (!_references.Any(r => r.Display == reference.Reference.Display))
+                {
+                    _references.Add(reference.Reference);
+                }
+                foreach (var ns in reference.Namespaces)
+                {
+                    if (!_usings.Contains(ns))
+                    {
+                        _usings.Add(ns);
+                    }
+                }
                 return this;
             }
 
