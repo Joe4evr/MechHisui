@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.AspNet.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.PlatformAbstractions;
@@ -11,6 +12,7 @@ using Discord.Commands;
 using Discord.Modules;
 using MechHisui.Commands;
 using MechHisui.Modules;
+using Microsoft.CodeAnalysis;
 
 namespace MechHisui
 {
@@ -36,6 +38,8 @@ namespace MechHisui
                 Console.WriteLine("Loading from jsons directory");
                 builder.AddJsonFile(@"..\..\..\..\..\..\MechHisui-jsons\secrets.json");
             }
+
+            //var dbContext = new MechHisuiDbContext();
 
             IConfiguration config = builder.Build();
 
@@ -69,30 +73,38 @@ namespace MechHisui
             });
 
             //register commands
-            client.RegisterAddChannelCommand(config);
-            client.RegisterDeleteCommand(config);
+            //client.RegisterAddChannelCommand(config);
+            //client.RegisterDeleteCommand(config);
             client.RegisterDisconnectCommand(config);
             if (!Debugger.IsAttached)
             {
-                client.RegisterEvalCommand(config);
+                var evalBuilder = EvalModule.Builder.BuilderWithSystemAndLinq()
+                    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(DiscordClient).Assembly.Location), "Discord"))
+                    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(CommandEventArgs).Assembly.Location), "Discord.Commands"))
+                    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(JiiLib.Extensions).Assembly.Location), "JiiLib"))
+                    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(FateGOLib.FgoHelpers).Assembly.Location), "MechHisui.FateGOLib"));
+
+                client.AddModule(evalBuilder.Build(config));
+                //client.RegisterEvalCommand(config);
             }
             //client.RegisterImageCommand(config);
             client.RegisterInfoCommand(config);
-            client.RegisterKnownChannelsCommand(config);
+            //client.RegisterKnownChannelsCommand(config);
             client.RegisterLearnCommand(config);
             client.RegisterPickCommand(config);
             //client.RegisterRecordingCommand(config);
-            client.RegisterResetCommand(config);
+            //client.RegisterResetCommand(config);
             client.RegisterRollCommand(config);
             client.RegisterThemeCommand(config);
-            client.RegisterWhereCommand(config);
-            client.RegisterXmasCommand(config);
+            //client.RegisterWhereCommand(config);
+            //client.RegisterXmasCommand(config);
 
             client.RegisterAPCommand(config);
             client.RegisterDailyCommand(config);
             client.RegisterEventCommand(config);
             client.RegisterFriendsCommand(config);
             client.RegisterLoginBonusCommand(config);
+            //client.RegisterPsa(config);
             client.RegisterStatsCommands(config);
             client.RegisterQuartzCommand(config);
             client.RegisterZoukenCommand(config);
@@ -101,9 +113,11 @@ namespace MechHisui
 
             client.RegisterSecretHitler(config);
 
-            client.RegisterTriviaCommand(config);
+            //client.RegisterTriviaCommand(config);
 
+            Console.WriteLine("Initializing Responder...");
             Responses.InitResponses(config);
+            client.MessageReceived += (new Responder().Respond);
 
             int lastcode = 0;
             if (args.Length > 0 && Int32.TryParse(args[0], out lastcode) && lastcode != 0)
@@ -137,7 +151,7 @@ namespace MechHisui
                 client.ExecuteAndWait(async () =>
                 {
                     //Connect to the Discord server using our email and password
-                    await client.Connect(config["Email"], config["Password"]);
+                    await client.Connect(config["LoginToken"]);
                     Console.WriteLine($"Logged in as {client.CurrentUser.Name}");
                     Console.WriteLine($"MH v. 0.3.0");
 
@@ -157,26 +171,18 @@ namespace MechHisui
                             nameof(ChannelWhitelistModule),
                             ModuleFilter.ChannelWhitelist
                         );
-
+                    await Task.Delay(3000);
                     if (!client.Servers.Any())
                     {
                         Console.WriteLine("Not a member of any server");
                     }
                     else
                     {
-                        foreach (var prChannel in client.PrivateChannels)
-                        {
-                            if (prChannel.Id == UInt64.Parse(config["PrivChat"]))
-                            {
-                                client.MessageReceived += (new Responder(prChannel, client).Respond);
-                            }
-                        }
                         foreach (var channel in Helpers.IterateChannels(client.Servers, printServerNames: true, printChannelNames: true))
                         {
                             if (!channel.IsPrivate && Helpers.IsWhilested(channel, client))
                             {
                                 //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
-                                client.MessageReceived += (new Responder(channel, client).Respond);
                                 if (channel.Id != UInt64.Parse(config["API_testing"]))
                                 {
                                     if (Debugger.IsAttached)

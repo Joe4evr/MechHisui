@@ -20,6 +20,7 @@ using Newtonsoft.Json;
 using MechHisui.FateGOLib;
 using MechHisui.Modules;
 using MechHisui.TriviaService;
+using MechHisui.HisuiBets;
 
 namespace MechHisui.Commands
 {
@@ -70,7 +71,7 @@ namespace MechHisui.Commands
                         //    await client.SendMessage(cea.Channel, $"Now listening on channel {chan.Name} in {chan.Server.Name} until next shutdown.");
                         //}
 
-                        client.MessageReceived += (new Responder(chan, client).Respond);
+                        client.MessageReceived += (new Responder().Respond);
                         await cea.Channel.SendMessage($"Now listening on channel `{chan.Name}` in `{chan.Server.Name}` until next shutdown.");
                         await chan.SendMessage(config["Hello"]);
                     }
@@ -107,7 +108,7 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Registering 'Disconnect'...");
             client.GetService<CommandService>().CreateCommand("disconnect")
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]))
                 .Parameter("code", ParameterType.Optional)
                 .Hide()
                 .Do(async cea =>
@@ -121,100 +122,122 @@ namespace MechHisui.Commands
                 });
         }
 
-        public static void RegisterEvalCommand(this DiscordClient client, IConfiguration config)
-        {
-            Console.WriteLine("Registering 'Eval'...");
-            var references = new MetadataReference[]
-            {
-                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(StreamReader).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(DiscordClient).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(CommandEventArgs).Assembly.Location),
-                //MetadataReference.CreateFromFile(typeof(DateTimeWithZone).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(JsonConvert).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(FgoHelpers).Assembly.Location)
-            };
-            client.GetService<CommandService>().CreateCommand("eval")
-                .Parameter("func", ParameterType.Unparsed)
-                .Hide()
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
-                .Do(async cea =>
-                {
-                    string arg = cea.Args[0]; //.Replace("\\", String.Empty);
-                    if (arg.Contains('^'))
-                    {
-                        await cea.Channel.SendMessage("**Note:** `^` is the Binary XOR operator. Use `Math.Pow(base, exponent)` if you wish to calculate an exponentiation.");
-                    }
-                    if (!arg.Contains("return"))
-                    {
-                        arg = $"return {arg}";
-                    }
-                    if (!arg.EndsWith(";"))
-                    {
-                        arg += ';';
-                    }
-                    SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(
-$@"using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
-using Newtonsoft.Json;
-using MechHisui.FateGOLib;
+//        public static void RegisterEvalCommand(this DiscordClient client, IConfiguration config)
+//        {
+//            Console.WriteLine("Registering 'Eval'...");
+//            var references = new MetadataReference[]
+//            {
+//                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+//                MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
+//                MetadataReference.CreateFromFile(typeof(StreamReader).Assembly.Location),
+//                MetadataReference.CreateFromFile(typeof(DiscordClient).Assembly.Location),
+//                MetadataReference.CreateFromFile(typeof(CommandEventArgs).Assembly.Location),
+//                MetadataReference.CreateFromFile(typeof(DateTimeWithZone).Assembly.Location),
+//                MetadataReference.CreateFromFile(typeof(JsonConvert).Assembly.Location),
+//                MetadataReference.CreateFromFile(typeof(FgoHelpers).Assembly.Location),
+//                MetadataReference.CreateFromFile(typeof(Bet).Assembly.Location)
+//            };
+//            client.GetService<CommandService>().CreateCommand("eval")
+//                .Parameter("func", ParameterType.Unparsed)
+//                .Hide()
+//                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+//                .Do(async cea =>
+//                {
+//                    string arg = cea.Args[0]; //.Replace("\\", String.Empty);
+//                    if (arg.Contains('^'))
+//                    {
+//                        await cea.Channel.SendMessage("**Note:** `^` is the Binary XOR operator. Use `Math.Pow(base, exponent)` if you wish to calculate an exponentiation.");
+//                    }
+//                    if (Regex.Match(arg, @"`{3}(?:\S*$)((?:.*\n)*)`{3}", RegexOptions.Multiline).Success)
+//                    {
 
-namespace DynamicCompile
-{{
-    public class DynEval
-    {{
-        public async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join("", "", await set());
+//                    }
+//                    SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(
+//$@"using System;
+//using System.Collections.Generic;
+//using System.IO;
+//using System.Linq;
+//using System.Threading.Tasks;
+//using Discord;
+//using Discord.Commands;
+//using JiiLib;
+//using Newtonsoft.Json;
+//using MechHisui.FateGOLib;
+//using MechHisui.HisuiBets;
 
-        public async Task<string> Eval<T>(Func<Task<T>> func) => (await func())?.ToString() ?? ""null"";
+//namespace DynamicCompile
+//{{
+//    public class DynEval
+//    {{
+//        public async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join("", "", await set());
 
-        public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(async () => {{ {arg} }});
-    }}
-}}");
+//        public async Task<string> Eval<T>(Func<Task<T>> func) => (await func())?.ToString() ?? ""null"";
 
-                    string assemblyName = Path.GetRandomFileName();
-                    CSharpCompilation compilation = CSharpCompilation.Create(
-                        assemblyName: assemblyName,
-                        syntaxTrees: new[] { syntaxTree },
-                        references: references,
-                        options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+//        //public async Task<string> Eval(Action<Task> func) => (await func()?.ContinueWith(t => ""Executed"")) ?? ""null"";
 
-                    using (var ms = new MemoryStream())
-                    {
-                        EmitResult result = compilation.Emit(ms);
+//        public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(async () => {arg});
+//    }}
+//}}");
 
-                        if (result.Success)
-                        {
-                            ms.Seek(0, SeekOrigin.Begin);
-                            Assembly assembly = Assembly.Load(ms.ToArray());
+//                    string assemblyName = Path.GetRandomFileName();
+//                    CSharpCompilation compilation = CSharpCompilation.Create(
+//                        assemblyName: assemblyName,
+//                        syntaxTrees: new[] { syntaxTree },
+//                        references: references,
+//                        options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-                            Type type = assembly.GetType("DynamicCompile.DynEval");
-                            object obj = Activator.CreateInstance(type);
-                            var res = type.InvokeMember("Exec",
-                                BindingFlags.Default | BindingFlags.InvokeMethod,
-                                null,
-                                obj,
-                                new object[2] { client, cea } );
+//                    using (var ms = new MemoryStream())
+//                    {
+//                        EmitResult result = compilation.Emit(ms);
 
-                            await cea.Channel.SendMessage($"**Result:** {((Task<string>)res).GetAwaiter().GetResult()}");
-                        }
-                        else
-                        {
-                            IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
-                                diagnostic.IsWarningAsError ||
-                                diagnostic.Severity == DiagnosticSeverity.Error);
+//                        if (result.Success)
+//                        {
+//                            ms.Seek(0, SeekOrigin.Begin);
+//                            Assembly assembly = Assembly.Load(ms.ToArray());
 
-                            Console.Error.WriteLine(String.Join("\n", failures.Select(f => $"{f.Id}: {f.GetMessage()}")));
-                            await cea.Channel.SendMessage($"**Error:** {failures.First().GetMessage()}");
-                        }
-                    }
-                });
-        }
+//                            Type type = assembly.GetType("DynamicCompile.DynEval");
+//                            object obj = Activator.CreateInstance(type);
+//                            var res = (await (Task<string>)type.InvokeMember("Exec",
+//                                BindingFlags.Default | BindingFlags.InvokeMethod,
+//                                null,
+//                                obj,
+//                                new object[2] { client, cea }));
+                            
+//                            await cea.Channel.SendMessage($"**Result:** {res}");
+//                        }
+//                        else
+//                        {
+//                            IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
+//                                diagnostic.IsWarningAsError ||
+//                                diagnostic.Severity == DiagnosticSeverity.Error);
+
+//                            Console.Error.WriteLine(String.Join("\n", failures.Select(f => $"{f.Id}: {f.GetMessage()}")));
+//                            await cea.Channel.SendMessage($"**Error:** {failures.First().GetMessage()}");
+//                        }
+//                    }
+//                });
+//        }
+
+        //private static bool isVoidMethod(string arg)
+        //{
+        //    var call = (new String(arg.TakeWhile(c => c != '(').ToArray())).Split('.');
+        //    //var args = (new String(arg.SkipWhile(c => c != '(').ToArray())).Split('.');
+        //    var type = Type.GetType(call[0], throwOnError: false);
+        //    if (type != null)
+        //    {
+        //        MethodInfo mi = null;
+        //        for (int i = 1; i < call.Length && mi == null; i++)
+        //        {
+        //            mi = type.GetMethods().FirstOrDefault(m => m.Name == call[i]);
+        //        }
+
+        //        return mi?.ReturnType == Type.GetType("Void");
+        //    }
+        //    else // couldn't determine the type
+        //    {
+        //        return false;
+        //    }
+        //}
 
         public static void RegisterImageCommand(this DiscordClient client, IConfiguration config)
         {
@@ -246,7 +269,7 @@ namespace DynamicCompile
         {
             Console.WriteLine("Registering 'Info'...");
             client.GetService<CommandService>().CreateCommand("info")
-                .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
+                //.AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
                 .Description("Relay info about myself.")
                 .Do(async cea =>
                 {
@@ -325,11 +348,12 @@ namespace DynamicCompile
         {
             Console.WriteLine("Registering 'Pick'...");
             client.GetService<CommandService>().CreateCommand("pick")
-                .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
+                //.AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
                 .Parameter("items", ParameterType.Multiple)
                 .Description("Randomly choose something from any number of items.")
                 .Do(async cea =>
                 {
+                    Console.WriteLine($"{DateTime.Now}: Command `pick` invoked");
                     if (cea.Args.Length <= 1)
                     {
                         await cea.Channel.SendMessage("Provide at least two items.");
@@ -389,16 +413,16 @@ namespace DynamicCompile
 
         public static void RegisterResetCommand(this DiscordClient client, IConfiguration config)
         {
-            Console.WriteLine("Registering 'Reset'...");
-            client.GetService<CommandService>().CreateCommand("reset")
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
-                .Hide()
-                .Do(async cea =>
-                {
-                    var resp = client.GetResponders().Single(r => r.channel.Id == cea.Channel.Id);
-                    resp.ResetTimeouts();
-                    await cea.Channel.SendMessage("Timeouts reset.");
-                });
+            //Console.WriteLine("Registering 'Reset'...");
+            //client.GetService<CommandService>().CreateCommand("reset")
+            //    .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+            //    .Hide()
+            //    .Do(async cea =>
+            //    {
+            //        var resp = client.GetResponders().Single(r => r.channel.Id == cea.Channel.Id);
+            //        resp.ResetTimeouts();
+            //        await cea.Channel.SendMessage("Timeouts reset.");
+            //    });
         }
 
         public static void RegisterRollCommand(this DiscordClient client, IConfiguration config)
@@ -472,13 +496,13 @@ namespace DynamicCompile
                                     sb.AppendLine($"{item.channel.Server.Name} - {item.channel.Name}");
                                 }
                                 break;
-                            case ChannelActivity.Responder:
-                                sb.AppendLine("Currently responding in: ");
-                                foreach (var item in client.GetResponders())
-                                {
-                                    sb.AppendLine($"{item.channel.Server.Name} - {item.channel.Name}");
-                                }
-                                break;
+                            //case ChannelActivity.Responder:
+                            //    sb.AppendLine("Currently responding in: ");
+                            //    foreach (var item in client.GetResponders())
+                            //    {
+                            //        sb.AppendLine($"{item.channel.Server.Name} - {item.channel.Name}");
+                            //    }
+                            //    break;
                             case ChannelActivity.Trivia:
                                 sb.AppendLine("Currently holding trivia in: ");
                                 foreach (var item in client.GetTrivias())
@@ -604,6 +628,8 @@ namespace DynamicCompile
 
     //    public async Task<string> Eval<T>(Func<Task<T>> func) => (await func())?.ToString() ?? "null";
 
-    //    public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(async () => { await Task.Delay(500); return 42; });
+    //    public async Task<string> Eval(Func<Task> func) => (await func()?.ContinueWith(t => "Executed")) ?? "null";
+
+    //    public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(null);
     //}
 }
