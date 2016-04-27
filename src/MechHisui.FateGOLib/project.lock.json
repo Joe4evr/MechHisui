@@ -24,6 +24,14 @@
           "Discord.Net": "0.9.0-rc3-3"
         }
       },
+      "Discord.Net.Modules/0.9.0-rc3": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
+        "dependencies": {
+          "Discord.Net": "0.9.0-rc3-3",
+          "Discord.Net.Commands": "0.9.0-rc3-1"
+        }
+      },
       "Google.Apis/1.9.2": {
         "type": "package",
         "dependencies": {
@@ -333,6 +341,14 @@
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
           "Discord.Net": "0.9.0-rc3-3"
+        }
+      },
+      "Discord.Net.Modules/0.9.0-rc3": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
+        "dependencies": {
+          "Discord.Net": "0.9.0-rc3-3",
+          "Discord.Net.Commands": "0.9.0-rc3-1"
         }
       },
       "Google.Apis/1.9.2": {
@@ -646,6 +662,14 @@
           "Discord.Net": "0.9.0-rc3-3"
         }
       },
+      "Discord.Net.Modules/0.9.0-rc3": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
+        "dependencies": {
+          "Discord.Net": "0.9.0-rc3-3",
+          "Discord.Net.Commands": "0.9.0-rc3-1"
+        }
+      },
       "Google.Apis/1.9.2": {
         "type": "package",
         "dependencies": {
@@ -944,6 +968,10 @@
     "Discord.Net.Commands/0.9.0-rc3-1": {
       "type": "project",
       "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/project.json"
+    },
+    "Discord.Net.Modules/0.9.0-rc3": {
+      "type": "project",
+      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Modules/project.json"
     },
     "JiiLib/0.1.2": {
       "type": "project",
@@ -1570,7 +1598,8 @@
       "JiiLib >= 0.1.2",
       "JiiLib.Net >= 0.1.2",
       "Discord.Net >= 0.9.0-rc3-3",
-      "Discord.Net.Commands >= 0.9.0-rc3-1"
+      "Discord.Net.Commands >= 0.9.0-rc3-1",
+      "Discord.Net.Modules >= 0.9.0-rc3"
     ],
     ".NETFramework,Version=v4.6": []
   }

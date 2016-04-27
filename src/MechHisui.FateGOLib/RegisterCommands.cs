@@ -225,120 +225,120 @@ namespace MechHisui.Commands
                 });
         }
 
-        public static void RegisterFriendsCommand(this DiscordClient client, IConfiguration config)
-        {
-            //statService = statService ?? InitStatService(config);
-            Console.WriteLine("Registering 'Friends'...");
-            FriendCodes.ReadFriendData(config["FriendcodePath"]);
-            client.GetService<CommandService>().CreateCommand("addfc")
-               .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
-               .Parameter("code", ParameterType.Required)
-               .Parameter("class", ParameterType.Required)
-               .Parameter("servant", ParameterType.Optional)
-               .Description("Add your friendcode to the list. Enter your code with quotes as `\"XXX XXX XXX\"`. You may optionally add your support Servant as well. If you do, enclose that in `\"\"`s as well.")
-               .Do(async cea =>
-               {
-                   if (FriendCodes.friendData.Any(fc => fc.User == cea.User.Name
-                           && fc.Class.Equals(cea.Args[1], StringComparison.OrdinalIgnoreCase)))
-                   {
-                       await cea.Channel.SendMessage($"Already in the Friendcode list. Please use `.updatefc` to update your description.");
-                       return;
-                   }
+        //public static void RegisterFriendsCommand(this DiscordClient client, IConfiguration config)
+        //{
+        //    //statService = statService ?? InitStatService(config);
+        //    Console.WriteLine("Registering 'Friends'...");
+        //    FriendCodes.ReadFriendData(config["FriendcodePath"]);
+        //    client.GetService<CommandService>().CreateCommand("addfc")
+        //       .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
+        //       .Parameter("code", ParameterType.Required)
+        //       .Parameter("class", ParameterType.Required)
+        //       .Parameter("servant", ParameterType.Optional)
+        //       .Description("Add your friendcode to the list. Enter your code with quotes as `\"XXX XXX XXX\"`. You may optionally add your support Servant as well. If you do, enclose that in `\"\"`s as well.")
+        //       .Do(async cea =>
+        //       {
+        //           if (FriendCodes.friendData.Any(fc => fc.User == cea.User.Name
+        //                   && fc.Class.Equals(cea.Args[1], StringComparison.OrdinalIgnoreCase)))
+        //           {
+        //               await cea.Channel.SendMessage($"Already in the Friendcode list. Please use `.updatefc` to update your description.");
+        //               return;
+        //           }
 
-                   SupportClass support;
-                   if (!Enum.TryParse(cea.GetArg("class"), true, out support))
-                   {
-                       await cea.Channel.SendMessage("Could not parse `class` parameter as valid suport slot.");
-                       return;
-                   }
+        //           SupportClass support;
+        //           if (!Enum.TryParse(cea.GetArg("class"), true, out support))
+        //           {
+        //               await cea.Channel.SendMessage("Could not parse `class` parameter as valid suport slot.");
+        //               return;
+        //           }
 
-                   if (Regex.Match(cea.Args[0], @"[0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9]").Success)
-                   {
-                       var friend = new FriendData
-                       {
-                           Id = FriendCodes.friendData.Count + 1,
-                           User = cea.User.Name,
-                           FriendCode = cea.Args[0],
-                           Class = support.ToString(),
-                           Servant = (cea.Args.Length > 2) ? cea.Args[2] : String.Empty
-                       };
-                       FriendCodes.friendData.Add(friend);
-                       FriendCodes.WriteFriendData(config["FriendcodePath"]);
-                       await cea.Channel.SendMessage($"Added {support.ToString()} support for `{friend.User}`.");
-                   }
-                   else
-                   {
-                       await cea.Channel.SendMessage($"Incorrect friendcode format specified.");
-                   }
-               });
+        //           if (Regex.Match(cea.Args[0], @"[0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9]").Success)
+        //           {
+        //               var friend = new FriendData
+        //               {
+        //                   Id = FriendCodes.friendData.Count + 1,
+        //                   User = cea.User.Name,
+        //                   FriendCode = cea.Args[0],
+        //                   Class = support.ToString(),
+        //                   Servant = (cea.Args.Length > 2) ? cea.Args[2] : String.Empty
+        //               };
+        //               FriendCodes.friendData.Add(friend);
+        //               FriendCodes.WriteFriendData(config["FriendcodePath"]);
+        //               await cea.Channel.SendMessage($"Added {support.ToString()} support for `{friend.User}`.");
+        //           }
+        //           else
+        //           {
+        //               await cea.Channel.SendMessage($"Incorrect friendcode format specified.");
+        //           }
+        //       });
 
-            client.GetService<CommandService>().CreateCommand("listfcs")
-               .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
-               .Parameter("filter", ParameterType.Required)
-               .Description("Display known friendcodes.")
-               .Do(async cea =>
-               {
-                   var data = Enumerable.Empty<FriendData>();
-                   SupportClass support;
-                   if (Enum.TryParse(cea.Args[0], true, out support))
-                   {
-                       data = FriendCodes.friendData.Where(f => f.Class == support.ToString());
-                   }
-                   else
-                   {
-                       await cea.Channel.SendMessage("Could not parse parameter as a valid filter.");
-                       return;
-                   }
+        //    client.GetService<CommandService>().CreateCommand("listfcs")
+        //       .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
+        //       .Parameter("filter", ParameterType.Required)
+        //       .Description("Display known friendcodes.")
+        //       .Do(async cea =>
+        //       {
+        //           var data = Enumerable.Empty<FriendData>();
+        //           SupportClass support;
+        //           if (Enum.TryParse(cea.Args[0], true, out support))
+        //           {
+        //               data = FriendCodes.friendData.Where(f => f.Class == support.ToString());
+        //           }
+        //           else
+        //           {
+        //               await cea.Channel.SendMessage("Could not parse parameter as a valid filter.");
+        //               return;
+        //           }
 
-                   var sb = new StringBuilder("```\n");
-                   int longestName = data.OrderByDescending(f => f.User.Length).First().User.Length;
-                   foreach (var friend in data.OrderBy(f => f.Id))
-                   {
-                       var spaces = new string(' ', (longestName - friend.User.Length) + 1);
-                       sb.Append($"{friend.User}:{spaces}{friend.FriendCode}");
-                       sb.AppendLine((!String.IsNullOrEmpty(friend.Servant)) ? $" - {friend.Servant}" : String.Empty);
-                       if (sb.Length > 1700)
-                       {
-                           sb.Append("\n```");
-                           await cea.Channel.SendMessage(sb.ToString());
-                           sb = sb.Clear().AppendLine("```");
-                       }
-                   }
-                   sb.Append("\n```");
-                   await cea.Channel.SendMessage(sb.ToString());
-               });
+        //           var sb = new StringBuilder("```\n");
+        //           int longestName = data.OrderByDescending(f => f.User.Length).First().User.Length;
+        //           foreach (var friend in data.OrderBy(f => f.Id))
+        //           {
+        //               var spaces = new string(' ', (longestName - friend.User.Length) + 1);
+        //               sb.Append($"{friend.User}:{spaces}{friend.FriendCode}");
+        //               sb.AppendLine((!String.IsNullOrEmpty(friend.Servant)) ? $" - {friend.Servant}" : String.Empty);
+        //               if (sb.Length > 1700)
+        //               {
+        //                   sb.Append("\n```");
+        //                   await cea.Channel.SendMessage(sb.ToString());
+        //                   sb = sb.Clear().AppendLine("```");
+        //               }
+        //           }
+        //           sb.Append("\n```");
+        //           await cea.Channel.SendMessage(sb.ToString());
+        //       });
 
-            client.GetService<CommandService>().CreateCommand("updatefc")
-               .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
-               .Parameter("class", ParameterType.Required)
-               .Parameter("newServant", ParameterType.Required)
-               .Description("Update the Support Servant displayed in your friendcode listing.")
-               .Do(async cea =>
-               {
-                   SupportClass support;
-                   if (!Enum.TryParse(cea.GetArg("class"), true, out support))
-                   {
-                       await cea.Channel.SendMessage("Could not parse `class` parameter as valid support slot.");
-                       return;
-                   }
+        //    client.GetService<CommandService>().CreateCommand("updatefc")
+        //       .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
+        //       .Parameter("class", ParameterType.Required)
+        //       .Parameter("newServant", ParameterType.Required)
+        //       .Description("Update the Support Servant displayed in your friendcode listing.")
+        //       .Do(async cea =>
+        //       {
+        //           SupportClass support;
+        //           if (!Enum.TryParse(cea.GetArg("class"), true, out support))
+        //           {
+        //               await cea.Channel.SendMessage("Could not parse `class` parameter as valid support slot.");
+        //               return;
+        //           }
 
-                   Func<FriendData, bool> pred = c => c.User == cea.User.Name && c.Class == support.ToString();
-                   if (FriendCodes.friendData.Any(pred))
-                   {
-                       var temp = FriendCodes.friendData.Single(pred);
-                       FriendCodes.friendData.Remove(FriendCodes.friendData.Single(pred));
-                       temp.Class = support.ToString();
-                       temp.Servant = cea.GetArg("newServant");
-                       FriendCodes.friendData.Add(temp);
-                       FriendCodes.WriteFriendData(config["FriendcodePath"]);
-                       await cea.Channel.SendMessage($"Updated `{temp.User}`'s {support.ToString()} Suppport Servant to be `{temp.Servant}`.");
-                   }
-                   else
-                   {
-                       await cea.Channel.SendMessage("Profile not found. Please add your profile using `.addfc`.");
-                   }
-               });
-        }
+        //           Func<FriendData, bool> pred = c => c.User == cea.User.Name && c.Class == support.ToString();
+        //           if (FriendCodes.friendData.Any(pred))
+        //           {
+        //               var temp = FriendCodes.friendData.Single(pred);
+        //               FriendCodes.friendData.Remove(FriendCodes.friendData.Single(pred));
+        //               temp.Class = support.ToString();
+        //               temp.Servant = cea.GetArg("newServant");
+        //               FriendCodes.friendData.Add(temp);
+        //               FriendCodes.WriteFriendData(config["FriendcodePath"]);
+        //               await cea.Channel.SendMessage($"Updated `{temp.User}`'s {support.ToString()} Suppport Servant to be `{temp.Servant}`.");
+        //           }
+        //           else
+        //           {
+        //               await cea.Channel.SendMessage("Profile not found. Please add your profile using `.addfc`.");
+        //           }
+        //       });
+        //}
 
         public static void RegisterLoginBonusCommand(this DiscordClient client, IConfiguration config)
         {
@@ -485,41 +485,41 @@ namespace MechHisui.Commands
                     }
                 });
 
-            //Console.WriteLine("Registering 'All CE'...");
-            //client.GetService<CommandService>().CreateCommand("allce")
-            //    .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(config["FGO_server"]))
-            //    .Parameter("ceeffect", ParameterType.Unparsed)
-            //    .Description($"Relay information on CEs having the specified effect.")
-            //    .Do(async cea =>
-            //    {
-            //        Console.WriteLine($"{DateTime.Now}: Command `allce` invoked.");
-            //        var arg = cea.Args[0];
-            //        Console.WriteLine($"Argument: {arg}.");
-            //        var ces = FgoHelpers.CEProfiles.Where(c => c.Effect.ContainsIgnoreCase(arg));
-            //        Console.WriteLine($"Amount of results: {ces.Count()}.");
-            //        if (ces.Count() > 0)
-            //        {
-            //            Console.WriteLine("Making StringBuilder.");
-            //            var sb = new StringBuilder($"`{arg}`:\n");
-            //            foreach (var c in ces)
-            //            {
-            //                Console.WriteLine("Appending to StringBuilder.");
-            //                sb.AppendLine($"**{c.Name}** - {c.Effect}");
-            //                if (sb.Length > 1700)
-            //                {
-            //                    Console.WriteLine("Sending and Clearing.");
-            //                    await cea.Channel.SendMessage(sb.ToString());
-            //                    sb = sb.Clear();
-            //                }
-            //            }
-            //            Console.WriteLine("Sending.");
-            //            await cea.Channel.SendMessage(sb.ToString());
-            //        }
-            //        else
-            //        {
-            //            await cea.Channel.SendMessage("No such CEs found. Please try another term.");
-            //        }
-            //    });
+            Console.WriteLine("Registering 'All CE'...");
+            client.GetService<CommandService>().CreateCommand("allce")
+                .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(config["FGO_server"]))
+                .Parameter("ceeffect", ParameterType.Unparsed)
+                .Description($"Relay information on CEs having the specified effect.")
+                .Do(async cea =>
+                {
+                    Console.WriteLine($"{DateTime.Now}: Command `allce` invoked.");
+                    var arg = cea.Args[0];
+                    Console.WriteLine($"Argument: {arg}.");
+                    var ces = FgoHelpers.CEProfiles.Where(c => c.Effect.ContainsIgnoreCase(arg)).ToList();
+                    Console.WriteLine($"Amount of results: {ces.Count()}.");
+                    if (ces.Count() > 0)
+                    {
+                        Console.WriteLine("Making StringBuilder.");
+                        var sb = new StringBuilder($"**{arg}:**\n");
+                        foreach (var c in ces)
+                        {
+                            Console.WriteLine("Appending to StringBuilder.");
+                            sb.AppendLine($"**{c.Name}** - {c.Effect}");
+                            if (sb.Length > 1700)
+                            {
+                                Console.WriteLine("Sending and Clearing.");
+                                await cea.Channel.SendMessage(sb.ToString());
+                                sb = sb.Clear();
+                            }
+                        }
+                        Console.WriteLine("Sending.");
+                        await cea.Channel.SendMessage(sb.ToString());
+                    }
+                    else
+                    {
+                        await cea.Channel.SendMessage("No such CEs found. Please try another term.");
+                    }
+                });
 
             Console.WriteLine("Registering 'Update'...");
             client.GetService<CommandService>().CreateCommand("update")
@@ -547,10 +547,10 @@ namespace MechHisui.Commands
                             await statService.UpdateEventListAsync();
                             await cea.Channel.SendMessage("Updated events lookup.");
                             break;
-                        case "fcs":
-                            FriendCodes.ReadFriendData(config["FriendcodePath"]);
-                            await cea.Channel.SendMessage("Updated friendcodes");
-                            break;
+                        //case "fcs":
+                        //    FriendCodes.ReadFriendData(config["FriendcodePath"]);
+                        //    await cea.Channel.SendMessage("Updated friendcodes");
+                        //    break;
                         case "mystic":
                             await statService.UpdateMysticCodesListAsync();
                             await cea.Channel.SendMessage("Updated Mystic Codes lookup.");
@@ -561,7 +561,7 @@ namespace MechHisui.Commands
                             break;
                         default:
                             statService.ReadAliasList();
-                            FriendCodes.ReadFriendData(config["FriendcodePath"]);
+                            //FriendCodes.ReadFriendData(config["FriendcodePath"]);
                             await statService.UpdateProfileListsAsync();
                             await statService.UpdateCEListAsync();
                             await statService.UpdateEventListAsync();

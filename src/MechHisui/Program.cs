@@ -84,7 +84,8 @@ namespace MechHisui
                     .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(JiiLib.Extensions).Assembly.Location), "JiiLib"))
                     .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(FateGOLib.FgoHelpers).Assembly.Location), "MechHisui.FateGOLib"));
 
-                client.AddModule(evalBuilder.Build(config));
+                client.AddModule(evalBuilder.Build((c, u, ch)
+                    => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])));
                 //client.RegisterEvalCommand(config);
             }
             //client.RegisterImageCommand(config);
@@ -102,9 +103,11 @@ namespace MechHisui
             client.RegisterAPCommand(config);
             client.RegisterDailyCommand(config);
             client.RegisterEventCommand(config);
-            client.RegisterFriendsCommand(config);
+            //client.RegisterFriendsCommand(config);
+            client.AddModule(new FateGOLib.FriendsModule(config["FriendcodePath"],
+                (c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"])));
             client.RegisterLoginBonusCommand(config);
-            //client.RegisterPsa(config);
+            client.RegisterPsa(config);
             client.RegisterStatsCommands(config);
             client.RegisterQuartzCommand(config);
             client.RegisterZoukenCommand(config);
