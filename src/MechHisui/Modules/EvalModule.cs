@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
-using Microsoft.Extensions.Configuration;
-using JiiLib;
+using Discord;
 using Discord.Commands;
 using Discord.Modules;
 
@@ -28,11 +27,6 @@ namespace MechHisui.Modules
         private const string regex = @"`{3}(?:\S*$)((?:.*\n)*)`{3}";
 
         /// <summary>
-        /// An <see cref="IConfiguration"/> object that holds additional data.
-        /// </summary>
-        private readonly IConfiguration _config;
-
-        /// <summary>
         /// The assemblies referenced during evaluation.
         /// </summary>
         private readonly IEnumerable<MetadataReference> _references;
@@ -44,6 +38,11 @@ namespace MechHisui.Modules
         private readonly string _syntaxText;
 
         /// <summary>
+        /// Function for checking when the command is allowed to run.
+        /// </summary>
+        private readonly Func<Command, User, Channel, bool> _checkFunc;
+
+        /// <summary>
         /// Creates a new <see cref="EvalModule"/>.
         /// </summary>
         /// <param name="references">The list of assemblies to reference.</param>
@@ -53,9 +52,9 @@ namespace MechHisui.Modules
         private EvalModule(
             IEnumerable<MetadataReference> references,
             string syntax,
-            IConfiguration config = null)
+            Func<Command, User, Channel, bool> checkFunc)
         {
-            _config = config;
+            _checkFunc = checkFunc;
             _references = references;
             _syntaxText = syntax;
         }
@@ -66,7 +65,7 @@ namespace MechHisui.Modules
             manager.Client.GetService<CommandService>().CreateCommand("eval")
                 .Parameter("func", ParameterType.Unparsed)
                 .Hide()
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(_config["Owner"]) || ch.Id == UInt64.Parse(_config["FGO_general"]) || ch.Id == UInt64.Parse(_config["FGO_playground"]))
+                .AddCheck(_checkFunc)
                 .Do(async cea =>
                 {
                     string arg = cea.Args[0];
@@ -168,12 +167,12 @@ namespace MechHisui.Modules
             }
 
             /// <summary>
-            /// Builds the <see cref="EvalModule"/> from the current <see cref="Builder"/> instance.
+            /// Builds the <see cref="EvalModule"/> from the
+            /// current <see cref="Builder"/> instance.
             /// </summary>
-            /// <param name="config">An optional <see cref="IConfiguration"/>
-            /// containing information that may be used inside of the 
-            /// <see cref="EvalModule"/>.</param>
-            public EvalModule Build(IConfiguration config = null)
+            /// <param name="checkFunc">A function for checking when
+            /// the command is allowed to run.</param>
+            public EvalModule Build(Func<Command, User, Channel, bool> checkFunc)
             {
                 var sb = new StringBuilder()
                     .AppendSequence(_usings, (s, str) => s.AppendLine($"using {str};"))
@@ -190,7 +189,7 @@ namespace MechHisui.Modules
         public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(async () => await Task.Run(() => {0}));
     }}
 }}");
-                return new EvalModule(_references, sb.ToString(), config);
+                return new EvalModule(_references, sb.ToString(), checkFunc);
             }
         }
     }
@@ -224,6 +223,25 @@ namespace MechHisui.Modules
         }
     }
 
+    internal static class StringBuilderExt
+    {
+        /// <summary>
+        /// Appends each element of an <see cref="IEnumerable{T}"/> to a <see cref="StringBuilder"/> instance.
+        /// </summary>
+        /// <param name="builder">A <see cref="StringBuilder"/> instance</param>
+        /// <param name="seq">The sequence to append.</param>
+        /// <param name="fn">A function to apply to each element of the sequence.</param>
+        /// <returns>An instance of <see cref="StringBuilder"/> with all elements of <see cref="seq"/>appended.</returns>
+        public static StringBuilder AppendSequence<T>(this StringBuilder builder, IEnumerable<T> seq, Func<StringBuilder, T, StringBuilder> fn)
+        {
+            if (builder == null) throw new ArgumentNullException(nameof(builder));
+            if (seq == null) throw new ArgumentNullException(nameof(seq));
+            if (fn == null) throw new ArgumentNullException(nameof(fn));
+
+            return seq.Aggregate(builder, fn);
+        }
+    }
+
     //public class DynEval
     //{
     //    public async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join(", ", await set());
@@ -231,13 +249,8 @@ namespace MechHisui.Modules
     //    public async Task<string> Eval<T>(Func<Task<T>> func) => (await func())?.ToString() ?? "null";
 
     //    public async Task<string> Eval(Func<Task> func) => (await func()?.ContinueWith(t => "Executed")) ?? "null";
-
-    //    public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(
-    //        async () => await Task.Run(
-    //            () => {
-    //                var str1 = "This is a multi-line eval";
-    //                var str2 = "Now it's easier to eval some more complex things";
-    //                return String.Concat(str1, "\n", str2);
-    //            }));
+        
+    //    public async Task<string> Exec(DiscordClient client, CommandEventArgs e)
+    //        => await Eval(async () => Console.WriteLine());
     //}
 }
