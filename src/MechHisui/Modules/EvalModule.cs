@@ -22,9 +22,9 @@ namespace MechHisui.Modules
     public class EvalModule : IModule
     {
         /// <summary>
-        /// Regex string to detect markdown code blocks.
+        /// Regex to detect markdown code blocks.
         /// </summary>
-        private const string regex = @"`{3}(?:\S*$)((?:.*\n)*)`{3}";
+        private static readonly Regex _codeblock = new Regex(@"`{3}(?:\S*$)((?:.*\n)*)`{3}", RegexOptions.Compiled | RegexOptions.Multiline);
 
         /// <summary>
         /// The assemblies referenced during evaluation.
@@ -73,9 +73,9 @@ namespace MechHisui.Modules
                     {
                         await cea.Channel.SendMessage("**Note:** `^` is the Binary XOR operator. Use `Math.Pow(base, exponent)` if you wish to calculate an exponentiation.");
                     }
-                    if (Regex.Match(arg, regex, RegexOptions.Multiline).Success)
+                    if (_codeblock.Match(arg).Success)
                     {
-                        arg = Regex.Replace(arg, regex, @"{$1}", RegexOptions.Multiline);
+                        arg = _codeblock.Replace(arg, @"{$1}");
                     }
 
                     SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(String.Format(_syntaxText, arg));
