@@ -245,7 +245,7 @@ namespace MechHisui.Commands
                             return;
                         }
 
-                        var target = cea.Server.FindUsers(cea.Args[1]).FirstOrDefault();
+                        var target = cea.Message.MentionedUsers.FirstOrDefault();
                         if (target != null)
                         {
                             bank.Accounts.Single(p => p.UserId == cea.User.Id).Bucks -= bucks;
