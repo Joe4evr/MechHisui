@@ -174,7 +174,7 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Registering 'Learn'...");
             client.GetService<CommandService>().CreateCommand("learn")
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
+                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]))
                 .Parameter("trigger", ParameterType.Required)
                 .Parameter("response", ParameterType.Required)
                 .Parameter("kind", ParameterType.Optional)

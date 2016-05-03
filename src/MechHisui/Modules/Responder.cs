@@ -36,12 +36,12 @@ namespace MechHisui.Modules
                     if (!_lastResponses.TryGetValue(resp.Key, out last) || (DateTime.UtcNow - last) > TimeSpan.FromMinutes(1))
                     {
                         _lastResponses.AddOrUpdate(resp.Key, msgTime, (k, v) => v = msgTime);
-                        await e.Channel.SendMessage(resp.Value[new Random().Next() % resp.Value.Length]);
+                        await e.Channel.SendMessage(resp.Value[new Random().Next(maxValue: resp.Value.Length)]);
                     }
                 }
                 else if (sResp != null)
                 {
-                    await e.Channel.SendMessage(sResp.Resp[new Random().Next() % sResp.Resp.Length]);
+                    await e.Channel.SendMessage(sResp.Resp[new Random().Next(maxValue: sResp.Resp.Length)]);
                 }
             }
         }

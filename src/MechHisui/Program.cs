@@ -103,7 +103,6 @@ namespace MechHisui
             client.RegisterAPCommand(config);
             client.RegisterDailyCommand(config);
             client.RegisterEventCommand(config);
-            //client.RegisterFriendsCommand(config);
             client.AddModule(new FateGOLib.FriendsModule(config["FriendcodePath"],
                 (c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"])));
             client.RegisterLoginBonusCommand(config);

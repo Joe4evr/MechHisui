@@ -152,7 +152,7 @@ namespace MechHisui.Commands
                     Console.WriteLine("Constructing StringBuilder");
                     var sb = new StringBuilder("The following bets have been made:\n```\n");
                     Console.WriteLine("Looping through active bets");
-                    foreach (var bet in game.ActiveBets)
+                    foreach (var bet in game.ActiveBets.ToList())
                     {
                         var nameSpaces = new String(' ', (longestName - bet.UserName.Length) + 1);
                         var betSpaces = new String(' ', (longestBet - bet.BettedAmount.ToString().Length));

@@ -56,7 +56,7 @@ namespace MechHisui.FateGOLib
                    }
 
                    SupportClass support;
-                   if (!Enum.TryParse(cea.GetArg("class"), true, out support))
+                   if (!Enum.TryParse(cea.GetArg("slot"), true, out support))
                    {
                        await cea.Channel.SendMessage("Could not parse `class` parameter as valid suport slot.");
                        return;
@@ -91,9 +91,14 @@ namespace MechHisui.FateGOLib
                {
                    var data = Enumerable.Empty<FriendData>();
                    SupportClass support;
+                   string username = cea.Message.MentionedUsers.FirstOrDefault()?.Name ?? cea.Args[0];
                    if (Enum.TryParse(cea.Args[0], true, out support))
                    {
                        data = _friendData.Where(f => f.Class == support.ToString());
+                   }
+                   else if (_friendData.Any(f => f.User == username))
+                   {
+                       data = _friendData.Where(f => f.User == username);
                    }
                    else
                    {
@@ -127,7 +132,7 @@ namespace MechHisui.FateGOLib
                .Do(async cea =>
                {
                    SupportClass support;
-                   if (!Enum.TryParse(cea.GetArg("class"), true, out support))
+                   if (!Enum.TryParse(cea.GetArg("slot"), true, out support))
                    {
                        await cea.Channel.SendMessage("Could not parse `class` parameter as valid support slot.");
                        return;
@@ -156,7 +161,7 @@ namespace MechHisui.FateGOLib
             => _friendData = JsonConvert.DeserializeObject<List<FriendData>>(File.ReadAllText(_friendcodeConfigPath));
 
         private void WriteFriendData()
-            => File.WriteAllText(_friendcodeConfigPath, JsonConvert.SerializeObject(_friendData));
+            => File.WriteAllText(_friendcodeConfigPath, JsonConvert.SerializeObject(_friendData, Formatting.Indented));
 
         private enum SupportClass
         {
