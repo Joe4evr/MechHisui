@@ -225,121 +225,6 @@ namespace MechHisui.Commands
                 });
         }
 
-        //public static void RegisterFriendsCommand(this DiscordClient client, IConfiguration config)
-        //{
-        //    //statService = statService ?? InitStatService(config);
-        //    Console.WriteLine("Registering 'Friends'...");
-        //    FriendCodes.ReadFriendData(config["FriendcodePath"]);
-        //    client.GetService<CommandService>().CreateCommand("addfc")
-        //       .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
-        //       .Parameter("code", ParameterType.Required)
-        //       .Parameter("class", ParameterType.Required)
-        //       .Parameter("servant", ParameterType.Optional)
-        //       .Description("Add your friendcode to the list. Enter your code with quotes as `\"XXX XXX XXX\"`. You may optionally add your support Servant as well. If you do, enclose that in `\"\"`s as well.")
-        //       .Do(async cea =>
-        //       {
-        //           if (FriendCodes.friendData.Any(fc => fc.User == cea.User.Name
-        //                   && fc.Class.Equals(cea.Args[1], StringComparison.OrdinalIgnoreCase)))
-        //           {
-        //               await cea.Channel.SendMessage($"Already in the Friendcode list. Please use `.updatefc` to update your description.");
-        //               return;
-        //           }
-
-        //           SupportClass support;
-        //           if (!Enum.TryParse(cea.GetArg("class"), true, out support))
-        //           {
-        //               await cea.Channel.SendMessage("Could not parse `class` parameter as valid suport slot.");
-        //               return;
-        //           }
-
-        //           if (Regex.Match(cea.Args[0], @"[0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9]").Success)
-        //           {
-        //               var friend = new FriendData
-        //               {
-        //                   Id = FriendCodes.friendData.Count + 1,
-        //                   User = cea.User.Name,
-        //                   FriendCode = cea.Args[0],
-        //                   Class = support.ToString(),
-        //                   Servant = (cea.Args.Length > 2) ? cea.Args[2] : String.Empty
-        //               };
-        //               FriendCodes.friendData.Add(friend);
-        //               FriendCodes.WriteFriendData(config["FriendcodePath"]);
-        //               await cea.Channel.SendMessage($"Added {support.ToString()} support for `{friend.User}`.");
-        //           }
-        //           else
-        //           {
-        //               await cea.Channel.SendMessage($"Incorrect friendcode format specified.");
-        //           }
-        //       });
-
-        //    client.GetService<CommandService>().CreateCommand("listfcs")
-        //       .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
-        //       .Parameter("filter", ParameterType.Required)
-        //       .Description("Display known friendcodes.")
-        //       .Do(async cea =>
-        //       {
-        //           var data = Enumerable.Empty<FriendData>();
-        //           SupportClass support;
-        //           if (Enum.TryParse(cea.Args[0], true, out support))
-        //           {
-        //               data = FriendCodes.friendData.Where(f => f.Class == support.ToString());
-        //           }
-        //           else
-        //           {
-        //               await cea.Channel.SendMessage("Could not parse parameter as a valid filter.");
-        //               return;
-        //           }
-
-        //           var sb = new StringBuilder("```\n");
-        //           int longestName = data.OrderByDescending(f => f.User.Length).First().User.Length;
-        //           foreach (var friend in data.OrderBy(f => f.Id))
-        //           {
-        //               var spaces = new string(' ', (longestName - friend.User.Length) + 1);
-        //               sb.Append($"{friend.User}:{spaces}{friend.FriendCode}");
-        //               sb.AppendLine((!String.IsNullOrEmpty(friend.Servant)) ? $" - {friend.Servant}" : String.Empty);
-        //               if (sb.Length > 1700)
-        //               {
-        //                   sb.Append("\n```");
-        //                   await cea.Channel.SendMessage(sb.ToString());
-        //                   sb = sb.Clear().AppendLine("```");
-        //               }
-        //           }
-        //           sb.Append("\n```");
-        //           await cea.Channel.SendMessage(sb.ToString());
-        //       });
-
-        //    client.GetService<CommandService>().CreateCommand("updatefc")
-        //       .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"]))
-        //       .Parameter("class", ParameterType.Required)
-        //       .Parameter("newServant", ParameterType.Required)
-        //       .Description("Update the Support Servant displayed in your friendcode listing.")
-        //       .Do(async cea =>
-        //       {
-        //           SupportClass support;
-        //           if (!Enum.TryParse(cea.GetArg("class"), true, out support))
-        //           {
-        //               await cea.Channel.SendMessage("Could not parse `class` parameter as valid support slot.");
-        //               return;
-        //           }
-
-        //           Func<FriendData, bool> pred = c => c.User == cea.User.Name && c.Class == support.ToString();
-        //           if (FriendCodes.friendData.Any(pred))
-        //           {
-        //               var temp = FriendCodes.friendData.Single(pred);
-        //               FriendCodes.friendData.Remove(FriendCodes.friendData.Single(pred));
-        //               temp.Class = support.ToString();
-        //               temp.Servant = cea.GetArg("newServant");
-        //               FriendCodes.friendData.Add(temp);
-        //               FriendCodes.WriteFriendData(config["FriendcodePath"]);
-        //               await cea.Channel.SendMessage($"Updated `{temp.User}`'s {support.ToString()} Suppport Servant to be `{temp.Servant}`.");
-        //           }
-        //           else
-        //           {
-        //               await cea.Channel.SendMessage("Profile not found. Please add your profile using `.addfc`.");
-        //           }
-        //       });
-        //}
-
         public static void RegisterLoginBonusCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Login bonus'...");
@@ -363,7 +248,7 @@ namespace MechHisui.Commands
             },
             client,
             new DateTimeWithZone(DateTime.UtcNow, FgoHelpers.JpnTimeZone)
-                .TimeUntilNextLocalTimeAt(new TimeSpan(hours: 3, minutes: 59, seconds: 57)),
+                .TimeUntilNextLocalTimeAt(new TimeSpan(hours: 3, minutes: 59, seconds: 58)),
             TimeSpan.FromDays(1));
         }
 
@@ -492,27 +377,27 @@ namespace MechHisui.Commands
                 .Description($"Relay information on CEs having the specified effect.")
                 .Do(async cea =>
                 {
-                    Console.WriteLine($"{DateTime.Now}: Command `allce` invoked.");
                     var arg = cea.Args[0];
-                    Console.WriteLine($"Argument: {arg}.");
+                    if (String.IsNullOrEmpty(arg))
+                    {
+                        await cea.Channel.SendMessage("No effect specified.");
+                        return;
+                    }
+
                     var ces = FgoHelpers.CEProfiles.Where(c => c.Effect.ContainsIgnoreCase(arg)).ToList();
-                    Console.WriteLine($"Amount of results: {ces.Count()}.");
+
                     if (ces.Count() > 0)
                     {
-                        Console.WriteLine("Making StringBuilder.");
                         var sb = new StringBuilder($"**{arg}:**\n");
                         foreach (var c in ces)
                         {
-                            Console.WriteLine("Appending to StringBuilder.");
                             sb.AppendLine($"**{c.Name}** - {c.Effect}");
                             if (sb.Length > 1700)
                             {
-                                Console.WriteLine("Sending and Clearing.");
                                 await cea.Channel.SendMessage(sb.ToString());
                                 sb = sb.Clear();
                             }
                         }
-                        Console.WriteLine("Sending.");
                         await cea.Channel.SendMessage(sb.ToString());
                     }
                     else
@@ -939,7 +824,6 @@ namespace MechHisui.Commands
                 "Dragonkin",
             };
             var premiumPool = FgoHelpers.ServantProfiles
-                .Where(p => p.Obtainable)
                 .Where(p => p.Rarity >= 3)
                 .Concat(FgoHelpers.ServantProfiles
                     .Where(p => p.Rarity >= 3 && p.Rarity <= 4)
@@ -947,9 +831,9 @@ namespace MechHisui.Commands
                 .Concat(FgoHelpers.ServantProfiles
                     .Where(p => p.Rarity == 3)
                     .RepeatSeq(5))
+                .Where(p => p.Obtainable)
                 .Select(p => p.Name)
                 .Concat(FgoHelpers.CEProfiles
-                    .Where(ce => ce.Obtainable)
                     .Where(ce => ce.Rarity >= 3)
                     .Concat(FgoHelpers.CEProfiles
                         .Where(ce => ce.Rarity >= 3 && ce.Rarity <= 4)
@@ -957,19 +841,20 @@ namespace MechHisui.Commands
                     .Concat(FgoHelpers.CEProfiles
                         .Where(ce => ce.Rarity == 3)
                         .RepeatSeq(5))
+                    .Where(ce => ce.Obtainable)
                     .Select(ce => ce.Name));
             var fpPool = FgoHelpers.ServantProfiles
-                .Where(p => p.Obtainable)
-                .Where(p => p.Rarity <= 3)
+                .Where(p => p.Rarity <= 3 && p.Rarity > 0)
                 .Concat(FgoHelpers.ServantProfiles
-                    .Where(p => p.Rarity <= 2)
+                    .Where(p => p.Rarity <= 2 && p.Rarity > 0)
                     .RepeatSeq(5))
                 .Concat(FgoHelpers.ServantProfiles
                     .Where(p => p.Rarity == 1)
                     .RepeatSeq(5))
+                .Concat(FgoHelpers.ServantProfiles.Where(p => p.Rarity == 0))
+                .Where(p => p.Obtainable)
                 .Select(p => p.Name)
                 .Concat(FgoHelpers.CEProfiles
-                    .Where(ce => ce.Obtainable)
                     .Where(ce => ce.Rarity <= 3)
                     .Concat(FgoHelpers.CEProfiles
                         .Where(ce => ce.Rarity <= 2)
@@ -977,46 +862,47 @@ namespace MechHisui.Commands
                     .Concat(FgoHelpers.CEProfiles
                         .Where(ce => ce.Rarity == 1)
                         .RepeatSeq(5))
+                    .Where(ce => ce.Obtainable)
                     .Select(ce => ce.Name))
-                .Concat(fpOnly.RepeatSeq(5));
+                .Concat(fpOnly.RepeatSeq(3));
             #endregion
             client.GetService<CommandService>().CreateCommand("gacha")
                 .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"]))
-                .Description("Simulate gacha roll (not accurate wrt rarity ratios and rate ups). Accepetable parameters are `fp1`, `fp10`, `ticket`, `4`, and `40`")
+                .Description($"Simulate gacha roll (not accurate wrt rarity ratios and rate ups). Accepetable parameters are `{String.Join("`, `", rolltypes)}`")
                 .Parameter("type", ParameterType.Optional)
                 .Do(async cea =>
                 {
-                    await cea.Channel.SendMessage("This command temporarily disabled.");
-                    //if (!rolltypes.Contains(cea.Args[0]))
-                    //{
-                    //    await cea.Channel.SendMessage("Unaccaptable parameter.");
-                    //    return;
-                    //}
+                    //await cea.Channel.SendMessage("This command temporarily disabled.");
+                    if (!rolltypes.Contains(cea.Args[0]))
+                    {
+                        await cea.Channel.SendMessage("Unaccaptable parameter. Use `.help gacha` to see the accaptable values.");
+                        return;
+                    }
 
-                    //var rng = new Random();
-                    //IEnumerable<string> pool = (cea.Args[0] == "fp" || cea.Args[0] == "fp10") ? fpPool : premiumPool;
-                    //List<string> picks = new List<string>();
+                    var rng = new Random();
+                    IEnumerable<string> pool = (cea.Args[0] == rolltypes[0] || cea.Args[0] == rolltypes[1]) ? fpPool.ToList() : premiumPool.ToList();
+                    List<string> picks = new List<string>();
 
-                    //for (int i = 0; i < 28; i++)
-                    //{
-                    //    pool = pool.Shuffle();
-                    //}
+                    for (int i = 0; i < 28; i++)
+                    {
+                        pool = pool.Shuffle();
+                    }
 
-                    //if (cea.Args[0] == "fp" || cea.Args[0] == "ticket" || cea.Args[0] == "4")
-                    //{
-                    //    pool = pool.Shuffle();
-                    //    picks.Add(pool.ElementAt(rng.Next(maxValue: pool.Count())));
-                    //}
-                    //else //10-roll
-                    //{
-                    //    for (int i = 0; i < 10; i++)
-                    //    {
-                    //        pool = pool.Shuffle();
-                    //        picks.Add(pool.ElementAt(rng.Next(maxValue: pool.Count())));
-                    //    }
-                    //}
+                    if (cea.Args[0] == rolltypes[0] || cea.Args[0] == rolltypes[2] || cea.Args[0] == rolltypes[3])
+                    {
+                        pool = pool.Shuffle();
+                        picks.Add(pool.ElementAt(rng.Next(maxValue: pool.Count())));
+                    }
+                    else //10-roll
+                    {
+                        for (int i = 0; i < 10; i++)
+                        {
+                            pool = pool.Shuffle();
+                            picks.Add(pool.ElementAt(rng.Next(maxValue: pool.Count())));
+                        }
+                    }
 
-                    //await cea.Channel.SendMessage($"**{cea.User.Name} rolled:** {String.Join(", ", picks)}");
+                    await cea.Channel.SendMessage($"**{cea.User.Name} rolled:** {String.Join(", ", picks)}");
                 });
 
             Console.WriteLine("Registering 'Simulate'...");
@@ -1213,18 +1099,6 @@ namespace MechHisui.Commands
         }
 
         private static Timer LoginBonusTimer;
-
-        private enum SupportClass
-        {
-            Omni,
-            Saber,
-            Archer,
-            Lancer,
-            Rider,
-            Caster,
-            Assassin,
-            Berserker
-        }
 
         private static decimal SimulateDmg(ServantProfile srv, string enemyClass, int servantAtk, Card atkCard, int atkIndex)
         {
