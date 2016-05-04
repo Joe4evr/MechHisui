@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using JiiLib;
 using JiiLib.Net;
@@ -37,7 +38,7 @@ namespace MechHisui.FateGOLib
 
         public string LookupServantName(string servant)
         {
-            var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.ContainsIgnoreCase(servant));
+            var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.Any(a => RegexMatch(a, servant)));
 
             return (serv != null) ?
                 serv.Servant :
@@ -46,7 +47,7 @@ namespace MechHisui.FateGOLib
 
         public ServantProfile LookupStats(string servant)
         {
-            var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.ContainsIgnoreCase(servant));
+            var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.Any(a => RegexMatch(a, servant)));
             if (serv != null)
             {
                 Func<ServantProfile, bool> eqServ = p => p.Name.ToLowerInvariant() == serv.Servant.ToLowerInvariant();
@@ -66,7 +67,7 @@ namespace MechHisui.FateGOLib
 
         public CEProfile LookupCE(string name)
         {
-            var ce = FgoHelpers.CEDict.SingleOrDefault(k => k.Alias.ContainsIgnoreCase(name));
+            var ce = FgoHelpers.CEDict.SingleOrDefault(k => k.Alias.Any(a => RegexMatch(a, name)));
             if (ce != null)
             {
                 return FgoHelpers.CEProfiles.SingleOrDefault(p => p.Name == ce.CE);
@@ -80,7 +81,7 @@ namespace MechHisui.FateGOLib
 
         public MysticCode LookupMystic(string code)
         {
-            var mystic = FgoHelpers.MysticCodeDict.SingleOrDefault(m => m.Alias.ContainsIgnoreCase(code));
+            var mystic = FgoHelpers.MysticCodeDict.SingleOrDefault(m => m.Alias.Any(a => RegexMatch(a, code)));
             if (mystic != null)
             {
                 return FgoHelpers.MysticCodeList.SingleOrDefault(m => m.Code == mystic.Code);
@@ -144,7 +145,9 @@ namespace MechHisui.FateGOLib
                 FgoHelpers.MysticCodeDict = JsonConvert.DeserializeObject<List<MysticAlias>>(tr.ReadToEnd()) ?? new List<MysticAlias>();
             }
         }
-        
+
+        private static readonly Func<string, string, bool> RegexMatch = (a, str) => Regex.Match(a, "\b" + str + "\b", RegexOptions.IgnoreCase | RegexOptions.Singleline).Success;
+
         //{ new[] [ "" ], "Brynhildr" },
         //{ new[] [ "gil's bff" ], "Enkidu" },
         //{ new[] [ "broskander", "big alex" ], "Alexander the Great" },
