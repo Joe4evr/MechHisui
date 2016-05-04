@@ -3,7 +3,7 @@
   "version": 2,
   "targets": {
     "DNX,Version=v4.6": {
-      "Discord.Net/0.9.0-rc3-3": {
+      "Discord.Net/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
@@ -17,19 +17,19 @@
           "System.Threading.Tasks"
         ]
       },
-      "Discord.Net.Commands/0.9.0-rc3-1": {
+      "Discord.Net.Commands/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3"
+          "Discord.Net": "0.9.1"
         }
       },
-      "Discord.Net.Modules/0.9.0-rc3": {
+      "Discord.Net.Modules/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3",
-          "Discord.Net.Commands": "0.9.0-rc3-1"
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1"
         }
       },
       "FuzzyString/1.0.0": {
@@ -119,9 +119,9 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3",
-          "Discord.Net.Commands": "0.9.0-rc3-1",
-          "Discord.Net.Modules": "0.9.0-rc3",
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1",
+          "Discord.Net.Modules": "0.9.1",
           "Google.Apis.Script.v1": "1.9.2.10",
           "JiiLib": "0.1.2",
           "JiiLib.Net": "0.1.2",
@@ -136,8 +136,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3",
-          "Discord.Net.Commands": "0.9.0-rc3-1",
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1",
           "JiiLib": "0.1.2",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
@@ -146,8 +146,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3",
-          "Discord.Net.Commands": "0.9.0-rc3-1",
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1",
           "JiiLib": "0.1.2",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
@@ -156,8 +156,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.0",
-          "Discord.Net.Commands": "0.9.0-rc3-1",
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
       },
@@ -1058,7 +1058,7 @@
       }
     },
     "DNX,Version=v4.6/win7-x86": {
-      "Discord.Net/0.9.0-rc3-3": {
+      "Discord.Net/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
@@ -1072,19 +1072,19 @@
           "System.Threading.Tasks"
         ]
       },
-      "Discord.Net.Commands/0.9.0-rc3-1": {
+      "Discord.Net.Commands/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3"
+          "Discord.Net": "0.9.1"
         }
       },
-      "Discord.Net.Modules/0.9.0-rc3": {
+      "Discord.Net.Modules/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3",
-          "Discord.Net.Commands": "0.9.0-rc3-1"
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1"
         }
       },
       "FuzzyString/1.0.0": {
@@ -1174,9 +1174,9 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3",
-          "Discord.Net.Commands": "0.9.0-rc3-1",
-          "Discord.Net.Modules": "0.9.0-rc3",
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1",
+          "Discord.Net.Modules": "0.9.1",
           "Google.Apis.Script.v1": "1.9.2.10",
           "JiiLib": "0.1.2",
           "JiiLib.Net": "0.1.2",
@@ -1191,8 +1191,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3",
-          "Discord.Net.Commands": "0.9.0-rc3-1",
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1",
           "JiiLib": "0.1.2",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
@@ -1201,8 +1201,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3",
-          "Discord.Net.Commands": "0.9.0-rc3-1",
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1",
           "JiiLib": "0.1.2",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
@@ -1211,8 +1211,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.0",
-          "Discord.Net.Commands": "0.9.0-rc3-1",
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
       },
@@ -2113,7 +2113,7 @@
       }
     },
     "DNX,Version=v4.6/win7-x64": {
-      "Discord.Net/0.9.0-rc3-3": {
+      "Discord.Net/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
@@ -2127,19 +2127,19 @@
           "System.Threading.Tasks"
         ]
       },
-      "Discord.Net.Commands/0.9.0-rc3-1": {
+      "Discord.Net.Commands/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3"
+          "Discord.Net": "0.9.1"
         }
       },
-      "Discord.Net.Modules/0.9.0-rc3": {
+      "Discord.Net.Modules/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3",
-          "Discord.Net.Commands": "0.9.0-rc3-1"
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1"
         }
       },
       "FuzzyString/1.0.0": {
@@ -2229,9 +2229,9 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3",
-          "Discord.Net.Commands": "0.9.0-rc3-1",
-          "Discord.Net.Modules": "0.9.0-rc3",
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1",
+          "Discord.Net.Modules": "0.9.1",
           "Google.Apis.Script.v1": "1.9.2.10",
           "JiiLib": "0.1.2",
           "JiiLib.Net": "0.1.2",
@@ -2246,8 +2246,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3",
-          "Discord.Net.Commands": "0.9.0-rc3-1",
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1",
           "JiiLib": "0.1.2",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
@@ -2256,8 +2256,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3",
-          "Discord.Net.Commands": "0.9.0-rc3-1",
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1",
           "JiiLib": "0.1.2",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
@@ -2266,8 +2266,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.0",
-          "Discord.Net.Commands": "0.9.0-rc3-1",
+          "Discord.Net": "0.9.1",
+          "Discord.Net.Commands": "0.9.1",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final"
         }
       },
@@ -3169,15 +3169,15 @@
     }
   },
   "libraries": {
-    "Discord.Net/0.9.0-rc3-3": {
+    "Discord.Net/0.9.1": {
       "type": "project",
       "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/project.json"
     },
-    "Discord.Net.Commands/0.9.0-rc3-1": {
+    "Discord.Net.Commands/0.9.1": {
       "type": "project",
       "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/project.json"
     },
-    "Discord.Net.Modules/0.9.0-rc3": {
+    "Discord.Net.Modules/0.9.1": {
       "type": "project",
       "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Modules/project.json"
     },
@@ -4977,9 +4977,9 @@
       "Microsoft.Extensions.Configuration.FileExtensions >= 1.0.0-rc1-final",
       "Microsoft.Extensions.Configuration.UserSecrets >= 1.0.0-rc1-final",
       "Microsoft.Extensions.PlatformAbstractions >= 1.0.0-rc1-final",
-      "Discord.Net >= 0.9.0-rc3-3",
-      "Discord.Net.Commands >= 0.9.0-rc3-1",
-      "Discord.Net.Modules >= 0.9.0-rc3",
+      "Discord.Net >= 0.9.1",
+      "Discord.Net.Commands >= 0.9.1",
+      "Discord.Net.Modules >= 0.9.1",
       "MechHisui.FateGOLib ",
       "MechHisui.FfrkLib ",
       "MechHisui.HisuiBets ",

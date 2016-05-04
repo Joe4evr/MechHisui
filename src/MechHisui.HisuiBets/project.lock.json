@@ -3,7 +3,7 @@
   "version": 2,
   "targets": {
     ".NETFramework,Version=v4.6": {
-      "Discord.Net/0.9.0-rc3-3": {
+      "Discord.Net/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
@@ -17,11 +17,11 @@
           "System.Threading.Tasks"
         ]
       },
-      "Discord.Net.Commands/0.9.0-rc3-1": {
+      "Discord.Net.Commands/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3"
+          "Discord.Net": "0.9.1"
         }
       },
       "JiiLib/0.1.2": {
@@ -177,7 +177,7 @@
       }
     },
     ".NETFramework,Version=v4.6/win7-x86": {
-      "Discord.Net/0.9.0-rc3-3": {
+      "Discord.Net/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
@@ -191,11 +191,11 @@
           "System.Threading.Tasks"
         ]
       },
-      "Discord.Net.Commands/0.9.0-rc3-1": {
+      "Discord.Net.Commands/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3"
+          "Discord.Net": "0.9.1"
         }
       },
       "JiiLib/0.1.2": {
@@ -351,7 +351,7 @@
       }
     },
     ".NETFramework,Version=v4.6/win7-x64": {
-      "Discord.Net/0.9.0-rc3-3": {
+      "Discord.Net/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
@@ -365,11 +365,11 @@
           "System.Threading.Tasks"
         ]
       },
-      "Discord.Net.Commands/0.9.0-rc3-1": {
+      "Discord.Net.Commands/0.9.1": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.9.0-rc3-3"
+          "Discord.Net": "0.9.1"
         }
       },
       "JiiLib/0.1.2": {
@@ -526,11 +526,11 @@
     }
   },
   "libraries": {
-    "Discord.Net/0.9.0-rc3-3": {
+    "Discord.Net/0.9.1": {
       "type": "project",
       "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/project.json"
     },
-    "Discord.Net.Commands/0.9.0-rc3-1": {
+    "Discord.Net.Commands/0.9.1": {
       "type": "project",
       "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/project.json"
     },
@@ -794,8 +794,8 @@
   "projectFileDependencyGroups": {
     "": [
       "Microsoft.Extensions.Configuration.UserSecrets >= 1.0.0-rc1-final",
-      "Discord.Net >= 0.9.0-rc3-3",
-      "Discord.Net.Commands >= 0.9.0-rc3-1",
+      "Discord.Net >= 0.9.1",
+      "Discord.Net.Commands >= 0.9.1",
       "JiiLib >= 0.1.2"
     ],
     ".NETFramework,Version=v4.6": []
