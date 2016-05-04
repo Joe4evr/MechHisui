@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Discord;
 using Discord.Commands;
 using Discord.Modules;
-using System.Text.RegularExpressions;
-using System.Text;
-using System.IO;
 
-namespace MechHisui.FateGOLib
+namespace MechHisui.FateGOLib.Modules
 {
     /// <summary>
     /// FGO Friendcode module.

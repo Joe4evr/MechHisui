@@ -5,14 +5,15 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Hosting;
+using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.PlatformAbstractions;
 using Discord;
 using Discord.Commands;
 using Discord.Modules;
+using MechHisui.FateGOLib.Modules;
 using MechHisui.Commands;
 using MechHisui.Modules;
-using Microsoft.CodeAnalysis;
 
 namespace MechHisui
 {
@@ -103,11 +104,12 @@ namespace MechHisui
             client.RegisterAPCommand(config);
             client.RegisterDailyCommand(config);
             client.RegisterEventCommand(config);
-            client.AddModule(new FateGOLib.FriendsModule(config["FriendcodePath"],
+            client.AddModule(new FriendsModule(config["FriendcodePath"],
                 (c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"])));
             client.RegisterLoginBonusCommand(config);
             client.RegisterPsa(config);
-            client.RegisterStatsCommands(config);
+            new FgoStatsMetaModule(config).InstallModules(client);
+            //client.RegisterStatsCommands(config);
             client.RegisterQuartzCommand(config);
             client.RegisterZoukenCommand(config);
 
