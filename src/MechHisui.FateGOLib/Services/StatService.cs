@@ -149,10 +149,7 @@ namespace MechHisui.FateGOLib
         }
 
         private static readonly Func<string, string, bool> RegexMatch = (alias, str) =>
-        {
-            var reg = Regex.Match(alias, String.Concat(b, str, b), RegexOptions.IgnoreCase);
-            return reg.Success;
-        };
+            Regex.Match(alias, String.Concat(b, str, b), RegexOptions.IgnoreCase).Success;
 
         private const string b = @"\b";
 

@@ -13,6 +13,7 @@ using Discord.Commands;
 using Discord.Modules;
 using MechHisui.FateGOLib.Modules;
 using MechHisui.Commands;
+using MechHisui.HisuiBets;
 using MechHisui.Modules;
 
 namespace MechHisui
@@ -103,7 +104,7 @@ namespace MechHisui
 
             client.RegisterAPCommand(config);
             client.RegisterDailyCommand(config);
-            client.RegisterEventCommand(config);
+            //client.RegisterEventCommand(config);
             client.AddModule(new FriendsModule(config["FriendcodePath"],
                 (c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"])));
             client.RegisterLoginBonusCommand(config);
@@ -113,7 +114,8 @@ namespace MechHisui
             client.RegisterQuartzCommand(config);
             client.RegisterZoukenCommand(config);
 
-            client.RegisterHisuiBetsCommands(config);
+            client.AddModule(new HisuiBetsModule(client, config));
+            //client.RegisterHisuiBetsCommands(config);
 
             client.RegisterSecretHitler(config);
 
@@ -200,10 +202,7 @@ namespace MechHisui
                                 }
                             }
                         }
-                        if (!Debugger.IsAttached)
-                        {
-                            client.AddNewHisuiBetsUsers(config);
-                        }
+                        client.GetModule<HisuiBetsModule>().Instance.AddNewHisuiBetsUsers(client, config);
                         Console.WriteLine($"Started up at {DateTime.Now}.");
                     }
                 });
