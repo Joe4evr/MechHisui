@@ -64,7 +64,7 @@ namespace MechHisui.FateGOLib.Modules
                     }
 
 
-                    ServantProfile profile;
+                    ServantProfile profile = null;
                     int id;
                     if (Int32.TryParse(cea.GetArg("servant"), out id))
                     {
@@ -72,7 +72,11 @@ namespace MechHisui.FateGOLib.Modules
                     }
                     else
                     {
-                        profile = _statService.LookupStats(cea.GetArg("servant"));
+                        var p = _statService.LookupStats(cea.GetArg("servant"));
+                        if (p.Count() == 1)
+                        {
+                            profile = p.Single();
+                        }
                     }
 
                     if (profile == null)

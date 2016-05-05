@@ -53,6 +53,7 @@ namespace MechHisui.FateGOLib.Modules
 
             _modules.Add(new CeStatsModule(_statService, config));
             _modules.Add(new DropsModule(_statService, config));
+            _modules.Add(new EventModule(_statService, config));
             _modules.Add(new GachaModule(_statService, config));
             _modules.Add(new HgwModule(_statService, config));
             _modules.Add(new MysticCodeStatsModule(_statService, config));
