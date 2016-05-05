@@ -4,8 +4,8 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using JiiLib;
+using Newtonsoft.Json;
 using Discord.Commands;
 using Discord.Modules;
 
@@ -31,35 +31,25 @@ namespace MechHisui.FateGOLib.Modules
                 .Description($"Relay information on the specified Craft Essence. Alternative names acceptable.")
                 .Do(async cea =>
                 {
-                    CEProfile ce;
                     int id;
                     if (Int32.TryParse(cea.Args[0], out id) && id <= FgoHelpers.CEProfiles.Max(p => p.Id))
                     {
-                        ce = FgoHelpers.CEProfiles.SingleOrDefault(p => p.Id == id);
-                    }
-                    else
-                    {
-                        ce = _statService.LookupCE(cea.Args[0]);
-                    }
-
-                    if (ce != null)
-                    {
+                        var ce = FgoHelpers.CEProfiles.SingleOrDefault(p => p.Id == id);
                         await cea.Channel.SendMessage(FormatCEProfile(ce));
                     }
                     else
                     {
-                        var potentials = FgoHelpers.CEDict.Where(c => c.Alias.Any(a => a.ContainsIgnoreCase(cea.Args[0])) || c.CE.ContainsIgnoreCase(cea.Args[0]));
-                        if (potentials.Any())
+                        var potentials = _statService.LookupCE(cea.Args[0]);
+                        if (potentials.Count() == 1)
                         {
-                            if (potentials.Count() > 1)
-                            {
-                                string res = String.Join("\n", potentials.Select(p => $"**{p.CE}** *({String.Join(", ", p.Alias)})*"));
-                                await cea.Channel.SendMessage($"Entry ambiguous. Did you mean one of the following?\n{res}");
-                            }
-                            else
-                            {
-                                await cea.Channel.SendMessage($"**CE:** {potentials.First().CE}\nMore information TBA.");
-                            }
+                            await cea.Channel.SendMessage(FormatCEProfile(potentials.Single()));
+                        }
+                        else if (potentials.Count() > 1)
+                        {
+                            var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
+                                .AppendSequence(potentials, (s, pr) => s.AppendLine($"**{pr.Name}** *({String.Join(", ", FgoHelpers.CEDict.Single(d => d.CE == pr.Name).Alias)})*"));
+
+                            await cea.Channel.SendMessage(sb.ToString());
                         }
                         else
                         {

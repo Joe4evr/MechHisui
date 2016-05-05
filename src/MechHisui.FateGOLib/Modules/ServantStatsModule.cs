@@ -45,29 +45,28 @@ namespace MechHisui.FateGOLib.Modules
                         await cea.Channel.SendMessage("Never ever.");
                         return;
                     }
-
-                    ServantProfile profile;
+                    
                     int id;
                     if (Int32.TryParse(cea.Args[0], out id))
                     {
-                        profile = FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Id == id) ??
+                        var profile = FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Id == id) ??
                             FgoHelpers.FakeServantProfiles.SingleOrDefault(p => p.Id == id);
-                    }
-                    else
-                    {
-                        profile = _statService.LookupStats(cea.Args[0]);
-                    }
 
-                    if (profile != null)
-                    {
                         await cea.Channel.SendMessage(FormatServantProfile(profile));
                     }
                     else
                     {
-                        var name = _statService.LookupServantName(cea.Args[0]);
-                        if (name != null)
+                        var potentials = _statService.LookupStats(cea.Args[0]);
+                        if (potentials.Count() == 1)
                         {
-                            await cea.Channel.SendMessage($"**Servant:** {name}\nMore information TBA.");
+                            await cea.Channel.SendMessage(FormatServantProfile(potentials.Single()));
+                        }
+                        else if (potentials.Count() > 1)
+                        {
+                            var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
+                                .AppendSequence(potentials, (s, pr) => s.AppendLine($"**{pr.Name}** *({String.Join(", ", FgoHelpers.ServantDict.Single(d => d.Servant == pr.Name).Alias)})*"));
+
+                            await cea.Channel.SendMessage(sb.ToString());
                         }
                         else
                         {

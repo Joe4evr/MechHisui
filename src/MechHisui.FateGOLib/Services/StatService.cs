@@ -36,60 +36,62 @@ namespace MechHisui.FateGOLib
             ReadAliasList();
         }
 
-        public string LookupServantName(string servant)
+        public IEnumerable<ServantProfile> LookupStats(string servant)
         {
-            var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.Any(a => RegexMatch(a, servant)));
+            var servants = FgoHelpers.ServantProfiles.Where(p => p.Name.ContainsIgnoreCase(servant))
+                .Concat(FgoHelpers.FakeServantProfiles.Where(p => p.Name.ContainsIgnoreCase(servant)));
 
-            return (serv != null) ?
-                serv.Servant :
-                FgoHelpers.ServantDict.SingleOrDefault(p => p.Servant.ToLowerInvariant() == servant.ToLowerInvariant())?.Servant;
+            if (servants.Count() == 0)
+            {
+                var lookup = FgoHelpers.ServantDict.Where(k => k.Alias.Any(a => RegexMatch(a, servant)))
+                    .Select(l => l.Servant)
+                    .ToList();
+                if (lookup.Count > 0)
+                {
+                    Func<ServantProfile, bool> pred = p => lookup.Contains(p.Name);
+
+                    servants = FgoHelpers.ServantProfiles.Where(pred)
+                        .Concat(FgoHelpers.FakeServantProfiles.Where(pred));
+                }
+            }
+
+            return servants;
         }
 
-        public ServantProfile LookupStats(string servant)
+        public IEnumerable<CEProfile> LookupCE(string name)
         {
-            var serv = FgoHelpers.ServantDict.SingleOrDefault(k => k.Alias.Any(a => RegexMatch(a, servant)));
-            if (serv != null)
+            var ces = FgoHelpers.CEProfiles.Where(ce => ce.Name.ContainsIgnoreCase(name));
+
+            if (ces.Count() == 0)
             {
-                Func<ServantProfile, bool> eqServ = p => p.Name.ToLowerInvariant() == serv.Servant.ToLowerInvariant();
-                return FgoHelpers.ServantProfiles.SingleOrDefault(eqServ)
-                    ?? FgoHelpers.FakeServantProfiles.SingleOrDefault(eqServ);
+                var lookup = FgoHelpers.CEDict.Where(k => k.Alias.Any(a => RegexMatch(a, name)))
+                    .Select(l => l.CE)
+                    .ToList();
+                if (lookup.Count > 0)
+                {
+                    ces = FgoHelpers.CEProfiles.Where(ce => lookup.Contains(ce.Name));
+                }
             }
-            else
-            {
-                Func<ServantProfile, bool> eqArg = p => p.Name.ToLowerInvariant() == servant.ToLowerInvariant();
-                Func<ServantProfile, bool> containsArg = p => p.Name.ContainsIgnoreCase(servant);
-                return FgoHelpers.ServantProfiles.SingleOrDefault(eqArg)
-                    ?? FgoHelpers.ServantProfiles.SingleOrDefault(containsArg)
-                    ?? FgoHelpers.FakeServantProfiles.SingleOrDefault(eqArg)
-                    ?? FgoHelpers.FakeServantProfiles.SingleOrDefault(containsArg);
-            }
+
+            return ces;
         }
 
-        public CEProfile LookupCE(string name)
+        public IEnumerable<MysticCode> LookupMystic(string code)
         {
-            var ce = FgoHelpers.CEDict.SingleOrDefault(k => k.Alias.Any(a => RegexMatch(a, name)));
-            if (ce != null)
-            {
-                return FgoHelpers.CEProfiles.SingleOrDefault(p => p.Name == ce.CE);
-            }
-            else
-            {
-                return FgoHelpers.CEProfiles.SingleOrDefault(p => p.Name.ToLowerInvariant() == name.ToLowerInvariant())
-                    ?? FgoHelpers.CEProfiles.SingleOrDefault(p => p.Name.ContainsIgnoreCase(name.ToLowerInvariant()));
-            }
-        }
+            var mystics = FgoHelpers.MysticCodeList.Where(m => m.Code.ContainsIgnoreCase(code));
 
-        public MysticCode LookupMystic(string code)
-        {
-            var mystic = FgoHelpers.MysticCodeDict.SingleOrDefault(m => m.Alias.Any(a => RegexMatch(a, code)));
-            if (mystic != null)
+            if (mystics.Count() == 0)
             {
-                return FgoHelpers.MysticCodeList.SingleOrDefault(m => m.Code == mystic.Code);
+                var lookup = FgoHelpers.MysticCodeDict.Where(m => m.Alias.Any(a => RegexMatch(a, code)))
+                    .Select(l => l.Code)
+                    .ToList();
+                if (lookup.Count > 0)
+                {
+                    mystics = FgoHelpers.MysticCodeList.Where(m => lookup.Contains(m.Code));
+                }
             }
-            else
-            {
-                return FgoHelpers.MysticCodeList.SingleOrDefault(m => m.Code.ToLowerInvariant() == code.ToLowerInvariant());
-            }
+
+            return mystics;
         }
 
         //get table data and serialize to the respective lists so that they're cached
@@ -146,7 +148,13 @@ namespace MechHisui.FateGOLib
             }
         }
 
-        private static readonly Func<string, string, bool> RegexMatch = (a, str) => Regex.Match(a, "\b" + str + "\b", RegexOptions.IgnoreCase | RegexOptions.Singleline).Success;
+        private static readonly Func<string, string, bool> RegexMatch = (alias, str) =>
+        {
+            var reg = Regex.Match(alias, String.Concat(b, str, b), RegexOptions.IgnoreCase);
+            return reg.Success;
+        };
+
+        private const string b = @"\b";
 
         //{ new[] [ "" ], "Brynhildr" },
         //{ new[] [ "gil's bff" ], "Enkidu" },

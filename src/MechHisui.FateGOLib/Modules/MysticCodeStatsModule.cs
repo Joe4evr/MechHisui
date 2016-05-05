@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using JiiLib;
 using Newtonsoft.Json;
 using Discord.Commands;
 using Discord.Modules;
@@ -29,22 +30,24 @@ namespace MechHisui.FateGOLib.Modules
                 .Parameter("code", ParameterType.Unparsed)
                 .Do(async cea =>
                 {
-                    string arg = String.Join(" ", cea.Args);
+                    string arg = cea.Args[0];
 
-                    if (arg.ToLowerInvariant() == "chaldea")
+                    var codes = _statService.LookupMystic(arg);
+
+                    if (codes.Count() == 1)
                     {
-                        await cea.Channel.SendMessage("Search term ambiguous. Please be more specific.");
-                        return;
+                        await cea.Channel.SendMessage(FormatMysticCodeProfile(codes.Single()));
                     }
-
-                    MysticCode code = _statService.LookupMystic(arg);
-                    if (code == null)
+                    else if (codes.Count() > 1)
                     {
-                        await cea.Channel.SendMessage("Specified Mystic Code not found. Please use `.listmystic` for the list of available Mystic Codes.");
+                        var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
+                            .AppendSequence(codes, (s, m) => s.AppendLine($"**{m.Code}** *({String.Join(", ", FgoHelpers.CEDict.Single(d => d.CE == m.Code).Alias)})*"));
+
+                        await cea.Channel.SendMessage(sb.ToString());
                     }
                     else
                     {
-                        await cea.Channel.SendMessage(FormatMysticCodeProfile(code));
+                        await cea.Channel.SendMessage("Specified Mystic Code not found. Please use `.listmystic` for the list of available Mystic Codes.");
                     }
                 });
 
