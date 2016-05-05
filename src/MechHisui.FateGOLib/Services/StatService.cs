@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using JiiLib;
 using JiiLib.Net;
 using Newtonsoft.Json;
 
@@ -38,8 +37,8 @@ namespace MechHisui.FateGOLib
 
         public IEnumerable<ServantProfile> LookupStats(string servant)
         {
-            var servants = FgoHelpers.ServantProfiles.Where(p => p.Name.ContainsIgnoreCase(servant))
-                .Concat(FgoHelpers.FakeServantProfiles.Where(p => p.Name.ContainsIgnoreCase(servant)));
+            var servants = FgoHelpers.ServantProfiles.Concat(FgoHelpers.FakeServantProfiles)
+                .Where(p => RegexMatch(p.Name, servant));
 
             if (servants.Count() == 0)
             {
@@ -50,8 +49,8 @@ namespace MechHisui.FateGOLib
                 {
                     Func<ServantProfile, bool> pred = p => lookup.Contains(p.Name);
 
-                    servants = FgoHelpers.ServantProfiles.Where(pred)
-                        .Concat(FgoHelpers.FakeServantProfiles.Where(pred));
+                    servants = FgoHelpers.ServantProfiles.Concat(FgoHelpers.FakeServantProfiles)
+                        .Where(pred);
                 }
             }
 
@@ -60,7 +59,7 @@ namespace MechHisui.FateGOLib
 
         public IEnumerable<CEProfile> LookupCE(string name)
         {
-            var ces = FgoHelpers.CEProfiles.Where(ce => ce.Name.ContainsIgnoreCase(name));
+            var ces = FgoHelpers.CEProfiles.Where(ce => RegexMatch(ce.Name, name));
 
             if (ces.Count() == 0)
             {
@@ -78,7 +77,7 @@ namespace MechHisui.FateGOLib
 
         public IEnumerable<MysticCode> LookupMystic(string code)
         {
-            var mystics = FgoHelpers.MysticCodeList.Where(m => m.Code.ContainsIgnoreCase(code));
+            var mystics = FgoHelpers.MysticCodeList.Where(m => RegexMatch(m.Code, code));
 
             if (mystics.Count() == 0)
             {
@@ -148,8 +147,8 @@ namespace MechHisui.FateGOLib
             }
         }
 
-        private static readonly Func<string, string, bool> RegexMatch = (alias, str) =>
-            Regex.Match(alias, String.Concat(b, str, b), RegexOptions.IgnoreCase).Success;
+        private static readonly Func<string, string, bool> RegexMatch = (hay, needle) =>
+            Regex.Match(hay, String.Concat(b, needle, b), RegexOptions.IgnoreCase).Success;
 
         private const string b = @"\b";
 
