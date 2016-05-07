@@ -165,10 +165,11 @@ namespace MechHisui.FateGOLib.Modules
 
         private static string FormatServantProfile(ServantProfile profile)
         {
-            string aoe = ((profile.NoblePhantasmEffect?.Contains("AoE") == true) && Regex.Match(profile.NoblePhantasmEffect, "([2-9]|10)H").Success) ? " (Hits is per enemy)" : String.Empty;
+            string aoe = ((profile.NoblePhantasmEffect?.Contains("AoE") == true) && Regex.Match(profile.NoblePhantasmEffect, "([0-9]+)H").Success) ? " (Hits is per enemy)" : String.Empty;
             int a = 1;
             int p = 1;
             return new StringBuilder()
+                .AppendWhen(() => profile.Id < 0, b => b.AppendLine("***Not** a real profile.*"))
                 .AppendWhen(() => profile.Id == -3, b => b.Append("~~"))
                 .AppendLine($"**Collection ID:** {profile.Id}")
                 .AppendLine($"**Rarity:** {profile.Rarity}☆")
