@@ -184,7 +184,7 @@ namespace MechHisui.FateGOLib
             }
         }
 
-        private static readonly Func<string, string, bool> RegexMatchOneWord = (hay, needle)
+        private static bool RegexMatchOneWord(string hay, string needle)
             => Regex.Match(hay, String.Concat(b, needle, b), RegexOptions.IgnoreCase).Success;
 
         private const string b = @"\b";
