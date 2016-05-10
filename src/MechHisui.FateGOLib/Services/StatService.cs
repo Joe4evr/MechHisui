@@ -47,14 +47,16 @@ namespace MechHisui.FateGOLib
 
                 if (servants.Count() == 0)
                 {
-                    var lookup = FgoHelpers.ServantDict.Where(k => k.Alias.Any(a => a.Equals(servant, StringComparison.InvariantCultureIgnoreCase)))
-                        .Select(l => l.Servant)
+                    var lookup = FgoHelpers.ServantDict
+                        .Where(s => s.Key.Equals(servant, StringComparison.InvariantCultureIgnoreCase))
+                        .Select(s => s.Value)
                         .ToList();
 
                     if (lookup.Count == 0)
                     {
-                        lookup = FgoHelpers.ServantDict.Where(k => k.Alias.Any(a => RegexMatchOneWord(a, servant)))
-                            .Select(l => l.Servant)
+                        lookup = FgoHelpers.ServantDict
+                            .Where(s => RegexMatchOneWord(s.Key, servant))
+                            .Select(s => s.Value)
                             .ToList();
                     }
 
@@ -79,13 +81,15 @@ namespace MechHisui.FateGOLib
 
                 if (ces.Count() == 0)
                 {
-                    var lookup = FgoHelpers.CEDict.Where(k => k.Alias.Any(a => a.Equals(name, StringComparison.InvariantCultureIgnoreCase)))
-                        .Select(l => l.CE)
+                    var lookup = FgoHelpers.CEDict
+                        .Where(ce => ce.Key.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                        .Select(ce => ce.Value)
                         .ToList();
+
                     if (lookup.Count == 0)
                     {
-                        lookup = FgoHelpers.CEDict.Where(k => k.Alias.Any(a => RegexMatchOneWord(a, name)))
-                            .Select(l => l.CE)
+                        lookup = FgoHelpers.CEDict.Where(ce => RegexMatchOneWord(ce.Key, name))
+                            .Select(ce => ce.Value)
                             .ToList();
                     }
 
@@ -110,15 +114,17 @@ namespace MechHisui.FateGOLib
 
             if (mystics.Count() == 0)
             {
-                var lookup = FgoHelpers.MysticCodeDict.Where(m => m.Alias.Any(a => a.Equals(code, StringComparison.InvariantCultureIgnoreCase)))
-                    .Select(l => l.Code)
+                var lookup = FgoHelpers.MysticCodeDict
+                    .Where(m => m.Key.Equals(code, StringComparison.InvariantCultureIgnoreCase))
+                    .Select(m => m.Value)
                     .ToList();
 
                 if (lookup.Count == 0)
                 {
-                    lookup = FgoHelpers.MysticCodeDict.Where(m => m.Alias.Any(a => RegexMatchOneWord(a, code)))
-                    .Select(l => l.Code)
-                    .ToList();
+                    lookup = FgoHelpers.MysticCodeDict
+                        .Where(m => RegexMatchOneWord(m.Key, code))
+                        .Select(m => m.Value)
+                        .ToList();
                 }
 
                 if (lookup.Count > 0)
@@ -172,15 +178,36 @@ namespace MechHisui.FateGOLib
         {
             using (TextReader tr = new StreamReader(_servantAliasPath))
             {
-                FgoHelpers.ServantDict = JsonConvert.DeserializeObject<List<ServantAlias>>(tr.ReadToEnd()) ?? new List<ServantAlias>();
+                var temp = JsonConvert.DeserializeObject<List<ServantAlias>>(tr.ReadToEnd());
+                temp.ForEach(a =>
+                {
+                    for (int i = 0; i < a.Alias.Length; i++)
+                    {
+                        FgoHelpers.ServantDict.Add(a.Alias[i], a.Servant);
+                    }
+                });
             }
             using (TextReader tr = new StreamReader(_ceAliasPath))
             {
-                FgoHelpers.CEDict = JsonConvert.DeserializeObject<List<CEAlias>>(tr.ReadToEnd()) ?? new List<CEAlias>();
+                var temp = JsonConvert.DeserializeObject<List<CEAlias>>(tr.ReadToEnd());
+                temp.ForEach(a =>
+                {
+                    for (int i = 0; i < a.Alias.Length; i++)
+                    {
+                        FgoHelpers.CEDict.Add(a.Alias[i], a.CE);
+                    }
+                });
             }
             using (TextReader tr = new StreamReader(_mysticAliasPath))
             {
-                FgoHelpers.MysticCodeDict = JsonConvert.DeserializeObject<List<MysticAlias>>(tr.ReadToEnd()) ?? new List<MysticAlias>();
+                var temp = JsonConvert.DeserializeObject<List<MysticAlias>>(tr.ReadToEnd());
+                temp.ForEach(a =>
+                {
+                    for (int i = 0; i < a.Alias.Length; i++)
+                    {
+                        FgoHelpers.MysticCodeDict.Add(a.Alias[i], a.Code);
+                    }
+                });
             }
         }
 

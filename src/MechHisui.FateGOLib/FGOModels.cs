@@ -46,7 +46,7 @@ namespace MechHisui.FateGOLib
 
     public class ServantAlias
     {
-        public IList<string> Alias { get; set; }
+        public string[] Alias { get; set; }
         public string Servant { get; set; }
     }
 
@@ -73,7 +73,7 @@ namespace MechHisui.FateGOLib
 
     public class CEAlias
     {
-        public IList<string> Alias { get; set; }
+        public string[] Alias { get; set; }
         public string CE { get; set; }
     }
 
@@ -100,7 +100,7 @@ namespace MechHisui.FateGOLib
 
     public class MysticAlias
     {
-        public IList<string> Alias { get; set; }
+        public string[] Alias { get; set; }
         public string Code { get; set; }
     }
 

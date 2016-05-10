@@ -41,7 +41,7 @@ namespace MechHisui.FateGOLib.Modules
                     else if (codes.Count() > 1)
                     {
                         var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
-                            .AppendSequence(codes, (s, m) => s.AppendLine($"**{m.Code}** *({String.Join(", ", FgoHelpers.CEDict.Single(d => d.CE == m.Code).Alias)})*"));
+                            .AppendSequence(codes, (s, m) => s.AppendLine($"**{m.Code}** *({String.Join(", ", FgoHelpers.MysticCodeDict.Where(d => d.Value == m.Code).Select(d => d.Key))})*"));
 
                         await cea.Channel.SendMessage(sb.ToString());
                     }
@@ -72,27 +72,25 @@ namespace MechHisui.FateGOLib.Modules
                 .Parameter("alias", ParameterType.Required)
                 .Do(async cea =>
                 {
-                    var newAlias = FgoHelpers.MysticCodeDict.SingleOrDefault(p => p.Code == cea.Args[0]);
-                    var arg = cea.Args[1].ToLowerInvariant();
-                    var test = FgoHelpers.MysticCodeDict.Where(a => a.Alias.Contains(arg)).FirstOrDefault();
-                    if (test != null)
-                    {
-                        await cea.Channel.SendMessage($"Alias `{arg}` already exists for CE `{test.Code}`.");
-                        return;
-                    }
-                    else
-                    if (newAlias != null)
-                    {
-                        newAlias.Alias.Add(arg);
-                    }
-                    else
+                    var mystic = cea.Args[0];
+                    if (!FgoHelpers.MysticCodeDict.Values.Contains(mystic))
                     {
                         await cea.Channel.SendMessage("Could not find Mystic Code to add alias for.");
                         return;
                     }
 
-                    File.WriteAllText(Path.Combine(_config["AliasPath"], "mystic.json"), JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
-                    await cea.Channel.SendMessage($"Added alias `{arg}` for `{newAlias.Code}`.");
+                    var alias = cea.Args[1].ToLowerInvariant();
+                    try
+                    {
+                        FgoHelpers.MysticCodeDict.Add(alias, mystic);
+                        File.WriteAllText(Path.Combine(_config["AliasPath"], "mystic.json"), JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
+                        await cea.Channel.SendMessage($"Added alias `{alias}` for `{mystic}`.");
+                    }
+                    catch (ArgumentException)
+                    {
+                        await cea.Channel.SendMessage($"Alias `{alias}` already exists for CE `{FgoHelpers.MysticCodeDict[alias]}`.");
+                        return;
+                    }
                 });
         }
 

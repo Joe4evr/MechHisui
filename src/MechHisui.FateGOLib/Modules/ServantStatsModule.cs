@@ -27,8 +27,7 @@ namespace MechHisui.FateGOLib.Modules
         {
             Console.WriteLine("Registering 'Stats'...");
             manager.Client.GetService<CommandService>().CreateCommand("servant")
-                .Alias("stat")
-                .Alias("stats")
+                .Alias("stat", "stats")
                 .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(_config["FGO_server"]))
                 .Parameter("name", ParameterType.Unparsed)
                 .Description($"Relay information on the specified Servant. Alternative names acceptable.")
@@ -64,7 +63,7 @@ namespace MechHisui.FateGOLib.Modules
                         else if (potentials.Count() > 1)
                         {
                             var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
-                                .AppendSequence(potentials, (s, pr) => s.AppendLine($"**{pr.Name}** *({String.Join(", ", FgoHelpers.ServantDict.Single(d => d.Servant == pr.Name).Alias)})*"));
+                                .AppendSequence(potentials, (s, pr) => s.AppendLine($"**{pr.Name}** *({String.Join(", ", FgoHelpers.ServantDict.Where(d => d.Value == pr.Name).Select(d => d.Key))})*"));
 
                             await cea.Channel.SendMessage(sb.ToString());
                         }
@@ -83,40 +82,28 @@ namespace MechHisui.FateGOLib.Modules
                 .Parameter("alias", ParameterType.Required)
                 .Do(async cea =>
                 {
-                    ServantAlias newAlias = FgoHelpers.ServantDict.SingleOrDefault(p => p.Servant == cea.Args[0]);
-                    var arg = cea.Args[1].ToLowerInvariant();
-                    var test = FgoHelpers.ServantDict.Where(a => a.Alias.Contains(arg)).FirstOrDefault();
-                    if (test != null)
+                    var servant = cea.Args[0];
+                    if (!FgoHelpers.ServantDict.Values.Contains(servant))
                     {
-                        await cea.Channel.SendMessage($"Alias `{arg}` already exists for Servant `{test.Servant}`.");
+                        await cea.Channel.SendMessage("Could not find name to add alias for.");
                         return;
                     }
-                    else if (newAlias != null)
-                    {
-                        newAlias.Alias.Add(arg);
-                    }
-                    else
-                    {
-                        ServantProfile profile = FgoHelpers.ServantProfiles.SingleOrDefault(s => s.Name == cea.Args[0]);
-                        if (profile != null)
-                        {
-                            newAlias = new ServantAlias
-                            {
-                                Alias = new List<string> { arg },
-                                Servant = profile.Name
-                            };
-                        }
-                        else
-                        {
-                            await cea.Channel.SendMessage("Could not find name to add alias for.");
-                            return;
-                        }
-                    }
 
-                    File.WriteAllText(Path.Combine(_config["AliasPath"], "servants.json"), JsonConvert.SerializeObject(FgoHelpers.ServantDict, Formatting.Indented));
-                    await cea.Channel.SendMessage($"Added alias `{arg}` for `{newAlias.Servant}`.");
-                }); Console.WriteLine("Registering 'Curve'...");
+                    var alias = cea.Args[1].ToLowerInvariant();
+                    try
+                    {
+                        FgoHelpers.ServantDict.Add(alias, servant);
+                        File.WriteAllText(Path.Combine(_config["AliasPath"], "servants.json"), JsonConvert.SerializeObject(FgoHelpers.ServantDict, Formatting.Indented));
+                        await cea.Channel.SendMessage($"Added alias `{alias}` for `{servant}`.");
+                    }
+                    catch (ArgumentException)
+                    {
+                        await cea.Channel.SendMessage($"Alias `{alias}` already exists for Servant `{FgoHelpers.ServantDict[alias]}`.");
+                        return;
+                    }
+                });
 
+            Console.WriteLine("Registering 'Curve'...");
             manager.Client.GetService<CommandService>().CreateCommand("curve")
                 .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(_config["FGO_server"]))
                 .Hide()

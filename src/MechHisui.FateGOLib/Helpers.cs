@@ -17,14 +17,14 @@ namespace MechHisui.FateGOLib
 
         public static List<ServantProfile> ServantProfiles = new List<ServantProfile>();
         public static List<ServantProfile> FakeServantProfiles = new List<ServantProfile>();
-        public static List<ServantAlias> ServantDict = new List<ServantAlias>();
+        public static Dictionary<string, string> ServantDict = new Dictionary<string, string>();
 
         public static List<CEProfile> CEProfiles = new List<CEProfile>();
-        public static List<CEAlias> CEDict = new List<CEAlias>();
+        public static Dictionary<string, string> CEDict = new Dictionary<string, string>();
 
         public static List<Event> EventList = new List<Event>();
         public static List<MysticCode> MysticCodeList = new List<MysticCode>();
-        public static List<MysticAlias> MysticCodeDict = new List<MysticAlias>();
+        public static Dictionary<string, string> MysticCodeDict = new Dictionary<string, string>();
 
         public static List<NodeDrop> ItemDropsList = new List<NodeDrop>();
         public static List<string> Masters = new List<string>();
@@ -59,10 +59,5 @@ namespace MechHisui.FateGOLib
 
         public static IEnumerable<ServantProfile> WhereTrait(this IEnumerable<ServantProfile> profiles, string trait)
             => profiles.Where(p => p.Traits.ContainsIgnoreCase(trait));
-
-        //private static string test()
-        //{
-        //    
-        //}
     }
 }

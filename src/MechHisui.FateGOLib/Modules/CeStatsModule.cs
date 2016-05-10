@@ -47,7 +47,7 @@ namespace MechHisui.FateGOLib.Modules
                         else if (potentials.Count() > 1)
                         {
                             var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
-                                .AppendSequence(potentials, (s, pr) => s.AppendLine($"**{pr.Name}** *({String.Join(", ", FgoHelpers.CEDict.Single(d => d.CE == pr.Name).Alias)})*"));
+                                .AppendSequence(potentials, (s, pr) => s.AppendLine($"**{pr.Name}** *({String.Join(", ", FgoHelpers.CEDict.Where(d => d.Value == pr.Name).Select(d => d.Key))})*"));
 
                             await cea.Channel.SendMessage(sb.ToString());
                         }
@@ -96,44 +96,31 @@ namespace MechHisui.FateGOLib.Modules
 
             Console.WriteLine("Registering 'CE alias'...");
             manager.Client.GetService<CommandService>().CreateCommand("cealias")
-                .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(UInt64.Parse(_config["FGO_Admins"])) && ch.Server.Id == UInt64.Parse(_config["FGO_server"]))
+                .AddCheck((c, u, ch) => u.Roles.Select(r => r.Id).Contains(ulong.Parse(_config["FGO_Admins"])) && ch.Server.Id == ulong.Parse(_config["FGO_server"]))
                 .Hide()
                 .Parameter("ce", ParameterType.Required)
                 .Parameter("alias", ParameterType.Required)
                 .Do(async cea =>
                 {
-                    CEAlias newAlias = FgoHelpers.CEDict.SingleOrDefault(p => p.CE == cea.Args[0]);
-                    var arg = cea.Args[1].ToLowerInvariant();
-                    var test = FgoHelpers.CEDict.Where(a => a.Alias.Contains(arg)).FirstOrDefault();
-                    if (test != null)
+                    var ce = cea.Args[0];
+                    if (!FgoHelpers.CEDict.Values.Contains(ce))
                     {
-                        await cea.Channel.SendMessage($"Alias `{arg}` already exists for CE `{test.CE}`.");
+                        await cea.Channel.SendMessage("Could not find name to add alias for.");
                         return;
                     }
-                    else if (newAlias != null)
-                    {
-                        newAlias.Alias.Add(arg);
-                    }
-                    else
-                    {
-                        CEProfile ce = FgoHelpers.CEProfiles.SingleOrDefault(s => s.Name == cea.Args[0]);
-                        if (ce != null)
-                        {
-                            newAlias = new CEAlias
-                            {
-                                Alias = new List<string> { arg },
-                                CE = ce.Name
-                            };
-                        }
-                        else
-                        {
-                            await cea.Channel.SendMessage("Could not find name to add alias for.");
-                            return;
-                        }
-                    }
 
-                    File.WriteAllText(Path.Combine(_config["AliasPath"], "ces.json"), JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
-                    await cea.Channel.SendMessage($"Added alias `{arg}` for `{newAlias.CE}`.");
+                    var alias = cea.Args[1].ToLowerInvariant();
+                    try
+                    {
+                        FgoHelpers.CEDict.Add(alias, ce);
+                        File.WriteAllText(Path.Combine(_config["AliasPath"], "ces.json"), JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
+                        await cea.Channel.SendMessage($"Added alias `{alias}` for `{ce}`.");
+                    }
+                    catch (ArgumentException)
+                    {
+                        await cea.Channel.SendMessage($"Alias `{alias}` already exists for CE `{FgoHelpers.CEDict[alias]}`.");
+                        return;
+                    }
                 });
         }
 
