@@ -10,7 +10,7 @@ namespace MechHisui.HisuiBets
 {
     public class Game
     {
-        public IList<Bet> ActiveBets { get; }
+        public List<Bet> ActiveBets { get; }
         public GameType GType { get; }
         public bool GameOpen { get; private set; }
         public bool BetsOpen { get; private set; }

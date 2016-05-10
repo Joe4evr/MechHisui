@@ -17,6 +17,16 @@ namespace MechHisui.HisuiBets
         private readonly BankOfHisui _bank;
         private readonly Timer _upTimer;
         private readonly IConfiguration _config;
+        private readonly ulong[] _blacklist = new[]
+        {
+            121687861350105089ul,
+            124939115396333570ul,
+            145964622984380416ul,
+            168215800946098176ul,
+            168263616250904576ul,
+            168298664698052617ul,
+            175851451988312064ul
+        };
 
         const char symbol = '\u050A';
 
@@ -114,6 +124,11 @@ namespace MechHisui.HisuiBets
                         await cea.Channel.SendMessage("Bets are currently closed at this time.");
                         return;
                     }
+                    if (_blacklist.Contains(cea.User.Id))
+                    {
+                        await cea.Channel.SendMessage("Not allowed to bet.");
+                        return;
+                    }
 
                     var userBucks = _bank.Accounts.SingleOrDefault(u => u.UserId == cea.User.Id).Bucks;
                     if (userBucks == 0)
@@ -156,7 +171,7 @@ namespace MechHisui.HisuiBets
 
             manager.Client.GetService<CommandService>().CreateCommand("checkbets")
                 .Alias("betstats")
-                .AddCheck((c, u, ch) =>ch.Id == UInt64.Parse(_config["FGO_Hgames"]) && (u.Id == UInt64.Parse(_config["Hgame_Master"]) || u.Id == UInt64.Parse(_config["Owner"])))
+                .AddCheck((c, u, ch) => (ch.Id == UInt64.Parse(_config["FGO_Hgames"]) && u.Id == UInt64.Parse(_config["Hgame_Master"])) || u.Id == UInt64.Parse(_config["Owner"]))
                 .Do(async cea =>
                 {
                     Console.WriteLine("Checking for an open game");
@@ -176,7 +191,7 @@ namespace MechHisui.HisuiBets
                     Console.WriteLine("Constructing StringBuilder");
                     var sb = new StringBuilder("The following bets have been made:\n```\n");
                     Console.WriteLine("Looping through active bets");
-                    foreach (var bet in _game.ActiveBets.ToList())
+                    foreach (var bet in _game.ActiveBets)
                     {
                         var nameSpaces = new String(' ', (longestName - bet.UserName.Length) + 1);
                         var betSpaces = new String(' ', (longestBet - bet.BettedAmount.ToString().Length));
@@ -189,7 +204,7 @@ namespace MechHisui.HisuiBets
 
                             sb.Append("```");
                             await cea.Channel.SendMessage(sb.ToString());
-                            sb = new StringBuilder("```\n");
+                            sb.Clear().AppendLine("```");
                         }
                     }
                     sb.Append("```");
@@ -272,7 +287,7 @@ namespace MechHisui.HisuiBets
                         var target = cea.Message.MentionedUsers.FirstOrDefault();
                         if (target != null)
                         {
-                            if (target.IsBot)
+                            if (_blacklist.Contains(cea.User.Id))
                             {
                                 await cea.Channel.SendMessage("Unable to donate to Bot accounts.");
                                 return;
@@ -341,7 +356,7 @@ namespace MechHisui.HisuiBets
             var accounts = _bank.Accounts.Select(u => u.UserId);
             foreach (var user in fgo.Users)
             {
-                if (!accounts.Contains(user.Id) && user.Id != 0 && !user.IsBot)
+                if (!accounts.Contains(user.Id) && user.Id != 0 && !_blacklist.Contains(user.Id))
                 {
                     _bank.Accounts.Add(new UserBucks { UserId = user.Id, Bucks = 100 });
                 }
