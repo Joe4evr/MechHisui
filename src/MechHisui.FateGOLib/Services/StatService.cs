@@ -35,24 +35,24 @@ namespace MechHisui.FateGOLib
             ReadAliasList();
         }
 
-        public IEnumerable<ServantProfile> LookupStats(string servant)
+        public IEnumerable<ServantProfile> LookupStats(string servant, bool fullsearch = false)
         {
             var servants = FgoHelpers.ServantProfiles.Concat(FgoHelpers.FakeServantProfiles)
                 .Where(p => p.Name.Equals(servant, StringComparison.InvariantCultureIgnoreCase));
 
-            if (servants.Count() == 0)
+            if (servants.Count() == 0 || fullsearch)
             {
                 servants = FgoHelpers.ServantProfiles.Concat(FgoHelpers.FakeServantProfiles)
                     .Where(p => RegexMatchOneWord(p.Name, servant));
 
-                if (servants.Count() == 0)
+                if (servants.Count() == 0 || fullsearch)
                 {
                     var lookup = FgoHelpers.ServantDict
                         .Where(s => s.Key.Equals(servant, StringComparison.InvariantCultureIgnoreCase))
                         .Select(s => s.Value)
                         .ToList();
 
-                    if (lookup.Count == 0)
+                    if (lookup.Count == 0 || fullsearch)
                     {
                         lookup = FgoHelpers.ServantDict
                             .Where(s => RegexMatchOneWord(s.Key, servant))
@@ -71,22 +71,22 @@ namespace MechHisui.FateGOLib
             return servants;
         }
 
-        public IEnumerable<CEProfile> LookupCE(string name)
+        public IEnumerable<CEProfile> LookupCE(string name, bool fullsearch = false)
         {
             var ces = FgoHelpers.CEProfiles.Where(ce => ce.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
 
-            if (ces.Count() == 0)
+            if (ces.Count() == 0 || fullsearch)
             {
                 ces = FgoHelpers.CEProfiles.Where(ce => RegexMatchOneWord(ce.Name, name));
 
-                if (ces.Count() == 0)
+                if (ces.Count() == 0 || fullsearch)
                 {
                     var lookup = FgoHelpers.CEDict
                         .Where(ce => ce.Key.Equals(name, StringComparison.InvariantCultureIgnoreCase))
                         .Select(ce => ce.Value)
                         .ToList();
 
-                    if (lookup.Count == 0)
+                    if (lookup.Count == 0 || fullsearch)
                     {
                         lookup = FgoHelpers.CEDict.Where(ce => RegexMatchOneWord(ce.Key, name))
                             .Select(ce => ce.Value)
@@ -103,23 +103,23 @@ namespace MechHisui.FateGOLib
             return ces;
         }
 
-        public IEnumerable<MysticCode> LookupMystic(string code)
+        public IEnumerable<MysticCode> LookupMystic(string code, bool fullsearch = false)
         {
             var mystics = FgoHelpers.MysticCodeList.Where(m => m.Code.Equals(code, StringComparison.InvariantCultureIgnoreCase));
 
-            if (mystics.Count() == 0)
+            if (mystics.Count() == 0 || fullsearch)
             {
                 mystics = FgoHelpers.MysticCodeList.Where(m => RegexMatchOneWord(m.Code, code));
             }
 
-            if (mystics.Count() == 0)
+            if (mystics.Count() == 0 || fullsearch)
             {
                 var lookup = FgoHelpers.MysticCodeDict
                     .Where(m => m.Key.Equals(code, StringComparison.InvariantCultureIgnoreCase))
                     .Select(m => m.Value)
                     .ToList();
 
-                if (lookup.Count == 0)
+                if (lookup.Count == 0 || fullsearch)
                 {
                     lookup = FgoHelpers.MysticCodeDict
                         .Where(m => RegexMatchOneWord(m.Key, code))
@@ -176,39 +176,9 @@ namespace MechHisui.FateGOLib
 
         public void ReadAliasList()
         {
-            using (TextReader tr = new StreamReader(_servantAliasPath))
-            {
-                var temp = JsonConvert.DeserializeObject<List<ServantAlias>>(tr.ReadToEnd());
-                temp.ForEach(a =>
-                {
-                    for (int i = 0; i < a.Alias.Length; i++)
-                    {
-                        FgoHelpers.ServantDict.Add(a.Alias[i], a.Servant);
-                    }
-                });
-            }
-            using (TextReader tr = new StreamReader(_ceAliasPath))
-            {
-                var temp = JsonConvert.DeserializeObject<List<CEAlias>>(tr.ReadToEnd());
-                temp.ForEach(a =>
-                {
-                    for (int i = 0; i < a.Alias.Length; i++)
-                    {
-                        FgoHelpers.CEDict.Add(a.Alias[i], a.CE);
-                    }
-                });
-            }
-            using (TextReader tr = new StreamReader(_mysticAliasPath))
-            {
-                var temp = JsonConvert.DeserializeObject<List<MysticAlias>>(tr.ReadToEnd());
-                temp.ForEach(a =>
-                {
-                    for (int i = 0; i < a.Alias.Length; i++)
-                    {
-                        FgoHelpers.MysticCodeDict.Add(a.Alias[i], a.Code);
-                    }
-                });
-            }
+            FgoHelpers.ServantDict    = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(_servantAliasPath));
+            FgoHelpers.CEDict         = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(_ceAliasPath));
+            FgoHelpers.MysticCodeDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(_mysticAliasPath));
         }
 
         private static bool RegexMatchOneWord(string hay, string needle)

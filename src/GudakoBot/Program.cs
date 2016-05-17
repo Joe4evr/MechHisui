@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Microsoft.AspNet.Hosting;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.PlatformAbstractions;
 using Discord;
@@ -19,15 +19,15 @@ namespace GudakoBot
         public static void Main(string[] args)
         {
             PlatformServices ps = PlatformServices.Default;
-            IApplicationEnvironment env = ps.Application;
-            //Console.WriteLine($"Base: {env.ApplicationBasePath}");
+            var env = ps.Application;
+            Console.WriteLine($"Base: {env.ApplicationBasePath}");
 
             IConfigurationBuilder builder = new ConfigurationBuilder()
                 .AddEnvironmentVariables()
                 .SetBasePath(env.ApplicationBasePath);
 
             IHostingEnvironment hostingEnv = new HostingEnvironment();
-            hostingEnv.Initialize(env.ApplicationBasePath, builder.Build());
+            hostingEnv.Initialize(env.ApplicationName, env.ApplicationBasePath, new WebHostOptions());
             if (hostingEnv.IsDevelopment())
             {
                 Console.WriteLine("Loading from UserSecret store");
@@ -36,7 +36,9 @@ namespace GudakoBot
             else
             {
                 Console.WriteLine("Loading from jsons directory");
-                builder.AddJsonFile(@"..\..\..\..\GudakoBot-jsons\secrets.json");
+                builder.AddInMemoryCollection(JsonConvert.DeserializeObject<Dictionary<string, string>>(
+                    File.ReadAllText(@"..\GudakoBot-jsons\secrets.json")
+                ));
             }
 
             IConfiguration config = builder.Build();
@@ -57,7 +59,7 @@ namespace GudakoBot
             });
 
             //Display all log messages in the console
-            client.Log.Message += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
+            client.Log.Message += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}"); //File.AppendAllText(logPath, $"[{e.Severity}] {e.Source}: {e.Message}"); 
             client.MessageReceived += (s, e) =>
             {
                 if (e.Message.User.Id == owner && e.Message.Text == "-new")

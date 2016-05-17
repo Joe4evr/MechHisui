@@ -186,7 +186,7 @@ namespace MechHisui.Modules
 
         public async Task<string> Eval(Func<Task> func) => (await func()?.ContinueWith(t => ""Executed"")) ?? ""null"";
 
-        public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(async () => await Task.Run(() => {0}));
+        public async Task<string> Exec(DiscordClient client, CommandEventArgs e) => await Eval(async () => {0});
     }}
 }}");
                 return new EvalModule(_references, sb.ToString(), checkFunc);

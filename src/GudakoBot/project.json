@@ -1,31 +1,38 @@
 ﻿{
-    "version": "1.0.0-*",
-    "description": "GudakoBot Console Application",
-    "authors": [ "Jonathan" ],
-    "tags": [ "" ],
-    "projectUrl": "",
-    "licenseUrl": "",
+	"version": "1.0.0-*",
+	"description": "GudakoBot",
+	"authors": [ "Jonathan" ],
 
-    "compilationOptions": {
-        "emitEntryPoint": true
-    },
+	"packOptions": {
+		"tags": [ "" ],
+		"projectUrl": "",
+		"licenseUrl": ""
 
-    "dependencies": {
-        "Microsoft.AspNet.Hosting": "1.0.0-rc1-final",
-        "Microsoft.AspNet.Hosting.Abstractions": "1.0.0-rc1-final",
-        "Microsoft.Extensions.Configuration.Abstractions": "1.0.0-rc1-final",
-        "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final",
-        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
-        "Discord.Net": "0.9.1",
-        "JiiLib": "0.1.2"
-    },
+	},
 
-    "commands": {
-        "GudakoBot": "GudakoBot"
-    },
+	"buildOptions": {
+		"emitEntryPoint": true
+	},
 
-    "frameworks": {
-        "dnx46": { }
-    },
-    "userSecretsId": "aspnet5-GudakoBot-20160212024053"
+	"dependencies": {
+		"Microsoft.AspNetCore.Hosting": "1.0.0-rc2-final",
+		"Microsoft.Extensions.Configuration": "1.0.0-rc2-final",
+		"Microsoft.Extensions.Configuration.Abstractions": "1.0.0-rc2-final",
+		"Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0-rc2-final",
+		"Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc2-final",
+		"Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-final",
+		"Discord.Net": "0.9.1",
+		"JiiLib": "0.1.2"
+	},
+
+	"commands": {
+		"GudakoBot": "GudakoBot"
+	},
+
+	"frameworks": {
+		"net46": {
+			"imports": [ "portable-net45+win8" ]
+		}
+	},
+	"userSecretsId": "aspnet5-GudakoBot-20160212024053"
 }

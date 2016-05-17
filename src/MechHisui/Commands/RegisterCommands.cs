@@ -20,62 +20,6 @@ namespace MechHisui.Commands
 {
     public static class RegisterCommands
     {
-        public static void RegisterAddChannelCommand(this DiscordClient client, IConfiguration config)
-        {
-            Console.WriteLine("Registering 'Add channel'...");
-            client.GetService<CommandService>().CreateCommand("add")
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]) && Helpers.IsWhilested(ch, client))
-                .Hide()
-                .Parameter("id", ParameterType.Required)
-                // .Parameter("services", ParameterType.Multiple)
-                .Do(async cea =>
-                {
-                    ulong ch;
-                    if (UInt64.TryParse(cea.Args[0], out ch))
-                    {
-                        Channel chan = client.GetChannel(ch);
-                        client.GetService<ModuleService>().Modules
-                            .SingleOrDefault(m => m.Id == nameof(ChannelWhitelistModule).ToLowerInvariant())
-                            .EnableChannel(chan);
-
-                        //if (cea.Args.Length > 1)
-                        //{
-                        //    List<string> services = new List<string>();
-                        //    for (int i = 1; i < cea.Args.Length; i++)
-                        //    {
-                        //        if (cea.Args[i] == nameof(Responder).ToLowerInvariant())
-                        //        {
-                        //            client.MessageReceived += (new Responder(chan, client).Respond);
-                        //        }
-                        //        else if (cea.Args[i] == nameof(Recorder).ToLowerInvariant())
-                        //        {
-
-                        //        }
-                        //        else
-                        //        {
-                        //            continue;
-                        //        }
-                        //        services.Add(cea.Args[i]);
-                        //    }
-
-                        //    await client.SendMessage(cea.Channel, $"Now listening on channel {chan.Name} in {chan.Server.Name} with {String.Join(", ", services)} until next shutdown.");
-                        //}
-                        //else
-                        //{
-                        //    await client.SendMessage(cea.Channel, $"Now listening on channel {chan.Name} in {chan.Server.Name} until next shutdown.");
-                        //}
-
-                        client.MessageReceived += (new Responder().Respond);
-                        await cea.Channel.SendMessage($"Now listening on channel `{chan.Name}` in `{chan.Server.Name}` until next shutdown.");
-                        await chan.SendMessage(config["Hello"]);
-                    }
-                    else
-                    {
-                        await cea.Channel.SendMessage("Could not parse channel ID.");
-                    }
-                });
-        }
-
         public static void RegisterDeleteCommand(this DiscordClient client, IConfiguration config)
         {
             Console.WriteLine("Registering 'Delete'...");
@@ -167,42 +111,6 @@ namespace MechHisui.Commands
                         Console.WriteLine($"{channel.Name}:  {channel.Id}");
                     }
                     await cea.Channel.SendMessage("Known Channel IDs logged to console.");
-                });
-        }
-
-        public static void RegisterLearnCommand(this DiscordClient client, IConfiguration config)
-        {
-            Console.WriteLine("Registering 'Learn'...");
-            client.GetService<CommandService>().CreateCommand("learn")
-                .AddCheck((c, u, ch) => u.Id == UInt64.Parse(config["Owner"]))
-                .Parameter("trigger", ParameterType.Required)
-                .Parameter("response", ParameterType.Required)
-                .Parameter("kind", ParameterType.Optional)
-                .Hide()
-                .Do(async cea =>
-                {
-                    string triggger = cea.Args[0];
-                    string response = cea.Args[1];
-                    //var response = new Response { Call = new[] { cea.Args[0] }, Resp = new[] { cea.Args[1] } };
-                    Responses.responseDict.AddOrUpdate(
-                        Responses.responseDict.SingleOrDefault(kv => kv.Key.Contains(triggger)).Key ?? new string[] { triggger },
-                        new string[] { response },
-                        (k, v) =>
-                        {
-                            var t = v.ToList();
-                            t.Add(response);
-                            return t.ToArray();
-                        });
-                    using (TextWriter tw = new StreamWriter(config["ResponsesPath"]))
-                    {
-                        var l = new List<Response>();
-                        foreach (var item in Responses.responseDict)
-                        {
-                            l.Add(new Response { Call = item.Key, Resp = item.Value });
-                        }
-                        tw.Write(JsonConvert.SerializeObject(l, Formatting.Indented));
-                    }
-                    await cea.Channel.SendMessage($"Understood. Shall respond to `{triggger}` with `{response}`.");
                 });
         }
 
@@ -463,7 +371,7 @@ namespace MechHisui.Commands
             }
         }
 
-        private static void StopReponders(DiscordClient client, List<Responder> resps)
+        private static void StopReponders(DiscordClient client, List<ResponderModule> resps)
         {
             if (resps.Any())
             {

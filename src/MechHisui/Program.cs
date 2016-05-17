@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Hosting;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.PlatformAbstractions;
+using Newtonsoft.Json;
 using Discord;
 using Discord.Commands;
 using Discord.Modules;
@@ -23,13 +26,13 @@ namespace MechHisui
         public static void Main(string[] args)
         {
             PlatformServices ps = PlatformServices.Default;
-            IApplicationEnvironment env = ps.Application;
+            var env = ps.Application;
             IConfigurationBuilder builder = new ConfigurationBuilder()
                 .AddEnvironmentVariables()
                 .SetBasePath(env.ApplicationBasePath);
 
             IHostingEnvironment hostingEnv = new HostingEnvironment();
-            hostingEnv.Initialize(env.ApplicationBasePath, builder.Build());
+            hostingEnv.Initialize(env.ApplicationName, env.ApplicationBasePath, new WebHostOptions());
             if (hostingEnv.IsDevelopment())
             {
                 Console.WriteLine("Loading from UserSecret store");
@@ -38,7 +41,9 @@ namespace MechHisui
             else
             {
                 Console.WriteLine("Loading from jsons directory");
-                builder.AddJsonFile(@"..\..\..\..\..\..\MechHisui-jsons\secrets.json");
+                builder.AddInMemoryCollection(JsonConvert.DeserializeObject<Dictionary<string, string>>(
+                    File.ReadAllText(@"..\MechHisui-jsons\secrets.json")
+                ));
             }
 
             //var dbContext = new MechHisuiDbContext();
@@ -93,7 +98,7 @@ namespace MechHisui
             //client.RegisterImageCommand(config);
             client.RegisterInfoCommand(config);
             //client.RegisterKnownChannelsCommand(config);
-            client.RegisterLearnCommand(config);
+            //client.RegisterLearnCommand(config);
             client.RegisterPickCommand(config);
             //client.RegisterRecordingCommand(config);
             //client.RegisterResetCommand(config);
@@ -108,7 +113,7 @@ namespace MechHisui
             client.AddModule(new FriendsModule(config["FriendcodePath"],
                 (c, u, ch) => ch.Id == UInt64.Parse(config["FGO_playground"])));
             client.RegisterLoginBonusCommand(config);
-            client.RegisterPsa(config);
+            
             new FgoStatsMetaModule(config).InstallModules(client);
             //client.RegisterStatsCommands(config);
             client.RegisterQuartzCommand(config);
@@ -121,9 +126,8 @@ namespace MechHisui
 
             //client.RegisterTriviaCommand(config);
 
-            Console.WriteLine("Initializing Responder...");
-            Responses.InitResponses(config);
-            client.MessageReceived += (new Responder().Respond);
+            var rm = new ResponderModule(config);
+            client.AddModule(rm);
 
             int lastcode = 0;
             if (args.Length > 0 && Int32.TryParse(args[0], out lastcode) && lastcode != 0)

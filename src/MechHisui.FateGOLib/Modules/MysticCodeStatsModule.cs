@@ -83,7 +83,7 @@ namespace MechHisui.FateGOLib.Modules
                     try
                     {
                         FgoHelpers.MysticCodeDict.Add(alias, mystic);
-                        File.WriteAllText(Path.Combine(_config["AliasPath"], "mystic.json"), JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
+                        File.WriteAllText(Path.Combine(_config["AliasPath"], "mystics.json"), JsonConvert.SerializeObject(FgoHelpers.MysticCodeDict, Formatting.Indented));
                         await cea.Channel.SendMessage($"Added alias `{alias}` for `{mystic}`.");
                     }
                     catch (ArgumentException)

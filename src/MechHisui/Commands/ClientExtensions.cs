@@ -15,7 +15,7 @@ namespace MechHisui
         private static List<Recorder> _recorders = new List<Recorder>();
         internal static List<Recorder> GetRecorders(this DiscordClient client) => _recorders;
         
-        private static List<Responder> _responders = new List<Responder>();
-        internal static List<Responder> GetResponders(this DiscordClient client) => _responders;
+        private static List<ResponderModule> _responders = new List<ResponderModule>();
+        internal static List<ResponderModule> GetResponders(this DiscordClient client) => _responders;
     }
 }
