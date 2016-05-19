@@ -90,9 +90,15 @@ namespace GudakoBot
                     }
                     else
                     {
-                        Console.WriteLine($"{DateTime.Now}: Sending message.");
+                        string str;
                         Randomlines = Randomlines.Shuffle();
-                        await channel.SendMessage(Randomlines.ElementAt(rng.Next(maxValue: Randomlines.Count())));
+                        
+                        do str = Randomlines.ElementAt(rng.Next(maxValue: Randomlines.Count()));
+                        while (str == lastLine);
+                        
+                        Console.WriteLine($"{DateTime.Now}: Sending message.");
+                        await channel.SendMessage(str);
+                        lastLine = str;
                     }
                 },
                 null,
@@ -111,5 +117,6 @@ namespace GudakoBot
 
         private static IEnumerable<string> Randomlines = new List<string>();
         private static Timer timer;
+        private static string lastLine;
     }
 }

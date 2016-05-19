@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Discord;
 using Discord.Commands;
@@ -14,7 +12,6 @@ using Discord.Modules;
 using JiiLib;
 using Newtonsoft.Json;
 using MechHisui.Modules;
-using MechHisui.TriviaService;
 
 namespace MechHisui.Commands
 {
@@ -123,7 +120,7 @@ namespace MechHisui.Commands
                 .Description("Randomly choose something from any number of items.")
                 .Do(async cea =>
                 {
-                    Console.WriteLine($"{DateTime.Now}: Command `pick` invoked");
+                    //Console.WriteLine($"{DateTime.Now}: Command `pick` invoked");
                     if (cea.Args.Length <= 1)
                     {
                         await cea.Channel.SendMessage("Provide at least two items.");
@@ -273,13 +270,13 @@ namespace MechHisui.Commands
                             //        sb.AppendLine($"{item.channel.Server.Name} - {item.channel.Name}");
                             //    }
                             //    break;
-                            case ChannelActivity.Trivia:
-                                sb.AppendLine("Currently holding trivia in: ");
-                                foreach (var item in client.GetTrivias())
-                                {
-                                    sb.AppendLine($"{item.Channel.Server.Name} - {item.Channel.Name}");
-                                }
-                                break;
+                            //case ChannelActivity.Trivia:
+                            //    sb.AppendLine("Currently holding trivia in: ");
+                            //    foreach (var item in client.GetTrivias())
+                            //    {
+                            //        sb.AppendLine($"{item.Channel.Server.Name} - {item.Channel.Name}");
+                            //    }
+                            //    break;
                             default:
                                 break;
                         }
@@ -349,16 +346,16 @@ namespace MechHisui.Commands
             Environment.Exit(code);
         }
 
-        private static async Task StopTrvias(List<Trivia> trivs)
-        {
-            if (trivs.Any())
-            {
-                foreach (var triv in trivs)
-                {
-                    await triv.EndTriviaEarly();
-                }
-            }
-        }
+        //private static async Task StopTrvias(List<Trivia> trivs)
+        //{
+        //    if (trivs.Any())
+        //    {
+        //        foreach (var triv in trivs)
+        //        {
+        //            await triv.EndTriviaEarly();
+        //        }
+        //    }
+        //}
 
         private static async Task StopRecorders(DiscordClient client, List<Recorder> recs)
         {

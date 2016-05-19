@@ -37,13 +37,13 @@ namespace MechHisui.FateGOLib
 
         public IEnumerable<ServantProfile> LookupStats(string servant, bool fullsearch = false)
         {
-            var servants = FgoHelpers.ServantProfiles.Concat(FgoHelpers.FakeServantProfiles)
+            var list = FgoHelpers.ServantProfiles.Concat(FgoHelpers.FakeServantProfiles);
+            var servants = list
                 .Where(p => p.Name.Equals(servant, StringComparison.InvariantCultureIgnoreCase));
 
             if (servants.Count() == 0 || fullsearch)
             {
-                servants = FgoHelpers.ServantProfiles.Concat(FgoHelpers.FakeServantProfiles)
-                    .Where(p => RegexMatchOneWord(p.Name, servant));
+                servants = servants.Concat(list.Where(p => RegexMatchOneWord(p.Name, servant)));
 
                 if (servants.Count() == 0 || fullsearch)
                 {
@@ -54,16 +54,14 @@ namespace MechHisui.FateGOLib
 
                     if (lookup.Count == 0 || fullsearch)
                     {
-                        lookup = FgoHelpers.ServantDict
+                        lookup.Concat(FgoHelpers.ServantDict
                             .Where(s => RegexMatchOneWord(s.Key, servant))
-                            .Select(s => s.Value)
-                            .ToList();
+                            .Select(s => s.Value));
                     }
 
                     if (lookup.Count > 0)
                     {
-                        servants = FgoHelpers.ServantProfiles.Concat(FgoHelpers.FakeServantProfiles)
-                            .Where(p => lookup.Contains(p.Name));
+                        servants = servants.Concat(list.Where(p => lookup.Contains(p.Name)));
                     }
                 }
             }
@@ -73,11 +71,12 @@ namespace MechHisui.FateGOLib
 
         public IEnumerable<CEProfile> LookupCE(string name, bool fullsearch = false)
         {
-            var ces = FgoHelpers.CEProfiles.Where(ce => ce.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+            var ces = FgoHelpers.CEProfiles
+                .Where(ce => ce.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
 
             if (ces.Count() == 0 || fullsearch)
             {
-                ces = FgoHelpers.CEProfiles.Where(ce => RegexMatchOneWord(ce.Name, name));
+                ces = ces.Concat(FgoHelpers.CEProfiles.Where(ce => RegexMatchOneWord(ce.Name, name)));
 
                 if (ces.Count() == 0 || fullsearch)
                 {
@@ -88,14 +87,13 @@ namespace MechHisui.FateGOLib
 
                     if (lookup.Count == 0 || fullsearch)
                     {
-                        lookup = FgoHelpers.CEDict.Where(ce => RegexMatchOneWord(ce.Key, name))
-                            .Select(ce => ce.Value)
-                            .ToList();
+                        lookup.Concat(FgoHelpers.CEDict.Where(ce => RegexMatchOneWord(ce.Key, name))
+                            .Select(ce => ce.Value));
                     }
 
                     if (lookup.Count > 0)
                     {
-                        ces = FgoHelpers.CEProfiles.Where(ce => lookup.Contains(ce.Name));
+                        ces = ces.Concat(FgoHelpers.CEProfiles.Where(ce => lookup.Contains(ce.Name)));
                     }
                 }
             }
@@ -105,31 +103,31 @@ namespace MechHisui.FateGOLib
 
         public IEnumerable<MysticCode> LookupMystic(string code, bool fullsearch = false)
         {
-            var mystics = FgoHelpers.MysticCodeList.Where(m => m.Code.Equals(code, StringComparison.InvariantCultureIgnoreCase));
+            var mystics = FgoHelpers.MysticCodeList
+                .Where(m => m.Code.Equals(code, StringComparison.InvariantCultureIgnoreCase));
 
             if (mystics.Count() == 0 || fullsearch)
             {
-                mystics = FgoHelpers.MysticCodeList.Where(m => RegexMatchOneWord(m.Code, code));
-            }
+                mystics = mystics.Concat(FgoHelpers.MysticCodeList.Where(m => RegexMatchOneWord(m.Code, code)));
 
-            if (mystics.Count() == 0 || fullsearch)
-            {
-                var lookup = FgoHelpers.MysticCodeDict
-                    .Where(m => m.Key.Equals(code, StringComparison.InvariantCultureIgnoreCase))
-                    .Select(m => m.Value)
-                    .ToList();
-
-                if (lookup.Count == 0 || fullsearch)
+                if (mystics.Count() == 0 || fullsearch)
                 {
-                    lookup = FgoHelpers.MysticCodeDict
-                        .Where(m => RegexMatchOneWord(m.Key, code))
+                    var lookup = FgoHelpers.MysticCodeDict
+                        .Where(m => m.Key.Equals(code, StringComparison.InvariantCultureIgnoreCase))
                         .Select(m => m.Value)
                         .ToList();
-                }
 
-                if (lookup.Count > 0)
-                {
-                    mystics = FgoHelpers.MysticCodeList.Where(m => lookup.Contains(m.Code));
+                    if (lookup.Count == 0 || fullsearch)
+                    {
+                        lookup.Concat(FgoHelpers.MysticCodeDict
+                            .Where(m => RegexMatchOneWord(m.Key, code))
+                            .Select(m => m.Value));
+                    }
+
+                    if (lookup.Count > 0)
+                    {
+                        mystics = mystics.Concat(FgoHelpers.MysticCodeList.Where(m => lookup.Contains(m.Code)));
+                    }
                 }
             }
 
