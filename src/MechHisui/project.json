@@ -14,6 +14,7 @@
     },
 
     "dependencies": {
+        "Microsoft.CodeAnalysis.CSharp": "2.0.0-beta1",
         "Microsoft.Extensions.Configuration": "1.0.0-rc2-final",
         "Microsoft.Extensions.Configuration.Abstractions": "1.0.0-rc2-final",
         "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0-rc2-final",

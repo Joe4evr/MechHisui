@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using JiiLib.Net;
 using Newtonsoft.Json;
+using JiiLib.Net;
 
 namespace MechHisui.FateGOLib
 {
@@ -54,9 +54,10 @@ namespace MechHisui.FateGOLib
 
                     if (lookup.Count == 0 || fullsearch)
                     {
-                        lookup.Concat(FgoHelpers.ServantDict
+                        lookup = lookup.Concat(FgoHelpers.ServantDict
                             .Where(s => RegexMatchOneWord(s.Key, servant))
-                            .Select(s => s.Value));
+                            .Select(s => s.Value))
+                            .ToList();
                     }
 
                     if (lookup.Count > 0)
@@ -87,8 +88,9 @@ namespace MechHisui.FateGOLib
 
                     if (lookup.Count == 0 || fullsearch)
                     {
-                        lookup.Concat(FgoHelpers.CEDict.Where(ce => RegexMatchOneWord(ce.Key, name))
-                            .Select(ce => ce.Value));
+                        lookup = lookup.Concat(FgoHelpers.CEDict.Where(ce => RegexMatchOneWord(ce.Key, name))
+                            .Select(ce => ce.Value))
+                            .ToList();
                     }
 
                     if (lookup.Count > 0)
@@ -119,9 +121,10 @@ namespace MechHisui.FateGOLib
 
                     if (lookup.Count == 0 || fullsearch)
                     {
-                        lookup.Concat(FgoHelpers.MysticCodeDict
+                        lookup = lookup.Concat(FgoHelpers.MysticCodeDict
                             .Where(m => RegexMatchOneWord(m.Key, code))
-                            .Select(m => m.Value));
+                            .Select(m => m.Value))
+                            .ToList();
                     }
 
                     if (lookup.Count > 0)
@@ -138,38 +141,32 @@ namespace MechHisui.FateGOLib
         public async Task UpdateProfileListsAsync()
         {
             Console.WriteLine("Updating profile lists...");
-            _apiService.Parameters = new List<object> { "Servants" };
-            FgoHelpers.ServantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(await _apiService.GetDataFromServiceAsJsonAsync(), new FgoProfileConverter());
-            _apiService.Parameters = new List<object> { "FakeServants" };
-            FgoHelpers.FakeServantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(await _apiService.GetDataFromServiceAsJsonAsync(), new FgoProfileConverter());
+            FgoHelpers.ServantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(await _apiService.GetDataFromServiceAsJsonAsync("Servants"), new FgoProfileConverter());
+            FgoHelpers.FakeServantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(await _apiService.GetDataFromServiceAsJsonAsync("FakeServants"), new FgoProfileConverter());
         }
 
         public async Task UpdateCEListAsync()
         {
             Console.WriteLine("Updating CE list...");
-            _apiService.Parameters = new List<object> { "CEs" };
-            FgoHelpers.CEProfiles = JsonConvert.DeserializeObject<List<CEProfile>>(await _apiService.GetDataFromServiceAsJsonAsync());
+            FgoHelpers.CEProfiles = JsonConvert.DeserializeObject<List<CEProfile>>(await _apiService.GetDataFromServiceAsJsonAsync("CEs"));
         }
 
         public async Task UpdateEventListAsync()
         {
             Console.WriteLine("Updating event list...");
-            _apiService.Parameters = new List<object> { "Events" };
-            FgoHelpers.EventList = JsonConvert.DeserializeObject<List<Event>>(await _apiService.GetDataFromServiceAsJsonAsync());
+            FgoHelpers.EventList = JsonConvert.DeserializeObject<List<Event>>(await _apiService.GetDataFromServiceAsJsonAsync("Events"));
         }
 
         public async Task UpdateMysticCodesListAsync()
         {
             Console.WriteLine("Updating Mystic Codes list...");
-            _apiService.Parameters = new List<object> { "MysticCodes" };
-            FgoHelpers.MysticCodeList = JsonConvert.DeserializeObject<List<MysticCode>>(await _apiService.GetDataFromServiceAsJsonAsync());
+            FgoHelpers.MysticCodeList = JsonConvert.DeserializeObject<List<MysticCode>>(await _apiService.GetDataFromServiceAsJsonAsync("MysticCodes"));
         }
 
         public async Task UpdateDropsListAsync()
         {
             Console.WriteLine("Updating Item Drops list...");
-            _apiService.Parameters = new List<object> { "Drops" };
-            FgoHelpers.ItemDropsList = JsonConvert.DeserializeObject<List<NodeDrop>>(await _apiService.GetDataFromServiceAsJsonAsync());
+            FgoHelpers.ItemDropsList = JsonConvert.DeserializeObject<List<NodeDrop>>(await _apiService.GetDataFromServiceAsJsonAsync("Drops"));
         }
 
         public void ReadAliasList()

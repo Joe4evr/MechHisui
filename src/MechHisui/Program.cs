@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-//using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json;
@@ -80,15 +80,14 @@ namespace MechHisui
             //client.RegisterDeleteCommand(config);
             client.RegisterDisconnectCommand(config);
 
-            //var evalBuilder = EvalModule.Builder.BuilderWithSystemAndLinq()
-            //    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(DiscordClient).Assembly.Location), "Discord"))
-            //    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(CommandEventArgs).Assembly.Location), "Discord.Commands"))
-            //    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(JiiLib.Extensions).Assembly.Location), "JiiLib"))
-            //    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(FateGOLib.FgoHelpers).Assembly.Location), "MechHisui.FateGOLib"));
+            var evalBuilder = EvalModule.Builder.BuilderWithSystemAndLinq()
+                .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(DiscordClient).Assembly.Location), "Discord"))
+                .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(CommandEventArgs).Assembly.Location), "Discord.Commands"))
+                .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(JiiLib.Extensions).Assembly.Location), "JiiLib"))
+                .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(FateGOLib.FgoHelpers).Assembly.Location), "MechHisui.FateGOLib"));
 
-            //client.AddModule(evalBuilder.Build((c, u, ch)
-            //    => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])));
-            //client.RegisterEvalCommand(config);
+            client.AddModule(evalBuilder.Build((c, u, ch)
+                => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])));
 
             //client.RegisterImageCommand(config);
             client.RegisterInfoCommand(config);
@@ -154,7 +153,6 @@ namespace MechHisui
                 //Convert our sync method to an async one and block the Main function until the bot disconnects
                 client.ExecuteAndWait(async () =>
                 {
-                    //Connect to the Discord server using our email and password
                     await client.Connect(config["LoginToken"]);
                     Console.WriteLine($"Logged in as {client.CurrentUser.Name}");
                     Console.WriteLine($"MH v. 0.3.0");

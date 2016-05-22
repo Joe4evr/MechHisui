@@ -287,7 +287,7 @@ namespace MechHisui.HisuiBets
                         var target = cea.Message.MentionedUsers.FirstOrDefault();
                         if (target != null)
                         {
-                            if (_blacklist.Contains(cea.User.Id))
+                            if (_blacklist.Contains(target.Id))
                             {
                                 await cea.Channel.SendMessage("Unable to donate to Bot accounts.");
                                 return;
