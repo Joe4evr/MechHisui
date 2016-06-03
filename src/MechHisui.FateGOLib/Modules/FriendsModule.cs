@@ -39,7 +39,6 @@ namespace MechHisui.FateGOLib.Modules
         {
             Console.WriteLine("Registering 'Friends'...");
             ReadFriendData();
-            //FriendCodes.ReadFriendData(_friendcodeConfigPath);
             manager.Client.GetService<CommandService>().CreateCommand("addfc")
                .AddCheck(_checkFunc)
                .Parameter("code", ParameterType.Required)
@@ -48,7 +47,7 @@ namespace MechHisui.FateGOLib.Modules
                .Description("Add your friendcode to the list. Enter your code with quotes as `\"XXX XXX XXX\"`. You may optionally add your support Servant as well. If you do, enclose that in `\"\"`s as well.")
                .Do(async cea =>
                {
-                   if (_friendData.Any(fc => fc.User == cea.User.Name
+                   if (_friendData.Any(fc => fc.User == cea.User.Id
                            && fc.Class.Equals(cea.Args[1], StringComparison.OrdinalIgnoreCase)))
                    {
                        await cea.Channel.SendMessage($"Already in the Friendcode list. Please use `.updatefc` to update your description.");
@@ -64,18 +63,16 @@ namespace MechHisui.FateGOLib.Modules
 
                    if (Regex.Match(cea.Args[0], @"[0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9]").Success)
                    {
-                       var friend = new FriendData
+                       _friendData.Add(new FriendData
                        {
                            Id = _friendData.Count + 1,
-                           User = cea.User.Name,
+                           User = cea.User.Id,
                            FriendCode = cea.Args[0],
                            Class = support.ToString(),
-                           Servant = (cea.Args.Length > 2) ? cea.Args[2] : String.Empty
-                       };
-                       _friendData.Add(friend);
+                           Servant = (cea.Args.Length > 2) ? cea.Args[2] : string.Empty
+                       });
                        WriteFriendData();
-                       //FriendCodes.WriteFriendData(_friendcodeConfigPath);
-                       await cea.Channel.SendMessage($"Added {support.ToString()} support for `{friend.User}`.");
+                       await cea.Channel.SendMessage($"Added {support.ToString()} support for `{cea.User.Name}`.");
                    }
                    else
                    {
@@ -91,14 +88,14 @@ namespace MechHisui.FateGOLib.Modules
                {
                    var data = Enumerable.Empty<FriendData>();
                    SupportClass support;
-                   string username = cea.Message.MentionedUsers.FirstOrDefault()?.Name ?? cea.Args[0];
+                   User user = cea.Message.MentionedUsers.FirstOrDefault();
                    if (Enum.TryParse(cea.Args[0], true, out support))
                    {
                        data = _friendData.Where(f => f.Class == support.ToString());
                    }
-                   else if (_friendData.Any(f => f.User == username))
+                   else if (user != null && _friendData.Any(f => f.User == user.Id))
                    {
-                       data = _friendData.Where(f => f.User == username);
+                       data = _friendData.Where(f => f.User == user.Id);
                    }
                    else
                    {
@@ -106,9 +103,17 @@ namespace MechHisui.FateGOLib.Modules
                        return;
                    }
 
+                   var orderedData = data.Select(f => new
+                   {
+                       f.Id,
+                       f.FriendCode,
+                       f.Class,
+                       f.Servant,
+                       User = cea.Server.GetUser(f.User).Name,
+                   }).OrderBy(f => f.Id).ToList();
                    var sb = new StringBuilder("```\n");
-                   int longestName = data.OrderByDescending(f => f.User.Length).First().User.Length;
-                   foreach (var friend in data.OrderBy(f => f.Id))
+                   int longestName = orderedData.OrderByDescending(f => f.User.Length).First().User.Length;
+                   foreach (var friend in orderedData)
                    {
                        var spaces = new string(' ', (longestName - friend.User.Length) + 1);
                        sb.Append($"{friend.User}:{spaces}{friend.FriendCode}");
@@ -138,7 +143,7 @@ namespace MechHisui.FateGOLib.Modules
                        return;
                    }
 
-                   Func<FriendData, bool> pred = c => c.User == cea.User.Name && c.Class == support.ToString();
+                   Func<FriendData, bool> pred = c => c.User == cea.User.Id && c.Class == support.ToString();
                    if (_friendData.Any(pred))
                    {
                        var temp = _friendData.Single(pred);
@@ -148,7 +153,7 @@ namespace MechHisui.FateGOLib.Modules
                        _friendData.Add(temp);
                        WriteFriendData();
                        //FriendCodes.WriteFriendData(_friendcodeConfigPath);
-                       await cea.Channel.SendMessage($"Updated `{temp.User}`'s {support.ToString()} Suppport Servant to be `{temp.Servant}`.");
+                       await cea.Channel.SendMessage($"Updated `{cea.Server.GetUser(temp.User).Name}`'s {support.ToString()} Suppport Servant to be `{temp.Servant}`.");
                    }
                    else
                    {

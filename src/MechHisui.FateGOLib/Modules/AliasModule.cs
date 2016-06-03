@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using JiiLib;
-using Newtonsoft.Json;
+using Discord;
 using Discord.Commands;
 using Discord.Modules;
 
@@ -29,7 +26,7 @@ namespace MechHisui.FateGOLib.Modules
                 .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(_config["FGO_server"]))
                 .Parameter("type", ParameterType.Required)
                 .Parameter("name", ParameterType.Required)
-                .Do(cea =>
+                .Do(async cea =>
                 {
                     string msg = cea.Args[0] == _types[0]
                         ? GetServantAliases(cea.Args[1])
@@ -39,30 +36,30 @@ namespace MechHisui.FateGOLib.Modules
                                 ? GetMysticAliases(cea.Args[1])
                                 : "Invalid search type specified."));
 
-                    cea.Channel.SendMessage(msg);
+                    await cea.Channel.SendMessage(msg);
                 });
         }
 
         private string GetServantAliases(string name)
         {
-            var results = _statService.LookupStats(name, true);
-            return results.Count() == 0
+            var results = _statService.LookupStats(name, true).ToList();
+            return results.Count == 0
                 ? "No result found."
                 : String.Join("\n", results.Select(r => $"**{r.Name}:** *({String.Join(", ", FgoHelpers.ServantDict.Where(a => a.Value == r.Name).Select(a => a.Key))})*"));
         }
 
         private string GetCeAliases(string name)
         {
-            var results = _statService.LookupCE(name, true);
-            return results.Count() == 0
+            var results = _statService.LookupCE(name, true).ToList();
+            return results.Count == 0
                 ? "No result found."
                 : String.Join("\n", results.Select(r => $"**{r.Name}:** *({String.Join(", ", FgoHelpers.CEDict.Where(a => a.Value == r.Name).Select(a => a.Key))})*"));
         }
 
         private string GetMysticAliases(string name)
         {
-            var results = _statService.LookupMystic(name, true);
-            return results.Count() == 0
+            var results = _statService.LookupMystic(name, true).ToList();
+            return results.Count == 0
                 ? "No result found."
                 : String.Join("\n", results.Select(r => $"**{r.Code}:** *({String.Join(", ", FgoHelpers.MysticCodeDict.Where(a => a.Value == r.Code).Select(a => a.Key))})*"));
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
+using Discord;
 using Discord.Commands;
 using Discord.Modules;
 

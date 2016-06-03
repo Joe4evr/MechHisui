@@ -605,7 +605,7 @@
           "lib/net45/WebSocket4Net.dll": {}
         }
       },
-      "Discord.Net/0.9.2": {
+      "Discord.Net/0.9.3": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
@@ -2314,7 +2314,7 @@
         "lib/sl50/WebSocket4Net.dll"
       ]
     },
-    "Discord.Net/0.9.2": {
+    "Discord.Net/0.9.3": {
       "type": "project",
       "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/project.json",
       "msbuildProject": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/Discord.Net.xproj"
@@ -2327,7 +2327,7 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "Discord.Net >= 0.9.2",
+      "Discord.Net >= 0.9.3",
       "JiiLib >= 0.2.2",
       "Microsoft.AspNetCore.Hosting >= 1.0.0-rc2-final",
       "Microsoft.Extensions.Configuration >= 1.0.0-rc2-final",

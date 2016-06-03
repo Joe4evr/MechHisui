@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using JiiLib;
 using Newtonsoft.Json;
+using Discord;
 using Discord.Commands;
 using Discord.Modules;
 
@@ -103,7 +103,7 @@ namespace MechHisui.FateGOLib.Modules
                 .Do(async cea =>
                 {
                     var ce = cea.Args[0];
-                    if (!FgoHelpers.CEDict.Values.Contains(ce))
+                    if (!FgoHelpers.CEProfiles.Select(c => c.Name).Contains(ce))
                     {
                         await cea.Channel.SendMessage("Could not find name to add alias for.");
                         return;

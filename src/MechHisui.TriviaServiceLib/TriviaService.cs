@@ -32,7 +32,7 @@ namespace MechHisui.TriviaService
             _scoreboard = new ConcurrentDictionary<ulong, int>();
             _asked = new List<string>();
             _rng = new Random();
-            Channel.SendMessage($"Trivia commencing. Play until {rounds} points to win. *Start the clock!*");
+            Channel.SendMessage($"Trivia commencing. Play until {rounds} points to win. *Start the clock!*").GetAwaiter().GetResult();
             _client.MessageReceived += CheckTrivia;
         }
 

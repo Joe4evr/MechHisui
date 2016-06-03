@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Discord;
 using Discord.Commands;
 using Discord.Modules;
 

@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using JiiLib;
 using Newtonsoft.Json;
+using Discord;
 using Discord.Commands;
 using Discord.Modules;
 
@@ -73,7 +74,7 @@ namespace MechHisui.FateGOLib.Modules
                 .Do(async cea =>
                 {
                     var mystic = cea.Args[0];
-                    if (!FgoHelpers.MysticCodeDict.Values.Contains(mystic))
+                    if (!FgoHelpers.MysticCodeList.Select(m => m.Code).Contains(mystic))
                     {
                         await cea.Channel.SendMessage("Could not find Mystic Code to add alias for.");
                         return;

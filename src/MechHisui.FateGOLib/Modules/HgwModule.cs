@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using JiiLib;
+using Discord;
 using Discord.Commands;
 using Discord.Modules;
 

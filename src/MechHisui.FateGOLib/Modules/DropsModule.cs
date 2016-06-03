@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using JiiLib;
+using Discord;
 using Discord.Commands;
 using Discord.Modules;
 
@@ -27,14 +28,14 @@ namespace MechHisui.FateGOLib.Modules
                 .Parameter("item", ParameterType.Unparsed)
                 .Do(async cea =>
                 {
-                    var arg = String.Join(" ", cea.Args);
+                    var arg = cea.Args[0];
                     if (String.IsNullOrWhiteSpace(arg))
                     {
                         await cea.Channel.SendMessage("Provide an item to find among drops.");
                         return;
                     }
 
-                    var potentials = FgoHelpers.ItemDropsList.Where(d => d.ItemDrops.ContainsIgnoreCase(arg));
+                    var potentials = FgoHelpers.ItemDropsList.Where(d => d.ItemDrops?.ContainsIgnoreCase(arg) == true);
                     if (potentials.Any())
                     {
                         string result = String.Join("\n", potentials.Select(p => $"**{p.Map} - {p.NodeJP} ({p.NodeEN}):** {p.ItemDrops}"));

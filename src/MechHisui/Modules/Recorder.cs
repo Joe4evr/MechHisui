@@ -20,7 +20,7 @@ namespace MechHisui.Modules
             this.channel = channel;
             writer = new StreamWriter(Path.GetFullPath($"{config["Recordings"]}{channel.Server.Name} - {channel.Name} - {DateTime.UtcNow.Date}.txt"), true, Encoding.UTF8);
             client.MessageReceived += LogToFile;
-            channel.SendMessage($"Recording in {channel.Name}....");
+            channel.SendMessage($"Recording in {channel.Name}....").GetAwaiter().GetResult();
         }
 
         public async void LogToFile(object sender, MessageEventArgs e)

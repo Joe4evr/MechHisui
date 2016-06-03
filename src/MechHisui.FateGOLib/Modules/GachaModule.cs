@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using JiiLib;
+using Discord;
 using Discord.Commands;
 using Discord.Modules;
 

@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using JiiLib;
+using Discord;
 using Discord.Commands;
 using Discord.Modules;
 
@@ -83,7 +84,7 @@ namespace MechHisui.FateGOLib.Modules
                 .Do(async cea =>
                 {
                     var servant = cea.Args[0];
-                    if (!FgoHelpers.ServantDict.Values.Contains(servant))
+                    if (!FgoHelpers.ServantProfiles.Select(p => p.Name).Contains(servant))
                     {
                         await cea.Channel.SendMessage("Could not find name to add alias for.");
                         return;

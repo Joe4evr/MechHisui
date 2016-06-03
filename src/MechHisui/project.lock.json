@@ -105,38 +105,6 @@
       "Microsoft.Bcl.Build/1.0.21": {
         "type": "package"
       },
-      "Microsoft.CodeAnalysis.Analyzers/1.1.0": {
-        "type": "package",
-        "frameworkAssemblies": [
-          "System"
-        ]
-      },
-      "Microsoft.CodeAnalysis.Common/2.0.0-beta1": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.CodeAnalysis.Analyzers": "1.1.0",
-          "System.Collections.Immutable": "1.1.37",
-          "System.Reflection.Metadata": "1.2.0"
-        },
-        "compile": {
-          "lib/net45/Microsoft.CodeAnalysis.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Microsoft.CodeAnalysis.dll": {}
-        }
-      },
-      "Microsoft.CodeAnalysis.CSharp/2.0.0-beta1": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.CodeAnalysis.Common": "[2.0.0-beta1]"
-        },
-        "compile": {
-          "lib/net45/Microsoft.CodeAnalysis.CSharp.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Microsoft.CodeAnalysis.CSharp.dll": {}
-        }
-      },
       "Microsoft.Extensions.Configuration/1.0.0-rc2-final": {
         "type": "package",
         "dependencies": {
@@ -337,35 +305,7 @@
           "lib/net45/_._": {}
         }
       },
-      "System.Collections.Immutable/1.1.37": {
-        "type": "package",
-        "dependencies": {
-          "System.Collections": "4.0.0",
-          "System.Diagnostics.Debug": "4.0.0",
-          "System.Globalization": "4.0.0",
-          "System.Linq": "4.0.0",
-          "System.Resources.ResourceManager": "4.0.0",
-          "System.Runtime": "4.0.0",
-          "System.Runtime.Extensions": "4.0.0",
-          "System.Threading": "4.0.0"
-        },
-        "compile": {
-          "lib/dotnet/System.Collections.Immutable.dll": {}
-        },
-        "runtime": {
-          "lib/dotnet/System.Collections.Immutable.dll": {}
-        }
-      },
       "System.Diagnostics.Debug/4.0.11-rc2-24027": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
-      },
-      "System.Globalization/4.0.0": {
         "type": "package",
         "compile": {
           "ref/net45/_._": {}
@@ -390,18 +330,6 @@
         },
         "runtime": {
           "lib/net45/_._": {}
-        }
-      },
-      "System.Reflection.Metadata/1.2.0": {
-        "type": "package",
-        "dependencies": {
-          "System.Collections.Immutable": "1.1.37"
-        },
-        "compile": {
-          "lib/portable-net45+win8/System.Reflection.Metadata.dll": {}
-        },
-        "runtime": {
-          "lib/portable-net45+win8/System.Reflection.Metadata.dll": {}
         }
       },
       "System.Resources.ResourceManager/4.0.1-rc2-24027": {
@@ -467,7 +395,7 @@
           "lib/portable-net4+sl5+wp8+win8+wpa81+MonoTouch+MonoAndroid/Zlib.Portable.dll": {}
         }
       },
-      "Discord.Net/0.9.2": {
+      "Discord.Net/0.9.3": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
@@ -487,11 +415,11 @@
           "net45/Discord.Net.dll": {}
         }
       },
-      "Discord.Net.Commands/0.9.2": {
+      "Discord.Net.Commands/0.9.3": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.9.2"
+          "Discord.Net": "0.9.3"
         },
         "compile": {
           "net45/Discord.Net.Commands.dll": {}
@@ -500,12 +428,12 @@
           "net45/Discord.Net.Commands.dll": {}
         }
       },
-      "Discord.Net.Modules/0.9.2": {
+      "Discord.Net.Modules/0.9.3": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5",
         "dependencies": {
-          "Discord.Net": "0.9.2",
-          "Discord.Net.Commands": "0.9.2"
+          "Discord.Net": "0.9.3",
+          "Discord.Net.Commands": "0.9.3"
         },
         "compile": {
           "net45/Discord.Net.Modules.dll": {}
@@ -541,9 +469,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.2",
-          "Discord.Net.Commands": "0.9.2",
-          "Discord.Net.Modules": "0.9.2",
+          "Discord.Net.Commands": "0.9.3",
+          "Discord.Net.Modules": "0.9.3",
           "Google.Apis.Script.v1": "1.9.2.10",
           "JiiLib": "0.2.2",
           "JiiLib.Net": "0.1.2",
@@ -560,9 +487,9 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.2",
-          "Discord.Net.Commands": "0.9.2",
-          "Discord.Net.Modules": "0.9.2",
+          "Discord.Net": "0.9.3",
+          "Discord.Net.Commands": "0.9.3",
+          "Discord.Net.Modules": "0.9.3",
           "JiiLib": "0.2.2",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc2-final"
         },
@@ -577,8 +504,8 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Discord.Net": "0.9.2",
-          "Discord.Net.Commands": "0.9.2",
+          "Discord.Net": "0.9.3",
+          "Discord.Net.Commands": "0.9.3",
           "JiiLib": "0.2.2",
           "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc2-final"
         },
@@ -868,47 +795,6 @@
         "Microsoft.Bcl.Build.nuspec",
         "build/Microsoft.Bcl.Build.Tasks.dll",
         "build/Microsoft.Bcl.Build.targets"
-      ]
-    },
-    "Microsoft.CodeAnalysis.Analyzers/1.1.0": {
-      "sha512": "HS3iRWZKcUw/8eZ/08GXKY2Bn7xNzQPzf8gRPHGSowX7u7XXu9i9YEaBeBNKUXWfI7qjvT2zXtLUvbN0hds8vg==",
-      "type": "package",
-      "files": [
-        "Microsoft.CodeAnalysis.Analyzers.1.1.0.nupkg.sha512",
-        "Microsoft.CodeAnalysis.Analyzers.nuspec",
-        "ThirdPartyNotices.rtf",
-        "analyzers/dotnet/cs/Microsoft.CodeAnalysis.Analyzers.dll",
-        "analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.Analyzers.dll",
-        "analyzers/dotnet/vb/Microsoft.CodeAnalysis.Analyzers.dll",
-        "analyzers/dotnet/vb/Microsoft.CodeAnalysis.VisualBasic.Analyzers.dll",
-        "tools/install.ps1",
-        "tools/uninstall.ps1"
-      ]
-    },
-    "Microsoft.CodeAnalysis.Common/2.0.0-beta1": {
-      "sha512": "MuAKqJy2kih1zbHyO/Q2cjzAYd3y2Rvwx44E2qq5D9iJuznM+F/vNRIvf3PT4ZX05K/1aWLk43CBfg99UnpZyw==",
-      "type": "package",
-      "files": [
-        "Microsoft.CodeAnalysis.Common.2.0.0-beta1.nupkg.sha512",
-        "Microsoft.CodeAnalysis.Common.nuspec",
-        "ThirdPartyNotices.rtf",
-        "lib/net45/Microsoft.CodeAnalysis.dll",
-        "lib/net45/Microsoft.CodeAnalysis.xml",
-        "lib/portable-net45+win8/Microsoft.CodeAnalysis.dll",
-        "lib/portable-net45+win8/Microsoft.CodeAnalysis.xml"
-      ]
-    },
-    "Microsoft.CodeAnalysis.CSharp/2.0.0-beta1": {
-      "sha512": "W8u6QVZ8VoH4Hio0/a0hZ1o8NLJoooIbHJGs/5lFPOpPSytcupm7mcAukkCXl4Wzr+PpgCIBK254CiFpGj6tIg==",
-      "type": "package",
-      "files": [
-        "Microsoft.CodeAnalysis.CSharp.2.0.0-beta1.nupkg.sha512",
-        "Microsoft.CodeAnalysis.CSharp.nuspec",
-        "ThirdPartyNotices.rtf",
-        "lib/net45/Microsoft.CodeAnalysis.CSharp.dll",
-        "lib/net45/Microsoft.CodeAnalysis.CSharp.xml",
-        "lib/portable-net45+win8/Microsoft.CodeAnalysis.CSharp.dll",
-        "lib/portable-net45+win8/Microsoft.CodeAnalysis.CSharp.xml"
       ]
     },
     "Microsoft.Extensions.Configuration/1.0.0-rc2-final": {
@@ -1309,18 +1195,6 @@
         "ref/xamarinwatchos10/_._"
       ]
     },
-    "System.Collections.Immutable/1.1.37": {
-      "sha512": "fTpqwZYBzoklTT+XjTRK8KxvmrGkYHzBiylCcKyQcxiOM8k+QvhNBxRvFHDWzy4OEP5f8/9n+xQ9mEgEXY+muA==",
-      "type": "package",
-      "files": [
-        "System.Collections.Immutable.1.1.37.nupkg.sha512",
-        "System.Collections.Immutable.nuspec",
-        "lib/dotnet/System.Collections.Immutable.dll",
-        "lib/dotnet/System.Collections.Immutable.xml",
-        "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll",
-        "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.xml"
-      ]
-    },
     "System.Diagnostics.Debug/4.0.11-rc2-24027": {
       "sha512": "k0ckwL97zqxiSjRpgmkjUoP51LvEzMshynNuNOyUsKLQTHVieTsrg2YiBnou0AsDnDk/maCmuPJvoJR0qIcOuQ==",
       "type": "package",
@@ -1384,53 +1258,6 @@
         "ref/xamarinmac20/_._",
         "ref/xamarintvos10/_._",
         "ref/xamarinwatchos10/_._"
-      ]
-    },
-    "System.Globalization/4.0.0": {
-      "sha512": "IBJyTo1y7ZtzzoJUA60T1XPvNTyw/wfFmjFoBFtlYfkekIOtD/AzDDIg0YdUa7eNtFEfliED2R7HdppTdU4t5A==",
-      "type": "package",
-      "files": [
-        "License.rtf",
-        "System.Globalization.4.0.0.nupkg.sha512",
-        "System.Globalization.nuspec",
-        "lib/MonoAndroid10/_._",
-        "lib/MonoTouch10/_._",
-        "lib/net45/_._",
-        "lib/win8/_._",
-        "lib/wp80/_._",
-        "lib/wpa81/_._",
-        "lib/xamarinios10/_._",
-        "lib/xamarinmac20/_._",
-        "ref/MonoAndroid10/_._",
-        "ref/MonoTouch10/_._",
-        "ref/dotnet/System.Globalization.dll",
-        "ref/dotnet/System.Globalization.xml",
-        "ref/dotnet/de/System.Globalization.xml",
-        "ref/dotnet/es/System.Globalization.xml",
-        "ref/dotnet/fr/System.Globalization.xml",
-        "ref/dotnet/it/System.Globalization.xml",
-        "ref/dotnet/ja/System.Globalization.xml",
-        "ref/dotnet/ko/System.Globalization.xml",
-        "ref/dotnet/ru/System.Globalization.xml",
-        "ref/dotnet/zh-hans/System.Globalization.xml",
-        "ref/dotnet/zh-hant/System.Globalization.xml",
-        "ref/net45/_._",
-        "ref/netcore50/System.Globalization.dll",
-        "ref/netcore50/System.Globalization.xml",
-        "ref/netcore50/de/System.Globalization.xml",
-        "ref/netcore50/es/System.Globalization.xml",
-        "ref/netcore50/fr/System.Globalization.xml",
-        "ref/netcore50/it/System.Globalization.xml",
-        "ref/netcore50/ja/System.Globalization.xml",
-        "ref/netcore50/ko/System.Globalization.xml",
-        "ref/netcore50/ru/System.Globalization.xml",
-        "ref/netcore50/zh-hans/System.Globalization.xml",
-        "ref/netcore50/zh-hant/System.Globalization.xml",
-        "ref/win8/_._",
-        "ref/wp80/_._",
-        "ref/wpa81/_._",
-        "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._"
       ]
     },
     "System.IO/4.1.0-rc2-24027": {
@@ -1578,20 +1405,6 @@
         "ref/xamarinmac20/_._",
         "ref/xamarintvos10/_._",
         "ref/xamarinwatchos10/_._"
-      ]
-    },
-    "System.Reflection.Metadata/1.2.0": {
-      "sha512": "ubQKFCNYPwhqPXPLjRKCvTDR2UvL5L5+Tm181D/5kl/df7264AuXDi2j2Bf5DxplBxevq8eUH9LRomcFCXTQKw==",
-      "type": "package",
-      "files": [
-        "System.Reflection.Metadata.1.2.0.nupkg.sha512",
-        "System.Reflection.Metadata.nuspec",
-        "ThirdPartyNotices.txt",
-        "dotnet_library_license.txt",
-        "lib/netstandard1.1/System.Reflection.Metadata.dll",
-        "lib/netstandard1.1/System.Reflection.Metadata.xml",
-        "lib/portable-net45+win8/System.Reflection.Metadata.dll",
-        "lib/portable-net45+win8/System.Reflection.Metadata.xml"
       ]
     },
     "System.Resources.ResourceManager/4.0.1-rc2-24027": {
@@ -1999,17 +1812,17 @@
         "lib/portable-net4+sl5+wp8+win8+wpa81+MonoTouch+MonoAndroid/Zlib.Portable.xml"
       ]
     },
-    "Discord.Net/0.9.2": {
+    "Discord.Net/0.9.3": {
       "type": "project",
       "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/project.json",
       "msbuildProject": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/Discord.Net.xproj"
     },
-    "Discord.Net.Commands/0.9.2": {
+    "Discord.Net.Commands/0.9.3": {
       "type": "project",
       "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/project.json",
       "msbuildProject": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/Discord.Net.Commands.xproj"
     },
-    "Discord.Net.Modules/0.9.2": {
+    "Discord.Net.Modules/0.9.3": {
       "type": "project",
       "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Modules/project.json",
       "msbuildProject": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Modules/Discord.Net.Modules.xproj"
@@ -2042,13 +1855,11 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "Discord.Net >= 0.9.2",
-      "Discord.Net.Commands >= 0.9.2",
-      "Discord.Net.Modules >= 0.9.2",
+      "Discord.Net.Commands >= 0.9.3",
+      "Discord.Net.Modules >= 0.9.3",
       "MechHisui.FateGOLib >= 0.4.1",
       "MechHisui.HisuiBets >= 0.2.0",
       "MechHisui.SecretHitler >= 1.1.0",
-      "Microsoft.CodeAnalysis.CSharp >= 2.0.0-beta1",
       "Microsoft.Extensions.Configuration >= 1.0.0-rc2-final",
       "Microsoft.Extensions.Configuration.Abstractions >= 1.0.0-rc2-final",
       "Microsoft.Extensions.Configuration.EnvironmentVariables >= 1.0.0-rc2-final",

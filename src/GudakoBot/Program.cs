@@ -60,13 +60,13 @@ namespace GudakoBot
 
             //Display all log messages in the console
             client.Log.Message += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}"); //File.AppendAllText(logPath, $"[{e.Severity}] {e.Source}: {e.Message}"); 
-            client.MessageReceived += (s, e) =>
+            client.MessageReceived += async (s, e) =>
             {
                 if (e.Message.User.Id == owner && e.Message.Text == "-new")
                 {
                     Console.WriteLine($"{DateTime.Now}: Reloading lines");
                     LoadLines(config);
-                    e.Channel.SendMessage(Randomlines.Last());
+                    await e.Channel.SendMessage(Randomlines.Last());
                     timer.Change(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(30));
                 }
             };
