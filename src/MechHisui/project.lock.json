@@ -1814,18 +1814,18 @@
     },
     "Discord.Net/0.9.3": {
       "type": "project",
-      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/project.json",
-      "msbuildProject": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/Discord.Net.xproj"
+      "path": "../../../../Users/Jonathan/Documents/Visual Studio 2015/ReferenceProjects/Discord.Net/src/Discord.Net/project.json",
+      "msbuildProject": "../../../../Users/Jonathan/Documents/Visual Studio 2015/ReferenceProjects/Discord.Net/src/Discord.Net/Discord.Net.xproj"
     },
     "Discord.Net.Commands/0.9.3": {
       "type": "project",
-      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/project.json",
-      "msbuildProject": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/Discord.Net.Commands.xproj"
+      "path": "../../../../Users/Jonathan/Documents/Visual Studio 2015/ReferenceProjects/Discord.Net/src/Discord.Net.Commands/project.json",
+      "msbuildProject": "../../../../Users/Jonathan/Documents/Visual Studio 2015/ReferenceProjects/Discord.Net/src/Discord.Net.Commands/Discord.Net.Commands.xproj"
     },
     "Discord.Net.Modules/0.9.3": {
       "type": "project",
-      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Modules/project.json",
-      "msbuildProject": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Modules/Discord.Net.Modules.xproj"
+      "path": "../../../../Users/Jonathan/Documents/Visual Studio 2015/ReferenceProjects/Discord.Net/src/Discord.Net.Modules/project.json",
+      "msbuildProject": "../../../../Users/Jonathan/Documents/Visual Studio 2015/ReferenceProjects/Discord.Net/src/Discord.Net.Modules/Discord.Net.Modules.xproj"
     },
     "JiiLib/0.2.2": {
       "type": "project",

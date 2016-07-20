@@ -1,12 +1,10 @@
 {
     "projects": [
-        "C:\\Users\\Jonathan\\Documents\\Visual Studio 2015\\Projects\\JiiLib\\src\\",
-        "C:\\Users\\Jonathan\\Documents\\Visual Studio 2015\\ReferenceProjects\\Discord.Net\\src\\",
         "src",
         "test",
-        "wrap"
+        "../../aspnetreference/Discord.Net/src"
     ],
     "sdk": {
-        "version": "1.0.0-preview1-002702"
+        "version": "1.0.0-preview2-003121"
     }
 }
