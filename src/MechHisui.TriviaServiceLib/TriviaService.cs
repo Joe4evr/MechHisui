@@ -32,7 +32,7 @@ namespace MechHisui.TriviaService
             _scoreboard = new ConcurrentDictionary<ulong, int>();
             _asked = new List<string>();
             _rng = new Random();
-            Channel.SendMessage($"Trivia commencing. Play until {rounds} points to win. *Start the clock!*").GetAwaiter().GetResult();
+            Channel.SendWithRetry($"Trivia commencing. Play until {rounds} points to win. *Start the clock!*").GetAwaiter().GetResult();
             _client.MessageReceived += CheckTrivia;
         }
 
@@ -43,14 +43,14 @@ namespace MechHisui.TriviaService
         private async void TimeUp(object sender, ElapsedEventArgs e)
         {
             _isAnswered = true;
-            await Channel.SendMessage($"Time up.");
+            await Channel.SendWithRetry($"Time up.");
             if (_asked.Count == TriviaHelpers.Questions.Count)
             {
                 await OutOfQuestions();
             }
             else
             {
-                await Channel.SendMessage($"Next question commencing in 15 seconds.");
+                await Channel.SendWithRetry($"Next question commencing in 15 seconds.");
                 await Task.Delay(TimeSpan.FromSeconds(15));
                 await AskQuestion();
             }
@@ -59,21 +59,21 @@ namespace MechHisui.TriviaService
         private async Task OutOfQuestions()
         {
             _client.MessageReceived -= CheckTrivia;
-            await Channel.SendMessage($"Out of questions. {Channel.GetUser(_scoreboard.OrderByDescending(kv => kv.Value).First().Key).Name} has the most points.");
+            await Channel.SendWithRetry($"Out of questions. {Channel.GetUser(_scoreboard.OrderByDescending(kv => kv.Value).First().Key).Name} has the most points.");
             _client.GetTrivias().Remove(this);
         }
 
         public async Task EndTriviaEarly()
         {
             _client.MessageReceived -= CheckTrivia;
-            await Channel.SendMessage($"Aborting trivia. {Channel.GetUser(_scoreboard.OrderByDescending(kv => kv.Value).First().Key).Name} has the most points.");
+            await Channel.SendWithRetry($"Aborting trivia. {Channel.GetUser(_scoreboard.OrderByDescending(kv => kv.Value).First().Key).Name} has the most points.");
             _client.GetTrivias().Remove(this);
         }
 
         public async Task EndTrivia(User winner)
         {
             _client.MessageReceived -= CheckTrivia;
-            await Channel.SendMessage($"Trivia over, {winner.Name} has won with {_scoreboard.Single(kv => kv.Key == winner.Id).Value} points.");
+            await Channel.SendWithRetry($"Trivia over, {winner.Name} has won with {_scoreboard.Single(kv => kv.Key == winner.Id).Value} points.");
             _client.GetTrivias().Remove(this);
         }
 
@@ -84,7 +84,7 @@ namespace MechHisui.TriviaService
 
             _asked.Add(_currentQuestion.Key);
             _isAnswered = false;
-            await Channel.SendMessage(_currentQuestion.Key);
+            await Channel.SendWithRetry(_currentQuestion.Key);
             _timer = new Timer(TimeSpan.FromSeconds(90).TotalMilliseconds)
             {
                 AutoReset = false,
@@ -101,7 +101,7 @@ namespace MechHisui.TriviaService
                 _timer.Stop();
                 _scoreboard.AddOrUpdate(e.User.Id, 1, (k, v) => ++v);
                 var userScore = _scoreboard.Single(kv => kv.Key == e.User.Id).Value;
-                await Channel.SendMessage($"Correct. {e.User.Name} is now at {userScore} point(s).");
+                await Channel.SendWithRetry($"Correct. {e.User.Name} is now at {userScore} point(s).");
                 if (userScore == _winscore)
                 {
                     await EndTrivia(e.User);
@@ -112,7 +112,7 @@ namespace MechHisui.TriviaService
                 }
                 else
                 {
-                    await Channel.SendMessage($"Next question commencing in 15 seconds.");
+                    await Channel.SendWithRetry($"Next question commencing in 15 seconds.");
                     await Task.Delay(TimeSpan.FromSeconds(15));
                     await AskQuestion();
                 }

@@ -109,7 +109,7 @@ namespace MechHisui.FateGOLib.Modules
                         sb.AppendLine("No known upcoming events.");
                     }
                     sb.Append("KanColle Collab never ever");
-                    await cea.Channel.SendMessage(sb.ToString());
+                    await cea.Channel.SendWithRetry(sb.ToString());
                 });
         }
     }

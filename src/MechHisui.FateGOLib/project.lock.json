@@ -3,63 +3,109 @@
   "version": 2,
   "targets": {
     ".NETFramework,Version=v4.6": {
-      "Google.Apis/1.9.2": {
+      "BouncyCastle/1.7.0": {
+        "type": "package",
+        "compile": {
+          "lib/Net40-Client/BouncyCastle.Crypto.dll": {}
+        },
+        "runtime": {
+          "lib/Net40-Client/BouncyCastle.Crypto.dll": {}
+        }
+      },
+      "Discord.Net/0.9.4": {
         "type": "package",
         "dependencies": {
-          "Google.Apis.Core": "1.9.2",
+          "Newtonsoft.Json": "8.0.3",
+          "Nito.AsyncEx": "3.0.1",
+          "RestSharp": "105.2.3",
+          "WebSocket4Net": "0.14.1"
+        },
+        "compile": {
+          "lib/net45/Discord.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.dll": {}
+        }
+      },
+      "Discord.Net.Commands/0.9.4": {
+        "type": "package",
+        "dependencies": {
+          "Discord.Net": "0.9.4"
+        },
+        "compile": {
+          "lib/net45/Discord.Net.Commands.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.Commands.dll": {}
+        }
+      },
+      "Discord.Net.Modules/0.9.4": {
+        "type": "package",
+        "dependencies": {
+          "Discord.Net": "0.9.4",
+          "Discord.Net.Commands": "0.9.4"
+        },
+        "compile": {
+          "lib/net45/Discord.Net.Modules.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.Modules.dll": {}
+        }
+      },
+      "Google.Apis/1.14.0": {
+        "type": "package",
+        "dependencies": {
+          "Google.Apis.Core": "1.14.0",
           "Zlib.Portable.Signed": "1.11.0",
           "log4net": "2.0.3"
         },
         "compile": {
-          "lib/net40/Google.Apis.PlatformServices.dll": {},
-          "lib/net40/Google.Apis.dll": {}
+          "lib/net45/Google.Apis.PlatformServices.dll": {},
+          "lib/net45/Google.Apis.dll": {}
         },
         "runtime": {
-          "lib/net40/Google.Apis.PlatformServices.dll": {},
-          "lib/net40/Google.Apis.dll": {}
+          "lib/net45/Google.Apis.PlatformServices.dll": {},
+          "lib/net45/Google.Apis.dll": {}
         }
       },
-      "Google.Apis.Auth/1.9.2": {
+      "Google.Apis.Auth/1.14.0": {
         "type": "package",
         "dependencies": {
-          "Google.Apis.Core": "1.9.2"
+          "BouncyCastle": "1.7.0",
+          "Google.Apis.Core": "1.14.0"
         },
         "compile": {
-          "lib/net40/Google.Apis.Auth.PlatformServices.dll": {},
-          "lib/net40/Google.Apis.Auth.dll": {}
+          "lib/net45/Google.Apis.Auth.PlatformServices.dll": {},
+          "lib/net45/Google.Apis.Auth.dll": {}
         },
         "runtime": {
-          "lib/net40/Google.Apis.Auth.PlatformServices.dll": {},
-          "lib/net40/Google.Apis.Auth.dll": {}
+          "lib/net45/Google.Apis.Auth.PlatformServices.dll": {},
+          "lib/net45/Google.Apis.Auth.dll": {}
         }
       },
-      "Google.Apis.Core/1.9.2": {
+      "Google.Apis.Core/1.14.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Bcl": "1.1.10",
-          "Microsoft.Bcl.Async": "1.0.168",
-          "Microsoft.Bcl.Build": "1.0.21",
-          "Microsoft.Net.Http": "2.2.29",
           "Newtonsoft.Json": "7.0.1"
         },
         "compile": {
-          "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Core.dll": {}
+          "lib/net45/Google.Apis.Core.dll": {}
         },
         "runtime": {
-          "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Core.dll": {}
+          "lib/net45/Google.Apis.Core.dll": {}
         }
       },
-      "Google.Apis.Script.v1/1.9.2.10": {
+      "Google.Apis.Script.v1/1.14.0.481": {
         "type": "package",
         "dependencies": {
-          "Google.Apis": "1.9.2",
-          "Google.Apis.Auth": "1.9.2"
+          "Google.Apis": "1.14.0",
+          "Google.Apis.Auth": "1.14.0"
         },
         "compile": {
-          "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
+          "lib/portable-net45+netcore45+wpa81+wp8/Google.Apis.Script.v1.dll": {}
         },
         "runtime": {
-          "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll": {}
+          "lib/portable-net45+netcore45+wpa81+wp8/Google.Apis.Script.v1.dll": {}
         }
       },
       "log4net/2.0.3": {
@@ -70,40 +116,6 @@
         "runtime": {
           "lib/net40-full/log4net.dll": {}
         }
-      },
-      "Microsoft.Bcl/1.1.10": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Bcl.Build": "1.0.14"
-        },
-        "compile": {
-          "lib/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
-      },
-      "Microsoft.Bcl.Async/1.0.168": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Bcl": "1.1.8"
-        },
-        "frameworkAssemblies": [
-          "System.Net"
-        ],
-        "compile": {
-          "lib/net40/Microsoft.Threading.Tasks.Extensions.Desktop.dll": {},
-          "lib/net40/Microsoft.Threading.Tasks.Extensions.dll": {},
-          "lib/net40/Microsoft.Threading.Tasks.dll": {}
-        },
-        "runtime": {
-          "lib/net40/Microsoft.Threading.Tasks.Extensions.Desktop.dll": {},
-          "lib/net40/Microsoft.Threading.Tasks.Extensions.dll": {},
-          "lib/net40/Microsoft.Threading.Tasks.dll": {}
-        }
-      },
-      "Microsoft.Bcl.Build/1.0.21": {
-        "type": "package"
       },
       "Microsoft.Extensions.Configuration/1.0.0-rc2-final": {
         "type": "package",
@@ -212,6 +224,15 @@
           "lib/net451/Microsoft.Extensions.FileSystemGlobbing.dll": {}
         }
       },
+      "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc2-final": {
+        "type": "package",
+        "compile": {
+          "lib/net451/Microsoft.Extensions.PlatformAbstractions.dll": {}
+        },
+        "runtime": {
+          "lib/net451/Microsoft.Extensions.PlatformAbstractions.dll": {}
+        }
+      },
       "Microsoft.Extensions.Primitives/1.0.0-rc2-final": {
         "type": "package",
         "dependencies": {
@@ -223,25 +244,6 @@
         },
         "runtime": {
           "lib/netstandard1.0/Microsoft.Extensions.Primitives.dll": {}
-        }
-      },
-      "Microsoft.Net.Http/2.2.29": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Bcl": "1.1.10",
-          "Microsoft.Bcl.Build": "1.0.14"
-        },
-        "frameworkAssemblies": [
-          "System.Net.Http",
-          "System.Net.Http.WebRequest"
-        ],
-        "compile": {
-          "lib/net45/System.Net.Http.Extensions.dll": {},
-          "lib/net45/System.Net.Http.Primitives.dll": {}
-        },
-        "runtime": {
-          "lib/net45/System.Net.Http.Extensions.dll": {},
-          "lib/net45/System.Net.Http.Primitives.dll": {}
         }
       },
       "Newtonsoft.Json/8.0.3": {
@@ -374,51 +376,17 @@
           "lib/portable-net4+sl5+wp8+win8+wpa81+MonoTouch+MonoAndroid/Zlib.Portable.dll": {}
         }
       },
-      "Discord.Net/0.9.3": {
+      "DiscordBaseExtensions/0.1.0": {
         "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
+        "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Newtonsoft.Json": "8.0.3",
-          "Nito.AsyncEx": "3.0.1",
-          "RestSharp": "105.2.3",
-          "WebSocket4Net": "0.14.1"
-        },
-        "frameworkAssemblies": [
-          "System.Runtime",
-          "System.Threading.Tasks"
-        ],
-        "compile": {
-          "net45/Discord.Net.dll": {}
-        },
-        "runtime": {
-          "net45/Discord.Net.dll": {}
-        }
-      },
-      "Discord.Net.Commands/0.9.3": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
-        "dependencies": {
-          "Discord.Net": "0.9.3"
+          "Discord.Net": "0.9.4"
         },
         "compile": {
-          "net45/Discord.Net.Commands.dll": {}
+          "net46/DiscordBaseExtensions.dll": {}
         },
         "runtime": {
-          "net45/Discord.Net.Commands.dll": {}
-        }
-      },
-      "Discord.Net.Modules/0.9.3": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
-        "dependencies": {
-          "Discord.Net": "0.9.3",
-          "Discord.Net.Commands": "0.9.3"
-        },
-        "compile": {
-          "net45/Discord.Net.Modules.dll": {}
-        },
-        "runtime": {
-          "net45/Discord.Net.Modules.dll": {}
+          "net46/DiscordBaseExtensions.dll": {}
         }
       },
       "JiiLib/0.2.2": {
@@ -431,11 +399,12 @@
           "net46/JiiLib.dll": {}
         }
       },
-      "JiiLib.Net/0.1.2": {
+      "JiiLib.Net/0.1.3": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Google.Apis.Script.v1": "1.9.2.10"
+          "Google.Apis.Script.v1": "1.14.0.481",
+          "Newtonsoft.Json": "8.0.3"
         },
         "compile": {
           "net46/JiiLib.Net.dll": {}
@@ -447,29 +416,76 @@
     }
   },
   "libraries": {
-    "Google.Apis/1.9.2": {
-      "sha512": "ZyqH+Ottza2Y1YLr75QkKr3thaNVpsCEQZV5iwYW1/Hp7Vc1S7w3Y5uNuGyYN8oY+JQw6FEZvFECS2t3DEcCVA==",
+    "BouncyCastle/1.7.0": {
+      "sha512": "yvrW1NCFBC+l53Kchlk1iRYlnafpZ+o6oy0tFpFM2G28gz3H0PubyJFLc8KoYys3N0UPYo6TN2NRegpouDxRTw==",
       "type": "package",
+      "path": "BouncyCastle/1.7.0",
       "files": [
-        "Google.Apis.1.9.2.nupkg",
-        "Google.Apis.1.9.2.nupkg.sha512",
+        "BouncyCastle.1.7.0.nupkg.sha512",
+        "BouncyCastle.nuspec",
+        "Readme.txt",
+        "lib/Net20/BouncyCastle.Crypto.dll",
+        "lib/Net40-Client/BouncyCastle.Crypto.dll",
+        "lib/Net40-Client/BouncyCastle.Crypto.pdb",
+        "lib/Net40-Client/crypto.xml"
+      ]
+    },
+    "Discord.Net/0.9.4": {
+      "sha512": "Ipmn9IJimhNanOh83yfmX5ynANpTv1NrHfgoQvDWXy2x2TZ8sTn1fulJ/q1PShIqm7keYS/rNMEs9Ep/ibxRuA==",
+      "type": "package",
+      "path": "Discord.Net/0.9.4",
+      "files": [
+        "Discord.Net.0.9.4.nupkg.sha512",
+        "Discord.Net.nuspec",
+        "lib/net45/Discord.Net.dll",
+        "lib/netstandard1.3/Discord.Net.dll"
+      ]
+    },
+    "Discord.Net.Commands/0.9.4": {
+      "sha512": "lCquyYjE4JsOslk1lnEqHNddfEceWpQOfVJq8hr3fWweKYnESQ0aO2sCjToH7M33Q13L+pID+1YHYppzaAHHnQ==",
+      "type": "package",
+      "path": "Discord.Net.Commands/0.9.4",
+      "files": [
+        "Discord.Net.Commands.0.9.4.nupkg.sha512",
+        "Discord.Net.Commands.nuspec",
+        "lib/net45/Discord.Net.Commands.dll",
+        "lib/netstandard1.3/Discord.Net.Commands.dll"
+      ]
+    },
+    "Discord.Net.Modules/0.9.4": {
+      "sha512": "57d9Ts5tvIWSvwuopF0je2oTaHsHzhku2fn8U63v3e292bMsIh1IPDne5bR5nkGfz1ew7hkuWiyzBgPICPvr/g==",
+      "type": "package",
+      "path": "Discord.Net.Modules/0.9.4",
+      "files": [
+        "Discord.Net.Modules.0.9.4.nupkg.sha512",
+        "Discord.Net.Modules.nuspec",
+        "lib/net45/Discord.Net.Modules.dll",
+        "lib/netstandard1.3/Discord.Net.Modules.dll"
+      ]
+    },
+    "Google.Apis/1.14.0": {
+      "sha512": "xaOjRZ84LLfr31b5hEnslynuH4kZO4tg8aKE7cIwx+eOOmk7lqmIK/IkzETgFvt6fIYkXDalu2PxrLWwDRgoHg==",
+      "type": "package",
+      "path": "Google.Apis/1.14.0",
+      "files": [
+        "Google.Apis.1.14.0.nupkg.sha512",
         "Google.Apis.nuspec",
         "License.txt",
-        "lib/net40/Google.Apis.PlatformServices.dll",
-        "lib/net40/Google.Apis.PlatformServices.pdb",
-        "lib/net40/Google.Apis.PlatformServices.xml",
-        "lib/net40/Google.Apis.dll",
-        "lib/net40/Google.Apis.pdb",
-        "lib/net40/Google.Apis.xml",
-        "lib/netcore45/Google.Apis.PlatformServices.dll",
-        "lib/netcore45/Google.Apis.PlatformServices.pdb",
-        "lib/netcore45/Google.Apis.PlatformServices.xml",
-        "lib/netcore45/Google.Apis.dll",
-        "lib/netcore45/Google.Apis.pdb",
-        "lib/netcore45/Google.Apis.xml",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.dll",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.pdb",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.xml",
+        "lib/net45/Google.Apis.PlatformServices.dll",
+        "lib/net45/Google.Apis.PlatformServices.pdb",
+        "lib/net45/Google.Apis.PlatformServices.xml",
+        "lib/net45/Google.Apis.dll",
+        "lib/net45/Google.Apis.pdb",
+        "lib/net45/Google.Apis.xml",
+        "lib/portable-net45+sl50+netcore45+wpa81+wp8/Google.Apis.dll",
+        "lib/portable-net45+sl50+netcore45+wpa81+wp8/Google.Apis.pdb",
+        "lib/portable-net45+sl50+netcore45+wpa81+wp8/Google.Apis.xml",
+        "lib/win81/Google.Apis.PlatformServices.dll",
+        "lib/win81/Google.Apis.PlatformServices.pdb",
+        "lib/win81/Google.Apis.PlatformServices.xml",
+        "lib/win81/Google.Apis.dll",
+        "lib/win81/Google.Apis.pdb",
+        "lib/win81/Google.Apis.xml",
         "lib/wp8/Google.Apis.PlatformServices.dll",
         "lib/wp8/Google.Apis.PlatformServices.pdb",
         "lib/wp8/Google.Apis.PlatformServices.xml",
@@ -484,29 +500,29 @@
         "lib/wpa81/Google.Apis.xml"
       ]
     },
-    "Google.Apis.Auth/1.9.2": {
-      "sha512": "N3GqNPPLD6Lroa+AZyH35N44WAzoB6QGZtFblJqTt4iO1OMspndpu4Jcgvk0PuvbgqQ0ASqswopHaTM/GNlzRA==",
+    "Google.Apis.Auth/1.14.0": {
+      "sha512": "M5N+E8CFat9ZnXkESPOjung62Eb6hZM0/gZXbwWxN/Ds/ls5/LKCR04D7ceh2vVCWQk6ImymvAMEmzQQ0/U/uQ==",
       "type": "package",
+      "path": "Google.Apis.Auth/1.14.0",
       "files": [
-        "Google.Apis.Auth.1.9.2.nupkg",
-        "Google.Apis.Auth.1.9.2.nupkg.sha512",
+        "Google.Apis.Auth.1.14.0.nupkg.sha512",
         "Google.Apis.Auth.nuspec",
         "License.txt",
-        "lib/net40/Google.Apis.Auth.PlatformServices.dll",
-        "lib/net40/Google.Apis.Auth.PlatformServices.pdb",
-        "lib/net40/Google.Apis.Auth.PlatformServices.xml",
-        "lib/net40/Google.Apis.Auth.dll",
-        "lib/net40/Google.Apis.Auth.pdb",
-        "lib/net40/Google.Apis.Auth.xml",
-        "lib/netcore45/Google.Apis.Auth.PlatformServices.dll",
-        "lib/netcore45/Google.Apis.Auth.PlatformServices.pdb",
-        "lib/netcore45/Google.Apis.Auth.PlatformServices.xml",
-        "lib/netcore45/Google.Apis.Auth.dll",
-        "lib/netcore45/Google.Apis.Auth.pdb",
-        "lib/netcore45/Google.Apis.Auth.xml",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Auth.dll",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Auth.pdb",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Auth.xml",
+        "lib/net45/Google.Apis.Auth.PlatformServices.dll",
+        "lib/net45/Google.Apis.Auth.PlatformServices.pdb",
+        "lib/net45/Google.Apis.Auth.PlatformServices.xml",
+        "lib/net45/Google.Apis.Auth.dll",
+        "lib/net45/Google.Apis.Auth.pdb",
+        "lib/net45/Google.Apis.Auth.xml",
+        "lib/portable-net45+sl50+netcore45+wpa81+wp8/Google.Apis.Auth.dll",
+        "lib/portable-net45+sl50+netcore45+wpa81+wp8/Google.Apis.Auth.pdb",
+        "lib/portable-net45+sl50+netcore45+wpa81+wp8/Google.Apis.Auth.xml",
+        "lib/win81/Google.Apis.Auth.PlatformServices.dll",
+        "lib/win81/Google.Apis.Auth.PlatformServices.pdb",
+        "lib/win81/Google.Apis.Auth.PlatformServices.xml",
+        "lib/win81/Google.Apis.Auth.dll",
+        "lib/win81/Google.Apis.Auth.pdb",
+        "lib/win81/Google.Apis.Auth.xml",
         "lib/wp8/Google.Apis.Auth.PlatformServices.dll",
         "lib/wp8/Google.Apis.Auth.PlatformServices.pdb",
         "lib/wp8/Google.Apis.Auth.PlatformServices.xml",
@@ -521,34 +537,41 @@
         "lib/wpa81/Google.Apis.Auth.xml"
       ]
     },
-    "Google.Apis.Core/1.9.2": {
-      "sha512": "xCxDRIN5OWUZod7L1SOeXBEGK1BPZoq5JwM6htcVSYUVDk/PnNEkQmuXjL9oZqT1Ei4/BDgmvYQIri/sGWHUwA==",
+    "Google.Apis.Core/1.14.0": {
+      "sha512": "5nYOq10bTyoawN6U04BB67kkjR/tnv6pFrkV2jzcuK6nBv5rIF7vUdF7NDgDKOFFgLHOOOFWBLOjjVp3Vv3XaA==",
       "type": "package",
+      "path": "Google.Apis.Core/1.14.0",
       "files": [
-        "Google.Apis.Core.1.9.2.nupkg",
-        "Google.Apis.Core.1.9.2.nupkg.sha512",
+        "Google.Apis.Core.1.14.0.nupkg.sha512",
         "Google.Apis.Core.nuspec",
         "License.txt",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Core.dll",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Core.pdb",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Core.xml"
+        "lib/net45/Google.Apis.Core.dll",
+        "lib/net45/Google.Apis.Core.pdb",
+        "lib/net45/Google.Apis.Core.xml",
+        "lib/portable-net45+sl50+netcore45+wpa81+wp8/Google.Apis.Core.dll",
+        "lib/portable-net45+sl50+netcore45+wpa81+wp8/Google.Apis.Core.pdb",
+        "lib/portable-net45+sl50+netcore45+wpa81+wp8/Google.Apis.Core.xml"
       ]
     },
-    "Google.Apis.Script.v1/1.9.2.10": {
-      "sha512": "B6nHTtjPZHw8kz6kYoSyM0hKyzk6H+faEMHtjMRaWed84gYwe2eGorANpg3HKu0YiXXaEXH++hq+6K+NAGmKvw==",
+    "Google.Apis.Script.v1/1.14.0.481": {
+      "sha512": "XY5hA1WVm0hC18C+jfUCZNDHxONrbz4BUNlij/b30dGPVpEg8P+HPtn7bbSTbYESSiiI87TVPj//N93aU7hUWw==",
       "type": "package",
+      "path": "Google.Apis.Script.v1/1.14.0.481",
       "files": [
-        "Google.Apis.Script.v1.1.9.2.10.nupkg",
-        "Google.Apis.Script.v1.1.9.2.10.nupkg.sha512",
+        "Google.Apis.Script.v1.1.14.0.481.nupkg.sha512",
         "Google.Apis.Script.v1.nuspec",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.dll",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.pdb",
-        "lib/portable-net40+sl50+win+wpa81+wp80/Google.Apis.Script.v1.xml"
+        "lib/portable-net40+sl50+netcore45+wpa81+wp8/Google.Apis.Script.v1.dll",
+        "lib/portable-net40+sl50+netcore45+wpa81+wp8/Google.Apis.Script.v1.pdb",
+        "lib/portable-net40+sl50+netcore45+wpa81+wp8/Google.Apis.Script.v1.xml",
+        "lib/portable-net45+netcore45+wpa81+wp8/Google.Apis.Script.v1.dll",
+        "lib/portable-net45+netcore45+wpa81+wp8/Google.Apis.Script.v1.pdb",
+        "lib/portable-net45+netcore45+wpa81+wp8/Google.Apis.Script.v1.xml"
       ]
     },
     "log4net/2.0.3": {
       "sha512": "rxMHzK5efGPo5XtRnuUGO4tfW5l74Aji6kVmtMAt2SgcB5PHBNtNY7yj2LCI2VtKrLPO7kCKR6kH6lIZggq3Gg==",
       "type": "package",
+      "path": "log4net/2.0.3",
       "files": [
         "lib/net10-full/log4net.dll",
         "lib/net10-full/log4net.xml",
@@ -564,170 +587,14 @@
         "lib/net40-client/log4net.xml",
         "lib/net40-full/log4net.dll",
         "lib/net40-full/log4net.xml",
-        "log4net.2.0.3.nupkg",
         "log4net.2.0.3.nupkg.sha512",
         "log4net.nuspec"
-      ]
-    },
-    "Microsoft.Bcl/1.1.10": {
-      "sha512": "+tTqoh/M1pyL8El3qLy30EcwnAtyvFoDZJtdG9Cbg/WdFbh4N8kyrq198XHuEL7lnJbeD0DRO8jcX5IIOh05cQ==",
-      "type": "package",
-      "files": [
-        "License-Stable.rtf",
-        "Microsoft.Bcl.1.1.10.nupkg",
-        "Microsoft.Bcl.1.1.10.nupkg.sha512",
-        "Microsoft.Bcl.nuspec",
-        "lib/Xamarin.iOS10/_._",
-        "lib/monoandroid/_._",
-        "lib/monotouch/_._",
-        "lib/net40/System.IO.dll",
-        "lib/net40/System.IO.xml",
-        "lib/net40/System.Runtime.dll",
-        "lib/net40/System.Runtime.xml",
-        "lib/net40/System.Threading.Tasks.dll",
-        "lib/net40/System.Threading.Tasks.xml",
-        "lib/net40/ensureRedirect.xml",
-        "lib/net45/_._",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.IO.dll",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.IO.xml",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Runtime.dll",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Runtime.xml",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Threading.Tasks.dll",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Threading.Tasks.xml",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/ensureRedirect.xml",
-        "lib/portable-net40+sl4+win8+wp8+wpa81/System.IO.dll",
-        "lib/portable-net40+sl4+win8+wp8+wpa81/System.IO.xml",
-        "lib/portable-net40+sl4+win8+wp8+wpa81/System.Runtime.dll",
-        "lib/portable-net40+sl4+win8+wp8+wpa81/System.Runtime.xml",
-        "lib/portable-net40+sl4+win8+wp8+wpa81/System.Threading.Tasks.dll",
-        "lib/portable-net40+sl4+win8+wp8+wpa81/System.Threading.Tasks.xml",
-        "lib/portable-net40+sl4+win8+wp8+wpa81/ensureRedirect.xml",
-        "lib/portable-net40+sl4+win8/System.IO.dll",
-        "lib/portable-net40+sl4+win8/System.IO.xml",
-        "lib/portable-net40+sl4+win8/System.Runtime.dll",
-        "lib/portable-net40+sl4+win8/System.Runtime.xml",
-        "lib/portable-net40+sl4+win8/System.Threading.Tasks.dll",
-        "lib/portable-net40+sl4+win8/System.Threading.Tasks.xml",
-        "lib/portable-net40+sl4+win8/ensureRedirect.xml",
-        "lib/portable-net40+sl5+win8+wp8+wpa81/System.IO.dll",
-        "lib/portable-net40+sl5+win8+wp8+wpa81/System.IO.xml",
-        "lib/portable-net40+sl5+win8+wp8+wpa81/System.Runtime.dll",
-        "lib/portable-net40+sl5+win8+wp8+wpa81/System.Runtime.xml",
-        "lib/portable-net40+sl5+win8+wp8+wpa81/System.Threading.Tasks.dll",
-        "lib/portable-net40+sl5+win8+wp8+wpa81/System.Threading.Tasks.xml",
-        "lib/portable-net40+sl5+win8+wp8+wpa81/ensureRedirect.xml",
-        "lib/portable-net40+win8+wp8+wpa81/System.IO.dll",
-        "lib/portable-net40+win8+wp8+wpa81/System.IO.xml",
-        "lib/portable-net40+win8+wp8+wpa81/System.Runtime.dll",
-        "lib/portable-net40+win8+wp8+wpa81/System.Runtime.xml",
-        "lib/portable-net40+win8+wp8+wpa81/System.Threading.Tasks.dll",
-        "lib/portable-net40+win8+wp8+wpa81/System.Threading.Tasks.xml",
-        "lib/portable-net40+win8+wp8+wpa81/ensureRedirect.xml",
-        "lib/portable-net40+win8/System.IO.dll",
-        "lib/portable-net40+win8/System.IO.xml",
-        "lib/portable-net40+win8/System.Runtime.dll",
-        "lib/portable-net40+win8/System.Runtime.xml",
-        "lib/portable-net40+win8/System.Threading.Tasks.dll",
-        "lib/portable-net40+win8/System.Threading.Tasks.xml",
-        "lib/portable-net40+win8/ensureRedirect.xml",
-        "lib/portable-net45+win8+wp8+wpa81/_._",
-        "lib/portable-net45+win8+wpa81/_._",
-        "lib/portable-net451+win81+wpa81/_._",
-        "lib/portable-net451+win81/_._",
-        "lib/portable-win81+wp81+wpa81/_._",
-        "lib/sl4-windowsphone71/System.IO.dll",
-        "lib/sl4-windowsphone71/System.IO.xml",
-        "lib/sl4-windowsphone71/System.Runtime.dll",
-        "lib/sl4-windowsphone71/System.Runtime.xml",
-        "lib/sl4-windowsphone71/System.Threading.Tasks.dll",
-        "lib/sl4-windowsphone71/System.Threading.Tasks.xml",
-        "lib/sl4-windowsphone71/ensureRedirect.xml",
-        "lib/sl4/System.IO.dll",
-        "lib/sl4/System.IO.xml",
-        "lib/sl4/System.Runtime.dll",
-        "lib/sl4/System.Runtime.xml",
-        "lib/sl4/System.Threading.Tasks.dll",
-        "lib/sl4/System.Threading.Tasks.xml",
-        "lib/sl5/System.IO.dll",
-        "lib/sl5/System.IO.xml",
-        "lib/sl5/System.Runtime.dll",
-        "lib/sl5/System.Runtime.xml",
-        "lib/sl5/System.Threading.Tasks.dll",
-        "lib/sl5/System.Threading.Tasks.xml",
-        "lib/win8/_._",
-        "lib/wp8/_._",
-        "lib/wpa81/_._"
-      ]
-    },
-    "Microsoft.Bcl.Async/1.0.168": {
-      "sha512": "tUNC02eBwDKpGre0BcNIvblLv1q0Q3DnS/vtkRHj2FE1sXwt386HAudztyl5C0U88hllrqHDvtlz8bK0Y8cHDA==",
-      "type": "package",
-      "files": [
-        "License-Stable.rtf",
-        "Microsoft.Bcl.Async.1.0.168.nupkg",
-        "Microsoft.Bcl.Async.1.0.168.nupkg.sha512",
-        "Microsoft.Bcl.Async.nuspec",
-        "lib/net40/Microsoft.Threading.Tasks.Extensions.Desktop.dll",
-        "lib/net40/Microsoft.Threading.Tasks.Extensions.Desktop.xml",
-        "lib/net40/Microsoft.Threading.Tasks.Extensions.dll",
-        "lib/net40/Microsoft.Threading.Tasks.Extensions.xml",
-        "lib/net40/Microsoft.Threading.Tasks.dll",
-        "lib/net40/Microsoft.Threading.Tasks.xml",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/Microsoft.Threading.Tasks.Extensions.dll",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/Microsoft.Threading.Tasks.Extensions.xml",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/Microsoft.Threading.Tasks.dll",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/Microsoft.Threading.Tasks.xml",
-        "lib/portable-net45+win8+wp8+wpa81/Microsoft.Threading.Tasks.Extensions.dll",
-        "lib/portable-net45+win8+wp8+wpa81/Microsoft.Threading.Tasks.Extensions.xml",
-        "lib/portable-net45+win8+wp8+wpa81/Microsoft.Threading.Tasks.dll",
-        "lib/portable-net45+win8+wp8+wpa81/Microsoft.Threading.Tasks.xml",
-        "lib/portable-net45+win8+wpa81/Microsoft.Threading.Tasks.Extensions.dll",
-        "lib/portable-net45+win8+wpa81/Microsoft.Threading.Tasks.Extensions.xml",
-        "lib/portable-net45+win8+wpa81/Microsoft.Threading.Tasks.dll",
-        "lib/portable-net45+win8+wpa81/Microsoft.Threading.Tasks.xml",
-        "lib/sl4-windowsphone71/Microsoft.Threading.Tasks.Extensions.Phone.dll",
-        "lib/sl4-windowsphone71/Microsoft.Threading.Tasks.Extensions.Phone.xml",
-        "lib/sl4-windowsphone71/Microsoft.Threading.Tasks.Extensions.dll",
-        "lib/sl4-windowsphone71/Microsoft.Threading.Tasks.Extensions.xml",
-        "lib/sl4-windowsphone71/Microsoft.Threading.Tasks.dll",
-        "lib/sl4-windowsphone71/Microsoft.Threading.Tasks.xml",
-        "lib/sl4/Microsoft.Threading.Tasks.Extensions.Silverlight.dll",
-        "lib/sl4/Microsoft.Threading.Tasks.Extensions.Silverlight.xml",
-        "lib/sl4/Microsoft.Threading.Tasks.Extensions.dll",
-        "lib/sl4/Microsoft.Threading.Tasks.Extensions.xml",
-        "lib/sl4/Microsoft.Threading.Tasks.dll",
-        "lib/sl4/Microsoft.Threading.Tasks.xml",
-        "lib/win8/Microsoft.Threading.Tasks.Extensions.dll",
-        "lib/win8/Microsoft.Threading.Tasks.Extensions.xml",
-        "lib/win8/Microsoft.Threading.Tasks.dll",
-        "lib/win8/Microsoft.Threading.Tasks.xml",
-        "lib/wp8/Microsoft.Threading.Tasks.Extensions.Phone.dll",
-        "lib/wp8/Microsoft.Threading.Tasks.Extensions.Phone.xml",
-        "lib/wp8/Microsoft.Threading.Tasks.Extensions.dll",
-        "lib/wp8/Microsoft.Threading.Tasks.Extensions.xml",
-        "lib/wp8/Microsoft.Threading.Tasks.dll",
-        "lib/wp8/Microsoft.Threading.Tasks.xml",
-        "lib/wpa81/Microsoft.Threading.Tasks.Extensions.dll",
-        "lib/wpa81/Microsoft.Threading.Tasks.Extensions.xml",
-        "lib/wpa81/Microsoft.Threading.Tasks.dll",
-        "lib/wpa81/Microsoft.Threading.Tasks.xml"
-      ]
-    },
-    "Microsoft.Bcl.Build/1.0.21": {
-      "sha512": "sgHu4mIt0+NVGyI12Bj4hLPypNK55UOH+ologj2LqDCjxq3EbIxe/uAtHjY+fEwbE1dtsAHG8SXHf+V/EYbKTg==",
-      "type": "package",
-      "files": [
-        "License-Stable.rtf",
-        "Microsoft.Bcl.Build.1.0.21.nupkg",
-        "Microsoft.Bcl.Build.1.0.21.nupkg.sha512",
-        "Microsoft.Bcl.Build.nuspec",
-        "build/Microsoft.Bcl.Build.Tasks.dll",
-        "build/Microsoft.Bcl.Build.targets"
       ]
     },
     "Microsoft.Extensions.Configuration/1.0.0-rc2-final": {
       "sha512": "dHr1CJ3nkWxQAtIRk7pTX/0KCDC14DY580xC7RlMHt3EW9zUak4y31FQQIMgsE9oaeJMnJP2RtimN4FPzPaWdQ==",
       "type": "package",
+      "path": "Microsoft.Extensions.Configuration/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.Configuration.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.Configuration.nuspec",
@@ -738,6 +605,7 @@
     "Microsoft.Extensions.Configuration.Abstractions/1.0.0-rc2-final": {
       "sha512": "Q871jpweVxec1zvUuK4RoXGRRXCZsp/f+6SDUSi8DQ95KcT8yKe2ZSoq2S2xnwoKFUepg2B6Yr3ToXD2v27zNA==",
       "type": "package",
+      "path": "Microsoft.Extensions.Configuration.Abstractions/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.Configuration.Abstractions.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.Configuration.Abstractions.nuspec",
@@ -748,6 +616,7 @@
     "Microsoft.Extensions.Configuration.FileExtensions/1.0.0-rc2-final": {
       "sha512": "Ry1KQP2nv459lAiY2EsQ7i35u8XgD0ZMMgrvzGr9QlReXW8XWj5WLE2xuu7To3oFQIvCnDtZtZsr7dJ05KHr1Q==",
       "type": "package",
+      "path": "Microsoft.Extensions.Configuration.FileExtensions/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.Configuration.FileExtensions.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.Configuration.FileExtensions.nuspec",
@@ -760,6 +629,7 @@
     "Microsoft.Extensions.Configuration.Json/1.0.0-rc2-final": {
       "sha512": "1Y/3qSjHpuaLeyja+gSAZUtdj503tbc23699YzE8DxWMZ3urDztdpdWy0CFGGES15obfmsrm+oBxzEwtiHKPTw==",
       "type": "package",
+      "path": "Microsoft.Extensions.Configuration.Json/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.Configuration.Json.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.Configuration.Json.nuspec",
@@ -772,6 +642,7 @@
     "Microsoft.Extensions.Configuration.UserSecrets/1.0.0-rc2-final": {
       "sha512": "UAj6RZp2uSDc+XJvlPJGScVH+LtOiJaRxXhFPTBy38vfLf4B+5bqpaiHwSjl01HbyT0V4Iy7tiI9EdTfTEspgA==",
       "type": "package",
+      "path": "Microsoft.Extensions.Configuration.UserSecrets/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.Configuration.UserSecrets.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.Configuration.UserSecrets.nuspec",
@@ -784,6 +655,7 @@
     "Microsoft.Extensions.FileProviders.Abstractions/1.0.0-rc2-final": {
       "sha512": "pVcRuHzugJ1pn4LWpSJYOGXWdIMDcyj+AFIHFWUZ5CBGGXKfDCOPS0ztS5WshLYYc+9zDdAPmWSvQxVbTGljjg==",
       "type": "package",
+      "path": "Microsoft.Extensions.FileProviders.Abstractions/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.FileProviders.Abstractions.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.FileProviders.Abstractions.nuspec",
@@ -794,6 +666,7 @@
     "Microsoft.Extensions.FileProviders.Physical/1.0.0-rc2-final": {
       "sha512": "mGinPq86ouElAEY7K9Yww3bIJFD3k+UESFveOKCtXVbn9Z25rJOLoD7T0WRkJxzPZ+0MTipWpMh7jUJdsMV5Nw==",
       "type": "package",
+      "path": "Microsoft.Extensions.FileProviders.Physical/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.FileProviders.Physical.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.FileProviders.Physical.nuspec",
@@ -806,6 +679,7 @@
     "Microsoft.Extensions.FileSystemGlobbing/1.0.0-rc2-final": {
       "sha512": "xyrVmdjyFmGROsMkc50oI5KTie8V15ZJ8BdWbN/vpE45y+McRVpakGZDKzS2cLP7IaE67fGpr0jg4VvLQJ8Jhg==",
       "type": "package",
+      "path": "Microsoft.Extensions.FileSystemGlobbing/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.FileSystemGlobbing.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.FileSystemGlobbing.nuspec",
@@ -815,9 +689,25 @@
         "lib/netstandard1.3/Microsoft.Extensions.FileSystemGlobbing.xml"
       ]
     },
+    "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc2-final": {
+      "sha512": "OjXClhPcccu39GNAs6SH6J2iC2R883Wco7LKvPqnjo1aKJQRp9vFVFVueutJFABncZO7BZINgZCwgLxVQN3yIg==",
+      "type": "package",
+      "path": "Microsoft.Extensions.PlatformAbstractions/1.0.0-rc2-final",
+      "files": [
+        "Microsoft.Extensions.PlatformAbstractions.1.0.0-rc2-final.nupkg.sha512",
+        "Microsoft.Extensions.PlatformAbstractions.nuspec",
+        "lib/net451/Microsoft.Extensions.PlatformAbstractions.dll",
+        "lib/net451/Microsoft.Extensions.PlatformAbstractions.xml",
+        "lib/netcore50/Microsoft.Extensions.PlatformAbstractions.dll",
+        "lib/netcore50/Microsoft.Extensions.PlatformAbstractions.xml",
+        "lib/netstandard1.3/Microsoft.Extensions.PlatformAbstractions.dll",
+        "lib/netstandard1.3/Microsoft.Extensions.PlatformAbstractions.xml"
+      ]
+    },
     "Microsoft.Extensions.Primitives/1.0.0-rc2-final": {
       "sha512": "5lXETW9MI0CIOOCtgeJcrX3jODcFkX04tr+K/MB+cRspPvYD3URbf4MRIwWgI5r7cu+8+efPxEH0tG1g8ldhQA==",
       "type": "package",
+      "path": "Microsoft.Extensions.Primitives/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.Primitives.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.Primitives.nuspec",
@@ -827,76 +717,10 @@
         "lib/netstandard1.0/Microsoft.Extensions.Primitives.xml"
       ]
     },
-    "Microsoft.Net.Http/2.2.29": {
-      "sha512": "fc4CPEewJ30Xgal+fSq1lYIBt582A7eKlAL7O4HXiYAiTp2VTnA4osSvk7T2n8aS4xTCPVJusQk3yKLT0XSpkg==",
-      "type": "package",
-      "files": [
-        "License-Stable.rtf",
-        "Microsoft.Net.Http.2.2.29.nupkg",
-        "Microsoft.Net.Http.2.2.29.nupkg.sha512",
-        "Microsoft.Net.Http.nuspec",
-        "lib/Xamarin.iOS10/System.Net.Http.Extensions.XML",
-        "lib/Xamarin.iOS10/System.Net.Http.Extensions.dll",
-        "lib/Xamarin.iOS10/System.Net.Http.Primitives.dll",
-        "lib/Xamarin.iOS10/System.Net.Http.Primitives.xml",
-        "lib/monoandroid/System.Net.Http.Extensions.XML",
-        "lib/monoandroid/System.Net.Http.Extensions.dll",
-        "lib/monoandroid/System.Net.Http.Primitives.dll",
-        "lib/monoandroid/System.Net.Http.Primitives.xml",
-        "lib/monotouch/System.Net.Http.Extensions.XML",
-        "lib/monotouch/System.Net.Http.Extensions.dll",
-        "lib/monotouch/System.Net.Http.Primitives.dll",
-        "lib/monotouch/System.Net.Http.Primitives.xml",
-        "lib/net40/System.Net.Http.Extensions.XML",
-        "lib/net40/System.Net.Http.Extensions.dll",
-        "lib/net40/System.Net.Http.Primitives.dll",
-        "lib/net40/System.Net.Http.Primitives.xml",
-        "lib/net40/System.Net.Http.WebRequest.dll",
-        "lib/net40/System.Net.Http.WebRequest.xml",
-        "lib/net40/System.Net.Http.dll",
-        "lib/net40/System.Net.Http.xml",
-        "lib/net40/ensureRedirect.xml",
-        "lib/net45/System.Net.Http.Extensions.XML",
-        "lib/net45/System.Net.Http.Extensions.dll",
-        "lib/net45/System.Net.Http.Primitives.dll",
-        "lib/net45/System.Net.Http.Primitives.xml",
-        "lib/net45/ensureRedirect.xml",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.Extensions.XML",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.Extensions.dll",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.Primitives.XML",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.Primitives.dll",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.dll",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.xml",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/ensureRedirect.xml",
-        "lib/portable-net45+win8+wpa81/System.Net.Http.Extensions.XML",
-        "lib/portable-net45+win8+wpa81/System.Net.Http.Extensions.dll",
-        "lib/portable-net45+win8+wpa81/System.Net.Http.Primitives.dll",
-        "lib/portable-net45+win8+wpa81/System.Net.Http.Primitives.xml",
-        "lib/portable-net45+win8+wpa81/ensureRedirect.xml",
-        "lib/portable-net45+win8/System.Net.Http.Extensions.XML",
-        "lib/portable-net45+win8/System.Net.Http.Extensions.dll",
-        "lib/portable-net45+win8/System.Net.Http.Primitives.dll",
-        "lib/portable-net45+win8/System.Net.Http.Primitives.xml",
-        "lib/portable-net45+win8/ensureRedirect.xml",
-        "lib/sl4-windowsphone71/System.Net.Http.Extensions.XML",
-        "lib/sl4-windowsphone71/System.Net.Http.Extensions.dll",
-        "lib/sl4-windowsphone71/System.Net.Http.Primitives.XML",
-        "lib/sl4-windowsphone71/System.Net.Http.Primitives.dll",
-        "lib/sl4-windowsphone71/System.Net.Http.dll",
-        "lib/sl4-windowsphone71/System.Net.Http.xml",
-        "lib/win8/System.Net.Http.Extensions.XML",
-        "lib/win8/System.Net.Http.Extensions.dll",
-        "lib/win8/System.Net.Http.Primitives.dll",
-        "lib/win8/System.Net.Http.Primitives.xml",
-        "lib/wpa81/System.Net.Http.Extensions.XML",
-        "lib/wpa81/System.Net.Http.Extensions.dll",
-        "lib/wpa81/System.Net.Http.Primitives.dll",
-        "lib/wpa81/System.Net.Http.Primitives.xml"
-      ]
-    },
     "Newtonsoft.Json/8.0.3": {
       "sha512": "KGsYQdS2zLH+H8x2cZaSI7e+YZ4SFIbyy1YJQYl6GYBWjf5o4H1A68nxyq+WTyVSOJQ4GqS/DiPE+UseUizgMg==",
       "type": "package",
+      "path": "Newtonsoft.Json/8.0.3",
       "files": [
         "Newtonsoft.Json.8.0.3.nupkg.sha512",
         "Newtonsoft.Json.nuspec",
@@ -918,8 +742,8 @@
     "Nito.AsyncEx/3.0.1": {
       "sha512": "JSypx/S4sBY1+0wrXcSqcdV6p5nVNFeCfIVyC9LAy69hrle/bxMJf9oZsi5UDxZl7Bsq/bD2XwxMFFOx7zVPag==",
       "type": "package",
+      "path": "Nito.AsyncEx/3.0.1",
       "files": [
-        "Nito.AsyncEx.3.0.1.nupkg",
         "Nito.AsyncEx.3.0.1.nupkg.sha512",
         "Nito.AsyncEx.nuspec",
         "lib/MonoAndroid/Nito.AsyncEx.Concurrent.dll",
@@ -999,8 +823,8 @@
     "RestSharp/105.2.3": {
       "sha512": "50LkciOclb7Lza9QXqR9reKeUoPlDQiFD4iBdOmd6twOBmTtqEFIOXQgdDdsTHQg4HcGh6EvrM6gN1X72vkJLA==",
       "type": "package",
+      "path": "RestSharp/105.2.3",
       "files": [
-        "RestSharp.105.2.3.nupkg",
         "RestSharp.105.2.3.nupkg.sha512",
         "RestSharp.nuspec",
         "lib/MonoAndroid10/RestSharp.dll",
@@ -1035,6 +859,7 @@
     "System.Collections/4.0.11-rc2-24027": {
       "sha512": "wi4oT2B06Ev7vDPeJki7HVJ3qPYJIilzf+p81JuNaBD9L2wi9Y2L5BsQ6ToncW+lYZafuMea/hiK1xX1Ge1VWQ==",
       "type": "package",
+      "path": "System.Collections/4.0.11-rc2-24027",
       "files": [
         "System.Collections.4.0.11-rc2-24027.nupkg.sha512",
         "System.Collections.nuspec",
@@ -1100,6 +925,7 @@
     "System.Diagnostics.Debug/4.0.11-rc2-24027": {
       "sha512": "k0ckwL97zqxiSjRpgmkjUoP51LvEzMshynNuNOyUsKLQTHVieTsrg2YiBnou0AsDnDk/maCmuPJvoJR0qIcOuQ==",
       "type": "package",
+      "path": "System.Diagnostics.Debug/4.0.11-rc2-24027",
       "files": [
         "System.Diagnostics.Debug.4.0.11-rc2-24027.nupkg.sha512",
         "System.Diagnostics.Debug.nuspec",
@@ -1165,6 +991,7 @@
     "System.IO/4.1.0-rc2-24027": {
       "sha512": "VQRYN33mwALJ1UWfxxMqXzKCYUDNMUeU6j8YCxVcLCBx3Oa/l7i15NQv/OAebfOVSmBa3LmBTRP4rQqChrCbFg==",
       "type": "package",
+      "path": "System.IO/4.1.0-rc2-24027",
       "files": [
         "System.IO.4.1.0-rc2-24027.nupkg.sha512",
         "System.IO.nuspec",
@@ -1243,6 +1070,7 @@
     "System.Linq/4.1.0-rc2-24027": {
       "sha512": "uf9wbc/YWrM4xa6g0T8n1XpY/zRcTHSPw+sCwkdrL2aJbYyLFKs1Yeg8M0zjMX4SwmiNeDiZR2gkAHAPsIfKCg==",
       "type": "package",
+      "path": "System.Linq/4.1.0-rc2-24027",
       "files": [
         "System.Linq.4.1.0-rc2-24027.nupkg.sha512",
         "System.Linq.nuspec",
@@ -1312,6 +1140,7 @@
     "System.Resources.ResourceManager/4.0.1-rc2-24027": {
       "sha512": "WFDuYprqRWAVcQzArAqgabw9bbGPBaogBG17sGtZ5Iyb7ddOcIs89QYdcxdatPkSYOFNWydwSY2fyOjhIKMIcA==",
       "type": "package",
+      "path": "System.Resources.ResourceManager/4.0.1-rc2-24027",
       "files": [
         "System.Resources.ResourceManager.4.0.1-rc2-24027.nupkg.sha512",
         "System.Resources.ResourceManager.nuspec",
@@ -1366,6 +1195,7 @@
     "System.Runtime/4.1.0-rc2-24027": {
       "sha512": "sDyyCeXycMSiNP4z1wyeyXlZSb26/OXIAwqnDsOAjw9PL3r8OgDRJgt4SH6Qid5z6E5IEGTKwjBjrHJGoa8bag==",
       "type": "package",
+      "path": "System.Runtime/4.1.0-rc2-24027",
       "files": [
         "System.Runtime.4.1.0-rc2-24027.nupkg.sha512",
         "System.Runtime.nuspec",
@@ -1455,6 +1285,7 @@
     "System.Runtime.Extensions/4.1.0-rc2-24027": {
       "sha512": "rHmAgtQY8XlVd4tB/5ta8IzxAL9gpUlkTYQgUXDjdHux2MFmDSJv4vgm/atmwbKZcd0TnzjD2SYpnkWSqDWgFg==",
       "type": "package",
+      "path": "System.Runtime.Extensions/4.1.0-rc2-24027",
       "files": [
         "System.Runtime.Extensions.4.1.0-rc2-24027.nupkg.sha512",
         "System.Runtime.Extensions.nuspec",
@@ -1533,6 +1364,7 @@
     "System.Runtime.InteropServices/4.1.0-rc2-24027": {
       "sha512": "HMTGM3YyFBqDSP4STwC2YC51PInAQNMRj4V3rodwhaeAl+DnRKYqRFnd3eO2l99JqrcBIgg48SFGU9zglQC38w==",
       "type": "package",
+      "path": "System.Runtime.InteropServices/4.1.0-rc2-24027",
       "files": [
         "System.Runtime.InteropServices.4.1.0-rc2-24027.nupkg.sha512",
         "System.Runtime.InteropServices.nuspec",
@@ -1620,6 +1452,7 @@
     "System.Threading/4.0.11-rc2-24027": {
       "sha512": "JdVfUj82+pkIGfpUeb28HdwxoUMR7lTL5LT2iX9gyKtIo4yv2VirGPFVvohdlN9t9My+dIlYb9W4z1YlZV/RIA==",
       "type": "package",
+      "path": "System.Threading/4.0.11-rc2-24027",
       "files": [
         "System.Threading.4.0.11-rc2-24027.nupkg.sha512",
         "System.Threading.nuspec",
@@ -1688,6 +1521,7 @@
     "WebSocket4Net/0.14.1": {
       "sha512": "TNBXbI9mUkgwoSyNKIftqC91FAOZ7IKB+hTJ14BtVJGwO3+WxkL63FlbFwN5YmvYxL9M31NRQE4Ci3rpcg09Ug==",
       "type": "package",
+      "path": "WebSocket4Net/0.14.1",
       "files": [
         "WebSocket4Net.0.14.1.nupkg.sha512",
         "WebSocket4Net.nuspec",
@@ -1706,35 +1540,25 @@
     "Zlib.Portable.Signed/1.11.0": {
       "sha512": "1f4itCxlSBxU8kf85qUmx1+d0iHKLeZK8S7ilb4w0t+uV+/xtOUUVOEAnFMG5uHVBc7L+ycZjWQoA+a1GZKYjg==",
       "type": "package",
+      "path": "Zlib.Portable.Signed/1.11.0",
       "files": [
-        "Zlib.Portable.Signed.1.11.0.nupkg",
         "Zlib.Portable.Signed.1.11.0.nupkg.sha512",
         "Zlib.Portable.Signed.nuspec",
         "lib/portable-net4+sl5+wp8+win8+wpa81+MonoTouch+MonoAndroid/Zlib.Portable.dll",
         "lib/portable-net4+sl5+wp8+win8+wpa81+MonoTouch+MonoAndroid/Zlib.Portable.xml"
       ]
     },
-    "Discord.Net/0.9.3": {
+    "DiscordBaseExtensions/0.1.0": {
       "type": "project",
-      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/project.json",
-      "msbuildProject": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/Discord.Net.xproj"
-    },
-    "Discord.Net.Commands/0.9.3": {
-      "type": "project",
-      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/project.json",
-      "msbuildProject": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/Discord.Net.Commands.xproj"
-    },
-    "Discord.Net.Modules/0.9.3": {
-      "type": "project",
-      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Modules/project.json",
-      "msbuildProject": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Modules/Discord.Net.Modules.xproj"
+      "path": "../DiscordBaseExtensions/project.json",
+      "msbuildProject": "../DiscordBaseExtensions/DiscordBaseExtensions.xproj"
     },
     "JiiLib/0.2.2": {
       "type": "project",
       "path": "../../../JiiLib/src/JiiLib/project.json",
       "msbuildProject": "../../../JiiLib/src/JiiLib/JiiLib.xproj"
     },
-    "JiiLib.Net/0.1.2": {
+    "JiiLib.Net/0.1.3": {
       "type": "project",
       "path": "../../../JiiLib/src/JiiLib.Net/project.json",
       "msbuildProject": "../../../JiiLib/src/JiiLib.Net/JiiLib.Net.xproj"
@@ -1742,12 +1566,13 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "Discord.Net.Commands >= 0.9.3",
-      "Discord.Net.Modules >= 0.9.3",
-      "Google.Apis.Script.v1 >= 1.9.2.10",
+      "Discord.Net.Commands >= 0.9.4",
+      "Discord.Net.Modules >= 0.9.4",
+      "DiscordBaseExtensions >= 0.1.0",
       "JiiLib >= 0.2.2",
-      "JiiLib.Net >= 0.1.2",
-      "Microsoft.Extensions.Configuration.UserSecrets >= 1.0.0-rc2-final"
+      "JiiLib.Net >= 0.1.3",
+      "Microsoft.Extensions.Configuration.UserSecrets >= 1.0.0-rc2-final",
+      "Microsoft.Extensions.PlatformAbstractions >= 1.0.0-rc2-final"
     ],
     ".NETFramework,Version=v4.6": []
   },

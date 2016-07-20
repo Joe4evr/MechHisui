@@ -1,0 +1,11 @@
+﻿{
+    "version": "0.1.0",
+
+    "dependencies": {
+        "Discord.Net": "0.9.4"
+    },
+
+    "frameworks": {
+        "net46": { }
+    }
+}

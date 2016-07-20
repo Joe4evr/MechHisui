@@ -21,7 +21,7 @@
         "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0-rc2-final",
         "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc2-final",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-final",
-        "Discord.Net": "0.9.3",
+        "DiscordBaseExtensions": "0.1.0",
         "JiiLib": "0.2.2"
     },
 

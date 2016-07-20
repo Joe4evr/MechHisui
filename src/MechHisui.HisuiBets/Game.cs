@@ -52,7 +52,7 @@ namespace MechHisui.HisuiBets
                 .AppendLine($"The highest bet is {symbol}{highest.BettedAmount} on `{highest.Tribute}`.")
                 .Append($"The most bets are {most.Count} on `{most.Tribute}`.");
 
-            await _channel.SendMessage(sb.ToString());
+            await _channel.SendWithRetry(sb.ToString());
         }
 
         internal void CloseOff()

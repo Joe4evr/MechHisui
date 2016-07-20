@@ -37,18 +37,18 @@ namespace MechHisui.FateGOLib.Modules
 
                     if (codes.Count() == 1)
                     {
-                        await cea.Channel.SendMessage(FormatMysticCodeProfile(codes.Single()));
+                        await cea.Channel.SendWithRetry(FormatMysticCodeProfile(codes.Single()));
                     }
                     else if (codes.Count() > 1)
                     {
                         var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
                             .AppendSequence(codes, (s, m) => s.AppendLine($"**{m.Code}** *({String.Join(", ", FgoHelpers.MysticCodeDict.Where(d => d.Value == m.Code).Select(d => d.Key))})*"));
 
-                        await cea.Channel.SendMessage(sb.ToString());
+                        await cea.Channel.SendWithRetry(sb.ToString());
                     }
                     else
                     {
-                        await cea.Channel.SendMessage("Specified Mystic Code not found. Please use `.listmystic` for the list of available Mystic Codes.");
+                        await cea.Channel.SendWithRetry("Specified Mystic Code not found. Please use `.listmystic` for the list of available Mystic Codes.");
                     }
                 });
 
@@ -62,7 +62,7 @@ namespace MechHisui.FateGOLib.Modules
                     {
                         sb.AppendLine(code.Code);
                     }
-                    await cea.Channel.SendMessage(sb.ToString());
+                    await cea.Channel.SendWithRetry(sb.ToString());
                 });
 
             Console.WriteLine("Registering 'Mystic alias'...");
@@ -76,7 +76,7 @@ namespace MechHisui.FateGOLib.Modules
                     var mystic = cea.Args[0];
                     if (!FgoHelpers.MysticCodeList.Select(m => m.Code).Contains(mystic))
                     {
-                        await cea.Channel.SendMessage("Could not find Mystic Code to add alias for.");
+                        await cea.Channel.SendWithRetry("Could not find Mystic Code to add alias for.");
                         return;
                     }
 
@@ -85,11 +85,11 @@ namespace MechHisui.FateGOLib.Modules
                     {
                         FgoHelpers.MysticCodeDict.Add(alias, mystic);
                         File.WriteAllText(Path.Combine(_config["AliasPath"], "mystics.json"), JsonConvert.SerializeObject(FgoHelpers.MysticCodeDict, Formatting.Indented));
-                        await cea.Channel.SendMessage($"Added alias `{alias}` for `{mystic}`.");
+                        await cea.Channel.SendWithRetry($"Added alias `{alias}` for `{mystic}`.");
                     }
                     catch (ArgumentException)
                     {
-                        await cea.Channel.SendMessage($"Alias `{alias}` already exists for CE `{FgoHelpers.MysticCodeDict[alias]}`.");
+                        await cea.Channel.SendWithRetry($"Alias `{alias}` already exists for CE `{FgoHelpers.MysticCodeDict[alias]}`.");
                         return;
                     }
                 });

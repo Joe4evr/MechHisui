@@ -91,7 +91,7 @@ namespace MechHisui.Commands
                 .Description("Relay info about myself.")
                 .Do(async cea =>
                 {
-                    await cea.Channel.SendMessage("I am a bot made by Joe4evr. Find my source code here: https://github.com/Joe4evr/MechHisui/ ");
+                    await cea.Channel.SendWithRetry("I am a bot made by Joe4evr. Find my source code here: https://github.com/Joe4evr/MechHisui/ ");
                 });
         }
 
@@ -107,7 +107,7 @@ namespace MechHisui.Commands
                     {
                         Console.WriteLine($"{channel.Name}:  {channel.Id}");
                     }
-                    await cea.Channel.SendMessage("Known Channel IDs logged to console.");
+                    await cea.Channel.SendWithRetry("Known Channel IDs logged to console.");
                 });
         }
 
@@ -123,17 +123,17 @@ namespace MechHisui.Commands
                     //Console.WriteLine($"{DateTime.Now}: Command `pick` invoked");
                     if (cea.Args.Length <= 1)
                     {
-                        await cea.Channel.SendMessage("Provide at least two items.");
+                        await cea.Channel.SendWithRetry("Provide at least two items.");
                         return;
                     }
 
-                    IEnumerable<string> items = cea.Args;
+                    IEnumerable<string> items = cea.Args.Length == 2 ? cea.Args.RepeatSeq(3) : (cea.Args.Length == 3 ? cea.Args.RepeatSeq(2) : cea.Args);
                     for (int i = 0; i < 28; i++)
                     {
                         items = items.Shuffle();
                     }
 
-                    await cea.Channel.SendMessage($"**Picked:** `{items.ElementAt(new Random().Next(maxValue: items.Count()))}`");
+                    await cea.Channel.SendWithRetry($"**Picked:** `{items.ElementAt(new Random().Next(maxValue: items.Count()))}`");
                 });
         }
 
@@ -148,7 +148,7 @@ namespace MechHisui.Commands
                     var rec = client.GetRecordingChannels();
                     if (rec.Contains(cea.Channel.Id))
                     {
-                        await cea.Channel.SendMessage($"Already recording here.");
+                        await cea.Channel.SendWithRetry($"Already recording here.");
                     }
                     else
                     {
@@ -166,7 +166,7 @@ namespace MechHisui.Commands
                     var rec = client.GetRecordingChannels();
                     if (!rec.Contains(cea.Channel.Id))
                     {
-                        await cea.Channel.SendMessage($"Not recording here.");
+                        await cea.Channel.SendWithRetry($"Not recording here.");
                     }
                     else
                     {
@@ -188,7 +188,7 @@ namespace MechHisui.Commands
             //    {
             //        var resp = client.GetResponders().Single(r => r.channel.Id == cea.Channel.Id);
             //        resp.ResetTimeouts();
-            //        await cea.Channel.SendMessage("Timeouts reset.");
+            //        await cea.Channel.SendWithRetry("Timeouts reset.");
             //    });
         }
 
@@ -196,14 +196,14 @@ namespace MechHisui.Commands
         {
             Console.WriteLine("Registering 'Roll'...");
             client.GetService<CommandService>().CreateCommand("roll")
-                .Description("Roll one or more dice of variable length.")
+                .Description("Roll one or more dice of variable length. Uses D&D notation.")
                 .Parameter("dice", ParameterType.Required)
                 .Do(async cea =>
                 {
                     if (!Regex.Match(cea.Args[0], "[0-9]+d[0-9]+").Success)
                     {
-                        await cea.Channel.SendMessage("**Info:** Previous roll command has been renamed to `gacha`.");
-                        //await cea.Channel.SendMessage("Invalid format specified.");
+                        //await cea.Channel.SendWithRetry("**Info:** Previous roll command has been renamed to `gacha`.");
+                        await cea.Channel.SendWithRetry("Invalid format specified.");
                         return;
                     }
 
@@ -224,7 +224,7 @@ namespace MechHisui.Commands
                             results.Add(dice.ElementAt(rng.Next(maxValue: range)));
                         }
 
-                        await cea.Channel.SendMessage($"**Rolled:** {String.Join(", ", results)}");
+                        await cea.Channel.SendWithRetry($"**Rolled:** {String.Join(", ", results)}");
                     }
 
                 });
@@ -237,7 +237,7 @@ namespace MechHisui.Commands
                 .AddCheck((c, u, ch) => Helpers.IsWhilested(ch, client))
                 .Do(async cea =>
                 {
-                    await cea.Channel.SendMessage("https://www.youtube.com/watch?v=mQmgIfP-3OQ");
+                    await cea.Channel.SendWithRetry("https://www.youtube.com/watch?v=mQmgIfP-3OQ");
                 });
         }
 
@@ -283,12 +283,12 @@ namespace MechHisui.Commands
                         var str = sb.ToString();
                         if (!String.IsNullOrWhiteSpace(str))
                         {
-                            await cea.Channel.SendMessage(str);
+                            await cea.Channel.SendWithRetry(str);
                         }
                     }
                     else
                     {
-                        await cea.Channel.SendMessage("Invalid Argument.");
+                        await cea.Channel.SendWithRetry("Invalid Argument.");
                     }
                 });
         }
@@ -305,7 +305,7 @@ namespace MechHisui.Commands
                 .Hide()
                 .Do(async cea =>
                 {
-                    await cea.Channel.SendMessage(xmasvids.ElementAt(new Random().Next() % xmasvids.Count));
+                    await cea.Channel.SendWithRetry(xmasvids.ElementAt(new Random().Next() % xmasvids.Count));
                 });
 
             client.GetService<CommandService>().CreateCommand("addxmas")
@@ -319,7 +319,7 @@ namespace MechHisui.Commands
                     {
                         tw.Write(JsonConvert.SerializeObject(xmasvids, Formatting.Indented));
                     }
-                    await cea.Channel.SendMessage($"Added `{cea.Args[0]}` to `{nameof(xmasvids)}`.");
+                    await cea.Channel.SendWithRetry($"Added `{cea.Args[0]}` to `{nameof(xmasvids)}`.");
                 });
         }
 
@@ -336,7 +336,7 @@ namespace MechHisui.Commands
             {
                 if (ch.Id != UInt64.Parse(config["API_testing"]))
                 {
-                    await ch.SendMessage(msg);
+                    await ch.SendWithRetry(msg);
                 }
             }
 

@@ -35,7 +35,7 @@ namespace MechHisui.FateGOLib.Modules
                     var arg = String.Join(" ", cea.Args);
                     if (String.IsNullOrWhiteSpace(arg))
                     {
-                        await cea.Channel.SendMessage("Provide an item to find among drops.");
+                        await cea.Channel.SendWithRetry("Provide an item to find among drops.");
                         return;
                     }
 
@@ -49,27 +49,27 @@ namespace MechHisui.FateGOLib.Modules
                             {
                                 if (i == 0)
                                 {
-                                    await cea.Channel.SendMessage($"Found in the following {potentials.Count()} locations:\n{result.Substring(i, i + 1750)}...");
+                                    await cea.Channel.SendWithRetry($"Found in the following {potentials.Count()} locations:\n{result.Substring(i, i + 1750)}...");
                                 }
                                 else if (i + 1750 > result.Length)
                                 {
-                                    await cea.Channel.SendMessage($"...{result.Substring(i)}");
+                                    await cea.Channel.SendWithRetry($"...{result.Substring(i)}");
                                 }
                                 else
                                 {
-                                    await cea.Channel.SendMessage($"...{result.Substring(i, i + 1750)}");
+                                    await cea.Channel.SendWithRetry($"...{result.Substring(i, i + 1750)}");
                                 }
                             }
                         }
                         else
                         {
-                            await cea.Channel.SendMessage($"Found in the following {potentials.Count()} locations:\n{result}");
+                            await cea.Channel.SendWithRetry($"Found in the following {potentials.Count()} locations:\n{result}");
                         }
 
                     }
                     else
                     {
-                        await cea.Channel.SendMessage("Could not find specified item among location drops.");
+                        await cea.Channel.SendWithRetry("Could not find specified item among location drops.");
                     }
                 });
 
@@ -134,7 +134,7 @@ namespace MechHisui.FateGOLib.Modules
                         .AppendLine($"**Team Berserker:** {hgw.ElementAt(6).Key} + {hgw.ElementAt(6).Value}")
                         .Append("Discuss.");
 
-                    await cea.Channel.SendMessage(sb.ToString());
+                    await cea.Channel.SendWithRetry(sb.ToString());
                 });
 
             manager.Client.GetService<CommandService>().CreateCommand("addhgw")
@@ -159,7 +159,7 @@ namespace MechHisui.FateGOLib.Modules
                             {
                                 tw.Write(JsonConvert.SerializeObject(FgoHelpers.NameOnlyServants, Formatting.Indented));
                             }
-                            await cea.Channel.SendMessage($"Added `{name}` as a `{temp[0]}`.");
+                            await cea.Channel.SendWithRetry($"Added `{name}` as a `{temp[0]}`.");
                             break;
                         case "master":
                             FgoHelpers.Masters.Add(cea.Args[1]);
@@ -167,10 +167,10 @@ namespace MechHisui.FateGOLib.Modules
                             {
                                 tw.Write(JsonConvert.SerializeObject(FgoHelpers.Masters, Formatting.Indented));
                             }
-                            await cea.Channel.SendMessage($"Added `{cea.Args[1]}` as a Master.");
+                            await cea.Channel.SendWithRetry($"Added `{cea.Args[1]}` as a Master.");
                             break;
                         default:
-                            await cea.Channel.SendMessage("Unsupported catagory.");
+                            await cea.Channel.SendWithRetry("Unsupported catagory.");
                             break;
                     }
                 });

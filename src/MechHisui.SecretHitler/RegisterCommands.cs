@@ -39,7 +39,7 @@ namespace MechHisui.Commands
                         .AppendLine("For more details: https://dl.dropboxusercontent.com/u/502769/Secret_Hitler_Rules.pdf ")
                         .Append("Good luck, have fun.");
                     
-                    await cea.Channel.SendMessage(sb.ToString());
+                    await cea.Channel.SendWithRetry(sb.ToString());
                 });
 
             client.GetService<CommandService>().CreateCommand("opensh")
@@ -52,7 +52,7 @@ namespace MechHisui.Commands
                     {
                         rules = HouseRules.None;
                         players = new List<User>();
-                        await cea.Channel.SendMessage("Opening up a round of Secret Hitler.");
+                        await cea.Channel.SendWithRetry("Opening up a round of Secret Hitler.");
                     }
                 });
 
@@ -80,7 +80,7 @@ namespace MechHisui.Commands
                 .Description("Display the currently joined players.")
                 .Do(async cea =>
                 {
-                    await cea.Channel.SendMessage($"Current players are {String.Join(", ", players.Select(p => p.Name))}. ({players.Count})");
+                    await cea.Channel.SendWithRetry($"Current players are {String.Join(", ", players.Select(p => p.Name))}. ({players.Count})");
                 });
 
             client.GetService<CommandService>().CreateCommand("join")
@@ -92,19 +92,19 @@ namespace MechHisui.Commands
                     {
                         if (players.Count == 10)
                         {
-                            await cea.Channel.SendMessage($"The list is already full.");
+                            await cea.Channel.SendWithRetry($"The list is already full.");
                             return;
                         }
 
                         if (!players.Any(p => p.Id == cea.User.Id))
                         {
                             players.Add(cea.User);
-                            await cea.Channel.SendMessage($"{cea.User.Name} joined the game.");
+                            await cea.Channel.SendWithRetry($"{cea.User.Name} joined the game.");
                         }
                     }
                     else
                     {
-                        await cea.Channel.SendMessage($"Game is already in progress.");
+                        await cea.Channel.SendWithRetry($"Game is already in progress.");
                     }
                 });
 
@@ -118,7 +118,7 @@ namespace MechHisui.Commands
                         if (players.Any(p => p.Id == cea.User.Id))
                         {
                             players.Remove(cea.User);
-                            await cea.Channel.SendMessage($"{cea.User.Name} left the game.");
+                            await cea.Channel.SendWithRetry($"{cea.User.Name} left the game.");
                         }
                     }
                 });
@@ -134,7 +134,7 @@ namespace MechHisui.Commands
                         if (players.Count >= 5 && players.Count <= 10)
                         {
                             gameOpen = true;
-                            await cea.Channel.SendMessage($"Setting up game with {players.Count} players.");
+                            await cea.Channel.SendWithRetry($"Setting up game with {players.Count} players.");
                             var gameConfig = configs.SingleOrDefault(c => c.Key == cea.Args[0]) ?? SecretHitlerConfig.Default;
                             game = new SecretHitler.SecretHitler(gameConfig, cea.Channel, players);
                             await game.SetupGame();
@@ -150,7 +150,7 @@ namespace MechHisui.Commands
                 {
                     if (gameOpen)
                     {
-                        await cea.Channel.SendMessage("Cannot change rules while game is in progress.");
+                        await cea.Channel.SendWithRetry("Cannot change rules while game is in progress.");
                         return;
                     }
 
@@ -158,10 +158,10 @@ namespace MechHisui.Commands
                     {
                         case "skipfirst":
                             rules |= HouseRules.SkipFirstElection;
-                            await cea.Channel.SendMessage("House rule added.");
+                            await cea.Channel.SendWithRetry("House rule added.");
                             break;
                         default:
-                            await cea.Channel.SendMessage("Unknown parameter.");
+                            await cea.Channel.SendWithRetry("Unknown parameter.");
                             break;
                     }
 
@@ -175,11 +175,11 @@ namespace MechHisui.Commands
                 {
                     if (gameOpen)
                     {
-                        await cea.Channel.SendMessage(game.GetGameState());
+                        await cea.Channel.SendWithRetry(game.GetGameState());
                     }
                     else
                     {
-                        await cea.Channel.SendMessage("No game going on.");
+                        await cea.Channel.SendWithRetry("No game going on.");
                     }
                 });
 
@@ -202,7 +202,7 @@ namespace MechHisui.Commands
                 .Do(async cea =>
                 {
                     gameOpen = false;
-                    await cea.Channel.SendMessage("Game canceled.");
+                    await cea.Channel.SendWithRetry("Game canceled.");
                 });
         }
 

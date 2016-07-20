@@ -1,18 +1,26 @@
-﻿using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.PlatformAbstractions;
+using Newtonsoft.Json;
 using JiiLib;
 
 namespace MechHisui.FateGOLib
 {
     public static class FgoHelpers
     {
-        public static readonly TimeZoneInfo JpnTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time");
+        private static readonly Platform platform = PlatformServices.Default.Runtime.OperatingSystemPlatform;
+        public static TimeZoneInfo JpnTimeZone
+            {
+                get
+                {
+                    return platform == Platform.Windows
+                        ? TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time")
+                        : TimeZoneInfo.FindSystemTimeZoneById("Asia/Tokyo");
+                }
+            }
         public static readonly TimeSpan PerAP = TimeSpan.FromMinutes(5);
 
         public static List<ServantProfile> ServantProfiles = new List<ServantProfile>();
@@ -59,5 +67,10 @@ namespace MechHisui.FateGOLib
 
         public static IEnumerable<ServantProfile> WhereTrait(this IEnumerable<ServantProfile> profiles, string trait)
             => profiles.Where(p => p.Traits.ContainsIgnoreCase(trait));
+
+        private static void F()
+        {
+            var x = FgoHelpers.ServantProfiles.Where(p => p.Rarity <= 3).SelectMany(p => p.ActiveSkills.Where(s => s.Effect.Contains("Heal")).Select(s => $"{p.Name} - {s.SkillName}: {s.Effect}"));
+        }
     }
 }

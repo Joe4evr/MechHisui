@@ -34,14 +34,14 @@ namespace MechHisui.FateGOLib.Modules
                     int atk;
                     if (!Int32.TryParse(cea.GetArg("atk"), out atk))
                     {
-                        await cea.Channel.SendMessage("Could not parse `atk` parameter as number.");
+                        await cea.Channel.SendWithRetry("Could not parse `atk` parameter as number.");
                         return;
                     }
 
                     Card atkCard;
                     if (!Enum.TryParse<Card>(cea.GetArg("atkCard"), true, out atkCard))
                     {
-                        await cea.Channel.SendMessage("Could not parse `atkCard` parameter as a valid attack type.");
+                        await cea.Channel.SendWithRetry("Could not parse `atkCard` parameter as a valid attack type.");
                         return;
                     }
 
@@ -50,12 +50,12 @@ namespace MechHisui.FateGOLib.Modules
                     {
                         if (!Int32.TryParse(cea.GetArg("atkIndex"), out index))
                         {
-                            await cea.Channel.SendMessage("Could not parse `atkIndex` parameter as a number.");
+                            await cea.Channel.SendWithRetry("Could not parse `atkIndex` parameter as a number.");
                             return;
                         }
                         else if (index < 1 || index > 3)
                         {
-                            await cea.Channel.SendMessage("Parameter `atkIndex` not in valid range.");
+                            await cea.Channel.SendWithRetry("Parameter `atkIndex` not in valid range.");
                             return;
                         }
                     }
@@ -82,12 +82,12 @@ namespace MechHisui.FateGOLib.Modules
 
                     if (profile == null)
                     {
-                        await cea.Channel.SendMessage("Could not find specified Servant.");
+                        await cea.Channel.SendWithRetry("Could not find specified Servant.");
                         return;
                     }
                     else
                     {
-                        await cea.Channel.SendMessage($"**Approximate damage dealt:** {SimulateDmg(profile, cea.GetArg("enemyClass"), atk, atkCard, index):N3}");
+                        await cea.Channel.SendWithRetry($"**Approximate damage dealt:** {SimulateDmg(profile, cea.GetArg("enemyClass"), atk, atkCard, index):N3}");
                         return;
                     }
                 });

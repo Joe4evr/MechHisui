@@ -75,7 +75,7 @@ namespace MechHisui.HisuiBets
                 .Do(async cea =>
                 {
                     var bucks = _bank.Accounts.Single(u => u.UserId == cea.User.Id).Bucks;
-                    await cea.Channel.SendMessage($"**{cea.User.Name}** currently has {symbol}{bucks}.");
+                    await cea.Channel.SendWithRetry($"**{cea.User.Name}** currently has {symbol}{bucks}.");
                 });
 
             manager.Client.GetService<CommandService>().CreateCommand("newgame")
@@ -89,19 +89,19 @@ namespace MechHisui.HisuiBets
                         {
                             case "sb":
                             case "salty":
-                                await cea.Channel.SendMessage("Starting a SaltyBet game. Bets will close shortly.");
+                                await cea.Channel.SendWithRetry("Starting a SaltyBet game. Bets will close shortly.");
                                 _game = new Game(_bank, cea.Channel, GameType.SaltyBet);
                                 _game.ClosingGame();
                                 break;
                             default:
-                                await cea.Channel.SendMessage("A new game is starting. You may place your bets now.");
+                                await cea.Channel.SendWithRetry("A new game is starting. You may place your bets now.");
                                 _game = new Game(_bank, cea.Channel, GameType.HungerGame);
                                 break;
                         }
                     }
                     else
                     {
-                        await cea.Channel.SendMessage("Game is already in progress.");
+                        await cea.Channel.SendWithRetry("Game is already in progress.");
                     }
                 });
 
@@ -116,24 +116,24 @@ namespace MechHisui.HisuiBets
                 {
                     if (_game?.GType == GameType.HungerGame && cea.User.Id == UInt64.Parse(_config["Hgame_Master"]))
                     {
-                        await cea.Channel.SendMessage("The game master is not allowed to bet in a Hunger Game.");
+                        await cea.Channel.SendWithRetry("The game master is not allowed to bet in a Hunger Game.");
                         return;
                     }
                     if (_game?.GameOpen == false || _game?.BetsOpen == false)
                     {
-                        await cea.Channel.SendMessage("Bets are currently closed at this time.");
+                        await cea.Channel.SendWithRetry("Bets are currently closed at this time.");
                         return;
                     }
                     if (_blacklist.Contains(cea.User.Id))
                     {
-                        await cea.Channel.SendMessage("Not allowed to bet.");
+                        await cea.Channel.SendWithRetry("Not allowed to bet.");
                         return;
                     }
 
                     var userBucks = _bank.Accounts.SingleOrDefault(u => u.UserId == cea.User.Id).Bucks;
                     if (userBucks == 0)
                     {
-                        await cea.Channel.SendMessage("You currently have no HisuiBucks.");
+                        await cea.Channel.SendWithRetry("You currently have no HisuiBucks.");
                         return;
                     }
                     
@@ -144,23 +144,23 @@ namespace MechHisui.HisuiBets
                     }
                     else if (!Int32.TryParse(cea.Args[0], out amount))
                     {
-                        await cea.Channel.SendMessage("Could not parse amount as a number.");
+                        await cea.Channel.SendWithRetry("Could not parse amount as a number.");
                         return;
                     }
                     else if (amount > userBucks)
                     {
-                        await cea.Channel.SendMessage($"**{cea.User.Name}** currently does not have enough HisuiBucks to make that bet.");
+                        await cea.Channel.SendWithRetry($"**{cea.User.Name}** currently does not have enough HisuiBucks to make that bet.");
                         return;
                     }
 
                     var target = String.Join(" ", cea.Args.Skip(1));
                     if (_game?.GType == GameType.SaltyBet && !sbColors.ContainsIgnoreCase(target))
                     {
-                        await cea.Channel.SendMessage("Argument must be `red` or `blue` in a SaltyBet.");
+                        await cea.Channel.SendWithRetry("Argument must be `red` or `blue` in a SaltyBet.");
                         return;
                     }
 
-                    await cea.Channel.SendMessage(_game.ProcessBet(new Bet
+                    await cea.Channel.SendWithRetry(_game.ProcessBet(new Bet
                     {
                         UserName = cea.User.Name,
                         UserId = cea.User.Id,
@@ -178,7 +178,7 @@ namespace MechHisui.HisuiBets
                     if (_game?.GameOpen == false)
                     {
                         Console.WriteLine("No game open, aborting gracefully.");
-                        await cea.Channel.SendMessage("No game is going on at this time.");
+                        await cea.Channel.SendWithRetry("No game is going on at this time.");
                         return;
                     }
 
@@ -203,13 +203,13 @@ namespace MechHisui.HisuiBets
                         {
 
                             sb.Append("```");
-                            await cea.Channel.SendMessage(sb.ToString());
+                            await cea.Channel.SendWithRetry(sb.ToString());
                             sb.Clear().AppendLine("```");
                         }
                     }
                     sb.Append("```");
                     Console.WriteLine("Sending result to channel");
-                    await cea.Channel.SendMessage(sb.ToString());
+                    await cea.Channel.SendWithRetry(sb.ToString());
                 });
 
             manager.Client.GetService<CommandService>().CreateCommand("closebets")
@@ -218,20 +218,20 @@ namespace MechHisui.HisuiBets
                 {
                     if (_game?.GameOpen == false)
                     {
-                        await cea.Channel.SendMessage("No game is going on at this time.");
+                        await cea.Channel.SendWithRetry("No game is going on at this time.");
                         return;
                     }
                     if (_game?.BetsOpen == false)
                     {
-                        await cea.Channel.SendMessage("Bets are already closed.");
+                        await cea.Channel.SendWithRetry("Bets are already closed.");
                         return;
                     }
                     if (_game?.GType == GameType.SaltyBet)
                     {
-                        await cea.Channel.SendMessage("This type of game closes automatically.");
+                        await cea.Channel.SendWithRetry("This type of game closes automatically.");
                         return;
                     }
-                    await cea.Channel.SendMessage("Bets are going to close soon. Please place your final bets now.");
+                    await cea.Channel.SendWithRetry("Bets are going to close soon. Please place your final bets now.");
                     _game.ClosingGame();
                 });
 
@@ -246,7 +246,7 @@ namespace MechHisui.HisuiBets
                     }
                     if (_game?.GameOpen == true)
                     {
-                        await cea.Channel.SendMessage(await _game.Winner(String.Join(" ", cea.Args)));
+                        await cea.Channel.SendWithRetry(await _game.Winner(String.Join(" ", cea.Args)));
                     }
                 });
 
@@ -261,7 +261,7 @@ namespace MechHisui.HisuiBets
                     {
                         if ((DateTime.UtcNow - lastDonation).TotalMilliseconds == TimeSpan.FromMinutes(10).TotalMilliseconds)
                         {
-                            await cea.Channel.SendMessage("You are currently in donation timeout.");
+                            await cea.Channel.SendWithRetry("You are currently in donation timeout.");
                             return;
                         }
                         else
@@ -275,12 +275,12 @@ namespace MechHisui.HisuiBets
                     {
                         if (bucks <= 0)
                         {
-                            await cea.Channel.SendMessage("Cannot make a donation of 0 or less.");
+                            await cea.Channel.SendWithRetry("Cannot make a donation of 0 or less.");
                             return;
                         }
                         if (bucks > _bank.Accounts.Single(u => u.UserId == cea.User.Id).Bucks)
                         {
-                            await cea.Channel.SendMessage($"**{cea.User.Name}** currently does not have enough HisuiBucks to make that donation.");
+                            await cea.Channel.SendWithRetry($"**{cea.User.Name}** currently does not have enough HisuiBucks to make that donation.");
                             return;
                         }
 
@@ -289,13 +289,13 @@ namespace MechHisui.HisuiBets
                         {
                             if (_blacklist.Contains(target.Id))
                             {
-                                await cea.Channel.SendMessage("Unable to donate to Bot accounts.");
+                                await cea.Channel.SendWithRetry("Unable to donate to Bot accounts.");
                                 return;
                             }
 
                             _bank.Accounts.Single(p => p.UserId == cea.User.Id).Bucks -= bucks;
                             _bank.Accounts.Single(p => p.UserId == target.Id).Bucks += bucks;
-                            await cea.Channel.SendMessage($"**{cea.User.Name}** donated {symbol}{bucks} to **{target.Name}**.");
+                            await cea.Channel.SendWithRetry($"**{cea.User.Name}** donated {symbol}{bucks} to **{target.Name}**.");
                             _bank.WriteBank(_config["bank"]);
 
                             _donationCounters.AddOrUpdate(cea.User.Id, 1, (k, v) => v++);
@@ -308,12 +308,12 @@ namespace MechHisui.HisuiBets
                         }
                         else
                         {
-                            await cea.Channel.SendMessage("Could not find that user.");
+                            await cea.Channel.SendWithRetry("Could not find that user.");
                         }
                     }
                     else
                     {
-                        await cea.Channel.SendMessage("Could not parse amount as a number.");
+                        await cea.Channel.SendWithRetry("Could not parse amount as a number.");
                     }
                 });
 
@@ -343,7 +343,7 @@ namespace MechHisui.HisuiBets
                         })
                         .Append("```");
 
-                    await cea.Channel.SendMessage(sb.ToString());
+                    await cea.Channel.SendWithRetry(sb.ToString());
                 });
         }
 

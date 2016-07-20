@@ -3,6 +3,46 @@
   "version": 2,
   "targets": {
     ".NETFramework,Version=v4.6": {
+      "Discord.Net/0.9.4": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "8.0.3",
+          "Nito.AsyncEx": "3.0.1",
+          "RestSharp": "105.2.3",
+          "WebSocket4Net": "0.14.1"
+        },
+        "compile": {
+          "lib/net45/Discord.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.dll": {}
+        }
+      },
+      "Discord.Net.Commands/0.9.4": {
+        "type": "package",
+        "dependencies": {
+          "Discord.Net": "0.9.4"
+        },
+        "compile": {
+          "lib/net45/Discord.Net.Commands.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.Commands.dll": {}
+        }
+      },
+      "Discord.Net.Modules/0.9.4": {
+        "type": "package",
+        "dependencies": {
+          "Discord.Net": "0.9.4",
+          "Discord.Net.Commands": "0.9.4"
+        },
+        "compile": {
+          "lib/net45/Discord.Net.Modules.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Discord.Net.Modules.dll": {}
+        }
+      },
       "Microsoft.Extensions.Configuration/1.0.0-rc2-final": {
         "type": "package",
         "dependencies": {
@@ -244,51 +284,17 @@
           "lib/net45/WebSocket4Net.dll": {}
         }
       },
-      "Discord.Net/0.9.3": {
+      "DiscordBaseExtensions/0.1.0": {
         "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
+        "framework": ".NETFramework,Version=v4.6",
         "dependencies": {
-          "Newtonsoft.Json": "8.0.3",
-          "Nito.AsyncEx": "3.0.1",
-          "RestSharp": "105.2.3",
-          "WebSocket4Net": "0.14.1"
-        },
-        "frameworkAssemblies": [
-          "System.Runtime",
-          "System.Threading.Tasks"
-        ],
-        "compile": {
-          "net45/Discord.Net.dll": {}
-        },
-        "runtime": {
-          "net45/Discord.Net.dll": {}
-        }
-      },
-      "Discord.Net.Commands/0.9.3": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
-        "dependencies": {
-          "Discord.Net": "0.9.3"
+          "Discord.Net": "0.9.4"
         },
         "compile": {
-          "net45/Discord.Net.Commands.dll": {}
+          "net46/DiscordBaseExtensions.dll": {}
         },
         "runtime": {
-          "net45/Discord.Net.Commands.dll": {}
-        }
-      },
-      "Discord.Net.Modules/0.9.3": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.5",
-        "dependencies": {
-          "Discord.Net": "0.9.3",
-          "Discord.Net.Commands": "0.9.3"
-        },
-        "compile": {
-          "net45/Discord.Net.Modules.dll": {}
-        },
-        "runtime": {
-          "net45/Discord.Net.Modules.dll": {}
+          "net46/DiscordBaseExtensions.dll": {}
         }
       },
       "JiiLib/0.2.2": {
@@ -304,9 +310,43 @@
     }
   },
   "libraries": {
+    "Discord.Net/0.9.4": {
+      "sha512": "Ipmn9IJimhNanOh83yfmX5ynANpTv1NrHfgoQvDWXy2x2TZ8sTn1fulJ/q1PShIqm7keYS/rNMEs9Ep/ibxRuA==",
+      "type": "package",
+      "path": "Discord.Net/0.9.4",
+      "files": [
+        "Discord.Net.0.9.4.nupkg.sha512",
+        "Discord.Net.nuspec",
+        "lib/net45/Discord.Net.dll",
+        "lib/netstandard1.3/Discord.Net.dll"
+      ]
+    },
+    "Discord.Net.Commands/0.9.4": {
+      "sha512": "lCquyYjE4JsOslk1lnEqHNddfEceWpQOfVJq8hr3fWweKYnESQ0aO2sCjToH7M33Q13L+pID+1YHYppzaAHHnQ==",
+      "type": "package",
+      "path": "Discord.Net.Commands/0.9.4",
+      "files": [
+        "Discord.Net.Commands.0.9.4.nupkg.sha512",
+        "Discord.Net.Commands.nuspec",
+        "lib/net45/Discord.Net.Commands.dll",
+        "lib/netstandard1.3/Discord.Net.Commands.dll"
+      ]
+    },
+    "Discord.Net.Modules/0.9.4": {
+      "sha512": "57d9Ts5tvIWSvwuopF0je2oTaHsHzhku2fn8U63v3e292bMsIh1IPDne5bR5nkGfz1ew7hkuWiyzBgPICPvr/g==",
+      "type": "package",
+      "path": "Discord.Net.Modules/0.9.4",
+      "files": [
+        "Discord.Net.Modules.0.9.4.nupkg.sha512",
+        "Discord.Net.Modules.nuspec",
+        "lib/net45/Discord.Net.Modules.dll",
+        "lib/netstandard1.3/Discord.Net.Modules.dll"
+      ]
+    },
     "Microsoft.Extensions.Configuration/1.0.0-rc2-final": {
       "sha512": "dHr1CJ3nkWxQAtIRk7pTX/0KCDC14DY580xC7RlMHt3EW9zUak4y31FQQIMgsE9oaeJMnJP2RtimN4FPzPaWdQ==",
       "type": "package",
+      "path": "Microsoft.Extensions.Configuration/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.Configuration.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.Configuration.nuspec",
@@ -317,6 +357,7 @@
     "Microsoft.Extensions.Configuration.Abstractions/1.0.0-rc2-final": {
       "sha512": "Q871jpweVxec1zvUuK4RoXGRRXCZsp/f+6SDUSi8DQ95KcT8yKe2ZSoq2S2xnwoKFUepg2B6Yr3ToXD2v27zNA==",
       "type": "package",
+      "path": "Microsoft.Extensions.Configuration.Abstractions/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.Configuration.Abstractions.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.Configuration.Abstractions.nuspec",
@@ -327,6 +368,7 @@
     "Microsoft.Extensions.Configuration.FileExtensions/1.0.0-rc2-final": {
       "sha512": "Ry1KQP2nv459lAiY2EsQ7i35u8XgD0ZMMgrvzGr9QlReXW8XWj5WLE2xuu7To3oFQIvCnDtZtZsr7dJ05KHr1Q==",
       "type": "package",
+      "path": "Microsoft.Extensions.Configuration.FileExtensions/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.Configuration.FileExtensions.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.Configuration.FileExtensions.nuspec",
@@ -339,6 +381,7 @@
     "Microsoft.Extensions.Configuration.Json/1.0.0-rc2-final": {
       "sha512": "1Y/3qSjHpuaLeyja+gSAZUtdj503tbc23699YzE8DxWMZ3urDztdpdWy0CFGGES15obfmsrm+oBxzEwtiHKPTw==",
       "type": "package",
+      "path": "Microsoft.Extensions.Configuration.Json/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.Configuration.Json.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.Configuration.Json.nuspec",
@@ -351,6 +394,7 @@
     "Microsoft.Extensions.Configuration.UserSecrets/1.0.0-rc2-final": {
       "sha512": "UAj6RZp2uSDc+XJvlPJGScVH+LtOiJaRxXhFPTBy38vfLf4B+5bqpaiHwSjl01HbyT0V4Iy7tiI9EdTfTEspgA==",
       "type": "package",
+      "path": "Microsoft.Extensions.Configuration.UserSecrets/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.Configuration.UserSecrets.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.Configuration.UserSecrets.nuspec",
@@ -363,6 +407,7 @@
     "Microsoft.Extensions.FileProviders.Abstractions/1.0.0-rc2-final": {
       "sha512": "pVcRuHzugJ1pn4LWpSJYOGXWdIMDcyj+AFIHFWUZ5CBGGXKfDCOPS0ztS5WshLYYc+9zDdAPmWSvQxVbTGljjg==",
       "type": "package",
+      "path": "Microsoft.Extensions.FileProviders.Abstractions/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.FileProviders.Abstractions.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.FileProviders.Abstractions.nuspec",
@@ -373,6 +418,7 @@
     "Microsoft.Extensions.FileProviders.Physical/1.0.0-rc2-final": {
       "sha512": "mGinPq86ouElAEY7K9Yww3bIJFD3k+UESFveOKCtXVbn9Z25rJOLoD7T0WRkJxzPZ+0MTipWpMh7jUJdsMV5Nw==",
       "type": "package",
+      "path": "Microsoft.Extensions.FileProviders.Physical/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.FileProviders.Physical.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.FileProviders.Physical.nuspec",
@@ -385,6 +431,7 @@
     "Microsoft.Extensions.FileSystemGlobbing/1.0.0-rc2-final": {
       "sha512": "xyrVmdjyFmGROsMkc50oI5KTie8V15ZJ8BdWbN/vpE45y+McRVpakGZDKzS2cLP7IaE67fGpr0jg4VvLQJ8Jhg==",
       "type": "package",
+      "path": "Microsoft.Extensions.FileSystemGlobbing/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.FileSystemGlobbing.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.FileSystemGlobbing.nuspec",
@@ -397,6 +444,7 @@
     "Microsoft.Extensions.Primitives/1.0.0-rc2-final": {
       "sha512": "5lXETW9MI0CIOOCtgeJcrX3jODcFkX04tr+K/MB+cRspPvYD3URbf4MRIwWgI5r7cu+8+efPxEH0tG1g8ldhQA==",
       "type": "package",
+      "path": "Microsoft.Extensions.Primitives/1.0.0-rc2-final",
       "files": [
         "Microsoft.Extensions.Primitives.1.0.0-rc2-final.nupkg.sha512",
         "Microsoft.Extensions.Primitives.nuspec",
@@ -409,6 +457,7 @@
     "Newtonsoft.Json/8.0.3": {
       "sha512": "KGsYQdS2zLH+H8x2cZaSI7e+YZ4SFIbyy1YJQYl6GYBWjf5o4H1A68nxyq+WTyVSOJQ4GqS/DiPE+UseUizgMg==",
       "type": "package",
+      "path": "Newtonsoft.Json/8.0.3",
       "files": [
         "Newtonsoft.Json.8.0.3.nupkg.sha512",
         "Newtonsoft.Json.nuspec",
@@ -430,8 +479,8 @@
     "Nito.AsyncEx/3.0.1": {
       "sha512": "JSypx/S4sBY1+0wrXcSqcdV6p5nVNFeCfIVyC9LAy69hrle/bxMJf9oZsi5UDxZl7Bsq/bD2XwxMFFOx7zVPag==",
       "type": "package",
+      "path": "Nito.AsyncEx/3.0.1",
       "files": [
-        "Nito.AsyncEx.3.0.1.nupkg",
         "Nito.AsyncEx.3.0.1.nupkg.sha512",
         "Nito.AsyncEx.nuspec",
         "lib/MonoAndroid/Nito.AsyncEx.Concurrent.dll",
@@ -511,8 +560,8 @@
     "RestSharp/105.2.3": {
       "sha512": "50LkciOclb7Lza9QXqR9reKeUoPlDQiFD4iBdOmd6twOBmTtqEFIOXQgdDdsTHQg4HcGh6EvrM6gN1X72vkJLA==",
       "type": "package",
+      "path": "RestSharp/105.2.3",
       "files": [
-        "RestSharp.105.2.3.nupkg",
         "RestSharp.105.2.3.nupkg.sha512",
         "RestSharp.nuspec",
         "lib/MonoAndroid10/RestSharp.dll",
@@ -547,6 +596,7 @@
     "System.Collections/4.0.11-rc2-24027": {
       "sha512": "wi4oT2B06Ev7vDPeJki7HVJ3qPYJIilzf+p81JuNaBD9L2wi9Y2L5BsQ6ToncW+lYZafuMea/hiK1xX1Ge1VWQ==",
       "type": "package",
+      "path": "System.Collections/4.0.11-rc2-24027",
       "files": [
         "System.Collections.4.0.11-rc2-24027.nupkg.sha512",
         "System.Collections.nuspec",
@@ -612,6 +662,7 @@
     "System.Diagnostics.Debug/4.0.11-rc2-24027": {
       "sha512": "k0ckwL97zqxiSjRpgmkjUoP51LvEzMshynNuNOyUsKLQTHVieTsrg2YiBnou0AsDnDk/maCmuPJvoJR0qIcOuQ==",
       "type": "package",
+      "path": "System.Diagnostics.Debug/4.0.11-rc2-24027",
       "files": [
         "System.Diagnostics.Debug.4.0.11-rc2-24027.nupkg.sha512",
         "System.Diagnostics.Debug.nuspec",
@@ -677,6 +728,7 @@
     "System.IO/4.1.0-rc2-24027": {
       "sha512": "VQRYN33mwALJ1UWfxxMqXzKCYUDNMUeU6j8YCxVcLCBx3Oa/l7i15NQv/OAebfOVSmBa3LmBTRP4rQqChrCbFg==",
       "type": "package",
+      "path": "System.IO/4.1.0-rc2-24027",
       "files": [
         "System.IO.4.1.0-rc2-24027.nupkg.sha512",
         "System.IO.nuspec",
@@ -755,6 +807,7 @@
     "System.Linq/4.1.0-rc2-24027": {
       "sha512": "uf9wbc/YWrM4xa6g0T8n1XpY/zRcTHSPw+sCwkdrL2aJbYyLFKs1Yeg8M0zjMX4SwmiNeDiZR2gkAHAPsIfKCg==",
       "type": "package",
+      "path": "System.Linq/4.1.0-rc2-24027",
       "files": [
         "System.Linq.4.1.0-rc2-24027.nupkg.sha512",
         "System.Linq.nuspec",
@@ -824,6 +877,7 @@
     "System.Resources.ResourceManager/4.0.1-rc2-24027": {
       "sha512": "WFDuYprqRWAVcQzArAqgabw9bbGPBaogBG17sGtZ5Iyb7ddOcIs89QYdcxdatPkSYOFNWydwSY2fyOjhIKMIcA==",
       "type": "package",
+      "path": "System.Resources.ResourceManager/4.0.1-rc2-24027",
       "files": [
         "System.Resources.ResourceManager.4.0.1-rc2-24027.nupkg.sha512",
         "System.Resources.ResourceManager.nuspec",
@@ -878,6 +932,7 @@
     "System.Runtime/4.1.0-rc2-24027": {
       "sha512": "sDyyCeXycMSiNP4z1wyeyXlZSb26/OXIAwqnDsOAjw9PL3r8OgDRJgt4SH6Qid5z6E5IEGTKwjBjrHJGoa8bag==",
       "type": "package",
+      "path": "System.Runtime/4.1.0-rc2-24027",
       "files": [
         "System.Runtime.4.1.0-rc2-24027.nupkg.sha512",
         "System.Runtime.nuspec",
@@ -967,6 +1022,7 @@
     "System.Runtime.Extensions/4.1.0-rc2-24027": {
       "sha512": "rHmAgtQY8XlVd4tB/5ta8IzxAL9gpUlkTYQgUXDjdHux2MFmDSJv4vgm/atmwbKZcd0TnzjD2SYpnkWSqDWgFg==",
       "type": "package",
+      "path": "System.Runtime.Extensions/4.1.0-rc2-24027",
       "files": [
         "System.Runtime.Extensions.4.1.0-rc2-24027.nupkg.sha512",
         "System.Runtime.Extensions.nuspec",
@@ -1045,6 +1101,7 @@
     "System.Runtime.InteropServices/4.1.0-rc2-24027": {
       "sha512": "HMTGM3YyFBqDSP4STwC2YC51PInAQNMRj4V3rodwhaeAl+DnRKYqRFnd3eO2l99JqrcBIgg48SFGU9zglQC38w==",
       "type": "package",
+      "path": "System.Runtime.InteropServices/4.1.0-rc2-24027",
       "files": [
         "System.Runtime.InteropServices.4.1.0-rc2-24027.nupkg.sha512",
         "System.Runtime.InteropServices.nuspec",
@@ -1132,6 +1189,7 @@
     "System.Threading/4.0.11-rc2-24027": {
       "sha512": "JdVfUj82+pkIGfpUeb28HdwxoUMR7lTL5LT2iX9gyKtIo4yv2VirGPFVvohdlN9t9My+dIlYb9W4z1YlZV/RIA==",
       "type": "package",
+      "path": "System.Threading/4.0.11-rc2-24027",
       "files": [
         "System.Threading.4.0.11-rc2-24027.nupkg.sha512",
         "System.Threading.nuspec",
@@ -1200,6 +1258,7 @@
     "WebSocket4Net/0.14.1": {
       "sha512": "TNBXbI9mUkgwoSyNKIftqC91FAOZ7IKB+hTJ14BtVJGwO3+WxkL63FlbFwN5YmvYxL9M31NRQE4Ci3rpcg09Ug==",
       "type": "package",
+      "path": "WebSocket4Net/0.14.1",
       "files": [
         "WebSocket4Net.0.14.1.nupkg.sha512",
         "WebSocket4Net.nuspec",
@@ -1215,20 +1274,10 @@
         "lib/sl50/WebSocket4Net.dll"
       ]
     },
-    "Discord.Net/0.9.3": {
+    "DiscordBaseExtensions/0.1.0": {
       "type": "project",
-      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/project.json",
-      "msbuildProject": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net/Discord.Net.xproj"
-    },
-    "Discord.Net.Commands/0.9.3": {
-      "type": "project",
-      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/project.json",
-      "msbuildProject": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Commands/Discord.Net.Commands.xproj"
-    },
-    "Discord.Net.Modules/0.9.3": {
-      "type": "project",
-      "path": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Modules/project.json",
-      "msbuildProject": "../../../../ReferenceProjects/Discord.Net/src/Discord.Net.Modules/Discord.Net.Modules.xproj"
+      "path": "../DiscordBaseExtensions/project.json",
+      "msbuildProject": "../DiscordBaseExtensions/DiscordBaseExtensions.xproj"
     },
     "JiiLib/0.2.2": {
       "type": "project",
@@ -1238,9 +1287,9 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "Discord.Net >= 0.9.3",
-      "Discord.Net.Commands >= 0.9.3",
-      "Discord.Net.Modules >= 0.9.3",
+      "Discord.Net.Commands >= 0.9.4",
+      "Discord.Net.Modules >= 0.9.4",
+      "DiscordBaseExtensions >= 0.1.0",
       "JiiLib >= 0.2.2",
       "Microsoft.Extensions.Configuration.UserSecrets >= 1.0.0-rc2-final"
     ],

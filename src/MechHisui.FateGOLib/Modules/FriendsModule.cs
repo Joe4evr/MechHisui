@@ -50,14 +50,14 @@ namespace MechHisui.FateGOLib.Modules
                    if (_friendData.Any(fc => fc.User == cea.User.Id
                            && fc.Class.Equals(cea.Args[1], StringComparison.OrdinalIgnoreCase)))
                    {
-                       await cea.Channel.SendMessage($"Already in the Friendcode list. Please use `.updatefc` to update your description.");
+                       await cea.Channel.SendWithRetry($"Already in the Friendcode list. Please use `.updatefc` to update your description.");
                        return;
                    }
 
                    SupportClass support;
                    if (!Enum.TryParse(cea.GetArg("slot"), true, out support))
                    {
-                       await cea.Channel.SendMessage("Could not parse `class` parameter as valid suport slot.");
+                       await cea.Channel.SendWithRetry("Could not parse `class` parameter as valid suport slot.");
                        return;
                    }
 
@@ -72,11 +72,11 @@ namespace MechHisui.FateGOLib.Modules
                            Servant = (cea.Args.Length > 2) ? cea.Args[2] : string.Empty
                        });
                        WriteFriendData();
-                       await cea.Channel.SendMessage($"Added {support.ToString()} support for `{cea.User.Name}`.");
+                       await cea.Channel.SendWithRetry($"Added {support.ToString()} support for `{cea.User.Name}`.");
                    }
                    else
                    {
-                       await cea.Channel.SendMessage($"Incorrect friendcode format specified.");
+                       await cea.Channel.SendWithRetry($"Incorrect friendcode format specified.");
                    }
                });
 
@@ -89,6 +89,7 @@ namespace MechHisui.FateGOLib.Modules
                    var data = Enumerable.Empty<FriendData>();
                    SupportClass support;
                    User user = cea.Message.MentionedUsers.FirstOrDefault();
+                   bool isUserFilter = false;
                    if (Enum.TryParse(cea.Args[0], true, out support))
                    {
                        data = _friendData.Where(f => f.Class == support.ToString());
@@ -96,10 +97,11 @@ namespace MechHisui.FateGOLib.Modules
                    else if (user != null && _friendData.Any(f => f.User == user.Id))
                    {
                        data = _friendData.Where(f => f.User == user.Id);
+                       isUserFilter = true;
                    }
                    else
                    {
-                       await cea.Channel.SendMessage("Could not parse parameter as a valid filter.");
+                       await cea.Channel.SendWithRetry("Could not parse parameter as a valid filter.");
                        return;
                    }
 
@@ -112,21 +114,23 @@ namespace MechHisui.FateGOLib.Modules
                        User = cea.Server.GetUser(f.User).Name,
                    }).OrderBy(f => f.Id).ToList();
                    var sb = new StringBuilder("```\n");
-                   int longestName = orderedData.OrderByDescending(f => f.User.Length).First().User.Length;
+                   int longestName = isUserFilter
+                        ? SupportClass.Berserker.ToString().Length
+                        : orderedData.OrderByDescending(f => f.User.Length).First().User.Length;
                    foreach (var friend in orderedData)
                    {
                        var spaces = new string(' ', (longestName - friend.User.Length) + 1);
-                       sb.Append($"{friend.User}:{spaces}{friend.FriendCode}");
+                       sb.Append($"{(isUserFilter ? friend.Class : friend.User)}:{spaces}{friend.FriendCode}");
                        sb.AppendLine((!String.IsNullOrEmpty(friend.Servant)) ? $" - {friend.Servant}" : String.Empty);
-                       if (sb.Length > 1700)
+                       if (sb.Length > 1700 && friend != orderedData.Last())
                        {
                            sb.Append("\n```");
-                           await cea.Channel.SendMessage(sb.ToString());
-                           sb = sb.Clear().AppendLine("```");
+                           await cea.Channel.SendWithRetry(sb.ToString());
+                           sb = sb.Clear().AppendLine("```\n");
                        }
                    }
                    sb.Append("\n```");
-                   await cea.Channel.SendMessage(sb.ToString());
+                   await cea.Channel.SendWithRetry(sb.ToString());
                });
 
             manager.Client.GetService<CommandService>().CreateCommand("updatefc")
@@ -139,7 +143,7 @@ namespace MechHisui.FateGOLib.Modules
                    SupportClass support;
                    if (!Enum.TryParse(cea.GetArg("slot"), true, out support))
                    {
-                       await cea.Channel.SendMessage("Could not parse `class` parameter as valid support slot.");
+                       await cea.Channel.SendWithRetry("Could not parse `class` parameter as valid support slot.");
                        return;
                    }
 
@@ -153,11 +157,11 @@ namespace MechHisui.FateGOLib.Modules
                        _friendData.Add(temp);
                        WriteFriendData();
                        //FriendCodes.WriteFriendData(_friendcodeConfigPath);
-                       await cea.Channel.SendMessage($"Updated `{cea.Server.GetUser(temp.User).Name}`'s {support.ToString()} Suppport Servant to be `{temp.Servant}`.");
+                       await cea.Channel.SendWithRetry($"Updated `{cea.Server.GetUser(temp.User).Name}`'s {support.ToString()} Suppport Servant to be `{temp.Servant}`.");
                    }
                    else
                    {
-                       await cea.Channel.SendMessage("Profile not found. Please add your profile using `.addfc`.");
+                       await cea.Channel.SendWithRetry("Profile not found. Please add your profile using `.addfc`.");
                    }
                });
         }

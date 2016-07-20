@@ -29,10 +29,10 @@ namespace MechHisui.FateGOLib.Modules
                 .Parameter("type", ParameterType.Optional)
                 .Do(async cea =>
                 {
-                    //await cea.Channel.SendMessage("This command temporarily disabled.");
+                    //await cea.Channel.SendWithRetry("This command temporarily disabled.");
                     if (!rolltypes.Contains(cea.Args[0]))
                     {
-                        await cea.Channel.SendMessage("Unaccaptable parameter. Use `.help gacha` to see the accaptable values.");
+                        await cea.Channel.SendWithRetry("Unaccaptable parameter. Use `.help gacha` to see the accaptable values.");
                         return;
                     }
 
@@ -59,7 +59,7 @@ namespace MechHisui.FateGOLib.Modules
                         }
                     }
 
-                    await cea.Channel.SendMessage($"**{cea.User.Name} rolled:** {String.Join(", ", picks)}");
+                    await cea.Channel.SendWithRetry($"**{cea.User.Name} rolled:** {String.Join(", ", picks)}");
                 });
         }
 

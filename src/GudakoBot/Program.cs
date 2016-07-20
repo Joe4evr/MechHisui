@@ -37,7 +37,7 @@ namespace GudakoBot
             {
                 Console.WriteLine("Loading from jsons directory");
                 builder.AddInMemoryCollection(JsonConvert.DeserializeObject<Dictionary<string, string>>(
-                    File.ReadAllText(@"..\GudakoBot-jsons\secrets.json")
+                    File.ReadAllText(@"../GudakoBot-jsons/secrets.json")
                 ));
             }
 
@@ -66,7 +66,7 @@ namespace GudakoBot
                 {
                     Console.WriteLine($"{DateTime.Now}: Reloading lines");
                     LoadLines(config);
-                    await e.Channel.SendMessage(Randomlines.Last());
+                    await e.Channel.SendWithRetry(Randomlines.Last());
                     timer.Change(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(30));
                 }
             };
@@ -97,7 +97,7 @@ namespace GudakoBot
                         while (str == lastLine);
                         
                         Console.WriteLine($"{DateTime.Now}: Sending message.");
-                        await channel.SendMessage(str);
+                        await channel.SendWithRetry(str);
                         lastLine = str;
                     }
                 },

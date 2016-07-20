@@ -188,10 +188,10 @@ namespace MechHisui.SecretHitler
                     sb.Append($"{_config.Hitler} is **{_players.Single(p => p.Role == _config.Hitler).User.Name}**. Use this information wisely.");
                 }
 
-                await player.User.PrivateChannel.SendMessage(sb.ToString());
+                await player.User.PrivateChannel.SendWithRetry(sb.ToString());
                 await Task.Delay(1000);
             }
-            await _channel.SendMessage($"The order of players is: {String.Join(" -> ", _players.Select(p => p.User.Name))}");
+            await _channel.SendWithRetry($"The order of players is: {String.Join(" -> ", _players.Select(p => p.User.Name))}");
         }
 
         public async Task StartTurn()
@@ -218,7 +218,7 @@ namespace MechHisui.SecretHitler
             }
             _currentChancellor = 0;
             _turn++;
-            await _channel.SendMessage($"It is turn {_turn}, the {_config.President} is **{_players.Single(p => p.User.Id == _currentPresident).User.Name}**. Please choose your {_config.Chancellor}.");
+            await _channel.SendWithRetry($"It is turn {_turn}, the {_config.President} is **{_players.Single(p => p.User.Id == _currentPresident).User.Name}**. Please choose your {_config.Chancellor}.");
         }
 
         //internal async Task TestTurn(User testUser)
@@ -226,40 +226,40 @@ namespace MechHisui.SecretHitler
         //    _state = GameState.StartOfTurn;
         //    _currentPresident = testUser.Id;
         //    _turn++;
-        //    await _channel.SendMessage($"It is turn {_turn}, the {_config.President} is **{testUser.Name}**. Please choose your {_config.Chancellor}.");
+        //    await _channel.SendWithRetry($"It is turn {_turn}, the {_config.President} is **{testUser.Name}**. Please choose your {_config.Chancellor}.");
         //}
 
         public async Task NominatedChancellor(User nominee)
         {
             if (_turn == 1 && (_houseRules & HouseRules.SkipFirstElection) == HouseRules.SkipFirstElection)
             {
-                await _channel.SendMessage($"Because of the applied house rule, this vote will be skipped.");
+                await _channel.SendWithRetry($"Because of the applied house rule, this vote will be skipped.");
                 return;
             }
             if (nominee.Id == _lastChancellor)
             {
-                await _channel.SendMessage($"**{nominee.Name}** has has been the {_config.Chancellor} last time and is therefore ineligable.");
+                await _channel.SendWithRetry($"**{nominee.Name}** has has been the {_config.Chancellor} last time and is therefore ineligable.");
                 return;
             }
             if (nominee.Id == _lastPresident && _players.Count > 5)
             {
-                await _channel.SendMessage($"**{nominee.Name}** has has been the {_config.President} last time and is therefore ineligable.");
+                await _channel.SendWithRetry($"**{nominee.Name}** has has been the {_config.President} last time and is therefore ineligable.");
                 return;
             }
 
             if (_players.Where(p => !p.IsAlive).Select(p => p.User.Id).Contains(nominee.Id))
             {
-                await _channel.SendMessage($"**{nominee.Name}** is dead and is therefore ineligable.");
+                await _channel.SendWithRetry($"**{nominee.Name}** is dead and is therefore ineligable.");
                 return;
             }
 
             _chancellorNominee = nominee.Id;
             _state = GameState.VoteForGovernment;
             _votes = new List<PlayerVote>();
-            await _channel.SendMessage($"**{_channel.GetUser(_currentPresident).Name}** has nominated **{nominee.Name}** as their {_config.Chancellor}. PM me `{_config.Yes}` or `{_config.No}` to vote on this proposal.");
+            await _channel.SendWithRetry($"**{_channel.GetUser(_currentPresident).Name}** has nominated **{nominee.Name}** as their {_config.Chancellor}. PM me `{_config.Yes}` or `{_config.No}` to vote on this proposal.");
             foreach (var player in _players)
             {
-                await player.User.PrivateChannel.SendMessage($"**{_channel.GetUser(_currentPresident).Name}** nominated **{nominee.Name}** as {_config.Chancellor}.");
+                await player.User.PrivateChannel.SendWithRetry($"**{_channel.GetUser(_currentPresident).Name}** nominated **{nominee.Name}** as {_config.Chancellor}.");
                 await Task.Delay(1000);
             }
         }
@@ -269,7 +269,7 @@ namespace MechHisui.SecretHitler
         //    _chancellorNominee = nominee.Id;
         //    _state = GameState.VoteForGovernment;
         //    _votes = new List<PlayerVote>();
-        //    await _channel.SendMessage($"**{pres.Name}** has nominated {nominee.Name} as their {_config.Chancellor}. PM me `{_config.Yes}` or `{_config.No}` to vote on this proposal.");
+        //    await _channel.SendWithRetry($"**{pres.Name}** has nominated {nominee.Name} as their {_config.Chancellor}. PM me `{_config.Yes}` or `{_config.No}` to vote on this proposal.");
         //}
 
         public async Task VotingResults(List<PlayerVote> votes)
@@ -291,19 +291,19 @@ namespace MechHisui.SecretHitler
                 {
                     case 1:
                         sb.Append(_config.ThePeopleOne);
-                        await _channel.SendMessage(sb.ToString());
+                        await _channel.SendWithRetry(sb.ToString());
                         break;
                     case 2:
                         sb.Append(_config.ThePeopleTwo);
-                        await _channel.SendMessage(sb.ToString());
+                        await _channel.SendWithRetry(sb.ToString());
                         break;
                     case 3:
                         sb.AppendLine(_config.ThePeopleThree);
-                        await _channel.SendMessage(sb.ToString());
+                        await _channel.SendWithRetry(sb.ToString());
                         await Task.Delay(10000);
                         _electionTracker = 0;
                         var pol = Deck.Pop();
-                        await _channel.SendMessage(String.Format(_config.ThePeopleEnacted, pol.ToString()));
+                        await _channel.SendWithRetry(String.Format(_config.ThePeopleEnacted, pol.ToString()));
                         if (pol == PolicyType.Fascist)
                         {
                             await ResolveEffect(FascistTrack.First(b => b.IsEmpty), true);
@@ -328,25 +328,25 @@ namespace MechHisui.SecretHitler
                 if (!FascistTrack[2].IsEmpty && !_confirmedNot.Select(u => u.Id).Contains(_currentChancellor))
                 {
                     sb.Append($"The vote has gone through. Now to ask: **Are you {_config.Hitler}**?");
-                    await _channel.SendMessage(sb.ToString());
+                    await _channel.SendWithRetry(sb.ToString());
                     await Task.Delay(TimeSpan.FromSeconds(5));
                     var chosen = _channel.GetUser(_currentChancellor);
                     if (_players.Single(p => p.Role == _config.Hitler).User.Id == _currentChancellor)
                     {
-                        await _channel.SendMessage($"**{chosen.Name}** is, in fact, {_config.Hitler}.");
+                        await _channel.SendWithRetry($"**{chosen.Name}** is, in fact, {_config.Hitler}.");
                         await EndGame(_config.FascistsWin);
                     }
                     else
                     {
                         _confirmedNot.Add(chosen);
-                        await _channel.SendMessage($"**{chosen.Name}** is Not {_config.Hitler} (Confirmed). {_config.Parliament} can function.");
+                        await _channel.SendWithRetry($"**{chosen.Name}** is Not {_config.Hitler} (Confirmed). {_config.Parliament} can function.");
                         await DrawPolicies();
                     }
                 }
                 else
                 {
                     sb.Append($"The vote has gone through. {_config.Parliament} can function.");
-                    await _channel.SendMessage(sb.ToString());
+                    await _channel.SendWithRetry(sb.ToString());
                     await DrawPolicies();
                 }
             }
@@ -363,7 +363,7 @@ namespace MechHisui.SecretHitler
                 sb.AppendLine($"\t**{i + 1}**: {(_policies[i] == PolicyType.Fascist ? _config.Fascist : _config.Liberal)}");
             }
             sb.Append($"Which {_config.Policy} will you discard? The other two are automatically sent to your {_config.Chancellor}.");
-            await _channel.GetUser(_currentPresident).PrivateChannel.SendMessage(sb.ToString());
+            await _channel.GetUser(_currentPresident).PrivateChannel.SendWithRetry(sb.ToString());
         }
 
         public async Task ChancellorPick()
@@ -378,12 +378,12 @@ namespace MechHisui.SecretHitler
             if (!_vetoUnlocked)
             {
                 sb.Append($"Which {_config.Policy} will you discard? The other one is automatically played to the board.");
-                await _channel.GetUser(_currentChancellor).PrivateChannel.SendMessage(sb.ToString());
+                await _channel.GetUser(_currentChancellor).PrivateChannel.SendWithRetry(sb.ToString());
             }
             else
             {
                 sb.Append($"Will you discard one or `veto`?");
-                await _channel.GetUser(_currentChancellor).PrivateChannel.SendMessage(sb.ToString());
+                await _channel.GetUser(_currentChancellor).PrivateChannel.SendWithRetry(sb.ToString());
             }
         }
 
@@ -398,7 +398,7 @@ namespace MechHisui.SecretHitler
                 {
                     case BoardSpaceType.ExecutionVeto:
                         _vetoUnlocked = true;
-                        await _channel.SendMessage($"The {_config.President} and {_config.Chancellor} may veto from now.");
+                        await _channel.SendWithRetry($"The {_config.President} and {_config.Chancellor} may veto from now.");
                         return;
                     case BoardSpaceType.FascistWin:
                         await EndGame(_config.FascistsWin);
@@ -407,7 +407,7 @@ namespace MechHisui.SecretHitler
                         await EndGame(_config.LiberalsWin);
                         return;
                     default:
-                        await _channel.SendMessage($"No action is taken.");
+                        await _channel.SendWithRetry($"No action is taken.");
                         return;
                 }
             }
@@ -416,29 +416,29 @@ namespace MechHisui.SecretHitler
                 switch (space.Type)
                 {
                     case BoardSpaceType.Blank:
-                        await _channel.SendMessage($"Nothing happens. Next turn when players are ready.");
+                        await _channel.SendWithRetry($"Nothing happens. Next turn when players are ready.");
                         return;
                     case BoardSpaceType.Examine:
-                        await _channel.SendMessage($"The {_config.President} may see the top 3 cards from the {_config.Policy} deck.");
+                        await _channel.SendWithRetry($"The {_config.President} may see the top 3 cards from the {_config.Policy} deck.");
                         var tops = String.Join(", ", new[] { Deck.ElementAt(0).ToString(), Deck.ElementAt(1).ToString(), Deck.ElementAt(2).ToString() });
-                        await _channel.GetUser(_currentPresident).PrivateChannel.SendMessage($"The top 3 {_config.Policy} cards are {tops}");
+                        await _channel.GetUser(_currentPresident).PrivateChannel.SendWithRetry($"The top 3 {_config.Policy} cards are {tops}");
                         return;
                     case BoardSpaceType.Investigate:
                         _state = GameState.Investigating;
-                        await _channel.SendMessage($"The {_config.President} may investigate one player's Party affinity.");
+                        await _channel.SendWithRetry($"The {_config.President} may investigate one player's Party affinity.");
                         return;
                     case BoardSpaceType.ChooseNextCandidate:
                         _state = GameState.SpecialElection;
-                        await _channel.SendMessage($"The current {_config.President} may choose the next turn's {_config.President}.");
+                        await _channel.SendWithRetry($"The current {_config.President} may choose the next turn's {_config.President}.");
                         return;
                     case BoardSpaceType.Execution:
                         _state = GameState.Kill;
-                        await _channel.SendMessage($"The {_config.President} may choose another player to kill.");
+                        await _channel.SendWithRetry($"The {_config.President} may choose another player to kill.");
                         return;
                     case BoardSpaceType.ExecutionVeto:
                         _vetoUnlocked = true;
                         _state = GameState.Kill;
-                        await _channel.SendMessage($"The {_config.President} may choose another player to kill. Also, the {_config.President} and {_config.Chancellor} may veto.");
+                        await _channel.SendWithRetry($"The {_config.President} may choose another player to kill. Also, the {_config.President} and {_config.Chancellor} may veto.");
                         return;
                     case BoardSpaceType.FascistWin:
                         await EndGame(_config.FascistsWin);
@@ -458,7 +458,7 @@ namespace MechHisui.SecretHitler
                 .AppendLine("\nThe game is over.")
                 .AppendLine($"The {_config.Fascist}s were **{String.Join("**, **", _players.Where(p => p.Party == _config.FascistParty).Select(p => p.User.Name))}**.")
                 .AppendLine($"The {_config.Liberal}s were **{String.Join("**, **", _players.Where(p => p.Party == _config.LiberalParty).Select(p => p.User.Name))}**.");
-            await _channel.SendMessage(sb.ToString());
+            await _channel.SendWithRetry(sb.ToString());
         }
 
         private async void ProcessMessage(object sender, MessageEventArgs e)
@@ -491,14 +491,14 @@ namespace MechHisui.SecretHitler
                                 }
                                 else
                                 {
-                                    await e.Channel.SendMessage("Unnacceptable parameter.");
+                                    await e.Channel.SendWithRetry("Unnacceptable parameter.");
                                     return;
                                 }
                                 _votes.Add(new PlayerVote(e.User.Name, v));
                                 PropertyChanged(_votes, new PropertyChangedEventArgs(nameof(_votes)));
                                 while (_channel.Client.MessageQueue.Count > 10) await Task.Delay(100);
 
-                                await e.Channel.SendMessage("Your vote has been recorded.");
+                                await e.Channel.SendWithRetry("Your vote has been recorded.");
                             }
                             return;
                         case GameState.PresidentPicks:
@@ -510,15 +510,15 @@ namespace MechHisui.SecretHitler
                                     case 1:
                                     case 2:
                                     case 3:
-                                        await e.Channel.SendMessage($"Removing a {(_policies[i - 1] == PolicyType.Fascist ? _config.Fascist : _config.Liberal)} {_config.Policy}.");
+                                        await e.Channel.SendWithRetry($"Removing a {(_policies[i - 1] == PolicyType.Fascist ? _config.Fascist : _config.Liberal)} {_config.Policy}.");
                                         Discards.Push(_policies[i - 1]);
                                         _policies.RemoveAt(i - 1);
-                                        await _channel.SendMessage($"The {_config.President} has discarded one {_config.Policy}.");
+                                        await _channel.SendWithRetry($"The {_config.President} has discarded one {_config.Policy}.");
                                         await Task.Delay(1000);
                                         await ChancellorPick();
                                         return;
                                     default:
-                                        await e.Channel.SendMessage("Out of range.");
+                                        await e.Channel.SendWithRetry("Out of range.");
                                         return;
                                 }
                             }
@@ -531,10 +531,10 @@ namespace MechHisui.SecretHitler
                                 {
                                     case 1:
                                     case 2:
-                                        await e.Channel.SendMessage($"Removing a {(_policies[j - 1] == PolicyType.Fascist ? _config.Fascist : _config.Liberal)} {_config.Policy}.");
+                                        await e.Channel.SendWithRetry($"Removing a {(_policies[j - 1] == PolicyType.Fascist ? _config.Fascist : _config.Liberal)} {_config.Policy}.");
                                         Discards.Push(_policies[j - 1]);
                                         _policies.RemoveAt(j - 1);
-                                        await _channel.SendMessage($"The {_config.Chancellor} has discarded one {_config.Policy} and played a **{(_policies.Single() == PolicyType.Fascist ? _config.Fascist : _config.Liberal)}** {_config.Policy}.");
+                                        await _channel.SendWithRetry($"The {_config.Chancellor} has discarded one {_config.Policy} and played a **{(_policies.Single() == PolicyType.Fascist ? _config.Fascist : _config.Liberal)}** {_config.Policy}.");
                                         await Task.Delay(1000);
                                         var space = (_policies.Single() == PolicyType.Fascist)
                                             ? FascistTrack.First(s => s.IsEmpty)
@@ -546,7 +546,7 @@ namespace MechHisui.SecretHitler
                                         }
                                         return;
                                     default:
-                                        await e.Channel.SendMessage("Out of range.");
+                                        await e.Channel.SendWithRetry("Out of range.");
                                         return;
                                 }
                             }
@@ -555,12 +555,12 @@ namespace MechHisui.SecretHitler
                                 if (!_takenVeto)
                                 {
                                     _state = GameState.ChancellorVetod;
-                                    await _channel.SendMessage($"The {_config.Chancellor} has opted to veto. Do you consent, Mr./Mrs. {_config.President}?");
+                                    await _channel.SendWithRetry($"The {_config.Chancellor} has opted to veto. Do you consent, Mr./Mrs. {_config.President}?");
                                     return;
                                 }
                                 else
                                 {
-                                    await e.Channel.SendMessage($"You have already attempted to veto.");
+                                    await e.Channel.SendWithRetry($"You have already attempted to veto.");
                                     return;
                                 }
                             }
@@ -590,11 +590,11 @@ namespace MechHisui.SecretHitler
                                 if (target != null && _players.Where(p => p.IsAlive && p.User.Id != _currentChancellor && p.User.Id != _currentPresident).Select(p => p.User.Id).Contains(target.Id))
                                 {
                                     _specialElected = target.Id;
-                                    await _channel.SendMessage($"The {_config.President} has Special Elected **{target.Name}**.");
+                                    await _channel.SendWithRetry($"The {_config.President} has Special Elected **{target.Name}**.");
                                 }
                                 else
                                 {
-                                    await _channel.SendMessage("Ineligable for nomination.");
+                                    await _channel.SendWithRetry("Ineligable for nomination.");
                                 }
                             }
                             break;
@@ -606,7 +606,7 @@ namespace MechHisui.SecretHitler
                                 {
                                     var player = _players.Single(p => p.User.Id == target.Id);
                                     player.IsAlive = false;
-                                    await _channel.SendMessage(String.Format(_config.Kill, target.Name));
+                                    await _channel.SendWithRetry(String.Format(_config.Kill, target.Name));
                                     await Task.Delay(1500);
                                     if (player.Role == _config.Hitler)
                                     {
@@ -615,7 +615,7 @@ namespace MechHisui.SecretHitler
                                     else
                                     {
                                         _confirmedNot.Add(target);
-                                        await _channel.SendMessage(String.Format(_config.HitlerNotKilled, player.User.Name, _config.Hitler));
+                                        await _channel.SendWithRetry(String.Format(_config.HitlerNotKilled, player.User.Name, _config.Hitler));
                                     }
                                 }
                             }
@@ -626,10 +626,10 @@ namespace MechHisui.SecretHitler
                                 var target = e.Message.MentionedUsers.FirstOrDefault();
                                 if (target != null && _players.Any(p => p.User.Id == target.Id))
                                 {
-                                    await _channel.SendMessage($"The {_config.President} is investigating **{target.Name}**'s loyalty.");
+                                    await _channel.SendWithRetry($"The {_config.President} is investigating **{target.Name}**'s loyalty.");
                                     await Task.Delay(1000);
                                     var player = _players.Single(p => p.User.Id == target.Id);
-                                    await _channel.GetUser(_currentPresident).PrivateChannel.SendMessage($"**{player.User.Name}** belongs to the **{player.Party}**. You are not required to answer truthfully.");
+                                    await _channel.GetUser(_currentPresident).PrivateChannel.SendWithRetry($"**{player.User.Name}** belongs to the **{player.Party}**. You are not required to answer truthfully.");
                                 }
                             }
                             break;
@@ -641,13 +641,13 @@ namespace MechHisui.SecretHitler
                                 {
                                     _electionTracker++;
                                     _takenVeto = true;
-                                    await _channel.SendMessage($"The {_config.President} has approved the {_config.Chancellor}'s veto.");
+                                    await _channel.SendWithRetry($"The {_config.President} has approved the {_config.Chancellor}'s veto.");
                                 }
                                 else if (s == "denied")
                                 {
                                     _state = GameState.ChancellorPicks;
                                     _takenVeto = true;
-                                    await _channel.SendMessage($"The {_config.President} has denied veto and the {_config.Chancellor} must play.");
+                                    await _channel.SendWithRetry($"The {_config.President} has denied veto and the {_config.Chancellor} must play.");
                                 }
                             }
                             break;

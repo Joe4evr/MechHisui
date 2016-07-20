@@ -36,7 +36,7 @@ namespace MechHisui.FateGOLib.Modules
                                 ? GetMysticAliases(cea.Args[1])
                                 : "Invalid search type specified."));
 
-                    await cea.Channel.SendMessage(msg);
+                    await cea.Channel.SendWithRetry(msg);
                 });
         }
 

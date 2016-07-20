@@ -20,7 +20,7 @@ namespace MechHisui.Modules
             this.channel = channel;
             writer = new StreamWriter(Path.GetFullPath($"{config["Recordings"]}{channel.Server.Name} - {channel.Name} - {DateTime.UtcNow.Date}.txt"), true, Encoding.UTF8);
             client.MessageReceived += LogToFile;
-            channel.SendMessage($"Recording in {channel.Name}....").GetAwaiter().GetResult();
+            channel.SendWithRetry($"Recording in {channel.Name}....").GetAwaiter().GetResult();
         }
 
         public async void LogToFile(object sender, MessageEventArgs e)
@@ -33,7 +33,7 @@ namespace MechHisui.Modules
 
         public async Task EndRecord(DiscordClient client)
         {
-            await channel.SendMessage($"Stopped recording in {channel.Name}.");
+            await channel.SendWithRetry($"Stopped recording in {channel.Name}.");
             client.MessageReceived -= LogToFile;
             await writer.FlushAsync();
             writer.Dispose();

@@ -11,12 +11,12 @@ namespace MechHisui.FateGOLib
 {
     public class StatService
     {
-        private readonly GoogleScriptApiService _apiService;
+        private readonly IJsonApiService _apiService;
         private readonly string _servantAliasPath;
         private readonly string _ceAliasPath;
         private readonly string _mysticAliasPath;
 
-        public StatService(GoogleScriptApiService apiService, string servantAliasPath, string ceAliasPath, string mysticAliasPath)
+        public StatService(IJsonApiService apiService, string servantAliasPath, string ceAliasPath, string mysticAliasPath)
         {
             if (apiService == null) throw new ArgumentNullException(nameof(apiService));
             if (servantAliasPath == null) throw new ArgumentNullException(nameof(servantAliasPath));

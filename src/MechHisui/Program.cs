@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-//using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json;
@@ -16,6 +16,8 @@ using MechHisui.FateGOLib.Modules;
 using MechHisui.Commands;
 using MechHisui.HisuiBets;
 using MechHisui.Modules;
+using MechHisui.PkmnGoLib;
+using MechHisui.Superfight;
 
 namespace MechHisui
 {
@@ -27,7 +29,7 @@ namespace MechHisui
             var env = ps.Application;
             IConfigurationBuilder builder = new ConfigurationBuilder()
                 .AddEnvironmentVariables()
-                .SetBasePath(Path.Combine(env.ApplicationBasePath, @"..\..\..\..\"));
+                .SetBasePath(Path.Combine(env.ApplicationBasePath, @"../../../../"));
 
             if (args.Contains("--debug"))
             {
@@ -38,9 +40,16 @@ namespace MechHisui
             {
                 Console.WriteLine("Loading from jsons directory");
                 builder.AddInMemoryCollection(JsonConvert.DeserializeObject<Dictionary<string, string>>(
-                    File.ReadAllText(@"..\MechHisui-jsons\secrets.json")
+                    File.ReadAllText(@"../MechHisui-jsons/secrets.json")
                 ));
             }
+
+            //Console.WriteLine("Loaded assemblies:");
+            //foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            //{
+            //    Console.WriteLine($"{asm.GetName().Name}: {asm.GetName().Version}");
+            //}
+            //Console.ReadLine();
 
             //var dbContext = new MechHisuiDbContext();
 
@@ -59,12 +68,7 @@ namespace MechHisui
 
             //Display all log messages in the console
             client.Log.Message += (s, e) =>
-            {
-                if (!e.Message.Contains("Discord API (Unofficial)/"))
-                {
-                    Console.WriteLine($"{DateTime.Now} - [{e.Severity}] {e.Source}: {e.Message} {e.Exception}");
-                }
-            };
+                Console.WriteLine($"{DateTime.Now} - [{e.Severity}] {e.Source}: {e.Message} {e.Exception}");
 
             //Add a ModuleService and CommandService
             client.AddService(new ModuleService());
@@ -80,14 +84,14 @@ namespace MechHisui
             //client.RegisterDeleteCommand(config);
             client.RegisterDisconnectCommand(config);
 
-            //var evalBuilder = EvalModule.Builder.BuilderWithSystemAndLinq()
-            //    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(DiscordClient).Assembly.Location), "Discord"))
-            //    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(CommandEventArgs).Assembly.Location), "Discord.Commands"))
-            //    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(JiiLib.Extensions).Assembly.Location), "JiiLib"))
-            //    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(FateGOLib.FgoHelpers).Assembly.Location), "MechHisui.FateGOLib"));
+            var evalBuilder = EvalModule.Builder.BuilderWithSystemAndLinq()
+                .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(DiscordClient).Assembly.Location), "Discord"))
+                .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(CommandEventArgs).Assembly.Location), "Discord.Commands"))
+                .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(JiiLib.Extensions).Assembly.Location), "JiiLib"))
+                .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(FateGOLib.FgoHelpers).Assembly.Location), "MechHisui.FateGOLib"));
 
-            //client.AddModule(evalBuilder.Build((c, u, ch)
-            //    => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])));
+            client.AddModule(evalBuilder.Build((c, u, ch)
+                => u.Id == UInt64.Parse(config["Owner"]) || ch.Id == UInt64.Parse(config["FGO_general"]) || ch.Id == UInt64.Parse(config["FGO_playground"])));
 
             //client.RegisterImageCommand(config);
             client.RegisterInfoCommand(config);
@@ -108,19 +112,18 @@ namespace MechHisui
             client.RegisterLoginBonusCommand(config);
 
             new FgoStatsMetaModule(config).InstallModules(client);
-            //client.RegisterStatsCommands(config);
             client.RegisterQuartzCommand(config);
             client.RegisterZoukenCommand(config);
 
             client.AddModule(new HisuiBetsModule(client, config));
-            //client.RegisterHisuiBetsCommands(config);
+            client.AddModule(new PgoModule(config));
+            client.AddModule(new SuperfightModule(config, config["sf_path"]));
 
             client.RegisterSecretHitler(config);
 
             //client.RegisterTriviaCommand(config);
 
-            var rm = new ResponderModule(config);
-            client.AddModule(rm);
+            //client.AddModule(new ResponderModule(config));
 
             int lastcode = 0;
             if (args.Length > 0 && Int32.TryParse(args[0], out lastcode) && lastcode != 0)
@@ -134,7 +137,7 @@ namespace MechHisui
             //        && e.Server.GetUser(UInt64.Parse(config["Owner"])).Status == UserStatus.Offline)
             //    {
             //        var text = e.Message.Text.Replace('@', '~');
-            //        await client.GetChannel(UInt64.Parse(config["PrivChat"])).SendMessage($"You were pinged at **{DateTime.Now}** in **{e.Server.Name}/{e.Channel.Name}** by **{e.User.Name}**:\n\"{text}\"");
+            //        await client.GetChannel(UInt64.Parse(config["PrivChat"])).SendWithRetry($"You were pinged at **{DateTime.Now}** in **{e.Server.Name}/{e.Channel.Name}** by **{e.User.Name}**:\n\"{text}\"");
             //    }
             //};
 
@@ -157,22 +160,6 @@ namespace MechHisui
                     Console.WriteLine($"Logged in as {client.CurrentUser.Name}");
                     Console.WriteLine($"MH v. 0.3.0");
 
-                    //Use a channel whitelist
-                    client.GetService<ModuleService>().Add(
-                            new ChannelWhitelistModule(
-                                Helpers.ConvertStringArrayToULongArray(
-                                    //config["API_testing"]
-                                    //config["LTT_general"],
-                                    //config["LTT_testing"],
-                                    config["FGO_playground"],
-                                    config["FGO_Hgames"],
-                                    config["FGO_events"],
-                                    config["FGO_general"]
-                                )
-                            ),
-                            nameof(ChannelWhitelistModule),
-                            ModuleFilter.ChannelWhitelist
-                        );
                     await Task.Delay(3000);
                     if (!client.Servers.Any())
                     {
@@ -184,16 +171,16 @@ namespace MechHisui
                         {
                             if (!channel.IsPrivate && Helpers.IsWhilested(channel, client))
                             {
-                                //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
+                                //Console.CancelKeyPress += async (s, e) => await client.SendWithRetry(channel, config["Goodbye"]);
                                 if (channel.Id != UInt64.Parse(config["API_testing"]))
                                 {
                                     if (Debugger.IsAttached)
                                     {
-                                        // await channel.SendMessage("MechHisui started in debug mode. Not all commands will be available.");
+                                        // await channel.SendWithRetry("MechHisui started in debug mode. Not all commands will be available.");
                                     }
                                     else if (lastcode != -1 && channel.Id != UInt64.Parse(config["FGO_events"]))
                                     {
-                                        await channel.SendMessage(config["Hello"]);
+                                        await channel.SendWithRetry(config["Hello"]);
                                     }
                                 }
                             }

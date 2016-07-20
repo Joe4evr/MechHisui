@@ -190,19 +190,17 @@ namespace MechHisui.FateGOLib
                 }
                 else if (reader.TokenType == JsonToken.EndObject && reader.Depth == 1)
                 {
-                    tempProfile.ActiveSkills = new List<ServantSkill>
-                    {
-                        new ServantSkill { SkillName = tempHolder.skill1, Rank = tempHolder.rank1, Effect = tempHolder.effect1, RankUpEffect = tempHolder.effect1RankUp },
-                        new ServantSkill { SkillName = tempHolder.skill2, Rank = tempHolder.rank2, Effect = tempHolder.effect2, RankUpEffect = tempHolder.effect2RankUp },
-                        new ServantSkill { SkillName = tempHolder.skill3, Rank = tempHolder.rank3, Effect = tempHolder.effect3, RankUpEffect = tempHolder.effect3RankUp },
-                    };
-                    tempProfile.PassiveSkills = new List<ServantSkill>
-                    {
-                        new ServantSkill { SkillName = tempHolder.passiveSkill1, Rank = tempHolder.passiveRank1, Effect = tempHolder.passiveEffect1 },
-                        new ServantSkill { SkillName = tempHolder.passiveSkill2, Rank = tempHolder.passiveRank2, Effect = tempHolder.passiveEffect2 },
-                        new ServantSkill { SkillName = tempHolder.passiveSkill3, Rank = tempHolder.passiveRank3, Effect = tempHolder.passiveEffect3 },
-                        new ServantSkill { SkillName = tempHolder.passiveSkill4, Rank = tempHolder.passiveRank4, Effect = tempHolder.passiveEffect4 },
-                    };
+                    tempProfile.ActiveSkills = new List<ServantSkill>();
+                    if (tempHolder.skill1 != null) tempProfile.ActiveSkills.Add(new ServantSkill { SkillName = tempHolder.skill1, Rank = tempHolder.rank1, Effect = tempHolder.effect1, RankUpEffect = tempHolder.effect1RankUp });
+                    if (tempHolder.skill2 != null) tempProfile.ActiveSkills.Add(new ServantSkill { SkillName = tempHolder.skill2, Rank = tempHolder.rank2, Effect = tempHolder.effect2, RankUpEffect = tempHolder.effect2RankUp });
+                    if (tempHolder.skill3 != null) tempProfile.ActiveSkills.Add(new ServantSkill { SkillName = tempHolder.skill3, Rank = tempHolder.rank3, Effect = tempHolder.effect3, RankUpEffect = tempHolder.effect3RankUp });
+
+                    tempProfile.PassiveSkills = new List<ServantSkill>();
+                    if (tempHolder.passiveEffect1 != null) tempProfile.PassiveSkills.Add(new ServantSkill { SkillName = tempHolder.passiveSkill1, Rank = tempHolder.passiveRank1, Effect = tempHolder.passiveEffect1 });
+                    if (tempHolder.passiveEffect2 != null) tempProfile.PassiveSkills.Add(new ServantSkill { SkillName = tempHolder.passiveSkill2, Rank = tempHolder.passiveRank2, Effect = tempHolder.passiveEffect2 });
+                    if (tempHolder.passiveEffect3 != null) tempProfile.PassiveSkills.Add(new ServantSkill { SkillName = tempHolder.passiveSkill3, Rank = tempHolder.passiveRank3, Effect = tempHolder.passiveEffect3 });
+                    if (tempHolder.passiveEffect4 != null) tempProfile.PassiveSkills.Add(new ServantSkill { SkillName = tempHolder.passiveSkill4, Rank = tempHolder.passiveRank4, Effect = tempHolder.passiveEffect4 });
+                    
                     mappedObj.Add(tempProfile);
 
                     tempProfile = new ServantProfile();

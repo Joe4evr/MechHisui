@@ -26,7 +26,7 @@ namespace MechHisui.Commands
                    }
                    if (client.GetTrivias().Any(t => t.Channel.Id == cea.Channel.Id))
                    {
-                       await cea.Channel.SendMessage($"Trivia already running.");
+                       await cea.Channel.SendWithRetry($"Trivia already running.");
                        return;
                    }
                    int rounds;
@@ -34,7 +34,7 @@ namespace MechHisui.Commands
                    {
                        if (rounds > TriviaHelpers.Questions.Count)
                        {
-                           await cea.Channel.SendMessage($"Could not start trivia, too many questions specified.");
+                           await cea.Channel.SendWithRetry($"Could not start trivia, too many questions specified.");
                        }
                        else
                        {
@@ -45,7 +45,7 @@ namespace MechHisui.Commands
                    }
                    else
                    {
-                       await cea.Channel.SendMessage($"Could not start trivia, parameter was not a number.");
+                       await cea.Channel.SendWithRetry($"Could not start trivia, parameter was not a number.");
                    }
                });
         }

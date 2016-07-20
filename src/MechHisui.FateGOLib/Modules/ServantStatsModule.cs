@@ -34,15 +34,20 @@ namespace MechHisui.FateGOLib.Modules
                 .Description($"Relay information on the specified Servant. Alternative names acceptable.")
                 .Do(async cea =>
                 {
+                    if (String.IsNullOrWhiteSpace(cea.Args[0]))
+                    {
+                        return;
+                    }
+
                     if (cea.Args[0].ContainsIgnoreCase("waifu"))
                     {
-                        await cea.Channel.SendMessage("It has come to my attention that your 'waifu' is equatable to fecal matter.");
+                        await cea.Channel.SendWithRetry("It has come to my attention that your 'waifu' is equatable to fecal matter.");
                         return;
                     }
 
                     if (new[] { "enkidu", "arc", "arcueid" }.ContainsIgnoreCase(cea.Args[0]))
                     {
-                        await cea.Channel.SendMessage("Never ever.");
+                        await cea.Channel.SendWithRetry("Never ever.");
                         return;
                     }
                     
@@ -52,25 +57,25 @@ namespace MechHisui.FateGOLib.Modules
                         var profile = FgoHelpers.ServantProfiles.SingleOrDefault(p => p.Id == id) ??
                             FgoHelpers.FakeServantProfiles.SingleOrDefault(p => p.Id == id);
 
-                        await cea.Channel.SendMessage(FormatServantProfile(profile));
+                        await cea.Channel.SendWithRetry(FormatServantProfile(profile));
                     }
                     else
                     {
                         var potentials = _statService.LookupStats(cea.Args[0]);
                         if (potentials.Count() == 1)
                         {
-                            await cea.Channel.SendMessage(FormatServantProfile(potentials.Single()));
+                            await cea.Channel.SendWithRetry(FormatServantProfile(potentials.Single()));
                         }
                         else if (potentials.Count() > 1)
                         {
                             var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
                                 .AppendSequence(potentials, (s, pr) => s.AppendLine($"**{pr.Name}** *({String.Join(", ", FgoHelpers.ServantDict.Where(d => d.Value == pr.Name).Select(d => d.Key))})*"));
 
-                            await cea.Channel.SendMessage(sb.ToString());
+                            await cea.Channel.SendWithRetry(sb.ToString());
                         }
                         else
                         {
-                            await cea.Channel.SendMessage("No such entry found. Please try another name.");
+                            await cea.Channel.SendWithRetry("No such entry found. Please try another name.");
                         }
                     }
                 });
@@ -86,7 +91,7 @@ namespace MechHisui.FateGOLib.Modules
                     var servant = cea.Args[0];
                     if (!FgoHelpers.ServantProfiles.Select(p => p.Name).Contains(servant))
                     {
-                        await cea.Channel.SendMessage("Could not find name to add alias for.");
+                        await cea.Channel.SendWithRetry("Could not find name to add alias for.");
                         return;
                     }
 
@@ -95,11 +100,11 @@ namespace MechHisui.FateGOLib.Modules
                     {
                         FgoHelpers.ServantDict.Add(alias, servant);
                         File.WriteAllText(Path.Combine(_config["AliasPath"], "servants.json"), JsonConvert.SerializeObject(FgoHelpers.ServantDict, Formatting.Indented));
-                        await cea.Channel.SendMessage($"Added alias `{alias}` for `{servant}`.");
+                        await cea.Channel.SendWithRetry($"Added alias `{alias}` for `{servant}`.");
                     }
                     catch (ArgumentException)
                     {
-                        await cea.Channel.SendMessage($"Alias `{alias}` already exists for Servant `{FgoHelpers.ServantDict[alias]}`.");
+                        await cea.Channel.SendWithRetry($"Alias `{alias}` already exists for Servant `{FgoHelpers.ServantDict[alias]}`.");
                         return;
                     }
                 });
@@ -109,7 +114,7 @@ namespace MechHisui.FateGOLib.Modules
                 .AddCheck((c, u, ch) => ch.Server.Id == UInt64.Parse(_config["FGO_server"]))
                 .Hide()
                 .Do(async cea =>
-                    await cea.Channel.SendMessage(
+                    await cea.Channel.SendWithRetry(
                         String.Concat(
                             "From master KyteM: `Linear curves scale as you'd expect.\n",
                             "Reverse S means their stats will grow fast, slow the fuck down as they reach the midpoint (with zero or near-zero improvements at that midpoint), then return to their previous growth speed.\n",
@@ -138,15 +143,15 @@ namespace MechHisui.FateGOLib.Modules
                         .ToList();
                     if (trait == null)
                     {
-                        await cea.Channel.SendMessage("Could not find trait.");
+                        await cea.Channel.SendWithRetry("Could not find trait.");
                     }
                     else if (servants.Count == 0)
                     {
-                        await cea.Channel.SendMessage("No results for that query.");
+                        await cea.Channel.SendWithRetry("No results for that query.");
                     }
                     else
                     {
-                        await cea.Channel.SendMessage($"**{trait}:** {String.Join(", ", servants)}.");
+                        await cea.Channel.SendWithRetry($"**{trait}:** {String.Join(", ", servants)}.");
                     }
                 });
         }

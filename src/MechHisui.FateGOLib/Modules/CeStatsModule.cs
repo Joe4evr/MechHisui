@@ -31,29 +31,34 @@ namespace MechHisui.FateGOLib.Modules
                 .Description($"Relay information on the specified Craft Essence. Alternative names acceptable.")
                 .Do(async cea =>
                 {
+                    if (String.IsNullOrWhiteSpace(cea.Args[0]))
+                    {
+                        return;
+                    }
+
                     int id;
                     if (Int32.TryParse(cea.Args[0], out id) && id <= FgoHelpers.CEProfiles.Max(p => p.Id))
                     {
                         var ce = FgoHelpers.CEProfiles.SingleOrDefault(p => p.Id == id);
-                        await cea.Channel.SendMessage(FormatCEProfile(ce));
+                        await cea.Channel.SendWithRetry(FormatCEProfile(ce));
                     }
                     else
                     {
                         var potentials = _statService.LookupCE(cea.Args[0]);
                         if (potentials.Count() == 1)
                         {
-                            await cea.Channel.SendMessage(FormatCEProfile(potentials.Single()));
+                            await cea.Channel.SendWithRetry(FormatCEProfile(potentials.Single()));
                         }
                         else if (potentials.Count() > 1)
                         {
                             var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
                                 .AppendSequence(potentials, (s, pr) => s.AppendLine($"**{pr.Name}** *({String.Join(", ", FgoHelpers.CEDict.Where(d => d.Value == pr.Name).Select(d => d.Key))})*"));
 
-                            await cea.Channel.SendMessage(sb.ToString());
+                            await cea.Channel.SendWithRetry(sb.ToString());
                         }
                         else
                         {
-                            await cea.Channel.SendMessage("No such entry found. Please try another name.");
+                            await cea.Channel.SendWithRetry("No such entry found. Please try another name.");
                         }
                     }
                 });
@@ -65,10 +70,15 @@ namespace MechHisui.FateGOLib.Modules
                 .Description($"Relay information on CEs having the specified effect.")
                 .Do(async cea =>
                 {
+                    if (String.IsNullOrWhiteSpace(cea.Args[0]))
+                    {
+                        return;
+                    }
+
                     var arg = cea.Args[0];
                     if (String.IsNullOrEmpty(arg))
                     {
-                        await cea.Channel.SendMessage("No effect specified.");
+                        await cea.Channel.SendWithRetry("No effect specified.");
                         return;
                     }
 
@@ -82,15 +92,15 @@ namespace MechHisui.FateGOLib.Modules
                             sb.AppendLine($"**{c.Name}** - {c.Effect}");
                             if (sb.Length > 1700)
                             {
-                                await cea.Channel.SendMessage(sb.ToString());
+                                await cea.Channel.SendWithRetry(sb.ToString());
                                 sb = sb.Clear();
                             }
                         }
-                        await cea.Channel.SendMessage(sb.ToString());
+                        await cea.Channel.SendWithRetry(sb.ToString());
                     }
                     else
                     {
-                        await cea.Channel.SendMessage("No such CEs found. Please try another term.");
+                        await cea.Channel.SendWithRetry("No such CEs found. Please try another term.");
                     }
                 });
 
@@ -105,7 +115,7 @@ namespace MechHisui.FateGOLib.Modules
                     var ce = cea.Args[0];
                     if (!FgoHelpers.CEProfiles.Select(c => c.Name).Contains(ce))
                     {
-                        await cea.Channel.SendMessage("Could not find name to add alias for.");
+                        await cea.Channel.SendWithRetry("Could not find name to add alias for.");
                         return;
                     }
 
@@ -114,11 +124,11 @@ namespace MechHisui.FateGOLib.Modules
                     {
                         FgoHelpers.CEDict.Add(alias, ce);
                         File.WriteAllText(Path.Combine(_config["AliasPath"], "ces.json"), JsonConvert.SerializeObject(FgoHelpers.CEDict, Formatting.Indented));
-                        await cea.Channel.SendMessage($"Added alias `{alias}` for `{ce}`.");
+                        await cea.Channel.SendWithRetry($"Added alias `{alias}` for `{ce}`.");
                     }
                     catch (ArgumentException)
                     {
-                        await cea.Channel.SendMessage($"Alias `{alias}` already exists for CE `{FgoHelpers.CEDict[alias]}`.");
+                        await cea.Channel.SendWithRetry($"Alias `{alias}` already exists for CE `{FgoHelpers.CEDict[alias]}`.");
                         return;
                     }
                 });

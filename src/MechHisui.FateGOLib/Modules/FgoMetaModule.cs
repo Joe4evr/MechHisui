@@ -17,12 +17,12 @@ namespace MechHisui.FateGOLib.Modules
 
         public FgoStatsMetaModule(IConfiguration config)
         {
-            Console.WriteLine("Connecting to data service...");
+            Console.WriteLine("Connecting to data service (FGO)...");
             var apiService = new GoogleScriptApiService(
-                Path.Combine(config["Google_Secrets_Path"], "client_secret.json"),
-                Path.Combine(config["Google_Secrets_Path"], "scriptcreds"),
+                Path.Combine(config["Google_Fgo_Profiles"], "client_secret.json"),
+                Path.Combine(config["Google_Fgo_Profiles"], "scriptcreds"),
                 "MechHisui",
-                config["Project_Key"],
+                config["Fgo_Key"],
                 "exportSheet",
                 new string[]
                 {
@@ -83,31 +83,31 @@ namespace MechHisui.FateGOLib.Modules
                     {
                         case "alias":
                             _statService.ReadAliasList();
-                            await cea.Channel.SendMessage("Updated alias lookups.");
+                            await cea.Channel.SendWithRetry("Updated alias lookups.");
                             break;
                         case "profiles":
                             await _statService.UpdateProfileListsAsync();
-                            await cea.Channel.SendMessage("Updated profile lookups.");
+                            await cea.Channel.SendWithRetry("Updated profile lookups.");
                             break;
                         case "ces":
                             await _statService.UpdateCEListAsync();
-                            await cea.Channel.SendMessage("Updated CE lookup.");
+                            await cea.Channel.SendWithRetry("Updated CE lookup.");
                             break;
                         case "events":
                             await _statService.UpdateEventListAsync();
-                            await cea.Channel.SendMessage("Updated events lookup.");
+                            await cea.Channel.SendWithRetry("Updated events lookup.");
                             break;
                         //case "fcs":
                         //    FriendCodes.ReadFriendData(config["FriendcodePath"]);
-                        //    await cea.Channel.SendMessage("Updated friendcodes");
+                        //    await cea.Channel.SendWithRetry("Updated friendcodes");
                         //    break;
                         case "mystic":
                             await _statService.UpdateMysticCodesListAsync();
-                            await cea.Channel.SendMessage("Updated Mystic Codes lookup.");
+                            await cea.Channel.SendWithRetry("Updated Mystic Codes lookup.");
                             break;
                         case "drops":
                             await _statService.UpdateDropsListAsync();
-                            await cea.Channel.SendMessage("Updated Item Drops lookup.");
+                            await cea.Channel.SendWithRetry("Updated Item Drops lookup.");
                             break;
                         default:
                             _statService.ReadAliasList();
@@ -117,7 +117,7 @@ namespace MechHisui.FateGOLib.Modules
                             await _statService.UpdateEventListAsync();
                             await _statService.UpdateMysticCodesListAsync();
                             await _statService.UpdateDropsListAsync();
-                            await cea.Channel.SendMessage("Updated all lookups.");
+                            await cea.Channel.SendWithRetry("Updated all lookups.");
                             break;
                     }
                 });

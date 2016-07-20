@@ -31,7 +31,7 @@ namespace MechHisui.FateGOLib.Modules
                     var arg = cea.Args[0];
                     if (String.IsNullOrWhiteSpace(arg))
                     {
-                        await cea.Channel.SendMessage("Provide an item to find among drops.");
+                        await cea.Channel.SendWithRetry("Provide an item to find among drops.");
                         return;
                     }
 
@@ -45,27 +45,27 @@ namespace MechHisui.FateGOLib.Modules
                             {
                                 if (i == 0)
                                 {
-                                    await cea.Channel.SendMessage($"Found in the following {potentials.Count()} locations:\n{result.Substring(i, i + 1750)}...");
+                                    await cea.Channel.SendWithRetry($"Found in the following {potentials.Count()} locations:\n{result.Substring(i, i + 1750)}...");
                                 }
                                 else if (i + 1750 > result.Length)
                                 {
-                                    await cea.Channel.SendMessage($"...{result.Substring(i)}");
+                                    await cea.Channel.SendWithRetry($"...{result.Substring(i)}");
                                 }
                                 else
                                 {
-                                    await cea.Channel.SendMessage($"...{result.Substring(i, i + 1750)}");
+                                    await cea.Channel.SendWithRetry($"...{result.Substring(i, i + 1750)}");
                                 }
                             }
                         }
                         else
                         {
-                            await cea.Channel.SendMessage($"Found in the following {potentials.Count()} locations:\n{result}");
+                            await cea.Channel.SendWithRetry($"Found in the following {potentials.Count()} locations:\n{result}");
                         }
 
                     }
                     else
                     {
-                        await cea.Channel.SendMessage("Could not find specified item among location drops.");
+                        await cea.Channel.SendWithRetry("Could not find specified item among location drops.");
                     }
                 });
         }

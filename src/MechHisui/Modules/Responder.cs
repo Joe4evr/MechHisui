@@ -44,12 +44,12 @@ namespace MechHisui.Modules
                     if (!_lastResponses.TryGetValue(resp.Key, out last) || (DateTime.UtcNow - last) > TimeSpan.FromMinutes(1))
                     {
                         _lastResponses.AddOrUpdate(resp.Key, msgTime, (k, v) => v = msgTime);
-                        await e.Channel.SendMessage(resp.Value[new Random().Next(maxValue: resp.Value.Length)]);
+                        await e.Channel.SendWithRetry(resp.Value[new Random().Next(maxValue: resp.Value.Length)]);
                     }
                 }
                 else if (sResp != null)
                 {
-                    await e.Channel.SendMessage(sResp.Resp[new Random().Next(maxValue: sResp.Resp.Length)]);
+                    await e.Channel.SendWithRetry(sResp.Resp[new Random().Next(maxValue: sResp.Resp.Length)]);
                 }
             }
         }
@@ -58,6 +58,12 @@ namespace MechHisui.Modules
         {
             Console.WriteLine("Initializing Responder...");
             Responses.InitResponses(_config);
+
+            //manager.Client.GetModule<UpdateModule>().Instance.Register("responders", async cea =>
+            //{
+            //    Responses.InitResponses(_config);
+            //    await cea.Channel.SendWithRetry("Updated responses.");
+            //});
 
             Console.WriteLine("Registering 'Learn'...");
             manager.Client.GetService<CommandService>().CreateCommand("learn")
@@ -89,7 +95,7 @@ namespace MechHisui.Modules
                         }
                         tw.Write(JsonConvert.SerializeObject(l, Formatting.Indented));
                     }
-                    await cea.Channel.SendMessage($"Understood. Shall respond to `{triggger}` with `{response}`.");
+                    await cea.Channel.SendWithRetry($"Understood. Shall respond to `{triggger}` with `{response}`.");
                 });
 
             manager.Client.GetService<CommandService>().CreateCommand("refresh")
@@ -98,7 +104,7 @@ namespace MechHisui.Modules
                 .Do(async cea =>
                 {
                     Responses.InitResponses(_config);
-                    await cea.Channel.SendMessage("Refreshed auto-responses.");
+                    await cea.Channel.SendWithRetry("Refreshed auto-responses.");
                 });
 
             manager.Client.MessageReceived += Respond;
@@ -121,7 +127,7 @@ namespace MechHisui.Modules
             {
                 responseDict.AddOrUpdate(item.Call, item.Resp, (k, v) => v = item.Resp);
             }
-            
+
             spammableResponses = JsonConvert.DeserializeObject<List<Response>>(File.ReadAllText(config["SpamResponsesPath"])) ?? new List<Response>();
         }
 
