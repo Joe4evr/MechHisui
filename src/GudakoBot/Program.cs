@@ -1,74 +1,93 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Internal;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.PlatformAbstractions;
 using Discord;
-using Newtonsoft.Json;
+using Discord.WebSocket;
+using Discord.Addons.SimpleConfig;
+using Discord.Addons.WS4NetCompatibility;
+using System.Diagnostics;
 
 namespace GudakoBot
 {
     public class Program
     {
-        public static void Main(string[] args)
+        static void Main(string[] args)
         {
-            PlatformServices ps = PlatformServices.Default;
-            var env = ps.Application;
-            Console.WriteLine($"Base: {env.ApplicationBasePath}");
+            while (true)
+            {
+                try
+                {
+                    AsyncMain(args).GetAwaiter().GetResult();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{DateTime.Now}: {e.Message}\n{e.StackTrace}");
+                    Console.ReadLine();
+                }
+            }
+        }
 
-            IConfigurationBuilder builder = new ConfigurationBuilder()
-                .AddEnvironmentVariables()
-                .SetBasePath(env.ApplicationBasePath);
-
-            IHostingEnvironment hostingEnv = new HostingEnvironment();
-            hostingEnv.Initialize(env.ApplicationName, env.ApplicationBasePath, new WebHostOptions());
-
-            Console.WriteLine("Loading from jsons directory");
-            builder.AddInMemoryCollection(JsonConvert.DeserializeObject<Dictionary<string, string>>(
-                File.ReadAllText(@"C:\PublishOutputs\GudakoBot-jsons\secrets.json")
-            ));
-
-            IConfiguration config = builder.Build();
-
-            ulong owner = UInt64.Parse(config["Owner"]);
-            ulong fgogen = UInt64.Parse(config["FGO_general"]);
-
-            Console.WriteLine("Loading chat lines...");
-            LoadLines(config);
-            Console.WriteLine($"Loaded {Randomlines.Count()} lines.");
+        static async Task AsyncMain(string[] args)
+        {
+            Console.WriteLine("Loading config...");
+            var config = store.Load();
+            Console.WriteLine($"Loaded {config.Lines.Count()} lines.");
 
             var client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                LogLevel = LogSeverity.Warning
+                LogLevel = LogSeverity.Warning,
+                WebSocketProvider = () => new WS4NetProvider()
             });
 
             //Display all log messages in the console
-            client.Log += async msg => await Task.Run(() => Console.WriteLine($"[{msg.Severity}] {msg.Source}: {msg.Message}")); //File.AppendAllText(logPath, $"[{e.Severity}] {e.Source}: {e.Message}"); 
+            client.Log += msg =>
+            {
+                var cc = Console.ForegroundColor;
+                switch (msg.Severity)
+                {
+                    case LogSeverity.Critical:
+                    case LogSeverity.Error:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        break;
+                    case LogSeverity.Warning:
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        break;
+                    case LogSeverity.Info:
+                        Console.ForegroundColor = ConsoleColor.White;
+                        break;
+                    case LogSeverity.Verbose:
+                    case LogSeverity.Debug:
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        break;
+                }
+                Console.WriteLine($"{DateTime.Now,-19} [{msg.Severity,8}] {msg.Source}: {msg.Message}");
+                Console.ForegroundColor = cc;
+                return Task.CompletedTask;
+            };
+
             client.MessageReceived += async msg =>
             {
-                if (msg.Author.Id == owner && msg.Content == "-new")
+                if (msg.Author.Id == config.OwnerId && msg.Content == "-new")
                 {
                     Console.WriteLine($"{DateTime.Now}: Reloading lines");
-                    LoadLines(config);
-                    await msg.Channel.SendMessageAsync(Randomlines.Last());
+                    config = store.Load();
+                    await msg.Channel.SendMessageAsync(config.Lines.Last());
                     timer.Change(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(30));
                 }
             };
-            client.Ready += async () =>
+
+            client.Ready += () =>
             {
-                Console.WriteLine($"Logged in as {(await client.GetCurrentUserAsync()).Username}");
+                Console.WriteLine($"Logged in as {client.CurrentUser.Username}");
                 Console.WriteLine($"Started up at {DateTime.Now}.");
 
                 var rng = new Random();
                 timer = new Timer(async s =>
                 {
-                    var channel = await client.GetChannelAsync(fgogen) as ITextChannel;
+                    var channel = client.GetChannel(config.FgoGeneral) as ITextChannel;
                     if (channel == null)
                     {
                         Console.WriteLine($"Channel was null. Waiting for next interval.");
@@ -76,9 +95,9 @@ namespace GudakoBot
                     else
                     {
                         string str;
-                        Randomlines = Randomlines.Shuffle();
+                        config.Lines = config.Lines.Shuffle();
 
-                        do str = Randomlines.ElementAt(rng.Next(maxValue: Randomlines.Count()));
+                        do str = config.Lines.ElementAt(rng.Next(maxValue: config.Lines.Count()));
                         while (str == lastLine);
 
                         Console.WriteLine($"{DateTime.Now}: Sending message.");
@@ -86,28 +105,19 @@ namespace GudakoBot
                         lastLine = str;
                     }
                 },
-                null,
-                TimeSpan.FromMinutes(10),
-                TimeSpan.FromMinutes(30)
-                );
+                null, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(30));
+                return Task.CompletedTask;
             };
 
-            Task.Run(async () =>
-            {
-                await client.LoginAsync(TokenType.Bot, config["LoginToken"]);
-                await client.ConnectAsync(true);
-            }).GetAwaiter().GetResult();
+            await client.LoginAsync(TokenType.Bot, config.LoginToken);
+            await client.ConnectAsync(waitForGuilds: true);
+            await Task.Delay(-1);
         }
 
-        private static void LoadLines(IConfiguration config)
-        {
-            using (TextReader tr = new StreamReader(new FileStream(config["LinesPath"], FileMode.Open, FileAccess.Read)))
-            {
-                Randomlines = JsonConvert.DeserializeObject<List<string>>(tr.ReadToEnd());
-            }
-        }
-
-        private static IEnumerable<string> Randomlines = new List<string>();
+        private static readonly IConfigStore<GudakoConfig> store = new JsonConfigStore<GudakoConfig>(
+            Debugger.IsAttached
+            ? "config.json"
+            : "../GudakoBot-jsons/config.json");
         private static Timer timer;
         private static string lastLine;
     }

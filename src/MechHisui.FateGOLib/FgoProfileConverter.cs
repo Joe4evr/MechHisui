@@ -173,7 +173,7 @@ namespace MechHisui.FateGOLib
                         case "traits":
                             if (reader.Read() && reader.TokenType == JsonToken.String)
                             {
-                                tempProfile.Traits = reader.Value.ToString().Split(',').ToList();
+                                tempProfile.Traits = reader.Value.ToString().Split(',').Select(t => new ServantTrait { Trait = t }).ToList();
                             }
                             break;
                         default:

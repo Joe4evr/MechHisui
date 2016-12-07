@@ -11,35 +11,52 @@ namespace MechHisui.FateGOLib
 {
     public class StatService
     {
-        private readonly GoogleScriptApiService _apiService;
-        private readonly string _servantAliasPath;
-        private readonly string _ceAliasPath;
-        private readonly string _mysticAliasPath;
+        internal readonly IJsonApiService ApiService;
+        internal readonly FgoConfig Config;
+        internal readonly Dictionary<string, Func<Task>> UpdateFuncs = new Dictionary<string, Func<Task>>();
 
-        public StatService(GoogleScriptApiService apiService, string servantAliasPath, string ceAliasPath, string mysticAliasPath)
+        public StatService(FgoConfig config)
         {
-            if (apiService == null) throw new ArgumentNullException(nameof(apiService));
-            if (servantAliasPath == null) throw new ArgumentNullException(nameof(servantAliasPath));
-            if (ceAliasPath == null) throw new ArgumentNullException(nameof(ceAliasPath));
-            if (mysticAliasPath == null) throw new ArgumentNullException(nameof(mysticAliasPath));
+            //if (apiService == null) throw new ArgumentNullException(nameof(apiService));
+            if (config == null) throw new ArgumentNullException(nameof(config));
 
-            if (!File.Exists(servantAliasPath)) throw new FileNotFoundException(nameof(servantAliasPath));
-            if (!File.Exists(ceAliasPath)) throw new FileNotFoundException(nameof(ceAliasPath));
-            if (!File.Exists(mysticAliasPath)) throw new FileNotFoundException(nameof(mysticAliasPath));
+            if (!File.Exists(config.ServantAliasesPath)) throw new FileNotFoundException(nameof(config.ServantAliasesPath));
+            if (!File.Exists(config.CEAliasesPath)) throw new FileNotFoundException(nameof(config.CEAliasesPath));
+            if (!File.Exists(config.MysticAliasesPath)) throw new FileNotFoundException(nameof(config.MysticAliasesPath));
+            if (!File.Exists(config.MasterNamesPath)) throw new FileNotFoundException(nameof(config.MasterNamesPath));
+            if (!File.Exists(config.NameOnlyServantsPath)) throw new FileNotFoundException(nameof(config.NameOnlyServantsPath));
 
-            _apiService = apiService;
-            _servantAliasPath = servantAliasPath;
-            _ceAliasPath = ceAliasPath;
-            _mysticAliasPath = mysticAliasPath;
+            ApiService = new GoogleScriptApiService(
+                Path.Combine(config.GoogleCredPath, "client_secret.json"),
+                Path.Combine(config.GoogleCredPath, "scriptcreds", "Google.Apis.Auth.OAuth2.Responses.TokenResponse-user"),
+                applicationName: "MechHisui",
+                projectKey: config.GoogleToken,
+                functionName: "exportSheet",
+                clientId: config.GoogleClientId,
+                neededScopes: new string[]
+                {
+                    "https://www.googleapis.com/auth/spreadsheets",
+                    "https://www.googleapis.com/auth/drive",
+                    "https://spreadsheets.google.com/feeds/"
+                });
+            Config = config;
 
             ReadAliasList();
+        }
+
+
+
+        internal void RegisterUpdateFunc(string key, Func<Task> func)
+        {
+            if (!UpdateFuncs.ContainsKey(key))
+                UpdateFuncs[key] = func;
         }
 
         public IEnumerable<ServantProfile> LookupStats(string servant, bool fullsearch = false)
         {
             var list = FgoHelpers.ServantProfiles.Concat(FgoHelpers.FakeServantProfiles);
             var servants = list
-                .Where(p => p.Name.Equals(servant, StringComparison.InvariantCultureIgnoreCase));
+                .Where(p => p.Name.Equals(servant, StringComparison.OrdinalIgnoreCase));
 
             if (servants.Count() == 0 || fullsearch)
             {
@@ -48,7 +65,7 @@ namespace MechHisui.FateGOLib
                 if (servants.Count() == 0 || fullsearch)
                 {
                     var lookup = FgoHelpers.ServantDict
-                        .Where(s => s.Key.Equals(servant, StringComparison.InvariantCultureIgnoreCase))
+                        .Where(s => s.Key.Equals(servant, StringComparison.OrdinalIgnoreCase))
                         .Select(s => s.Value)
                         .ToList();
 
@@ -73,7 +90,7 @@ namespace MechHisui.FateGOLib
         public IEnumerable<CEProfile> LookupCE(string name, bool fullsearch = false)
         {
             var ces = FgoHelpers.CEProfiles
-                .Where(ce => ce.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+                .Where(ce => ce.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
             if (ces.Count() == 0 || fullsearch)
             {
@@ -82,7 +99,7 @@ namespace MechHisui.FateGOLib
                 if (ces.Count() == 0 || fullsearch)
                 {
                     var lookup = FgoHelpers.CEDict
-                        .Where(ce => ce.Key.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                        .Where(ce => ce.Key.Equals(name, StringComparison.OrdinalIgnoreCase))
                         .Select(ce => ce.Value)
                         .ToList();
 
@@ -106,7 +123,7 @@ namespace MechHisui.FateGOLib
         public IEnumerable<MysticCode> LookupMystic(string code, bool fullsearch = false)
         {
             var mystics = FgoHelpers.MysticCodeList
-                .Where(m => m.Code.Equals(code, StringComparison.InvariantCultureIgnoreCase));
+                .Where(m => m.Code.Equals(code, StringComparison.OrdinalIgnoreCase));
 
             if (mystics.Count() == 0 || fullsearch)
             {
@@ -115,7 +132,7 @@ namespace MechHisui.FateGOLib
                 if (mystics.Count() == 0 || fullsearch)
                 {
                     var lookup = FgoHelpers.MysticCodeDict
-                        .Where(m => m.Key.Equals(code, StringComparison.InvariantCultureIgnoreCase))
+                        .Where(m => m.Key.Equals(code, StringComparison.OrdinalIgnoreCase))
                         .Select(m => m.Value)
                         .ToList();
 
@@ -137,43 +154,29 @@ namespace MechHisui.FateGOLib
             return mystics;
         }
 
-        //get table data and serialize to the respective lists so that they're cached
-        public async Task UpdateProfileListsAsync()
-        {
-            Console.WriteLine("Updating profile lists...");
-            FgoHelpers.ServantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(await _apiService.GetDataFromServiceAsJsonAsync("Servants"), new FgoProfileConverter());
-            FgoHelpers.FakeServantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(await _apiService.GetDataFromServiceAsJsonAsync("FakeServants"), new FgoProfileConverter());
-        }
+        //public async Task UpdateEventListAsync()
+        //{
+        //    Console.WriteLine("Updating event list...");
+        //    FgoHelpers.EventList = JsonConvert.DeserializeObject<List<Event>>(await ApiService.GetDataFromServiceAsJsonAsync("Events"));
+        //}
 
-        public async Task UpdateCEListAsync()
-        {
-            Console.WriteLine("Updating CE list...");
-            FgoHelpers.CEProfiles = JsonConvert.DeserializeObject<List<CEProfile>>(await _apiService.GetDataFromServiceAsJsonAsync("CEs"));
-        }
+        //public async Task UpdateMysticCodesListAsync()
+        //{
+        //    Console.WriteLine("Updating Mystic Codes list...");
+        //    FgoHelpers.MysticCodeList = JsonConvert.DeserializeObject<List<MysticCode>>(await ApiService.GetDataFromServiceAsJsonAsync("MysticCodes"));
+        //}
 
-        public async Task UpdateEventListAsync()
-        {
-            Console.WriteLine("Updating event list...");
-            FgoHelpers.EventList = JsonConvert.DeserializeObject<List<Event>>(await _apiService.GetDataFromServiceAsJsonAsync("Events"));
-        }
-
-        public async Task UpdateMysticCodesListAsync()
-        {
-            Console.WriteLine("Updating Mystic Codes list...");
-            FgoHelpers.MysticCodeList = JsonConvert.DeserializeObject<List<MysticCode>>(await _apiService.GetDataFromServiceAsJsonAsync("MysticCodes"));
-        }
-
-        public async Task UpdateDropsListAsync()
-        {
-            Console.WriteLine("Updating Item Drops list...");
-            FgoHelpers.ItemDropsList = JsonConvert.DeserializeObject<List<NodeDrop>>(await _apiService.GetDataFromServiceAsJsonAsync("Drops"));
-        }
+        //public async Task UpdateDropsListAsync()
+        //{
+        //    Console.WriteLine("Updating Item Drops list...");
+        //    FgoHelpers.ItemDropsList = JsonConvert.DeserializeObject<List<NodeDrop>>(await ApiService.GetDataFromServiceAsJsonAsync("Drops"));
+        //}
 
         public void ReadAliasList()
         {
-            FgoHelpers.ServantDict    = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(_servantAliasPath));
-            FgoHelpers.CEDict         = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(_ceAliasPath));
-            FgoHelpers.MysticCodeDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(_mysticAliasPath));
+            FgoHelpers.ServantDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Config.ServantAliasesPath));
+            FgoHelpers.CEDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Config.CEAliasesPath));
+            FgoHelpers.MysticCodeDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Config.MysticAliasesPath));
         }
 
         private static bool RegexMatchOneWord(string hay, string needle)

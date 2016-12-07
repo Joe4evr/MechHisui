@@ -185,5 +185,10 @@ UpgradeLog*.htm
 # Microsoft Fakes
 FakesAssemblies/
 *.scgdat
+
+# Self added
 /src/SelfBot
 .vscode/
+.vs/
+**/config.json
+**/project.lock.json

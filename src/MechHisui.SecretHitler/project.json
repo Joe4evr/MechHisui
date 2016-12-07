@@ -1,5 +1,5 @@
 ﻿{
-    "version": "1.1.0",
+    "version": "3.2.0",
     "description": "MechHisui.SecretHitler Class Library",
     "authors": [ "Jonathan" ],
 
@@ -10,13 +10,19 @@
     },
 
     "dependencies": {
-        "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0",
-        "Discord.Net": "0.9.4",
-        "Discord.Net.Commands": "0.9.4",
-        "JiiLib": "0.2.2"
+        "Discord.Addons.MpGame": "0.6.10",
+        "Discord.Addons.SimplePermissions": "0.5.6",
+        "System.Security.Cryptography.Algorithms": "4.2.0"
     },
 
     "frameworks": {
-        "net46": { }
+        "netstandard1.3": {
+            "dependencies": {
+                "NETStandard.Library": {
+                    "version": "1.6.0"
+                }
+            },
+            "imports": "dnxcore50"
+        }
     }
 }

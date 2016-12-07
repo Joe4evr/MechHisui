@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
@@ -13,15 +14,25 @@ namespace MechHisui.HisuiBets
         public int BettedAmount { get; internal set; }
     }
 
-    public class UserBucks
+    public class UserAccount
     {
-        public ulong UserId { get; set; }
-        public int Bucks { get; set; }
+        public ulong UserId { get; internal set; }
+        public int Bucks { get; internal set; }
+
+        public override int GetHashCode()
+        {
+            return this.UserId.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (obj is UserAccount) ? ((UserAccount)obj).UserId == this.UserId : false;
+        }
     }
 
     public class BankOfHisui
     {
-        public IList<UserBucks> Accounts = new List<UserBucks>();
+        public HashSet<UserAccount> Accounts = new HashSet<UserAccount>();
         public string Path { get; }
 
         public BankOfHisui(string path)
@@ -29,14 +40,28 @@ namespace MechHisui.HisuiBets
             Path = path;
         }
 
-        public void ReadBank(string path = null)
+        public void ReadBank()
         {
-            Accounts = JsonConvert.DeserializeObject<List<UserBucks>>(File.ReadAllText(path ?? Path));
+            Accounts = JsonConvert.DeserializeObject<HashSet<UserAccount>>(File.ReadAllText(Path));
         }
 
-        public void WriteBank(string path = null)
+        public void WriteBank()
         {
-            File.WriteAllText((path ?? Path), JsonConvert.SerializeObject(Accounts, Formatting.Indented));
+            File.WriteAllText(Path, JsonConvert.SerializeObject(Accounts, Formatting.Indented));
         }
+    }
+
+    public enum GameType
+    {
+        Any,
+        HungerGame,
+        HungerGameDistrictsOnly,
+        SaltyBet
+    }
+
+    public enum SaltyBetTeam
+    {
+        Red,
+        Blue
     }
 }

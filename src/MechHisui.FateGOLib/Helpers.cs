@@ -1,11 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Newtonsoft.Json;
 using JiiLib;
 
 namespace MechHisui.FateGOLib
@@ -33,16 +31,10 @@ namespace MechHisui.FateGOLib
         public const int MaxAP = 140;
         public static List<UserAP> UsersAP = new List<UserAP>();
 
-        public static void InitRandomHgw(IConfiguration config)
+        public static void InitRandomHgw(FgoConfig config)
         {
-            using (TextReader tr = new StreamReader(Path.Combine(config["other"], "masters.json")))
-            {
-                Masters = JsonConvert.DeserializeObject<List<string>>(tr.ReadToEnd());
-            }
-            using (TextReader tr = new StreamReader(Path.Combine(config["other"], "nameonlyservants.json")))
-            {
-                NameOnlyServants = JsonConvert.DeserializeObject<List<NameOnlyServant>>(tr.ReadToEnd());
-            }
+            Masters = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(config.MasterNamesPath));
+            NameOnlyServants = JsonConvert.DeserializeObject<List<NameOnlyServant>>(File.ReadAllText(config.NameOnlyServantsPath));
         }
 
         public static IEnumerable<ServantProfile> WhereActive(this IEnumerable<ServantProfile> profiles, string skill)
@@ -58,6 +50,6 @@ namespace MechHisui.FateGOLib
             => profiles.Where(p => p.PassiveSkills.Any(s => s.Effect.Contains(effect)));
 
         public static IEnumerable<ServantProfile> WhereTrait(this IEnumerable<ServantProfile> profiles, string trait)
-            => profiles.Where(p => p.Traits.ContainsIgnoreCase(trait));
+            => profiles.Where(p => p.Traits.Any(t => t.Trait.ContainsIgnoreCase(trait)));
     }
 }
