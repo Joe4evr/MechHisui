@@ -1,6 +1,6 @@
 ﻿namespace MechHisui.SecretHitler.Models
 {
-    public enum BoardSpaceType
+    internal enum BoardSpaceType
     {
         Blank,
         Examine,

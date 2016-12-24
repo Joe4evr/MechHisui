@@ -2,7 +2,7 @@
 
 namespace MechHisui.SecretHitler.Models
 {
-    public sealed class PlayerVote
+    internal sealed class PlayerVote
     {
         public IUser User { get; }
         public Vote Vote { get; }

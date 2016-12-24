@@ -46,7 +46,7 @@ namespace MechHisui.SecretHitler
         }
         internal bool VetoUnlocked { get; private set; } = false;
 
-        public SecretHitlerGame(
+        internal SecretHitlerGame(
             IMessageChannel channel,
             IEnumerable<SecretHitlerPlayer> players,
             SecretHitlerConfig config,
@@ -331,7 +331,7 @@ namespace MechHisui.SecretHitler
             {
                 State = GameState.EndOfTurn;
                 var player = _livingPlayers.Single(p => p.User.Id == target.Id);
-                player.IsAlive = false;
+                player.Killed();
                 await Channel.SendMessageAsync(String.Format(_config.Kill, player.User.Username));
                 await Task.Delay(3500);
                 if (player.Role == _config.Hitler)

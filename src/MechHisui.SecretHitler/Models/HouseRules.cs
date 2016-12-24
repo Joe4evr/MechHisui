@@ -3,7 +3,7 @@
 namespace MechHisui.SecretHitler.Models
 {
     [Flags]
-    public enum HouseRules
+    internal enum HouseRules
     {
         None = 0,
         SkipFirstElection = 1,

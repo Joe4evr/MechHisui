@@ -20,7 +20,7 @@
     },
 
     "dependencies": {
-        "Discord.Net.Core": "1.0.0-beta2-00450",
+        "Discord.Net.Core": "1.0.0-beta2-*",
         "Discord.Addons.SimplePermissions": "0.5.6",
         "Discord.Addons.WS4NetCompatibility": "1.0.0-beta1",
         "MechHisui.FateGOLib": "*",

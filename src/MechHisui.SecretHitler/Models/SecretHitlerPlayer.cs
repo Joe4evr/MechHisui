@@ -5,9 +5,9 @@ namespace MechHisui.SecretHitler.Models
 {
     public sealed class SecretHitlerPlayer : Player
     {
-        public string Party { get; }
-        public string Role { get; }
-        public bool IsAlive { get; internal set; } = true;
+        internal string Party { get; }
+        internal string Role { get; }
+        internal bool IsAlive { get; private set; } = true;
 
         public SecretHitlerPlayer(
             IUser user, IMessageChannel channel,
@@ -17,5 +17,8 @@ namespace MechHisui.SecretHitler.Models
             Party = party;
             Role = role;
         }
+
+        internal void Killed()
+            => IsAlive = false;
     }
 }

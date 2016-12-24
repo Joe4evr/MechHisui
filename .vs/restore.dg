@@ -1,2 +1,4 @@
-#:C:\aspnetcore\MechHisui\src\GudakoBot\GudakoBot.xproj
-C:\aspnetcore\MechHisui\src\GudakoBot\GudakoBot.xproj|C:\aspnetreference\Discord.Net\src\Discord.Net\Discord.Net.xproj
+#:C:\aspnetcore\MechHisui\src\MechHisui\MechHisui.xproj
+C:\aspnetcore\MechHisui\src\MechHisui\MechHisui.xproj|C:\aspnetcore\MechHisui\src\MechHisui.FateGOLib\MechHisui.FateGOLib.xproj
+C:\aspnetcore\MechHisui\src\MechHisui\MechHisui.xproj|C:\aspnetcore\MechHisui\src\MechHisui.HisuiBets\MechHisui.HisuiBets.xproj
+C:\aspnetcore\MechHisui\src\MechHisui\MechHisui.xproj|C:\aspnetcore\MechHisui\src\MechHisui.SecretHitler\MechHisui.SecretHitler.xproj

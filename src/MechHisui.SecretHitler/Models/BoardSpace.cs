@@ -1,6 +1,6 @@
 ﻿namespace MechHisui.SecretHitler.Models
 {
-    public sealed class BoardSpace
+    internal sealed class BoardSpace
     {
         public BoardSpaceType Type { get; }
 

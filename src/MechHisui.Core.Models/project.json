@@ -19,7 +19,7 @@
     },
 
     "frameworks": {
-        "netstandard1.6": {
+        "netstandard1.3": {
             "dependencies": {
                 "NETStandard.Library": {
                     "version": "1.6.0"

@@ -1,6 +1,6 @@
 ﻿namespace MechHisui.SecretHitler.Models
 {
-    public enum Vote
+    internal enum Vote
     {
         No,
         Yes

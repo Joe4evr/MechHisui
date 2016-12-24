@@ -1,6 +1,6 @@
 ﻿namespace MechHisui.SecretHitler.Models
 {
-    public enum PolicyType
+    internal enum PolicyType
     {
         Liberal,
         Fascist

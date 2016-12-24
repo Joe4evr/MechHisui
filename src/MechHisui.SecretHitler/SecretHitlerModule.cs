@@ -378,7 +378,7 @@ namespace MechHisui.SecretHitler
     static class Ext
     {
         //Method for randomizing lists using a Fisher-Yates shuffle.
-        //Taken from http://stackoverflow.com/questions/273313/
+        //Based on http://stackoverflow.com/questions/273313/
         /// <summary>
         /// Perform a Fisher-Yates shuffle on a collection implementing <see cref="IEnumerable{T}"/>.
         /// </summary>
