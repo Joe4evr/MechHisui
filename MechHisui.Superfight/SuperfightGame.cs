@@ -160,8 +160,7 @@ namespace MechHisui.Superfight
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                var l = e.NewItems as IList<PlayerVote>;
-                if (l != null && l.Count == Players.Count)
+                if (e.NewItems is IList<PlayerVote> l && l.Count == Players.Count)
                 {
                     await EndVote(l);
                 }

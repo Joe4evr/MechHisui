@@ -10,6 +10,7 @@ using Discord.Addons.MpGame;
 using Discord.Commands;
 using MechHisui.SecretHitler.Collections;
 using MechHisui.SecretHitler.Models;
+using Discord.Addons.MpGame.Collections;
 
 namespace MechHisui.SecretHitler
 {
@@ -53,9 +54,7 @@ namespace MechHisui.SecretHitler
             HouseRules houseRules)
             : base(channel, players)
         {
-            if (config == null) throw new ArgumentNullException(nameof(config));
-
-            _config = config;
+            _config = config ?? throw new ArgumentNullException(nameof(config));
             _houseRules = houseRules;
 
             State = GameState.Setup;
@@ -362,8 +361,7 @@ namespace MechHisui.SecretHitler
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                var l = e.NewItems as IList<PlayerVote>;
-                if (l != null && l.Count == Players.Count(p => p.IsAlive))
+                if (e.NewItems is IList<PlayerVote> l && l.Count == Players.Count(p => p.IsAlive))
                 {
                     await VotingResults(l);
                 }

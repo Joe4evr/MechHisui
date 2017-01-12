@@ -70,8 +70,7 @@ namespace MechHisui.HisuiBets
         }
         private Task _onGameEnd(ulong channelId)
         {
-            BetGame game;
-            if (_games.TryRemove(channelId, out game))
+            if (_games.TryRemove(channelId, out var game))
             {
                 game.GameEnd -= _onGameEnd;
             }

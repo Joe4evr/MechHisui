@@ -27,7 +27,7 @@ namespace MechHisui.HisuiBets
             GameType = type;
 
             BetsOpen = true;
-            _countDown = new Timer(async cb => await close(), null,
+            _countDown = new Timer(async cb => await Close(), null,
             Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
         }
 
@@ -37,7 +37,7 @@ namespace MechHisui.HisuiBets
             _countDown.Change(TimeSpan.FromSeconds(45), Timeout.InfiniteTimeSpan);
         }
 
-        private async Task close()
+        private async Task Close()
         {
             if (_isClosing)
             {
@@ -123,7 +123,7 @@ namespace MechHisui.HisuiBets
             if (_isClosing)
             {
                 _countDown.Change(Timeout.Infinite, Timeout.Infinite);
-                await close();
+                await Close();
             }
             var wholeSum = ActiveBets.Sum(b => b.BettedAmount);
             var winners = ActiveBets

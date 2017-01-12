@@ -60,7 +60,7 @@ namespace MechHisui.Superfight
             }
             else
             {
-                if (PlayerList.Add(Context.User))
+                if (GameService.AddUser(Context.Channel.Id, Context.User))
                 {
                     await ReplyAsync($"**{Context.User.Username}** has joined.");
                 }
@@ -81,7 +81,7 @@ namespace MechHisui.Superfight
             }
             else
             {
-                if (PlayerList.Remove(Context.User))
+                if (GameService.RemoveUser(Context.Channel.Id, Context.User))
                 {
                     await ReplyAsync($"**{Context.User.Username}** has left.");
                 }

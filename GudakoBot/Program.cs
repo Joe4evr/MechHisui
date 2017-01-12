@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Net.Providers.WS4Net;
 using Discord.WebSocket;
-using Discord.Addons.SimpleConfig;
-using Discord.Addons.WS4NetCompatibility;
-using System.Diagnostics;
 
 namespace GudakoBot
 {
@@ -39,14 +38,14 @@ namespace GudakoBot
             var client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Warning,
-                WebSocketProvider = () => new WS4NetProvider()
+                WebSocketProvider = WS4NetProvider.Instance
             });
 
             //Display all log messages in the console
-            client.Log += msg =>
+            client.Log += lmsg =>
             {
                 var cc = Console.ForegroundColor;
-                switch (msg.Severity)
+                switch (lmsg.Severity)
                 {
                     case LogSeverity.Critical:
                     case LogSeverity.Error:
@@ -63,14 +62,14 @@ namespace GudakoBot
                         Console.ForegroundColor = ConsoleColor.DarkGray;
                         break;
                 }
-                Console.WriteLine($"{DateTime.Now,-19} [{msg.Severity,8}] {msg.Source}: {msg.Message}");
+                Console.WriteLine($"{DateTime.Now,-19} [{lmsg.Severity,8}] {lmsg.Source}: {lmsg.Message}");
                 Console.ForegroundColor = cc;
                 return Task.CompletedTask;
             };
 
             client.MessageReceived += async msg =>
             {
-                if (msg.Author.Id == config.OwnerId && msg.Content == "-new")
+                if (msg.Author.Id == owner && msg.Content == "-new")
                 {
                     Console.WriteLine($"{DateTime.Now}: Reloading lines");
                     config = store.Load();
@@ -79,10 +78,11 @@ namespace GudakoBot
                 }
             };
 
-            client.Ready += () =>
+            client.Ready += async () =>
             {
                 Console.WriteLine($"Logged in as {client.CurrentUser.Username}");
                 Console.WriteLine($"Started up at {DateTime.Now}.");
+                owner = (await client.GetApplicationInfoAsync()).Owner.Id;
 
                 var rng = new Random();
                 timer = new Timer(async s =>
@@ -90,7 +90,7 @@ namespace GudakoBot
                     var channel = client.GetChannel(config.FgoGeneral) as ITextChannel;
                     if (channel == null)
                     {
-                        Console.WriteLine($"Channel was null. Waiting for next interval.");
+                        Console.WriteLine($"{DateTime.Now,-19} Channel couldn't be found. Waiting for next interval.");
                     }
                     else
                     {
@@ -106,7 +106,7 @@ namespace GudakoBot
                     }
                 },
                 null, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(30));
-                return Task.CompletedTask;
+                //return Task.CompletedTask;
             };
 
             await client.LoginAsync(TokenType.Bot, config.LoginToken);
@@ -114,12 +114,13 @@ namespace GudakoBot
             await Task.Delay(-1);
         }
 
-        private static readonly IConfigStore<GudakoConfig> store = new JsonConfigStore<GudakoConfig>(
-            Debugger.IsAttached
-            ? "config.json"
-            : "../GudakoBot-jsons/config.json");
+        private static readonly ConfigStore store =
+            new ConfigStore(Debugger.IsAttached
+                ? "config.json"
+                : "../GudakoBot-jsons/config.json");
         private static Timer timer;
         private static string lastLine;
+        private static ulong owner;
     }
 
     static class Ext

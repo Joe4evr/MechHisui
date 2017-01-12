@@ -140,11 +140,9 @@ namespace MechHisui.HisuiBets
         [Command("bet"), Permission(MinimumPermission.Everyone)]
         [Priority(-1), RequiresGameType(GameType.Any), Hidden]
         [RequireContext(ContextType.Guild)]
-        public Task Bet([Remainder] string itall)
-            => (itall.ToLowerInvariant() == "it all") ?
-                Context.Channel.SendFileAsync("kappa.png",
-                    text: $"**{Context.User.Username}** has bet all their bucks. Good luck.") :
-                Task.CompletedTask;
+        public Task Bet([Remainder, LimitTo(StringComparison.OrdinalIgnoreCase, "it all")] string itall)
+            => Context.Channel.SendFileAsync("kappa.png",
+                    text: $"**{Context.User.Username}** has bet all their bucks. Good luck.");
 
         [Command("newgame"), Permission(MinimumPermission.Special)]
         [RequireContext(ContextType.Guild)]

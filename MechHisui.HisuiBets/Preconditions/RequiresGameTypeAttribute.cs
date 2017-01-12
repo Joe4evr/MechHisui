@@ -14,10 +14,9 @@ namespace MechHisui.HisuiBets
             _requiredType = requiredType;
         }
 
-        public override Task<PreconditionResult> CheckPermissions(CommandContext context, CommandInfo command, IDependencyMap map)
+        public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IDependencyMap map)
         {
-            BetGame game;
-            if (map.Get<HisuiBankService>().Games.TryGetValue(context.Channel.Id, out game))
+            if (map.Get<HisuiBankService>().Games.TryGetValue(context.Channel.Id, out var game))
             {
                 if (_requiredType == GameType.Any || game.GameType == _requiredType)
                     return Task.FromResult(PreconditionResult.FromSuccess());

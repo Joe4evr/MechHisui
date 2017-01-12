@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net46</TargetFramework>
+    <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="**\*.cs" />
+    <EmbeddedResource Include="**\*.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Discord.Addons.SimplePermissions.JsonProvider" Version="0.1.4-a" />
+    <PackageReference Include="Discord.Net.Providers.WS4Net" Version="1.0.0-rc-00544" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MechHisui.FateGOLib\MechHisui.FateGOLib.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Update="System.IO.Compression">
+      <SpecificVersion>true</SpecificVersion>
+    </Reference>
+    <Reference Update="System.Net.Http">
+      <SpecificVersion>true</SpecificVersion>
+    </Reference>
+  </ItemGroup>
+</Project>

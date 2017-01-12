@@ -22,7 +22,8 @@ namespace MechHisui.SecretHitler
         private const int MaxPlayers = 10;
         private readonly HouseRules _currentHouseRules;
 
-        public SecretHitlerModule(SecretHitlerService service) : base(service)
+        public SecretHitlerModule(SecretHitlerService service)
+            : base(service)
         {
             service.HouseRulesList.TryGetValue(Context.Channel.Id, out _currentHouseRules);
         }
@@ -85,11 +86,9 @@ namespace MechHisui.SecretHitler
             }
             else
             {
-                var author = Context.User as IGuildUser;
-                if (author != null)
+                if (GameService.AddUser(Context.Channel.Id, Context.User))
                 {
-                    if (PlayerList.Add(author))
-                        await ReplyAsync($"**{author.Username}** has joined.");
+                        await ReplyAsync($"**{Context.User.Username}** has joined.");
                 }
             }
         }
@@ -108,10 +107,9 @@ namespace MechHisui.SecretHitler
             }
             else
             {
-                var author = Context.User as IGuildUser;
-                if (author != null && PlayerList.Remove(author))
+                if (GameService.RemoveUser(Context.Channel.Id, Context.User))
                 {
-                    await ReplyAsync($"**{author.Username}** has left.");
+                    await ReplyAsync($"**{Context.User.Username}** has left.");
                 }
             }
         }
@@ -147,8 +145,7 @@ namespace MechHisui.SecretHitler
         [RequireContext(ContextType.Guild)]
         public Task StartGameCmd(string configName)
         {
-            SecretHitlerConfig config;
-            return GameService.Configs.TryGetValue(configName, out config) ?
+            return GameService.Configs.TryGetValue(configName, out var config) ?
                  StartInternal(config) : ReplyAsync("Could not find that config.");
         }
 
