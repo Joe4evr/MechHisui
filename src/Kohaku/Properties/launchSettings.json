@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "GudakoBot": {
+    "Kohaku": {
       "commandName": "Project",
       "commandLineArgs": "-c \"config.json\""
     }

@@ -192,3 +192,4 @@ FakesAssemblies/
 .vs/
 **/config.json
 **/project.lock.json
+*.dll

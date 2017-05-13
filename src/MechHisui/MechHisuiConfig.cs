@@ -1,30 +1,95 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
+//using Microsoft.EntityFrameworkCore;
 using Discord.Addons.SimplePermissions;
 using MechHisui.FateGOLib;
 using MechHisui.SecretHitler;
+using MechHisui.HisuiBets;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace MechHisui.Core
 {
-    public class MechHisuiConfig : IPermissionConfig
+    public class MechHisuiConfig : JsonConfigBase
     {
-        public ulong OwnerId { get; set; }
-
-        public string LoginToken { get; set; }
-
-        public string BankPath { get; set; }
-
+        public string Token { get; set; }
+        public string FgoBasePath { get; set; }
+        public string BankBasePath { get; set; }
+        public string SHConfigPath { get; set; }
         public string SuperfightBasePath { get; set; }
+        //public Dictionary<string, SecretHitlerConfig> SHConfigs { get; set; }
 
-        public FgoConfig FgoConfig { get; set; }
+        public IEnumerable<UserAccount> GetBankAccounts()
+        {
+            return JsonConvert.DeserializeObject<List<UserAccount>>(File.ReadAllText(Path.Combine(BankBasePath, "bank.json")));
+        }
 
-        public Dictionary<ulong, ulong> GuildModRole { get; set; }
+        public IEnumerable<ServantProfile> GetAllServants()
+        {
+            var reals = JsonConvert.DeserializeObject<List<ServantProfile>>(File.ReadAllText(Path.Combine(FgoBasePath, "Servants.json")));
+            var fakes = JsonConvert.DeserializeObject<List<ServantProfile>>(File.ReadAllText(Path.Combine(FgoBasePath, "FakeServants.json")));
+            return reals.Concat(fakes);
+        }
 
-        public Dictionary<ulong, ulong> GuildAdminRole { get; set; }
+        public IEnumerable<CEProfile> GetAllCEs()
+        {
+            return JsonConvert.DeserializeObject<List<CEProfile>>(File.ReadAllText(Path.Combine(FgoBasePath, "CEs.json")));
+        }
 
-        public Dictionary<ulong, HashSet<string>> ChannelModuleWhitelist { get; set; }
+        public IEnumerable<MysticCode> GetAllMystics()
+        {
+            return JsonConvert.DeserializeObject<List<MysticCode>>(File.ReadAllText(Path.Combine(FgoBasePath, "Mystics.json")));
+        }
 
-        public Dictionary<ulong, HashSet<ulong>> SpecialPermissionUsersList { get; set; }
-
-        public Dictionary<string, SecretHitlerConfig> SHConfigs { get; set; }
+        public IEnumerable<Event> GetAllEvents()
+        {
+            return JsonConvert.DeserializeObject<List<Event>>(File.ReadAllText(Path.Combine(FgoBasePath, "Events.json")));
+        }
     }
+
+    //    public class MechHisuiConfig : EFBaseConfigContext<HisuiGuild, HisuiChannel, HisuiUser>
+    //    {
+    //        public DbSet<ServantProfile> Servants { get; set; }
+    //        public DbSet<ServantProfile> FakeServants { get; set; }
+    //        public DbSet<ServantAlias> ServantAliases { get; set; }
+    //        public DbSet<CEProfile> CEs { get; set; }
+    //        public DbSet<CEAlias> CEAliases { get; set; }
+    //        public DbSet<MysticCode> MysticCodes { get; set; }
+    //        public DbSet<MysticAlias> MysticAliases { get; set; }
+    //        public DbSet<Event> Events { get; set; }
+    //        public DbSet<NameOnlyServant> NameOnlyServants { get; set; }
+    //        public DbSet<FriendData> FriendData { get; set; }
+    //        public DbSet<StringDict> MiscStrings { get; set; }
+    //        public DbSet<SecretHitlerConfig> SHConfigs { get; set; }
+
+    //        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //        {
+    //            optionsBuilder.UseSqlite(File.ReadAllText("conn.txt"));
+
+    //            base.OnConfiguring(optionsBuilder);
+    //        }
+    //    }
+
+    //    public sealed class HisuiUser : ConfigUser
+    //    {
+    //        public int Bucks { get; set; } = 100;
+    //    }
+
+    //    public sealed class HisuiChannel : ConfigChannel<HisuiUser>
+    //    {
+    //    }
+
+    //    public sealed class HisuiGuild : ConfigGuild<HisuiChannel, HisuiUser>
+    //    {
+    //    }
+
+    //    public sealed class StringDict
+    //    {
+    //        public int Id { get; set; }
+    //        public string Key { get; set; }
+    //        public string Value { get; set; }
+    //    }
 }

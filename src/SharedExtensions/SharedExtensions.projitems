@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>11e7bd48-424c-431a-b93b-0985cffbb6b0</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>SharedExtensions</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\AsyncObservableCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CoreExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DiscordExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EnumerableExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Params.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StringBuilderExtensions.cs" />
+  </ItemGroup>
+</Project>

@@ -1,14 +1,8 @@
 {
   "profiles": {
     "MechHisui": {
-      "commandName": "MechHisui",
-      "commandLineArgs": "--debug",
-      "environmentVariables": {
-        "ASPNET_ENV": "Development",
-        "Hosting:Environment": "Development",
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNET_ENVIRONMENT": "Development"
-      }
+      "commandName": "Project",
+      "commandLineArgs": "-c \"C:\\PublishOutputs\\MechHisui-jsons\\config.json\""
     }
   }
 }
