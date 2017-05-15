@@ -19,6 +19,8 @@ namespace MechHisui.SecretHitler
         private readonly HouseRules _houseRules;
         private readonly AsyncObservableCollection<PlayerVote> _votes = new AsyncObservableCollection<PlayerVote>();
         private readonly List<PolicyType> _policies = new List<PolicyType>();
+        private readonly Stack<PolicyType> _discards = new Stack<PolicyType>();
+        private readonly List<SecretHitlerPlayer> _confirmedNot = new List<SecretHitlerPlayer>();
 
         private Stack<PolicyType> _deck;
         private Node<SecretHitlerPlayer> _afterSpecial;
@@ -27,8 +29,6 @@ namespace MechHisui.SecretHitler
         private SecretHitlerPlayer _lastChancellor;
         private SecretHitlerPlayer _specialElected;
 
-        private Stack<PolicyType> _discards = new Stack<PolicyType>();
-        private List<SecretHitlerPlayer> _confirmedNot = new List<SecretHitlerPlayer>();
         private int _turn = 0;
         private int _electionTracker = 0;
         private bool _takenVeto = false;
@@ -207,11 +207,11 @@ namespace MechHisui.SecretHitler
                 && _livingPlayers.Any(p => p.User.Id == user.Id))
             {
                 Vote v;
-                if (vote.ToLowerInvariant() == _config.Yes.ToLowerInvariant())
+                if (vote.Equals(_config.Yes, StringComparison.OrdinalIgnoreCase))
                 {
                     v = Vote.Yes;
                 }
-                else if (vote.ToLowerInvariant() == _config.No.ToLowerInvariant())
+                else if (vote.Equals(_config.No, StringComparison.OrdinalIgnoreCase))
                 {
                     v = Vote.No;
                 }
@@ -279,16 +279,21 @@ namespace MechHisui.SecretHitler
             {
                 if (consent == "approved")
                 {
-                    State = GameState.EndOfTurn;
+                    await Channel.SendMessageAsync($"The {_config.President} has approved the {_config.Chancellor}'s veto.").ConfigureAwait(false);
+                    foreach (var p in _policies)
+                    {
+                        _discards.Push(p);
+                    }
+                    _policies.Clear();
                     _electionTracker++;
                     _takenVeto = true;
-                    await Channel.SendMessageAsync($"The {_config.President} has approved the {_config.Chancellor}'s veto.").ConfigureAwait(false);
+                    State = GameState.EndOfTurn;
                 }
                 else if (consent == "denied")
                 {
+                    await Channel.SendMessageAsync($"The {_config.President} has denied veto and the {_config.Chancellor} must play.").ConfigureAwait(false);
                     State = GameState.ChancellorPicks;
                     _takenVeto = true;
-                    await Channel.SendMessageAsync($"The {_config.President} has denied veto and the {_config.Chancellor} must play.").ConfigureAwait(false);
                 }
                 else
                 {
@@ -349,12 +354,11 @@ namespace MechHisui.SecretHitler
 
         private async Task VotesChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.Action == NotifyCollectionChangedAction.Add)
+            if (e.Action == NotifyCollectionChangedAction.Add
+                && e.NewItems is IList<PlayerVote> l
+                && l.Count == Players.Count(p => p.IsAlive))
             {
-                if (e.NewItems is IList<PlayerVote> l && l.Count == Players.Count(p => p.IsAlive))
-                {
-                    await VotingResults(l).ConfigureAwait(false);
-                }
+                await VotingResults(l).ConfigureAwait(false);
             }
         }
 
@@ -417,7 +421,7 @@ namespace MechHisui.SecretHitler
                     await Channel.SendMessageAsync(sb.ToString()).ConfigureAwait(false);
                     await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
                     var chosen = CurrentChancellor.User;
-                    if (Players.Single(p => p.Role == _config.Hitler).User.Id == CurrentChancellor.User.Id)
+                    if (Players.Single(p => p.Role == _config.Hitler).User.Id == chosen.Id)
                     {
                         await Channel.SendMessageAsync($"**{chosen.Username}** is, in fact, {_config.Hitler}.").ConfigureAwait(false);
                         await EndGame(_config.FascistsWin).ConfigureAwait(false);
@@ -554,7 +558,7 @@ namespace MechHisui.SecretHitler
         {
             var temp = _deck.Concat(_discards);
             _deck = new Stack<PolicyType>(temp.Shuffle(28));
-            _discards = new Stack<PolicyType>();
+            _discards.Clear();
         }
 
         public override string GetGameState()

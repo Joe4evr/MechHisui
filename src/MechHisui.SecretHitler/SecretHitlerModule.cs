@@ -15,7 +15,7 @@ namespace MechHisui.SecretHitler
     public sealed class SecretHitlerModule : MpGameModuleBase<SecretHitlerService, SecretHitlerGame, SecretHitlerPlayer>
 
     {
-        private const int MaxPlayers = 10;
+        private const int _maxPlayers = 10;
         private HouseRules _currentHouseRules;
 
         public SecretHitlerModule(SecretHitlerService service) : base(service)
@@ -39,7 +39,7 @@ namespace MechHisui.SecretHitler
                 .AppendLine("If 6 Fascist Policies are enacted, or Hitler is chosen as Chancellor in the late-game, the Fascists win.")
                 .AppendLine("If 5 Liberal Policies are enacted, or Hitler is successfully killed, the Liberals win.")
                 .AppendWhen(() => GameService.Configs.Keys.Any(), b =>  b.AppendLine($"The following themes are available too: `{String.Join("`, `", GameService.Configs.Keys)}`"))
-                .AppendLine("For more details: https://dl.dropboxusercontent.com/u/502769/Secret_Hitler_Rules.pdf ")
+                .AppendLine("For more details: http://secrethitler.com/assets/Secret_Hitler_Rules.pdf ")
                 .Append("Good luck, have fun.");
 
             await ReplyAsync(sb.ToString()).ConfigureAwait(false);
@@ -80,7 +80,7 @@ namespace MechHisui.SecretHitler
             {
                 await ReplyAsync("No game open to join.").ConfigureAwait(false);
             }
-            else if (PlayerList.Count == MaxPlayers)
+            else if (PlayerList.Count == _maxPlayers)
             {
                 await ReplyAsync("Maximum number of players already joined.").ConfigureAwait(false);
             }

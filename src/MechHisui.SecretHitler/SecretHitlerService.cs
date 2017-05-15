@@ -13,7 +13,7 @@ namespace MechHisui.SecretHitler
     public sealed class SecretHitlerService : MpGameService<SecretHitlerGame, SecretHitlerPlayer>
     {
         internal readonly ConcurrentDictionary<IMessageChannel, HouseRules> HouseRulesList
-            = new ConcurrentDictionary<IMessageChannel, HouseRules>(ChannelComparer);
+            = new ConcurrentDictionary<IMessageChannel, HouseRules>(MessageChannelComparer);
 
         internal readonly IReadOnlyDictionary<string, SecretHitlerConfig> Configs;
 
