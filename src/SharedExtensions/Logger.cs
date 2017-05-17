@@ -20,7 +20,7 @@ namespace SharedExtensions
 
         public Task Log(LogMessage lmsg)
         {
-            string logline = $"{DateTime.Now,-19} [{lmsg.Severity,8}] {lmsg.Source}: {lmsg.Message}";
+            string logline = $"{DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss"),-19} [{lmsg.Severity,8}] {lmsg.Source}: {lmsg.Message}";
             _logFile.WriteLine(logline);
             _logFile.Flush();
             if (lmsg.Severity <= _minimum)

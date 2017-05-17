@@ -22,9 +22,17 @@ namespace Kohaku
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
 
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
-            new Program(Params.Parse(args)).AsyncMain().GetAwaiter().GetResult();
+            var p = new Program(Params.Parse(args));
+            try
+            {
+                await p.Start();
+            }
+            catch (Exception e)
+            {
+                await p.Log(LogSeverity.Critical, $"Unhandled Exception: {e}");
+            }
         }
 
         public Program(Params p)
@@ -64,7 +72,7 @@ namespace Kohaku
             return _logger(new LogMessage(severity, "Main", msg));
         }
 
-        private async Task AsyncMain()
+        private async Task Start()
         {
             _client.Log += _logger;
             _client.Ready += () => Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");

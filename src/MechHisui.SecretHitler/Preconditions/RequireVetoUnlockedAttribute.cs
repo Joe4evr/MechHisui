@@ -2,19 +2,12 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
-using MechHisui.SecretHitler.Models;
 
 namespace MechHisui.SecretHitler
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-    internal sealed class RequireGameStateAttribute : PreconditionAttribute
+    internal class RequireVetoUnlockedAttribute : PreconditionAttribute
     {
-        private GameState RequiredState { get; }
-        public RequireGameStateAttribute(GameState state)
-        {
-            RequiredState = state;
-        }
-
         public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var shservice = services.GetService<SecretHitlerService>();
@@ -26,7 +19,7 @@ namespace MechHisui.SecretHitler
 
                 if (game != null || shservice.GameList.TryGetValue(context.Channel, out game))
                 {
-                    return (game.State == RequiredState)
+                    return game.VetoUnlocked
                         ? Task.FromResult(PreconditionResult.FromSuccess())
                         : Task.FromResult(PreconditionResult.FromError("Cannot use command at this time."));
                 }

@@ -279,7 +279,7 @@ namespace MechHisui.SecretHitler
             {
                 if (consent == "approved")
                 {
-                    await Channel.SendMessageAsync($"The {_config.President} has approved the {_config.Chancellor}'s veto.").ConfigureAwait(false);
+                    await Channel.SendMessageAsync($"The {_config.President} has approved the {_config.Chancellor}'s veto. Next turn when players are ready.").ConfigureAwait(false);
                     foreach (var p in _policies)
                     {
                         _discards.Push(p);

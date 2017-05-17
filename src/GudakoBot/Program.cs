@@ -17,13 +17,22 @@ namespace GudakoBot
 
         private static void Main(string[] args)
         {
-            new Program(Params.Parse(args)).AsyncMain().GetAwaiter().GetResult();
+            var p = new Program(Params.Parse(args));
+            try
+            {
+                p.AsyncMain().GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                p.Log(LogSeverity.Critical, $"Unhandled Exception: {e}").GetAwaiter().GetResult();
+            }
         }
 
         private Program(Params p)
         {
-            var minlog = LogSeverity.Info;
+            var minlog = p.LogSeverity ?? LogSeverity.Info;
             _logger = new Logger(minlog).Log;
+
             Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
             _store = new ConfigStore(p.ConfigPath);
 

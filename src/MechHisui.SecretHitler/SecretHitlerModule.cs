@@ -365,6 +365,7 @@ namespace MechHisui.SecretHitler
 
         [Command("veto"), RequireGameState(GameState.ChancellorPicks)]
         [RequireContext(ContextType.DM), RequirePlayerRole(PlayerRole.Chancellor)]
+        [RequireVetoUnlocked]
         public Task Veto() => Game.ChancellorVetos((IDMChannel)Context.Channel);
     }
 }
