@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.Addons.SimplePermissions;
 
-namespace MechHisui.Modules
+namespace Kohaku
 {
     /// <summary> Module for runtime evaluation of code. </summary>
     public class EvalModule : ModuleBase<ICommandContext>

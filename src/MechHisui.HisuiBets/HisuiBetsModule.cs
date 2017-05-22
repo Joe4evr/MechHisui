@@ -211,7 +211,7 @@ namespace MechHisui.HisuiBets
         [Command("winner"), Permission(MinimumPermission.Special)]
         [RequireContext(ContextType.Guild), RequiresGameType(GameType.Any)]
 #pragma warning disable RCS1174 // Remove redundant async/await.
-        public async Task SetWinner(string winner)
+        public async Task SetWinner([Remainder] string winner)
             => await ReplyAsync(await _game.Winner(winner).ConfigureAwait(false)).ConfigureAwait(false);
 #pragma warning restore RCS1174 // Remove redundant async/await.
 

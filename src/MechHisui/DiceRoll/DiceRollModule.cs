@@ -9,49 +9,6 @@ using Discord.Addons.SimplePermissions;
 
 namespace MechHisui
 {
-    public sealed class DiceTypeReader : TypeReader
-    {
-        private static readonly Regex _diceReader = new Regex("[0-9]+d[0-9]+", RegexOptions.Compiled);
-
-        public override Task<TypeReaderResult> Read(ICommandContext context, string input)
-        {
-            if (_diceReader.Match(input).Success)
-            {
-                var splits = input.Split('d');
-                if (Int32.TryParse(splits[0], out int amount)
-                    && Int32.TryParse(splits[1], out int range)
-                    && amount > 0 && range > 0)
-                {
-                    return Task.FromResult(TypeReaderResult.FromSuccess(new DiceRoll(amount, range)));
-                }
-            }
-            return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Invalid format"));
-        }
-    }
-
-    public sealed class DiceRoll
-    {
-        public int Amount { get; }
-        public int Sides { get; }
-
-        public DiceRoll(int amount, int sides)
-        {
-            Amount = amount;
-            Sides = sides;
-        }
-
-        public IEnumerable<int> Roll()
-        {
-            var rng = new Random();
-            var dice = Enumerable.Range(1, Sides);
-            for (int i = 0; i < Amount; i++)
-            {
-                dice = dice.Shuffle(28);
-                yield return dice.ElementAt(rng.Next(maxValue: Sides));
-            }
-        }
-    }
-
     [Name("RNG")]
     public sealed class DiceRollModule : ModuleBase<ICommandContext>
     {

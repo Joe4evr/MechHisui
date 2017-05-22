@@ -151,7 +151,7 @@ namespace MechHisui.HisuiBets
             }
             else
             {
-                ret = $"No bets were made on the winner of this game.";
+                ret = "No bets were made on the winner of this game.";
             }
             await GameEnd?.Invoke(_channel.Id);
             return ret;

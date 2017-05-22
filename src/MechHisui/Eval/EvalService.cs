@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 
-namespace MechHisui.Modules
+namespace Kohaku
 {
     /// <summary> Service for runtime evaluation of code.
     /// Use <see cref="Builder"/> to create an instance of this class. </summary>
@@ -19,6 +19,9 @@ namespace MechHisui.Modules
     {
         /// <summary> Regex to detect markdown code blocks. </summary>
         private static readonly Regex _codeblock = new Regex(@"`{3}(?:\S*$)((?:.*\n)*)`{3}", RegexOptions.Compiled | RegexOptions.Multiline);
+        private static readonly Regex _exprHole = new Regex(@"{expr}", RegexOptions.Compiled | RegexOptions.Multiline);
+        private static readonly object _emptyObj = new object();
+        private static readonly object[] _emptyArray = Array.Empty<object>();
 
         /// <summary> The assemblies referenced during evaluation. </summary>
         private readonly IEnumerable<MetadataReference> _references;
@@ -47,7 +50,8 @@ namespace MechHisui.Modules
                 arg = _codeblock.Replace(arg, @"{$1}");
             }
 
-            var syntaxTree = CSharpSyntaxTree.ParseText(String.Format(_syntaxText, arg));
+            string tmp = _exprHole.Replace(_syntaxText, arg);
+            var syntaxTree = CSharpSyntaxTree.ParseText(tmp);
 
             string assemblyName = Path.GetRandomFileName();
             var compilation = CSharpCompilation.Create(
@@ -66,10 +70,10 @@ namespace MechHisui.Modules
                     var assembly = AssemblyLoadContext.Default.LoadFromStream(ms);
 
                     var type = assembly.GetType("DynamicCompile.DynEval");
-                    object obj = Activator.CreateInstance(type);
+                    //object obj = Activator.CreateInstance(type);
                     string res = await (Task<string>)type.GetTypeInfo()
-                        .GetDeclaredMethod("Exec")
-                        .Invoke(obj, new object[0]);
+                        .GetMethod("Exec", BindingFlags.Static | BindingFlags.Public)
+                        .Invoke(_emptyObj, _emptyArray);
 
                     return $"**Result:** {res}";
                 }
@@ -88,8 +92,8 @@ namespace MechHisui.Modules
         /// <summary> Builder for an <see cref="EvalService"/>. </summary>
         public class Builder
         {
-            private List<MetadataReference> _references = new List<MetadataReference>();
-            private List<string> _usings = new List<string>();
+            private readonly List<MetadataReference> _references = new List<MetadataReference>();
+            private readonly List<string> _usings = new List<string>();
 
             /// <summary> Creates a <see cref="Builder"/> for an <see cref="EvalService"/> with
             /// predefined references to <see cref="System"/>, 
@@ -135,18 +139,15 @@ namespace MechHisui.Modules
                 var sb = new StringBuilder()
                     .AppendSequence(_usings, (s, str) => s.AppendLine($"using {str};"))
                     .Append(@"namespace DynamicCompile
-        {{
-            public class DynEval
-            {{
-                public string Eval<T>(Func<IEnumerable<T>> set) => String.Join("", "", set());
-
-                public string Eval<T>(Func<T> func) => func()?.ToString() ?? ""null"";
-
-                public string Eval(Action func) { func(); return ""Executed""; }
-
-                public string Exec() => Eval(() => {0});
-            }}
-        }}");
+{
+    public static class DynEval
+    {
+        private static async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join("", "", await set?.Invoke());
+        private static async Task<string> Eval<T>(Func<Task<T>> func) => (await func?.Invoke()).ToString() ?? ""null"";
+        private static async Task<string> Eval(Func<Task> func) { await func?.Invoke(); return ""Executed""; }
+        public static async Task<string> Exec() => await Eval(async () => {expr});
+    }
+}");
                 return new EvalService(_references, sb.ToString());
             }
         }
@@ -173,15 +174,11 @@ namespace MechHisui.Modules
         }
     }
 
-    //public class DynEval
+    //public static class DynEval
     //{
-    //    public string Eval<T>(Func<IEnumerable<T>> set) => String.Join(", ", set());
-
-    //    public string Eval<T>(Func<T> func) => func()?.ToString() ?? "null";
-
-    //    public string Eval(Action func) { func(); return "Executed"; }
-
-    //    public string Exec(DiscordClient client, CommandEventArgs e)
-    //        => Eval(() => Console.WriteLine());
+    //    private static async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join("", "", await set?.Invoke());
+    //    private static async Task<string> Eval<T>(Func<Task<T>> func) => (await func?.Invoke()).ToString() ?? ""null"";
+    //    private static async Task<string> Eval(Func<Task> func) { await func?.Invoke(); return ""Executed""; }
+    //    public static async Task<string> Exec() => await Eval(async () => { expr});
     //}
 }
