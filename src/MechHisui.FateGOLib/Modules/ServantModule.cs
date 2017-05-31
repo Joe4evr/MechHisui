@@ -127,7 +127,7 @@ namespace MechHisui.FateGOLib.Modules
 
         private static Embed FormatServantProfile(ServantProfile profile)
         {
-            return new EmbedBuilder()
+            var embed = new EmbedBuilder()
                 .WithAuthor(auth => auth.WithName($"Servant #{profile.Id}: {profile.Rarity}☆ {profile.Class}"))
                 .WithTitle(profile.Name)
                 .WithDescription($"More information at: [Cirno](http://fate-go.cirnopedia.org/servant_profile.php?servant={profile.Id})")
@@ -176,7 +176,21 @@ namespace MechHisui.FateGOLib.Modules
                         .WithValue(String.Join(", ", profile.Aliases)))
                 .WithImageWhen(() => !String.IsNullOrWhiteSpace(profile.Image), profile.Image)
                 .Build();
+#if DEBUG
+            int fields = embed.Fields.Sum(f => f.Name.Length + f.Value.Length);
+            var dbg = Sum((embed.Author?.Name.Length ?? 0),
+                (embed.Title?.Length ?? 0),
+                (embed.Description?.Length ?? 0),
+                fields,
+                (embed.Footer?.Text.Length ?? 0),
+                (embed.Url?.Length ?? 0));
+#endif
+            return embed;
         }
+
+#if DEBUG
+        private static int Sum(params int[] ns) => ns.Sum();
+#endif
 
         //private static string FormatServantProfile(ServantProfile profile)
         //{

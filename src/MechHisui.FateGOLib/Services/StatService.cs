@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 using JiiLib;
 using Discord.WebSocket;
 
@@ -60,7 +57,7 @@ namespace MechHisui.FateGOLib
                 }
             }
 
-            return servants;
+            return servants.ToList();
         }
 
         public IEnumerable<CEProfile> LookupCE(string name, bool fullsearch = false)
@@ -93,7 +90,7 @@ namespace MechHisui.FateGOLib
                 }
             }
 
-            return ces;
+            return ces.ToList();
         }
 
         public IEnumerable<MysticCode> LookupMystic(string code, bool fullsearch = false)
@@ -126,7 +123,7 @@ namespace MechHisui.FateGOLib
                 }
             }
 
-            return mystics;
+            return mystics.ToList();
         }
 
         //public void ReadAliasList()

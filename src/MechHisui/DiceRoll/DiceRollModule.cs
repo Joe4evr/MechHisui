@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.Addons.SimplePermissions;
@@ -14,7 +13,7 @@ namespace MechHisui
     {
         [Command("roll"), Permission(MinimumPermission.Everyone)]
         [Summary("Roll an arbitrary set of arbitrary-sided dice. Uses D&D notation.")]
-        public async Task DiceRoll(params DiceRoll[] dice)
+        public Task DiceRoll(params DiceRoll[] dice)
         {
             var rolls = new List<int>();
             var sb = new StringBuilder("**Rolled: **")
@@ -26,14 +25,15 @@ namespace MechHisui
                 })
                 .AppendWhen(() => rolls.Count > 1, b => b.Append($"\n(Total sum: {rolls.Sum()})"));
 
-            await ReplyAsync(sb.ToString()).ConfigureAwait(false);
+            return ReplyAsync(sb.ToString());
         }
 
         [Command("pick"), Permission(MinimumPermission.Everyone)]
+        [Summary("🎵RNG, RNG, Please be nice to me....🎵")]
         public Task PickCmd(params string[] options)
         {
             var realoptions = options.Distinct().ToList();
-            if (realoptions.Count < 1)
+            if (realoptions.Count <= 1)
             {
                 return ReplyAsync("Must provide more than one unique option.");
             }
