@@ -22,6 +22,10 @@ namespace MechHisui.SecretHitler
         private readonly Stack<PolicyType> _discards = new Stack<PolicyType>();
         private readonly List<SecretHitlerPlayer> _confirmedNot = new List<SecretHitlerPlayer>();
 
+        private int _turn = 0;
+        private int _electionTracker = 0;
+        private bool _takenVeto = false;
+
         private Stack<PolicyType> _deck;
         private Node<SecretHitlerPlayer> _afterSpecial;
         private SecretHitlerPlayer _lastPresident;
@@ -29,11 +33,7 @@ namespace MechHisui.SecretHitler
         private SecretHitlerPlayer _lastChancellor;
         private SecretHitlerPlayer _specialElected;
 
-        private int _turn = 0;
-        private int _electionTracker = 0;
-        private bool _takenVeto = false;
-
-        private IEnumerable<SecretHitlerPlayer> _livingPlayers => Players.Where(p => p.IsAlive);
+        private IEnumerable<SecretHitlerPlayer> LivingPlayers => Players.Where(p => p.IsAlive);
 
         internal GameState State { get; private set; }
         internal SecretHitlerPlayer CurrentChancellor { get; private set; }
@@ -204,7 +204,7 @@ namespace MechHisui.SecretHitler
         public async Task ProcessVote(IDMChannel dms, IUser user, string vote)
         {
             if (!_votes.Any(p => p.User.Id == user.Id)
-                && _livingPlayers.Any(p => p.User.Id == user.Id))
+                && LivingPlayers.Any(p => p.User.Id == user.Id))
             {
                 Vote v;
                 if (vote.Equals(_config.Yes, StringComparison.OrdinalIgnoreCase))
@@ -277,7 +277,7 @@ namespace MechHisui.SecretHitler
         {
             if (!_takenVeto)
             {
-                if (consent == "approved")
+                if (consent.Equals("approved", StringComparison.OrdinalIgnoreCase))
                 {
                     await Channel.SendMessageAsync($"The {_config.President} has approved the {_config.Chancellor}'s veto. Next turn when players are ready.").ConfigureAwait(false);
                     foreach (var p in _policies)
@@ -289,7 +289,7 @@ namespace MechHisui.SecretHitler
                     _takenVeto = true;
                     State = GameState.EndOfTurn;
                 }
-                else if (consent == "denied")
+                else if (consent.Equals("denied", StringComparison.OrdinalIgnoreCase))
                 {
                     await Channel.SendMessageAsync($"The {_config.President} has denied veto and the {_config.Chancellor} must play.").ConfigureAwait(false);
                     State = GameState.ChancellorPicks;
@@ -304,7 +304,7 @@ namespace MechHisui.SecretHitler
 
         public async Task SpecialElection(IUser player)
         {
-            if (player != null && _livingPlayers.Any(p =>
+            if (player != null && LivingPlayers.Any(p =>
                 p.User.Id != CurrentChancellor.User.Id
                 && p.User.Id != CurrentPresident.User.Id
                 && p.User.Id == player.Id))
@@ -321,10 +321,10 @@ namespace MechHisui.SecretHitler
 
         public async Task KillPlayer(IUser target)
         {
-            if (target != null && _livingPlayers.Any(p => p.User.Id == target.Id))
+            if (target != null && LivingPlayers.Any(p => p.User.Id == target.Id))
             {
                 State = GameState.EndOfTurn;
-                var player = _livingPlayers.Single(p => p.User.Id == target.Id);
+                var player = LivingPlayers.Single(p => p.User.Id == target.Id);
                 player.Killed();
                 await Channel.SendMessageAsync(String.Format(_config.Kill, player.User.Username)).ConfigureAwait(false);
                 await Task.Delay(3500).ConfigureAwait(false);
@@ -342,12 +342,12 @@ namespace MechHisui.SecretHitler
 
         public async Task InvestigatePlayer(IUser target)
         {
-            if (target != null && _livingPlayers.Any(p => p.User.Id == target.Id))
+            if (target != null && LivingPlayers.Any(p => p.User.Id == target.Id))
             {
                 State = GameState.EndOfTurn;
                 await Channel.SendMessageAsync($"The {_config.President} is investigating **{target.Username}**'s loyalty.").ConfigureAwait(false);
                 await Task.Delay(1000).ConfigureAwait(false);
-                var player = _livingPlayers.Single(p => p.User.Id == target.Id);
+                var player = LivingPlayers.Single(p => p.User.Id == target.Id);
                 await CurrentPresident.SendMessageAsync($"**{player.User.Username}** belongs to the **{player.Party}**. You are not required to answer truthfully.").ConfigureAwait(false);
             }
         }

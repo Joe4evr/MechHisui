@@ -23,7 +23,7 @@ namespace MechHisui.HisuiBets
 
     public sealed class BankOfHisui
     {
-        //public Func<SocketGuildUser, Task> AddUser { get; set; }
+        public Func<SocketGuildUser, Task> AddUser { get; set; }
         public Func<IEnumerable<UserAccount>> GetAllUsers { get; set; }
         public Func<ulong, UserAccount> GetUser { get; set; }
         public Func<IEnumerable<Bet>, string, BetResult> CashOut { get; set; }

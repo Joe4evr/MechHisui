@@ -97,13 +97,14 @@ namespace MechHisui.FateGOLib
         {
             var list = Config.GetMystics();
             var mystics = list
-                .Where(m => m.Code.Equals(code, StringComparison.OrdinalIgnoreCase));
+                .Where(m => m.Code.Equals(code, StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
-            if (!mystics.Any() || fullsearch)
+            if (mystics.Count == 0 || fullsearch)
             {
-                mystics = mystics.Concat(list.Where(m => RegexMatchOneWord(m.Code, code)));
+                mystics = mystics.Concat(list.Where(m => RegexMatchOneWord(m.Code, code))).ToList();
 
-                if (!mystics.Any() || fullsearch)
+                if (mystics.Count == 0 || fullsearch)
                 {
                     var lookup = list
                         .Where(m => m.Aliases.Any(a => a.Equals(code, StringComparison.OrdinalIgnoreCase)))
@@ -118,12 +119,12 @@ namespace MechHisui.FateGOLib
 
                     if (lookup.Count > 0)
                     {
-                        mystics = mystics.Concat(list.Where(m => lookup.Any(l => l.Id == m.Id)));
+                        mystics = mystics.Concat(list.Where(m => lookup.Any(l => l.Code == m.Code))).ToList();
                     }
                 }
             }
 
-            return mystics.ToList();
+            return mystics;
         }
 
         //public void ReadAliasList()

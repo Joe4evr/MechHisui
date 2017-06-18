@@ -91,7 +91,7 @@ namespace MechHisui.HisuiBets
                 await ReplyAsync("Bets are currently closed at this time.").ConfigureAwait(false);
                 return false;
             }
-            if (_service._blacklist.Contains(Context.User.Id))
+            if (_service.Blacklist.Contains(Context.User.Id))
             {
                 await ReplyAsync("Not allowed to bet.").ConfigureAwait(false);
                 return false;
@@ -124,7 +124,7 @@ namespace MechHisui.HisuiBets
         [Priority(0), RequiresGameType(GameType.HungerGame)]
         [RequireContext(ContextType.Guild), Hidden]
         public Task Bet(string allin, [Remainder] string target)
-            => (_service.allins.Contains(allin.ToLowerInvariant())
+            => (_service.Allins.Contains(allin.ToLowerInvariant())
                 && _account != null) ?
                 Bet(_account.Bucks, target) :
                 Task.CompletedTask;
@@ -133,7 +133,7 @@ namespace MechHisui.HisuiBets
         [Priority(1), RequiresGameType(GameType.HungerGameDistrictsOnly)]
         [RequireContext(ContextType.Guild), Hidden]
         public Task Bet(string allin, int district)
-            => (_service.allins.Contains(allin.ToLowerInvariant())
+            => (_service.Allins.Contains(allin.ToLowerInvariant())
                 && _account != null) ?
                 Bet(_account.Bucks, district) :
                 Task.CompletedTask;
@@ -142,7 +142,7 @@ namespace MechHisui.HisuiBets
         [Priority(2), RequiresGameType(GameType.SaltyBet)]
         [RequireContext(ContextType.Guild), Hidden]
         public Task Bet(string allin, SaltyBetTeam team)
-            => (_service.allins.Contains(allin.ToLowerInvariant())
+            => (_service.Allins.Contains(allin.ToLowerInvariant())
                 && _account != null)?
                 Bet(_account.Bucks, team) :
                 Task.CompletedTask;
@@ -151,7 +151,7 @@ namespace MechHisui.HisuiBets
         [Priority(-1), RequiresGameType(GameType.Any)]
         [RequireContext(ContextType.Guild), Hidden]
 #pragma warning disable RCS1163 // Unused parameter.
-        public Task Bet([Remainder, LimitTo(StringComparison.OrdinalIgnoreCase, "it all")] string itall)
+        public Task Bet([Remainder, LimitTo(StringComparison.OrdinalIgnoreCase, "it all")] string _)
             => Context.Channel.SendFileAsync("kappa.png",
                     text: $"**{Context.User.Username}** has bet all their bucks. Good luck.");
 #pragma warning restore RCS1163 // Unused parameter.
@@ -236,7 +236,7 @@ namespace MechHisui.HisuiBets
                 await ReplyAsync($"**{Context.User.Username}** currently does not have enough HisuiBucks to make that donation.").ConfigureAwait(false);
                 return;
             }
-            if (user.IsBot || _service._blacklist.Contains(user.Id))
+            if (user.IsBot || _service.Blacklist.Contains(user.Id))
             {
                 await ReplyAsync("Unable to donate to Bot accounts.").ConfigureAwait(false);
                 return;

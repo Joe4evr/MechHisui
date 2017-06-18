@@ -325,7 +325,7 @@ namespace MechHisui.SecretHitler
 
         [Command("veto"), RequireGameState(GameState.ChancellorVetod)]
         [RequireContext(ContextType.Guild | ContextType.Group), RequirePlayerRole(PlayerRole.President)]
-        public Task Veto(string consent) => Game.PresidentConsentsVeto(consent.ToLowerInvariant());
+        public Task Veto([LimitTo(StringComparison.OrdinalIgnoreCase, "approved", "denied")] string consent) => Game.PresidentConsentsVeto(consent.ToLowerInvariant());
 
         //DM commands
 

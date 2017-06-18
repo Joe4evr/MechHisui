@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -9,9 +10,9 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Kohaku
+namespace MechHisui
 {
     /// <summary> Service for runtime evaluation of code.
     /// Use <see cref="Builder"/> to create an instance of this class. </summary>
@@ -20,7 +21,7 @@ namespace Kohaku
         /// <summary> Regex to detect markdown code blocks. </summary>
         private static readonly Regex _codeblock = new Regex(@"`{3}(?:\S*$)((?:.*\n)*)`{3}", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly Regex _exprHole = new Regex(@"{expr}", RegexOptions.Compiled | RegexOptions.Multiline);
-        private static readonly object _emptyObj = new object();
+        //private static readonly object _emptyObj = new object();
         private static readonly object[] _emptyArray = Array.Empty<object>();
 
         /// <summary> The assemblies referenced during evaluation. </summary>
@@ -32,6 +33,7 @@ namespace Kohaku
 
         /// <summary> Creates a new <see cref="EvalService"/>. </summary>
         /// <param name="references">The list of assemblies to reference.</param>
+        /// <param name="services"></param>
         /// <param name="syntax">The text to parse into a <see cref="SyntaxTree"/>.</param>
         /// <param name="config">An optional <see cref="IConfiguration"/>
         /// object that holds additional data.</param>
@@ -43,7 +45,7 @@ namespace Kohaku
             _syntaxText = syntax;
         }
 
-        public async Task<string> Eval(string arg)
+        public async Task<string> Eval(string arg, IServiceProvider services = null)
         {
             if (_codeblock.Match(arg).Success)
             {
@@ -70,10 +72,10 @@ namespace Kohaku
                     var assembly = AssemblyLoadContext.Default.LoadFromStream(ms);
 
                     var type = assembly.GetType("DynamicCompile.DynEval");
-                    //object obj = Activator.CreateInstance(type);
+                    var obj = TypeDescriptor.CreateInstance(services, type, null, null);
                     string res = await (Task<string>)type.GetTypeInfo()
                         .GetMethod("Exec", BindingFlags.Static | BindingFlags.Public)
-                        .Invoke(_emptyObj, _emptyArray);
+                        .Invoke(obj, _emptyArray);
 
                     return $"**Result:** {res}";
                 }
@@ -134,18 +136,22 @@ namespace Kohaku
             /// current <see cref="Builder"/> instance. </summary>
             /// <param name="checkFunc">A function for checking when
             /// the command is allowed to run.</param>
-            public EvalService Build()
+            /// <param name="services"></param>
+            /// <param name="ctor"></param>
+            public EvalService Build(string ctor = "(){}")
             {
                 var sb = new StringBuilder()
                     .AppendSequence(_usings, (s, str) => s.AppendLine($"using {str};"))
                     .Append(@"namespace DynamicCompile
 {
-    public static class DynEval
+    public class DynEval
     {
-        private static async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join("", "", await set?.Invoke());
-        private static async Task<string> Eval<T>(Func<Task<T>> func) => (await func?.Invoke()).ToString() ?? ""null"";
-        private static async Task<string> Eval(Func<Task> func) { await func?.Invoke(); return ""Executed""; }
-        public static async Task<string> Exec() => await Eval(async () => {expr});
+        public DynEval" + ctor +
+@"
+        private async Task<string> Eval<T>(Func<Task<IEnumerable<T>>> set) => String.Join("", "", await set?.Invoke());
+        private async Task<string> Eval<T>(Func<Task<T>> func) => (await func?.Invoke()).ToString() ?? ""null"";
+        private async Task<string> Eval(Func<Task> func) { await func?.Invoke(); return ""Executed""; }
+        public async Task<string> Exec() => await Eval(async () => {expr});
     }
 }");
                 return new EvalService(_references, sb.ToString());

@@ -69,6 +69,19 @@ namespace MechHisui.FateGOLib
             return builder;
         }
 
+        internal static EmbedBuilder WithDescriptionWhen(
+            this EmbedBuilder builder,
+            Func<bool> predicate,
+            string description)
+        {
+            if (predicate())
+            {
+                builder.WithDescription(description);
+            }
+
+            return builder;
+        }
+
         internal static string ToNiceString(this TimeSpan ts)
         {
             var d = ts.TotalDays == 1 ? "day" : "days";

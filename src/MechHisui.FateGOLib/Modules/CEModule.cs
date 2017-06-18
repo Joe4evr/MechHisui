@@ -19,7 +19,7 @@ namespace MechHisui.FateGOLib.Modules
             _service = service;
         }
 
-        [Command("ce"), Permission(MinimumPermission.Everyone)]
+        [Command("ce"), Permission(MinimumPermission.Everyone), Priority(5)]
         public async Task CECmd(int id)
         {
             var ce = _service.Config.GetCEs().SingleOrDefault(p => p.Id == id);
@@ -34,7 +34,7 @@ namespace MechHisui.FateGOLib.Modules
             }
         }
 
-        [Command("ce"), Permission(MinimumPermission.Everyone), Priority(5)]
+        [Command("ce"), Permission(MinimumPermission.Everyone)]
         public async Task CECmd([Remainder] string name)
         {
             var potentials = _service.LookupCE(name);

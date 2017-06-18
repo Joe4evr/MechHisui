@@ -264,8 +264,17 @@ namespace MechHisui
                     }
                 }
             };
+            _map.AddSingleton(fgo);
             var bank = new BankOfHisui
             {
+                AddUser = (user) =>
+                {
+                    using (var config = _store.Load())
+                    {
+                        config.AddBankAccount(user);
+                    }
+                    return Task.CompletedTask;
+                },
                 GetAllUsers = () =>
                 {
                     using (var config = _store.Load())
@@ -344,24 +353,23 @@ namespace MechHisui
                     }
                 }
             };
-            var eval = EvalService.Builder.BuilderWithSystemAndLinq()
-                .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(StatService).Assembly.Location),
-                    "MechHisui.FateGOLib"))
-                .Build(@"(FgoConfig stats)
-        {
-            Servants = () => stats.GetServants().Concat(stats.GetFakedServants());
-            CEs = stats.GetCEs;
-        }
-        private readonly Func<IEnumerable<ServantProfile>> Servants;
-        private readonly Func<IEnumerable<CEProfile>> CEs;");
-            _map.AddSingleton(fgo);
-            _map.AddSingleton(eval);
+            //var eval = EvalService.Builder.BuilderWithSystemAndLinq()
+            //    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(StatService).Assembly.Location),
+            //        "MechHisui.FateGOLib"))
+            //    .Build(@"(FgoConfig stats)
+            //{
+            //    Servants = () => stats.GetServants().Concat(stats.GetFakedServants());
+            //    CEs = stats.GetCEs;
+            //}
+            //private readonly Func<IEnumerable<ServantProfile>> Servants;
+            //private readonly Func<IEnumerable<CEProfile>> CEs;");
+            //_map.AddSingleton(eval);
 
             await _commands.UseSimplePermissions(_client, _store, _map, _logger);
             await _commands.UseFgoService(_map, fgo, _client);
-            await _commands.UseHisuiBank(_map, bank, _logger);
+            await _commands.UseHisuiBank(_map, bank, _client, _logger);
             await _commands.AddDiceRoll();
-            await _commands.AddModuleAsync<EvalModule>();
+            //await _commands.AddModuleAsync<EvalModule>();
 
             using (var config = _store.Load())
             {

@@ -25,7 +25,6 @@ namespace SharedExtensions
             _logFile.Flush();
             if (lmsg.Severity <= _minimum)
             {
-                var cc = Console.ForegroundColor;
                 switch (lmsg.Severity)
                 {
                     case LogSeverity.Critical:
@@ -44,7 +43,7 @@ namespace SharedExtensions
                         break;
                 }
                 Console.WriteLine(logline);
-                Console.ForegroundColor = cc;
+                Console.ResetColor();
             }
             return Task.CompletedTask;
         }

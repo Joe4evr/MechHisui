@@ -78,7 +78,6 @@ namespace DivaBot
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 AlwaysDownloadUsers = true,
-                //AudioMode = Discord.Audio.AudioMode.Outgoing,
                 MessageCacheSize = 50,
                 LogLevel = minlog,
 #if !ARM

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
 
-namespace MechHisui.HisuiBets
+namespace MechHisui.SecretHitler
 {
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
     internal class LimitToAttribute : ParameterPreconditionAttribute
@@ -27,7 +27,7 @@ namespace MechHisui.HisuiBets
         {
             return (value is string str && _options.Contains(str, _comparer))
                 ? Task.FromResult(PreconditionResult.FromSuccess())
-                : Task.FromResult(PreconditionResult.FromError("Invalid parameter value."));
+                : Task.FromResult(PreconditionResult.FromError($"Invalid parameter value. Valid values are `{String.Join("`, `", _options)}`."));
         }
 
         private static StringComparer GetComparer(StringComparison comp)

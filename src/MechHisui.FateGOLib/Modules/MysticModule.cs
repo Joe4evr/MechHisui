@@ -30,7 +30,7 @@ namespace MechHisui.FateGOLib.Modules
             else if (codes.Count() > 1)
             {
                 var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
-                    .AppendSequence(codes, (s, m) => s.AppendLine($"**{m.Code}** *({String.Join(", ", m.Code)})*"));
+                    .AppendSequence(codes, (s, m) => s.AppendLine($"**{m.Code}** *({String.Join(", ", m.Aliases)})*"));
 
                 await ReplyAsync(sb.ToString()).ConfigureAwait(false);
             }

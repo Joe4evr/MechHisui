@@ -19,6 +19,7 @@ namespace DivaBot
 
         [Command("newscoreattack"), Permission(MinimumPermission.ModRole)]
         [Summary("Set a new Score Attack Challenge. Sets to expire in one week.")]
+        [Remarks("Usage: `!newscoreattack hard: \"EN title\" (\"JP title\") extreme: \"EN title\" (\"JP title\") ex-ex: \"EN title\" (\"JP title\")`")]
         public Task NewSCCmd([Remainder] ScoreChallenge sc)
         {
             var sac = new ScoreAttackChallenge

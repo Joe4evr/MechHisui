@@ -10,8 +10,18 @@
 //namespace MechHisui.HisuiBets
 //{
 //    [Name("Bank of Hisui")]
-//    public class HisuiBankModule
+//    public class HisuiBankModule : ModuleBase<ICommandContext>
 //    {
+//        private readonly HisuiBankService _service;
 
+//        public HisuiBankModule(HisuiBankService service)
+//        {
+//            _service = service;
+//        }
+
+//        public Task CreateAccountCmd(IUser user)
+//        {
+//            _service.
+//        }
 //    }
 //}

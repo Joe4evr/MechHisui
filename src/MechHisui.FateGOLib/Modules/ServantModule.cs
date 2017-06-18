@@ -20,7 +20,7 @@ namespace MechHisui.FateGOLib.Modules
         }
 
         [Command("servant"), Permission(MinimumPermission.Everyone)]
-        [Alias("stat", "stats")]
+        [Alias("stat", "stats"), Priority(5)]
         [Summary("Relay information on the specified Servant by ID.")]
         public async Task StatCmd(int id)
         {
@@ -34,7 +34,7 @@ namespace MechHisui.FateGOLib.Modules
         }
 
         [Command("servant"), Permission(MinimumPermission.Everyone)]
-        [Alias("stat", "stats"), Priority(5)]
+        [Alias("stat", "stats")]
         [Summary("Relay information on the specified Servant. Alternative names acceptable.")]
         public Task StatCmd([Remainder] string name)
         {
@@ -130,7 +130,8 @@ namespace MechHisui.FateGOLib.Modules
             var embed = new EmbedBuilder()
                 .WithAuthor(auth => auth.WithName($"Servant #{profile.Id}: {profile.Rarity}☆ {profile.Class}"))
                 .WithTitle(profile.Name)
-                .WithDescription($"More information at: [Cirno](http://fate-go.cirnopedia.org/servant_profile.php?servant={profile.Id})")
+                .WithDescriptionWhen(() => profile.Id > 0,
+                    $"More information at: [Cirno](http://fate-go.cirnopedia.org/servant_profile.php?servant={profile.Id}) | [FGO Wiki](http://fategrandorder.wikia.com/wiki/{(profile.Additional ?? profile.Name).Replace(' ', '_')})")
                 .AddField(field => field.WithIsInline(true)
                     .WithName("Gender")
                     .WithValue(profile.Gender))
@@ -191,53 +192,5 @@ namespace MechHisui.FateGOLib.Modules
 #if DEBUG
         private static int Sum(params int[] ns) => ns.Sum();
 #endif
-
-        //private static string FormatServantProfile(ServantProfile profile)
-        //{
-        //    string aoe = ((profile.NoblePhantasmEffect?.Contains("AoE") == true) && Regex.Match(profile.NoblePhantasmEffect, "([0-9]+)H").Success) ? " (Hits is per enemy)" : String.Empty;
-        //    int a = 1;
-        //    int p = 1;
-        //    return new StringBuilder(2000)
-        //        .AppendWhen(() => profile.Id < 0, b => b.AppendLine("_**Not** a real profile_"))
-        //        .AppendWhen(() => profile.Id == -3, b => b.Append("~~"))
-        //        .AppendLine($"**Collection ID:** {profile.Id}")
-        //        .AppendLine($"**Rarity:** {profile.Rarity}☆")
-        //        .AppendLine($"**Class:** {profile.Class}")
-        //        .AppendLine($"**Servant:** {profile.Name}")
-        //        .AppendLine($"**Gender:** {profile.Gender}")
-        //        .AppendLine($"**Card pool:** {profile.CardPool} ({profile.B}/{profile.A}/{profile.Q}/{profile.EX}) (Fourth number is EX attack)")
-        //        .AppendLine($"**Max ATK:** {profile.Atk}")
-        //        .AppendLine($"**Max HP:** {profile.HP}")
-        //        .AppendLine($"**Starweight:** {profile.Starweight}")
-        //        .AppendLine($"**Growth type:** {profile.GrowthCurve} (Use `.curve` for explanation)")
-        //        .AppendLine($"**NP:** ({profile.NPType}) {profile.NoblePhantasm} - *{profile.NoblePhantasmEffect}*{aoe}")
-        //        .AppendWhen(() => !String.IsNullOrWhiteSpace(profile.NoblePhantasmRankUpEffect),
-        //            b => b.AppendLine($"**NP Rank+:** *{profile.NoblePhantasmRankUpEffect}*{aoe}"))
-        //        .AppendLine($"**Attribute:** {profile.Attribute}")
-        //        .AppendLine($"**Traits:** {String.Join(", ", profile.Traits)}")
-        //        .AppendSequence(profile.ActiveSkills,
-        //            (b, s) =>
-        //            {
-        //                var t = b.AppendWhen(() => !String.IsNullOrWhiteSpace(s.SkillName),
-        //                    bu => bu.AppendLine($"**Skill {a}:** {s.SkillName} {s.Rank} - *{s.Effect}*")
-        //                        .AppendWhen(() => !String.IsNullOrWhiteSpace(s.RankUpEffect),
-        //                            stb => stb.AppendLine($"**Skill {a} Rank+:** *{s.RankUpEffect}*")));
-        //                a++;
-        //                return t;
-        //            })
-        //        .AppendSequence(profile.PassiveSkills,
-        //            (b, s) =>
-        //            {
-        //                var t = b.AppendWhen(() => !String.IsNullOrWhiteSpace(s.SkillName),
-        //                    bu => bu.AppendLine($"**Passive Skill {p}:** {s.SkillName} {s.Rank} - *{s.Effect}*"));
-        //                p++;
-        //                return t;
-        //            })
-        //            .AppendWhen(() => !String.IsNullOrWhiteSpace(profile.Additional),
-        //                b => b.AppendLine($"**Additional info:** {profile.Additional}"))
-        //            .Append(profile.Image)
-        //            .AppendWhen(() => profile.Id == -3, b => b.Append("~~"))
-        //            .ToString();
-        //}
     }
 }

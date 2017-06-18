@@ -10,6 +10,7 @@ using MechHisui.SecretHitler;
 using MechHisui.HisuiBets;
 using Newtonsoft.Json;
 using System.Linq;
+using Discord.WebSocket;
 
 namespace MechHisui.Core
 {
@@ -21,6 +22,13 @@ namespace MechHisui.Core
         public string SHConfigPath { get; set; }
         public string SuperfightBasePath { get; set; }
         //public Dictionary<string, SecretHitlerConfig> SHConfigs { get; set; }
+
+        public void AddBankAccount(SocketUser user)
+        {
+            var accounts = JsonConvert.DeserializeObject<List<UserAccount>>(File.ReadAllText(Path.Combine(BankBasePath, "bank.json")));
+            accounts.Add(new UserAccount { UserId = user.Id, Bucks = 100 });
+            File.WriteAllText(Path.Combine(BankBasePath, "bank.json"), JsonConvert.SerializeObject(accounts, Formatting.Indented));
+        }
 
         public IEnumerable<UserAccount> GetBankAccounts()
         {
@@ -41,7 +49,7 @@ namespace MechHisui.Core
 
         public IEnumerable<MysticCode> GetAllMystics()
         {
-            return JsonConvert.DeserializeObject<List<MysticCode>>(File.ReadAllText(Path.Combine(FgoBasePath, "Mystics.json")));
+            return JsonConvert.DeserializeObject<List<MysticCode>>(File.ReadAllText(Path.Combine(FgoBasePath, "MysticCodes.json")));
         }
 
         public IEnumerable<Event> GetAllEvents()

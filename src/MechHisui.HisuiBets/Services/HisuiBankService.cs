@@ -14,7 +14,13 @@ namespace MechHisui.HisuiBets
     public sealed class HisuiBankService
     {
         public const char Symbol = '\u050A';
-        internal readonly ulong[] _blacklist = new[]
+        private static readonly IEqualityComparer<SocketGuildUser> _userComparer = Comparers.UserComparer;
+        private readonly Timer _upTimer;
+        private readonly Func<LogMessage, Task> _logger;
+        private readonly ConcurrentDictionary<ulong, BetGame> _games = new ConcurrentDictionary<ulong, BetGame>();
+
+        internal BankOfHisui Bank { get; }
+        internal ulong[] Blacklist { get; } = new[]
         {
             121687861350105089ul,
             124939115396333570ul,
@@ -24,16 +30,11 @@ namespace MechHisui.HisuiBets
             168298664698052617ul,
             175851451988312064ul
         };
-        internal readonly string[] allins = new[] { "all", "allin" };
-        private readonly Func<LogMessage, Task> _logger;
-        private readonly ConcurrentDictionary<ulong, BetGame> _games = new ConcurrentDictionary<ulong, BetGame>();
-
-        internal readonly BankOfHisui Bank;
-        private readonly Timer _upTimer;
+        internal string[] Allins { get; } = new[] { "all", "allin" };
 
         internal IReadOnlyDictionary<ulong, BetGame> Games => _games;
 
-        internal HisuiBankService(BankOfHisui bank, Func<LogMessage, Task> logger)
+        internal HisuiBankService(BankOfHisui bank, DiscordSocketClient client, Func<LogMessage, Task> logger)
         {
             Bank = bank;
             _logger = logger;
@@ -54,14 +55,25 @@ namespace MechHisui.HisuiBets
             TimeSpan.FromMinutes(60 - DateTime.Now.Minute),
             TimeSpan.FromHours(1));
 
-            //client.UserJoined += Bank.AddUser;
-            //{
-            //    if (!user.IsBot && !_blacklist.Contains(user.Id) && Bank.Accounts.Add(new UserAccount { UserId = user.Id, Bucks = 100 }))
-            //    {
-            //        Log(LogSeverity.Info, $"Registered {user.Username} for a bank account.");
-            //    }
-            //    return Task.CompletedTask;
-            //};
+            client.UserJoined += async user => //Bank.AddUser;
+            {
+                if (!user.IsBot && !Blacklist.Contains(user.Id))
+                {
+                    await Bank.AddUser(user);
+                    await Log(LogSeverity.Info, $"Registered {user.Username} for a bank account.");
+                }
+            };
+            client.GuildAvailable += async guild =>
+            {
+                foreach (var user in guild.Users.Except(Bank.GetAllUsers().Select(a => guild.GetUser(a.UserId)), _userComparer))
+                {
+                    if (!user.IsBot && !Blacklist.Contains(user.Id))
+                    {
+                        await Bank.AddUser(user);
+                        await Log(LogSeverity.Info, $"Registered {user.Username} for a bank account.");
+                    }
+                }
+            };
         }
 
         private Task Log(LogSeverity severity, string msg)
@@ -96,9 +108,10 @@ namespace MechHisui.HisuiBets
             this CommandService commands,
             IServiceCollection map,
             BankOfHisui bank,
+            DiscordSocketClient client,
             Func<LogMessage, Task> logger = null)
         {
-            map.AddSingleton(new HisuiBankService(bank, logger ?? (msg => Task.CompletedTask)));
+            map.AddSingleton(new HisuiBankService(bank, client, logger ?? (msg => Task.CompletedTask)));
             return commands.AddModuleAsync<HisuiBetsModule>();
         }
     }

@@ -9,11 +9,11 @@ namespace MechHisui.SecretHitler
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     internal sealed class RequirePlayerRoleAttribute : PreconditionAttribute
     {
-        private PlayerRole Role { get; }
+        private PlayerRole RequiredRole { get; }
 
         public RequirePlayerRoleAttribute(PlayerRole role)
         {
-            Role = role;
+            RequiredRole = role;
         }
 
         public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
@@ -31,7 +31,7 @@ namespace MechHisui.SecretHitler
                     var president = game.CurrentPresident;
                     var chancellor = game.CurrentChancellor;
 
-                    switch (Role)
+                    switch (RequiredRole)
                     {
                         case PlayerRole.President:
                             if (authorId == president.User.Id)
@@ -42,7 +42,6 @@ namespace MechHisui.SecretHitler
                             {
                                 goto default;
                             }
-
                         case PlayerRole.Chancellor:
                             if (authorId == chancellor.User.Id)
                             {
@@ -52,7 +51,6 @@ namespace MechHisui.SecretHitler
                             {
                                 goto default;
                             }
-
                         default:
                             return Task.FromResult(PreconditionResult.FromError("Cannot use command at this time."));
                     }
