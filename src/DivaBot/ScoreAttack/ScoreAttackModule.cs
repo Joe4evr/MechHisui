@@ -94,12 +94,9 @@ namespace DivaBot
         public Task MyScoreCmd()
         {
             var current = _service.GetCurrent(Context.Channel.Id);
-            var scores = current.Scores.Select(kv =>
-            {
-                return (kv.Value.TryGetValue(Context.User.Id, out var sc))
+            var scores = current.Scores.Select(kv => (kv.Value.TryGetValue(Context.User.Id, out var sc))
                    ? $"{kv.Key}: <{sc}>"
-                   : $"None for {kv.Key}";
-            });
+                   : $"None for {kv.Key}");
 
             return ReplyAsync($"Your current scores: {String.Join("\n", scores)}");
         }

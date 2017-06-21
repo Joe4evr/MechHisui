@@ -85,8 +85,8 @@ namespace DivaBot
             using (var config = _store.Load())
             {
                 config.CurrentChallenges[ctx.Channel.Id].Scores[diff][ctx.User.Id] = link;
+                config.Save();
             }
-            //_store.Save();
         }
 
         internal void ReplaceChallenge(ulong channel, ScoreAttackChallenge challenge)
@@ -95,8 +95,8 @@ namespace DivaBot
             {
                 SetTimer(config, channel, challenge);
                 config.CurrentChallenges[channel] = challenge;
+                config.Save();
             }
-            //_store.Save();
         }
 
         private void SetTimer(DivaBotConfig config, ulong channel, ScoreAttackChallenge challenge)
