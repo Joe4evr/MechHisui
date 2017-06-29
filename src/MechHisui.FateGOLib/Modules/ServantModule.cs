@@ -184,7 +184,7 @@ namespace MechHisui.FateGOLib.Modules
                 (embed.Description?.Length ?? 0),
                 fields,
                 (embed.Footer?.Text.Length ?? 0),
-                (embed.Url?.Length ?? 0));
+                (embed.Url?.ToString().Length ?? 0));
 #endif
             return embed;
         }

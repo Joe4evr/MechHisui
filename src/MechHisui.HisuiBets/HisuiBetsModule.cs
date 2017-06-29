@@ -123,27 +123,24 @@ namespace MechHisui.HisuiBets
         [Command("bet"), Permission(MinimumPermission.Everyone)]
         [Priority(0), RequiresGameType(GameType.HungerGame)]
         [RequireContext(ContextType.Guild), Hidden]
-        public Task Bet(string allin, [Remainder] string target)
-            => (_service.Allins.Contains(allin.ToLowerInvariant())
-                && _account != null) ?
+        public Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, [Remainder] string target)
+            => (_account != null) ?
                 Bet(_account.Bucks, target) :
                 Task.CompletedTask;
 
         [Command("bet"), Permission(MinimumPermission.Everyone)]
         [Priority(1), RequiresGameType(GameType.HungerGameDistrictsOnly)]
         [RequireContext(ContextType.Guild), Hidden]
-        public Task Bet(string allin, int district)
-            => (_service.Allins.Contains(allin.ToLowerInvariant())
-                && _account != null) ?
+        public Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, int district)
+            => (_account != null) ?
                 Bet(_account.Bucks, district) :
                 Task.CompletedTask;
 
         [Command("bet"), Permission(MinimumPermission.Everyone)]
         [Priority(2), RequiresGameType(GameType.SaltyBet)]
         [RequireContext(ContextType.Guild), Hidden]
-        public Task Bet(string allin, SaltyBetTeam team)
-            => (_service.Allins.Contains(allin.ToLowerInvariant())
-                && _account != null)?
+        public Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, SaltyBetTeam team)
+            => (_account != null)?
                 Bet(_account.Bucks, team) :
                 Task.CompletedTask;
 
@@ -267,5 +264,7 @@ namespace MechHisui.HisuiBets
 
             return ReplyAsync(sb.ToString());
         }
+
+        public static string P { set { } }
     }
 }

@@ -3,8 +3,8 @@
     <TargetFramework>netstandard1.6</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Discord.Addons.Preconditions" Version="0.2.5-rc" />
-    <PackageReference Include="Discord.Addons.SimplePermissions" Version="0.9.24-rc" />
+    <PackageReference Include="Discord.Addons.Preconditions" Version="0.3.5-rc" />
+    <PackageReference Include="Discord.Addons.SimplePermissions" Version="0.10.25-rc" />
     <PackageReference Include="Microsoft.NET.Sdk" Version="1.0.0-alpha-20161104-2" />
   </ItemGroup>
   <ItemGroup>

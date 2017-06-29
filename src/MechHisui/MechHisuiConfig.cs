@@ -19,6 +19,7 @@ namespace MechHisui.Core
         public string Token { get; set; }
         public string FgoBasePath { get; set; }
         public string BankBasePath { get; set; }
+        public string XduBasePath { get; set; }
         public string SHConfigPath { get; set; }
         public string SuperfightBasePath { get; set; }
         //public Dictionary<string, SecretHitlerConfig> SHConfigs { get; set; }

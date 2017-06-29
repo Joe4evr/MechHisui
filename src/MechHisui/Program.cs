@@ -14,6 +14,7 @@ using MechHisui.FateGOLib;
 using MechHisui.HisuiBets;
 using MechHisui.SecretHitler;
 using MechHisui.Superfight;
+using MechHisui.SymphoXDULib;
 using Newtonsoft.Json;
 using SharedExtensions;
 using WS4NetCore;
@@ -47,11 +48,19 @@ namespace MechHisui
             var minlog = p.LogSeverity ?? LogSeverity.Info;
             _logger = new Logger(minlog).Log;
 
+            Log(LogSeverity.Verbose, $"Constructing {nameof(CommandService)}");
+            _commands = new CommandService(new CommandServiceConfig
+            {
+                CaseSensitiveCommands = false,
+                DefaultRunMode = RunMode.Sync
+            });
+
             Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
-            _store = new JsonConfigStore<MechHisuiConfig>(p.ConfigPath);
-            //using (var config = _store.Load())
-            //{
-            //}
+            _store = new JsonConfigStore<MechHisuiConfig>(p.ConfigPath, _commands);
+
+            using (var config = _store.Load())
+            {
+            }
 
             Log(LogSeverity.Verbose, $"Constructing {nameof(DiscordSocketClient)}");
             _client = new DiscordSocketClient(new DiscordSocketConfig
@@ -62,13 +71,6 @@ namespace MechHisui
 #if !ARM
                 WebSocketProvider = WS4NetProvider.Instance
 #endif
-            });
-
-            Log(LogSeverity.Verbose, $"Constructing {nameof(CommandService)}");
-            _commands = new CommandService(new CommandServiceConfig
-            {
-                CaseSensitiveCommands = false,
-                DefaultRunMode = RunMode.Sync
             });
         }
 
@@ -129,7 +131,7 @@ namespace MechHisui
             _client.MessageUpdated += async (before, after, channel) =>
             {
                 ulong myid = _client.CurrentUser.Id;
-                if (!(channel.GetCachedMessages(20).Any(m => m.Author.Id == myid)))
+                if (!(channel.GetCachedMessages(5).Any(m => m.Author.Id == myid)))
                 {
                     await HandleCommand(after);
                 }
@@ -353,6 +355,55 @@ namespace MechHisui
                     }
                 }
             };
+            var xdu = new XduConfig
+            {
+                GetGears = () =>
+                {
+                    using (var config = _store.Load())
+                    {
+                        string path = config.XduBasePath;
+                        var hibiki = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Hibiki.json")));
+                        hibiki.ForEach(p => p.CharacterName = "Hibiki Tachibana");
+                        var tsubasa = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Tsubasa.json")));
+                        tsubasa.ForEach(p => p.CharacterName = "Tsubasa Kazanari");
+                        var chris = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Chris.json")));
+                        chris.ForEach(p => p.CharacterName = "Chris Yukine");
+
+                        var maria = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Maria.json")));
+                        maria.ForEach(p => p.CharacterName = "Maria Cadenzavna Eve");
+                        var shirabe = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Shirabe.json")));
+                        shirabe.ForEach(p => p.CharacterName = "Shirabe Tsukuyomi");
+                        var kirika = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Kirika.json")));
+                        kirika.ForEach(p => p.CharacterName = "Kirika Akatsuki");
+
+                        var serena = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Serena.json")));
+                        serena.ForEach(p => p.CharacterName = "Serena Cadenzavna Eve");
+                        var kanade = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Kanade.json")));
+                        kanade.ForEach(p => p.CharacterName = "Kanade Amou");
+                        var miku = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Miku.json")));
+                        miku.ForEach(p => p.CharacterName = "Miku Kohinata");
+                        return hibiki.Concat(tsubasa).Concat(chris)
+                            .Concat(maria).Concat(shirabe).Concat(kirika)
+                            .Concat(serena).Concat(kanade).Concat(miku).ToList();
+                    }
+                },
+                GetMemorias = () =>
+                {
+                    using (var config = _store.Load())
+                    {
+                        return JsonConvert.DeserializeObject<List<Memoria>>(File.ReadAllText(Path.Combine(config.XduBasePath, "Memoria.json")));
+                    }
+                },
+                GetSongs = () =>
+                {
+                    using (var config = _store.Load())
+                    {
+                        return JsonConvert.DeserializeObject<List<Song>>(File.ReadAllText(Path.Combine(config.XduBasePath, "Songs.json")));
+                    }
+                }
+            };
+            _map.AddSingleton(new XduStatService(xdu, _client));
+            await _commands.AddModuleAsync<XduModule>();
             //var eval = EvalService.Builder.BuilderWithSystemAndLinq()
             //    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(StatService).Assembly.Location),
             //        "MechHisui.FateGOLib"))

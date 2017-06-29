@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Discord.Commands;
@@ -16,17 +15,15 @@ namespace MechHisui.SecretHitler
             RequiredRole = role;
         }
 
-        public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public async override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var shservice = services.GetService<SecretHitlerService>();
             if (shservice != null)
             {
                 var authorId = context.User.Id;
-                var game = shservice.GameList.Values
-                    .FirstOrDefault(g => g.PlayerChannels.Select(c => c.Id).Contains(context.Channel.Id))
-;
+                var game = await shservice.GetGameFromChannelAsync(context.Channel).ConfigureAwait(false);
 
-                if (game != null || shservice.GameList.TryGetValue(context.Channel, out game))
+                if (game != null)
                 {
                     var president = game.CurrentPresident;
                     var chancellor = game.CurrentChancellor;
@@ -36,7 +33,7 @@ namespace MechHisui.SecretHitler
                         case PlayerRole.President:
                             if (authorId == president.User.Id)
                             {
-                                return Task.FromResult(PreconditionResult.FromSuccess());
+                                return PreconditionResult.FromSuccess();
                             }
                             else
                             {
@@ -45,19 +42,19 @@ namespace MechHisui.SecretHitler
                         case PlayerRole.Chancellor:
                             if (authorId == chancellor.User.Id)
                             {
-                                return Task.FromResult(PreconditionResult.FromSuccess());
+                                return PreconditionResult.FromSuccess();
                             }
                             else
                             {
                                 goto default;
                             }
                         default:
-                            return Task.FromResult(PreconditionResult.FromError("Cannot use command at this time."));
+                            return PreconditionResult.FromError("Cannot use command at this time.");
                     }
                 }
-                return Task.FromResult(PreconditionResult.FromError("No game."));
+                return PreconditionResult.FromError("No game.");
             }
-            return Task.FromResult(PreconditionResult.FromError("No service."));
+            return PreconditionResult.FromError("No service.");
         }
     }
 

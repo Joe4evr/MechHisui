@@ -6,26 +6,30 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord.Addons.SimpleAudio;
 using Discord.Addons.SimplePermissions;
-using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kohaku
 {
-    internal class KohakuConfig : JsonConfigBase
+    //internal class KohakuConfig : JsonConfigBase
+    //{
+    //    public string LoginToken { get; set; }
+
+    //    public AudioConfig AudioConfig { get; set; }
+
+    //    public Dictionary<string, string[]> TriviaData { get; set; }
+
+    //    //[JsonIgnore]
+    //    //public List<ServantProfile> TestProfiles { get; set; }
+    //}
+
+    internal class KohakuConfig : EFBaseConfigContext
     {
-        public string LoginToken { get; set; }
 
-        public AudioConfig AudioConfig { get; set; }
 
-        public Dictionary<string, string[]> TriviaData { get; set; }
-
-        //public KohakuConfig()
-        //{
-        //    TestProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(
-        //        File.ReadAllText("profiles.json"),
-        //        new FgoProfileConverter());
-        //}
-
-        //[JsonIgnore]
-        //public List<ServantProfile> TestProfiles { get; set; }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.
+            base.OnConfiguring(optionsBuilder);
+        }
     }
 }

@@ -52,5 +52,11 @@ namespace System.Collections.Generic
         {
             return dictionary.TryGetValue(key, out var ret) ? ret : defaultValue;
         }
+
+
+        public static IEnumerable<TResult> DictionarySelect<TKey, TValue, TResult>(
+            this IDictionary<TKey, TValue> source,
+            Func<TKey, TValue, TResult> selector)
+                => source.Select(kvp => selector(kvp.Key, kvp.Value));
     }
 }

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Discord;
-using Discord.Addons.SimpleAudio;
+//using Discord.Addons.SimpleAudio;
 using Discord.Addons.SimplePermissions;
-using Discord.Addons.TriviaGames;
+//using Discord.Addons.TriviaGames;
 using Discord.Commands;
 using Discord.WebSocket;
 using SharedExtensions;
@@ -41,15 +43,15 @@ namespace Kohaku
             _logger = new Logger(minlog).Log;
 
             Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
-            _store = new JsonConfigStore<KohakuConfig>(p.ConfigPath);
-            using (var config = _store.Load())
-            {
-                if (config.AudioConfig == null)
-                {
-                    config.AudioConfig = new AudioConfig();
-                    config.Save();
-                }
-            }
+            _store = new EFConfigStore<KohakuConfig, ConfigGuild, ConfigChannel, ConfigUser>();
+            //using (var config = _store.Load())
+            //{
+            //    //if (config.AudioConfig == null)
+            //    //{
+            //    //    config.AudioConfig = new AudioConfig();
+            //    //    config.Save();
+            //    //}
+            //}
 
             Log(LogSeverity.Verbose, $"Constructing {nameof(DiscordSocketClient)}");
             _client = new DiscordSocketClient(new DiscordSocketConfig
@@ -93,17 +95,55 @@ namespace Kohaku
         private async Task InitCommands()
         {
             await _commands.UseSimplePermissions(_client, _store, _map, _logger);
-            using (var config = _store.Load())
-            {
-                //await _commands.UseFgoService(_map, config.FgoConfig);
 
-                //_map.Add(config.TestProfiles);
-                //await _commands.AddModuleAsync<TestModule>();
+            //var eval = EvalService.Builder.BuilderWithSystemAndLinq().Build();
 
-                await _commands.AddTrivia<TriviaImpl>(_client, _map, config.TriviaData, _logger);
+            //_map.AddSingleton(eval);
+            //await _commands.AddModuleAsync<EvalModule>();
 
-                await _commands.UseAudio<AudioModuleImpl>(_map, config.AudioConfig, _logger);
-            }
+            //var fgo = new FgoConfig
+            //{
+            //    GetServants = () => JsonConvert.DeserializeObject<List<ServantProfile>>(File.ReadAllText("Servants.json")),
+            //    GetFakeServants = Enumerable.Empty<ServantProfile>,
+            //    //GetServantAliases = () =>
+            //    //{
+            //    //    using (var config = _store.Load())
+            //    //    {
+            //    //        return JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(config.FgoBasePath, "ServantAlias.json")))
+            //    //            .Join(config.GetAllServants(), kv => kv.Value, s => s.Name, (kv, s) => new ServantAlias { Alias = kv.Key, Servant = s });
+            //    //    }
+            //    //},
+            //    AddServantAlias = (name, alias) => false,
+            //    GetCEs = Enumerable.Empty<CEProfile>,
+            //    //GetCEAliases = () =>
+            //    //{
+            //    //    using (var config = _store.Load())
+            //    //    {
+            //    //        return JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(config.FgoBasePath, "CEAlias.json")))
+            //    //            .Join(config.GetAllCEs(), kv => kv.Value, ce => ce.Name, (kv, ce) => new CEAlias { Alias = kv.Key, CE = ce });
+            //    //    }
+            //    //},
+            //    AddCEAlias = (ce, alias) => false,
+            //    GetMystics = Enumerable.Empty<MysticCode>,
+            //    //GetMysticAliases = () =>
+            //    //{
+            //    //    using (var config = _store.Load())
+            //    //    {
+            //    //        return JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(config.FgoBasePath, "MysticAlias.json")))
+            //    //            .Join(config.GetAllMystics(), kv => kv.Value, myst => myst.Code, (kv, myst) => new MysticAlias { Alias = kv.Key, Code = myst });
+            //    //    }
+            //    //},
+            //    AddMysticAlias = (code, alias) => false,
+            //    GetEvents = Enumerable.Empty<Event>
+            //};
+            //await _commands.UseFgoService(_map, fgo, _client);
+
+            //using (var config = _store.Load())
+            //{
+            //    //await _commands.AddTrivia<TriviaImpl>(_client, _map, config.TriviaData, _logger);
+
+            //    //await _commands.UseAudio<AudioModuleImpl>(_map, config.AudioConfig, _logger);
+            //}
 
             _client.MessageReceived += HandleCommand;
             //_services = _map.BuildServiceProvider();

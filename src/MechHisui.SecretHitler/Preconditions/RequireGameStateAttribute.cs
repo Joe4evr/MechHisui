@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Discord.Commands;
@@ -16,24 +15,22 @@ namespace MechHisui.SecretHitler
             RequiredState = state;
         }
 
-        public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public async override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var shservice = services.GetService<SecretHitlerService>();
             if (shservice != null)
             {
-                var game = shservice.GameList.Values
-                    .FirstOrDefault(g => g.PlayerChannels.Select(c => c.Id).Contains(context.Channel.Id))
-;
+                var game = await shservice.GetGameFromChannelAsync(context.Channel).ConfigureAwait(false);
 
-                if (game != null || shservice.GameList.TryGetValue(context.Channel, out game))
+                if (game != null)
                 {
                     return (game.State == RequiredState)
-                        ? Task.FromResult(PreconditionResult.FromSuccess())
-                        : Task.FromResult(PreconditionResult.FromError("Cannot use command at this time."));
+                        ? PreconditionResult.FromSuccess()
+                        : PreconditionResult.FromError("Cannot use command at this time.");
                 }
-                return Task.FromResult(PreconditionResult.FromError("No game."));
+                return PreconditionResult.FromError("No game.");
             }
-            return Task.FromResult(PreconditionResult.FromError("No service."));
+            return PreconditionResult.FromError("No service.");
         }
     }
 }

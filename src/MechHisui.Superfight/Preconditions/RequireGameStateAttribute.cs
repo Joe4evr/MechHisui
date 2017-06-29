@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Discord.Commands;
@@ -16,23 +15,22 @@ namespace MechHisui.Superfight.Preconditions
             RequiredState = state;
         }
 
-        public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public async override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var sfservice = services.GetService<SuperfightService>();
             if (sfservice != null)
             {
-                var game = sfservice.GameList.Values
-                    .FirstOrDefault(g => g.PlayerChannels.Select(c => c.Id).Contains(context.Channel.Id))
-;
-                if (game != null || sfservice.GameList.TryGetValue(context.Channel, out game))
+                var game = await sfservice.GetGameFromChannelAsync(context.Channel).ConfigureAwait(false);
+
+                if (game != null)
                 {
-                    return (game.State == RequiredState /*&& !(executingCommand.Name == "veto" && !game.VetoUnlocked)*/)
-                        ? Task.FromResult(PreconditionResult.FromSuccess())
-                        : Task.FromResult(PreconditionResult.FromError("Cannot use command at this time."));
+                    return (game.State == RequiredState)
+                        ? PreconditionResult.FromSuccess()
+                        : PreconditionResult.FromError("Cannot use command at this time.");
                 }
-                return Task.FromResult(PreconditionResult.FromError("No game."));
+                return PreconditionResult.FromError("No game.");
             }
-            return Task.FromResult(PreconditionResult.FromError("No service."));
+            return PreconditionResult.FromError("No service.");
         }
     }
 }

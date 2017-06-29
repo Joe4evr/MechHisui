@@ -2,7 +2,7 @@
 {
     public class SecretHitlerConfig
     {
-        public static SecretHitlerConfig Default = new SecretHitlerConfig();
+        public static readonly SecretHitlerConfig Default = new SecretHitlerConfig();
 
         public string Key { get; set; } = "default";
         public string President { get; set; } = "President";

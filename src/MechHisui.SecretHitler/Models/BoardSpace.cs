@@ -2,11 +2,11 @@
 {
     internal sealed class BoardSpace
     {
-        public BoardSpaceType Type { get; }
+        public BoardSpaceType BoardSpaceType { get; }
 
         public BoardSpace(BoardSpaceType type)
         {
-            Type = type;
+            BoardSpaceType = type;
         }
     }
 }
