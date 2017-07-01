@@ -54,6 +54,7 @@ namespace MechHisui
                 CaseSensitiveCommands = false,
                 DefaultRunMode = RunMode.Sync
             });
+            _commands.Log += _logger;
 
             Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
             _store = new JsonConfigStore<MechHisuiConfig>(p.ConfigPath, _commands);
@@ -72,6 +73,7 @@ namespace MechHisui
                 WebSocketProvider = WS4NetProvider.Instance
 #endif
             });
+            _client.Log += _logger;
         }
 
         private Task Log(LogSeverity severity, string msg)
@@ -79,53 +81,8 @@ namespace MechHisui
             return _logger(new LogMessage(severity, "Main", msg));
         }
 
-        //try
-        //{
-        //    //Convert our sync method to an async one and block the Main function until the bot disconnects
-        //    client.ExecuteAndWait(async () =>
-        //    {
-        //        await client.Connect(config["LoginToken"]);
-        //        Console.WriteLine($"Logged in as {client.CurrentUser.Name}");
-        //        Console.WriteLine($"MH v. 0.3.0");
-        //        await Task.Delay(3000);
-        //        if (!client.Servers.Any())
-        //        {
-        //            Console.WriteLine("Not a member of any server");
-        //        }
-        //        else
-        //        {
-        //            foreach (var channel in Helpers.IterateChannels(client.Servers, printServerNames: true, printChannelNames: true))
-        //            {
-        //                if (!channel.IsPrivate && Helpers.IsWhilested(channel, client))
-        //                {
-        //                    //Console.CancelKeyPress += async (s, e) => await client.SendMessage(channel, config["Goodbye"]);
-        //                    if (channel.Id != UInt64.Parse(config["API_testing"]))
-        //                    {
-        //                        if (Debugger.IsAttached)
-        //                        {
-        //                            // await channel.SendMessage("MechHisui started in debug mode. Not all commands will be available.");
-        //                        }
-        //                        else if (lastcode != -1 && channel.Id != UInt64.Parse(config["FGO_events"]))
-        //                        {
-        //                            await channel.SendMessage(config["Hello"]);
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //            client.GetModule<HisuiBetsModule>().Instance.AddNewHisuiBetsUsers(client, config);
-        //            Console.WriteLine($"Started up at {DateTime.Now}.");
-        //        }
-        //    });
-        //}
-        //catch (Exception ex)
-        //{
-        //    File.AppendAllText(Path.Combine(config["Logs"], "crashlogs.txt"), $"{DateTime.Now} - {ex.Message}\n{ex.StackTrace}\n");
-        //    Environment.Exit(-1);
-        //}
-
         private async Task AsyncMain()
         {
-            _client.Log += _logger;
             _client.Ready += () => Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");
 
             _client.MessageUpdated += async (before, after, channel) =>
@@ -415,12 +372,12 @@ namespace MechHisui
             //private readonly Func<IEnumerable<ServantProfile>> Servants;
             //private readonly Func<IEnumerable<CEProfile>> CEs;");
             //_map.AddSingleton(eval);
+            //await _commands.AddModuleAsync<EvalModule>();
 
             await _commands.UseSimplePermissions(_client, _store, _map, _logger);
             await _commands.UseFgoService(_map, fgo, _client);
             await _commands.UseHisuiBank(_map, bank, _client, _logger);
             await _commands.AddDiceRoll();
-            //await _commands.AddModuleAsync<EvalModule>();
 
             using (var config = _store.Load())
             {
