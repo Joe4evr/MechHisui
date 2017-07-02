@@ -1,122 +1,87 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Internal;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.PlatformAbstractions;
+using System.Threading.Tasks;
 using Discord;
-using Newtonsoft.Json;
-
-using static JiiLib.Extensions;
+using Discord.WebSocket;
+using SharedExtensions;
+using WS4NetCore;
 
 namespace GudakoBot
 {
     public class Program
     {
-        public static void Main(string[] args)
+        private readonly DiscordSocketClient _client;
+        private readonly ConfigStore _store;
+        private readonly Func<LogMessage, Task> _logger;
+        private ulong _owner;
+
+        private static void Main(string[] args)
         {
-            PlatformServices ps = PlatformServices.Default;
-            var env = ps.Application;
-            Console.WriteLine($"Base: {env.ApplicationBasePath}");
-
-            IConfigurationBuilder builder = new ConfigurationBuilder()
-                .AddEnvironmentVariables()
-                .SetBasePath(env.ApplicationBasePath);
-
-            IHostingEnvironment hostingEnv = new HostingEnvironment();
-            hostingEnv.Initialize(env.ApplicationName, env.ApplicationBasePath, new WebHostOptions());
-            if (hostingEnv.IsDevelopment())
+            var p = new Program(Params.Parse(args));
+            try
             {
-                Console.WriteLine("Loading from UserSecret store");
-                builder.AddUserSecrets();
+                p.AsyncMain().GetAwaiter().GetResult();
             }
-            else
+            catch (Exception e)
             {
-                Console.WriteLine("Loading from jsons directory");
-                builder.AddInMemoryCollection(JsonConvert.DeserializeObject<Dictionary<string, string>>(
-                    File.ReadAllText(@"../GudakoBot-jsons/secrets.json")
-                ));
+                p.Log(LogSeverity.Critical, $"Unhandled Exception: {e}").GetAwaiter().GetResult();
             }
+        }
 
-            IConfiguration config = builder.Build();
+        private Program(Params p)
+        {
+            var minlog = p.LogSeverity ?? LogSeverity.Info;
+            _logger = new Logger(minlog).Log;
 
-            ulong owner = UInt64.Parse(config["Owner"]);
-            ulong fgogen = UInt64.Parse(config["FGO_general"]);
+            Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
+            _store = new ConfigStore(p.ConfigPath);
 
-            Console.WriteLine("Loading chat lines...");
-            LoadLines(config);
-            Console.WriteLine($"Loaded {Randomlines.Count()} lines.");
-
-            var client = new DiscordClient(conf =>
+            Log(LogSeverity.Verbose, $"Constructing {nameof(DiscordSocketClient)}");
+            _client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                conf.AppName = "GudakoBot";
-                conf.CacheToken = true;
-                conf.LogLevel = /*Debugger.IsAttached ? LogSeverity.Verbose :*/ LogSeverity.Warning;
-                //conf.UseLargeThreshold = true;
+                LogLevel = minlog,
+#if !ARM
+                WebSocketProvider = WS4NetProvider.Instance
+#endif
             });
 
+            //_owner = _client.GetApplicationInfoAsync().GetAwaiter().GetResult().Owner.Id;
+        }
+
+        private Task Log(LogSeverity severity, string msg)
+        {
+            return _logger(new LogMessage(severity, "Main", msg));
+        }
+
+        private async Task AsyncMain()
+        {
+            //Console.WriteLine("Loading config...");
+            var config = _store.Load();
+            await Log(LogSeverity.Info, $"Loaded {config.Lines.Count()} lines.").ConfigureAwait(false);
+
             //Display all log messages in the console
-            client.Log.Message += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}"); //File.AppendAllText(logPath, $"[{e.Severity}] {e.Source}: {e.Message}"); 
-            client.MessageReceived += async (s, e) =>
+            _client.Log += _logger;
+
+            _client.MessageReceived += async msg =>
             {
-                if (e.Message.User.Id == owner && e.Message.Text == "-new")
+                if (msg.Author.Id == _owner && msg.Content == "-new")
                 {
-                    Console.WriteLine($"{DateTime.Now}: Reloading lines");
-                    LoadLines(config);
-                    await e.Channel.SendWithRetry(Randomlines.Last());
-                    timer.Change(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(30));
+                    await Log(LogSeverity.Info, $"{DateTime.Now}: Reloading lines").ConfigureAwait(false);
+                    config = _store.Load();
+                    await msg.Channel.SendMessageAsync(config.Lines.Last()).ConfigureAwait(false);
                 }
             };
 
-
-            client.ExecuteAndWait(async () =>
+            _client.Ready += async () =>
             {
-                //Connect to the Discord server using our email and password
-                await client.Connect(config["LoginToken"]);
-                //client.Token = (await client.Send(new LoginRequest { Email = config["Email"], Password = config["Password"] })).Token;
-                Console.WriteLine($"Logged in as {client.CurrentUser.Name}");
-                Console.WriteLine($"Started up at {DateTime.Now}.");
+                await Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}").ConfigureAwait(false);
+                await Log(LogSeverity.Info, $"Started up at {DateTime.Now}.").ConfigureAwait(false);
+                _owner = (await _client.GetApplicationInfoAsync().ConfigureAwait(false)).Owner.Id;
+            };
 
-                var rng = new Random();
-                timer = new Timer(async s =>
-                {
-                    var channel = client.GetChannel(fgogen);
-                    if (channel == null)
-                    {
-                        Console.WriteLine($"Channel was null. Waiting for next interval.");
-                    }
-                    else
-                    {
-                        string str;
-                        Randomlines = Randomlines.Shuffle();
-                        
-                        do str = Randomlines.ElementAt(rng.Next(maxValue: Randomlines.Count()));
-                        while (str == lastLine);
-                        
-                        Console.WriteLine($"{DateTime.Now}: Sending message.");
-                        await channel.SendWithRetry(str);
-                        lastLine = str;
-                    }
-                },
-                null,
-                TimeSpan.FromMinutes(10),
-                TimeSpan.FromMinutes(30));
-            });
+            await _client.LoginAsync(TokenType.Bot, config.LoginToken).ConfigureAwait(false);
+            await _client.StartAsync().ConfigureAwait(false);
+            await Task.Delay(-1).ConfigureAwait(false);
         }
-
-        private static void LoadLines(IConfiguration config)
-        {
-            using (TextReader tr = new StreamReader(new FileStream(config["LinesPath"], FileMode.Open, FileAccess.Read)))
-            {
-                Randomlines = JsonConvert.DeserializeObject<List<string>>(tr.ReadToEnd());
-            }
-        }
-
-        private static IEnumerable<string> Randomlines = new List<string>();
-        private static Timer timer;
-        private static string lastLine;
     }
 }

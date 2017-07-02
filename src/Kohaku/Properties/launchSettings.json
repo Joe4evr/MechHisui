@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Kohaku": {
+      "commandName": "Project",
+      "commandLineArgs": "-c \"config.json\""
+    }
+  }
+}

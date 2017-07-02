@@ -1,135 +1,125 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using JiiLib.Net;
+using System.Threading;
+using JiiLib;
+using Discord.WebSocket;
 
 namespace MechHisui.FateGOLib
 {
     public class StatService
     {
-        private readonly IJsonApiService _apiService;
-        private readonly string _servantAliasPath;
-        private readonly string _ceAliasPath;
-        private readonly string _mysticAliasPath;
+        private readonly Timer _logintimer;
+        internal readonly FgoConfig Config;
 
-        public StatService(IJsonApiService apiService, string servantAliasPath, string ceAliasPath, string mysticAliasPath)
+        internal StatService(FgoConfig config, DiscordSocketClient client)
         {
-            if (apiService == null) throw new ArgumentNullException(nameof(apiService));
-            if (servantAliasPath == null) throw new ArgumentNullException(nameof(servantAliasPath));
-            if (ceAliasPath == null) throw new ArgumentNullException(nameof(ceAliasPath));
-            if (mysticAliasPath == null) throw new ArgumentNullException(nameof(mysticAliasPath));
+            Config = config ?? throw new ArgumentNullException(nameof(config));
 
-            if (!File.Exists(servantAliasPath)) throw new FileNotFoundException(nameof(servantAliasPath));
-            if (!File.Exists(ceAliasPath)) throw new FileNotFoundException(nameof(ceAliasPath));
-            if (!File.Exists(mysticAliasPath)) throw new FileNotFoundException(nameof(mysticAliasPath));
-
-            _apiService = apiService;
-            _servantAliasPath = servantAliasPath;
-            _ceAliasPath = ceAliasPath;
-            _mysticAliasPath = mysticAliasPath;
-
-            ReadAliasList();
+            _logintimer = new Timer(async o =>
+            {
+                await (client.GetChannel(120979035290468352ul) as SocketTextChannel)
+                    .SendMessageAsync("Login bonuses have been distributed.").ConfigureAwait(false);
+            }, null,
+            new DateTimeWithZone(DateTime.UtcNow, FgoExtensions.JpnTimeZone)
+                .TimeUntilNextLocalTimeAt(new TimeSpan(hours: 3, minutes: 59, seconds: 59)),
+            TimeSpan.FromHours(24));
         }
 
         public IEnumerable<ServantProfile> LookupStats(string servant, bool fullsearch = false)
         {
-            var list = FgoHelpers.ServantProfiles.Concat(FgoHelpers.FakeServantProfiles);
+            var list = Config.GetServants();
             var servants = list
-                .Where(p => p.Name.Equals(servant, StringComparison.InvariantCultureIgnoreCase));
+                .Where(p => p.Name.Equals(servant, StringComparison.OrdinalIgnoreCase));
 
-            if (servants.Count() == 0 || fullsearch)
+            if (!servants.Any() || fullsearch)
             {
                 servants = servants.Concat(list.Where(p => RegexMatchOneWord(p.Name, servant)));
 
-                if (servants.Count() == 0 || fullsearch)
+                if (!servants.Any() || fullsearch)
                 {
-                    var lookup = FgoHelpers.ServantDict
-                        .Where(s => s.Key.Equals(servant, StringComparison.InvariantCultureIgnoreCase))
-                        .Select(s => s.Value)
+                    var lookup = list
+                        .Where(s => s.Aliases.Any(a => a.Equals(servant, StringComparison.OrdinalIgnoreCase)))
                         .ToList();
 
                     if (lookup.Count == 0 || fullsearch)
                     {
-                        lookup = lookup.Concat(FgoHelpers.ServantDict
-                            .Where(s => RegexMatchOneWord(s.Key, servant))
-                            .Select(s => s.Value))
+                        lookup = lookup.Concat(list
+                            .Where(s => s.Aliases.Any(a => RegexMatchOneWord(a, servant))))
                             .ToList();
                     }
 
                     if (lookup.Count > 0)
                     {
-                        servants = servants.Concat(list.Where(p => lookup.Contains(p.Name)));
+                        servants = servants.Concat(list.Where(p => lookup.Any(l => l.Id == p.Id)));
                     }
                 }
             }
 
-            return servants;
+            return servants.ToList();
         }
 
         public IEnumerable<CEProfile> LookupCE(string name, bool fullsearch = false)
         {
-            var ces = FgoHelpers.CEProfiles
-                .Where(ce => ce.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+            var list = Config.GetCEs();
+            var ces = list
+                .Where(ce => ce.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
-            if (ces.Count() == 0 || fullsearch)
+            if (!ces.Any() || fullsearch)
             {
-                ces = ces.Concat(FgoHelpers.CEProfiles.Where(ce => RegexMatchOneWord(ce.Name, name)));
+                ces = ces.Concat(list.Where(ce => RegexMatchOneWord(ce.Name, name)));
 
-                if (ces.Count() == 0 || fullsearch)
+                if (!ces.Any() || fullsearch)
                 {
-                    var lookup = FgoHelpers.CEDict
-                        .Where(ce => ce.Key.Equals(name, StringComparison.InvariantCultureIgnoreCase))
-                        .Select(ce => ce.Value)
+                    var lookup = list
+                        .Where(ce => ce.Aliases.Any(a => a.Equals(name, StringComparison.OrdinalIgnoreCase)))
                         .ToList();
 
                     if (lookup.Count == 0 || fullsearch)
                     {
-                        lookup = lookup.Concat(FgoHelpers.CEDict.Where(ce => RegexMatchOneWord(ce.Key, name))
-                            .Select(ce => ce.Value))
+                        lookup = lookup.Concat(list
+                            .Where(ce => ce.Aliases.Any(a => RegexMatchOneWord(a, name))))
                             .ToList();
                     }
 
                     if (lookup.Count > 0)
                     {
-                        ces = ces.Concat(FgoHelpers.CEProfiles.Where(ce => lookup.Contains(ce.Name)));
+                        ces = ces.Concat(list.Where(ce => lookup.Any(l => l.Id == ce.Id)));
                     }
                 }
             }
 
-            return ces;
+            return ces.ToList();
         }
 
         public IEnumerable<MysticCode> LookupMystic(string code, bool fullsearch = false)
         {
-            var mystics = FgoHelpers.MysticCodeList
-                .Where(m => m.Code.Equals(code, StringComparison.InvariantCultureIgnoreCase));
+            var list = Config.GetMystics();
+            var mystics = list
+                .Where(m => m.Code.Equals(code, StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
-            if (mystics.Count() == 0 || fullsearch)
+            if (mystics.Count == 0 || fullsearch)
             {
-                mystics = mystics.Concat(FgoHelpers.MysticCodeList.Where(m => RegexMatchOneWord(m.Code, code)));
+                mystics = mystics.Concat(list.Where(m => RegexMatchOneWord(m.Code, code))).ToList();
 
-                if (mystics.Count() == 0 || fullsearch)
+                if (mystics.Count == 0 || fullsearch)
                 {
-                    var lookup = FgoHelpers.MysticCodeDict
-                        .Where(m => m.Key.Equals(code, StringComparison.InvariantCultureIgnoreCase))
-                        .Select(m => m.Value)
+                    var lookup = list
+                        .Where(m => m.Aliases.Any(a => a.Equals(code, StringComparison.OrdinalIgnoreCase)))
                         .ToList();
 
                     if (lookup.Count == 0 || fullsearch)
                     {
-                        lookup = lookup.Concat(FgoHelpers.MysticCodeDict
-                            .Where(m => RegexMatchOneWord(m.Key, code))
-                            .Select(m => m.Value))
+                        lookup = lookup.Concat(list
+                            .Where(m => m.Aliases.Any(a => RegexMatchOneWord(a, code))))
                             .ToList();
                     }
 
                     if (lookup.Count > 0)
                     {
-                        mystics = mystics.Concat(FgoHelpers.MysticCodeList.Where(m => lookup.Contains(m.Code)));
+                        mystics = mystics.Concat(list.Where(m => lookup.Any(l => l.Code == m.Code))).ToList();
                     }
                 }
             }
@@ -137,50 +127,16 @@ namespace MechHisui.FateGOLib
             return mystics;
         }
 
-        //get table data and serialize to the respective lists so that they're cached
-        public async Task UpdateProfileListsAsync()
-        {
-            Console.WriteLine("Updating profile lists...");
-            FgoHelpers.ServantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(await _apiService.GetDataFromServiceAsJsonAsync("Servants"), new FgoProfileConverter());
-            FgoHelpers.FakeServantProfiles = JsonConvert.DeserializeObject<List<ServantProfile>>(await _apiService.GetDataFromServiceAsJsonAsync("FakeServants"), new FgoProfileConverter());
-        }
-
-        public async Task UpdateCEListAsync()
-        {
-            Console.WriteLine("Updating CE list...");
-            FgoHelpers.CEProfiles = JsonConvert.DeserializeObject<List<CEProfile>>(await _apiService.GetDataFromServiceAsJsonAsync("CEs"));
-        }
-
-        public async Task UpdateEventListAsync()
-        {
-            Console.WriteLine("Updating event list...");
-            FgoHelpers.EventList = JsonConvert.DeserializeObject<List<Event>>(await _apiService.GetDataFromServiceAsJsonAsync("Events"));
-        }
-
-        public async Task UpdateMysticCodesListAsync()
-        {
-            Console.WriteLine("Updating Mystic Codes list...");
-            FgoHelpers.MysticCodeList = JsonConvert.DeserializeObject<List<MysticCode>>(await _apiService.GetDataFromServiceAsJsonAsync("MysticCodes"));
-        }
-
-        public async Task UpdateDropsListAsync()
-        {
-            Console.WriteLine("Updating Item Drops list...");
-            FgoHelpers.ItemDropsList = JsonConvert.DeserializeObject<List<NodeDrop>>(await _apiService.GetDataFromServiceAsJsonAsync("Drops"));
-        }
-
-        public void ReadAliasList()
-        {
-            FgoHelpers.ServantDict    = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(_servantAliasPath));
-            FgoHelpers.CEDict         = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(_ceAliasPath));
-            FgoHelpers.MysticCodeDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(_mysticAliasPath));
-        }
+        //public void ReadAliasList()
+        //{
+        //    FgoHelpers.ServantDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Config.ServantAliasesPath));
+        //    FgoHelpers.CEDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Config.CEAliasesPath));
+        //    FgoHelpers.MysticCodeDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Config.MysticAliasesPath));
+        //}
 
         private static bool RegexMatchOneWord(string hay, string needle)
-            => Regex.Match(hay, String.Concat(b, needle, b), RegexOptions.IgnoreCase).Success;
+            => Regex.Match(hay, String.Concat(_b, needle, _b), RegexOptions.IgnoreCase).Success;
 
-        private const string b = @"\b";
-
-        //{ new[] [ "gil's bff" ], "Enkidu" },
+        private const string _b = @"\b";
     }
 }

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DivaBot": {
+      "commandName": "Project",
+      "commandLineArgs": "-c \"C:\\PublishOutputs\\DivaBot-jsons\\config.json\""
+    }
+  }
+}

@@ -1,136 +1,184 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using Discord.Commands;
-using Discord.Modules;
+using System.Threading.Tasks;
 using Discord;
+using Discord.Addons.MpGame;
+using Discord.Addons.SimplePermissions;
+using Discord.Commands;
+using MechHisui.Superfight.Preconditions;
+using MechHisui.Superfight.Models;
 
 namespace MechHisui.Superfight
 {
-    public class SuperfightModule : IModule
+    [Name("Superfight")]
+    public sealed class SuperfightModule : MpGameModuleBase<SuperfightService, SuperfightGame, SuperfightPlayer>
     {
-        private readonly IConfiguration _config;
-        private readonly string _basePath;
-
-        private bool gameOpen = false;
-        private bool gameStarted = false;
-        private List<User> players;
-        private Superfight game;
-
-        public SuperfightModule(IConfiguration config, string basePath)
+        private int _discusstimeout = 5;
+        public SuperfightModule(SuperfightService service) : base(service)
         {
-            if (config == null) throw new ArgumentNullException(nameof(config));
-            if (basePath == null) throw new ArgumentNullException(nameof(basePath));
-
-            _config = config;
-            _basePath = basePath;
         }
 
-        void IModule.Install(ModuleManager manager)
+        protected override void BeforeExecute()
         {
-            manager.Client.GetService<CommandService>().CreateCommand("opensf")
-                .AddCheck((c, u, ch) => u.Roles.Contains(ch.Server.GetRole(UInt64.Parse(_config["FGO_Admins"]))) && ch.Id == UInt64.Parse(_config["FGO_Powerlevels"]))
-                .Description("Open up a game of Superfight for people to join.")
-                .Do(async cea =>
+            _discusstimeout = GameService.DiscussionTimer.GetValueOrDefault(Context.Channel.Id, defaultValue: 5);
+        }
+
+        [Command("open"), Permission(MinimumPermission.ModRole)]
+        [RequireContext(ContextType.Guild)]
+        public override async Task OpenGameCmd()
+        {
+            if (GameInProgress)
+            {
+                await ReplyAsync("Another game already in progress.").ConfigureAwait(false);
+            }
+            else if (OpenToJoin)
+            {
+                await ReplyAsync("There is already a game open to join.").ConfigureAwait(false);
+            }
+            else
+            {
+                if (GameService.OpenNewGame(Context.Channel))
                 {
-                    players = new List<User>();
-                    gameOpen = true;
-                    await cea.Channel.SendWithRetry("Opening a game of Superfight.");
-                });
+                    await ReplyAsync("Opening for a game.").ConfigureAwait(false);
+                }
+            }
+        }
 
-            manager.Client.GetService<CommandService>().CreateCommand("join")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(_config["FGO_Powerlevels"]))
-                .Description("Join a game if it is open to join. At least three people need to be present to play.")
-                .Do(async cea =>
+        [Command("join"), Permission(MinimumPermission.Everyone)]
+        [RequireContext(ContextType.Guild)]
+        public override async Task JoinGameCmd()
+        {
+            if (GameInProgress)
+            {
+                await ReplyAsync("Cannot join a game already in progress.").ConfigureAwait(false);
+            }
+            else if (!OpenToJoin)
+            {
+                await ReplyAsync("No game open to join.").ConfigureAwait(false);
+            }
+            else
+            {
+                if (GameService.AddUser(Context.Channel, Context.User))
                 {
-                    if (!gameOpen || gameStarted)
-                    {
-                        await cea.Channel.SendWithRetry("Cannot join at this time.");
-                        return;
-                    }
+                    await ReplyAsync($"**{Context.User.Username}** has joined.").ConfigureAwait(false);
+                }
+            }
+        }
 
-                    if (!players.Any(p => p.Id == cea.User.Id))
-                    {
-                        players.Add(cea.User);
-                        await cea.Channel.SendWithRetry($"{cea.User.Name} has joined.");
-                    }
-                });
-
-            manager.Client.GetService<CommandService>().CreateCommand("leave")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(_config["FGO_Powerlevels"]))
-                .Description("Leave the game if you have joined but it has not started yet.")
-                .Do(async cea =>
+        [Command("leave"), Permission(MinimumPermission.Everyone)]
+        [RequireContext(ContextType.Guild)]
+        public override async Task LeaveGameCmd()
+        {
+            if (GameInProgress)
+            {
+                await ReplyAsync("Cannot leave a game already in progress.").ConfigureAwait(false);
+            }
+            else if (!OpenToJoin)
+            {
+                await ReplyAsync("No game open to leave.").ConfigureAwait(false);
+            }
+            else
+            {
+                if (GameService.RemoveUser(Context.Channel, Context.User))
                 {
-                    if (!gameOpen)
-                    {
-                        if (gameStarted)
-                        {
-                            await cea.Channel.SendWithRetry("Game is already in progress.");
-                        }
-                        else
-                        {
-                            await cea.Channel.SendWithRetry("No game is currently open.");
-                        }
-                    }
-                    else
-                    {
-                        if (players.Any(p => p.Id == cea.User.Id))
-                        {
-                            players.Remove(cea.User);
-                            await cea.Channel.SendWithRetry($"{cea.User.Name} has left.");
-                        }
-                    }
-                });
+                    await ReplyAsync($"**{Context.User.Username}** has left.").ConfigureAwait(false);
+                }
+            }
+        }
 
-            manager.Client.GetService<CommandService>().CreateCommand("players")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(_config["FGO_Powerlevels"]))
-                .Description("Display the currently joined players.")
-                .Do(async cea => await cea.Channel.SendWithRetry($"Current players are {String.Join(", ", players.Select(p => p.Name))}. ({players.Count})"));
-
-            manager.Client.GetService<CommandService>().CreateCommand("state")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(_config["FGO_Powerlevels"]))
-                .Do(async cea => await cea.Channel.SendWithRetry(game.GetGameState()));
-
-            manager.Client.GetService<CommandService>().CreateCommand("startsf")
-                .AddCheck((c, u, ch) => u.Roles.Contains(ch.Server.GetRole(UInt64.Parse(_config["FGO_Admins"]))) && ch.Id == UInt64.Parse(_config["FGO_Powerlevels"]))
-                .Do(async cea =>
+        [Command("cancel"), Permission(MinimumPermission.ModRole)]
+        [RequireContext(ContextType.Guild)]
+        public override async Task CancelGameCmd()
+        {
+            if (GameInProgress)
+            {
+                await ReplyAsync("Cannot cancel a game already in progress.").ConfigureAwait(false);
+            }
+            else if (!OpenToJoin)
+            {
+                await ReplyAsync("No game open to cancel.").ConfigureAwait(false);
+            }
+            else
+            {
+                if (GameService.TryUpdateOpenToJoin(Context.Channel, newValue: false, comparisonValue: true))
                 {
-                    if (!gameOpen)
-                    {
-                        await cea.Channel.SendWithRetry("There is no open game.");
-                        return;
-                    }
-                    else if (gameStarted)
-                    {
-                        await cea.Channel.SendWithRetry("There is already a game in progress.");
-                        return;
-                    }
+                    PlayerList.Clear();
+                    await ReplyAsync("Game was canceled.").ConfigureAwait(false);
+                }
+            }
+        }
 
-                    gameOpen = false;
-                    gameStarted = true;
-                    await cea.Channel.SendWithRetry("Starting game.");
-                    game = new Superfight(players, cea.Channel, _basePath);
-                    await game.StartGame();
-                });
-
-            manager.Client.GetService<CommandService>().CreateCommand("startvote")
-                .AddCheck((c, u, ch) => u.Roles.Contains(ch.Server.GetRole(UInt64.Parse(_config["FGO_Admins"]))) && ch.Id == UInt64.Parse(_config["FGO_Powerlevels"]))
-                .Do(async cea =>
+        [Command("start"), Permission(MinimumPermission.ModRole)]
+        [RequireContext(ContextType.Guild)]
+        public override async Task StartGameCmd()
+        {
+            if (GameInProgress)
+            {
+                await ReplyAsync("Another game already in progress.").ConfigureAwait(false);
+            }
+            else if (!OpenToJoin)
+            {
+                await ReplyAsync("No game has been opened at this time.").ConfigureAwait(false);
+            }
+            else if (PlayerList.Count < 4)
+            {
+                await ReplyAsync("Not enough players have joined.").ConfigureAwait(false);
+            }
+            else
+            {
+                if (GameService.TryUpdateOpenToJoin(Context.Channel, newValue: false, comparisonValue: true))
                 {
-                    game.StartVote();
-                    await cea.Channel.SendWithRetry("Discussion time is over, it's time to vote who would win.");
-                });
+                    var players = PlayerList.Select(u => new SuperfightPlayer(u, Context.Channel)).Shuffle(28);
 
-            manager.Client.GetService<CommandService>().CreateCommand("endsf")
-                .AddCheck((c, u, ch) => u.Roles.Contains(ch.Server.GetRole(UInt64.Parse(_config["FGO_Admins"]))) && ch.Id == UInt64.Parse(_config["FGO_Powerlevels"]))
-                .Do(async cea =>
-                {
-                    await cea.Channel.SendWithRetry(game.EndGame());
-                    gameStarted = false;
-                });
+                    var game = new SuperfightGame(Context.Channel, players, GameService.Config, _discusstimeout);
+                    if (GameService.TryAddNewGame(Context.Channel, game))
+                    {
+                        await game.SetupGame().ConfigureAwait(false);
+                        await game.StartGame().ConfigureAwait(false);
+                    }
+                }
+            }
+        }
+
+        [Command("turn"), RequireGameState(GameState.EndOfTurn)]
+        [RequireContext(ContextType.Guild), RequirePlayerRole(PlayerRole.Fighter)]
+        [Permission(MinimumPermission.Everyone)]
+        public override Task NextTurnCmd()
+            => GameInProgress ? Game.NextTurn() : ReplyAsync("No game in progress.");
+
+        [Command("endearly"), Permission(MinimumPermission.ModRole)]
+        [RequireContext(ContextType.Guild)]
+        public override Task EndGameCmd()
+            => GameInProgress ? Game.EndGame("Game ended early by moderator.") : ReplyAsync("No game in progress to end.");
+
+        [Command("state"), Permission(MinimumPermission.Everyone)]
+        [RequireContext(ContextType.Guild)]
+        public override Task GameStateCmd()
+            => GameInProgress ? ReplyAsync(Game.GetGameState()) : ReplyAsync("No game in progress.");
+
+        [Command("vote"), Permission(MinimumPermission.Everyone)]
+        [RequireContext(ContextType.Guild), RequireGameState(GameState.Voting)]
+        public Task VoteCmd(IUser target)
+            => GameInProgress ? Game.ProcessVote(voter: Context.User, target: target) : ReplyAsync("No game in progress.");
+
+        [Command("pick"), Permission(MinimumPermission.Everyone)]
+        [RequireContext(ContextType.DM), RequirePlayerRole(PlayerRole.Fighter)]
+        [RequireGameState(GameState.Choosing)]
+        public Task ChooseCmd(int index)
+         => GameInProgress ? ReplyAsync(Game.ChooseInternal(Context.User, index)) : ReplyAsync("No game in progress.");
+
+        [Command("confirm"), RequireGameState(GameState.Choosing)]
+        [RequireContext(ContextType.DM), RequirePlayerRole(PlayerRole.Fighter)]
+        [Permission(MinimumPermission.Everyone)]
+        public Task ConfirmCmd()
+         => GameInProgress ? Game.ConfirmInternal(Context.User) : ReplyAsync("No game in progress.");
+
+        [Command("settimer"), RequireContext(ContextType.Guild), Permission(MinimumPermission.ModRole)]
+        public Task SetTimerCmd(int minutes)
+        {
+            GameService.DiscussionTimer[Context.Channel.Id] = minutes;
+            return ReplyAsync($"Discussion timer now set to {minutes} minutes.");
         }
     }
 }

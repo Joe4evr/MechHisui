@@ -1,12 +1,8 @@
 {
-    "profiles": {
-        "GudakoBot": {
-            "commandName": "GudakoBot",
-            "environmentVariables": {
-                "ASPNET_ENV": "Development",
-                "ASPNET_ENVIRONMENT": "Development",
-                "Hosting:Environment": "Development"
-            }
-        }
+  "profiles": {
+    "GudakoBot": {
+      "commandName": "Project",
+      "commandLineArgs": "-c \"config.json\""
     }
+  }
 }

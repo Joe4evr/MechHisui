@@ -1,367 +1,270 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using Microsoft.Extensions.Configuration;
-using JiiLib;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.Modules;
+using Discord.Addons.Preconditions;
+using Discord.Addons.SimplePermissions;
 
 namespace MechHisui.HisuiBets
 {
-    public class HisuiBetsModule : IModule
+    [Name("HisuiBets")]
+    public sealed class HisuiBetsModule : ModuleBase<ICommandContext>
     {
-        private readonly BankOfHisui _bank;
-        private readonly Timer _upTimer;
-        private readonly IConfiguration _config;
-        private readonly ulong[] _blacklist = new[]
+        private readonly HisuiBankService _service;
+        private UserAccount _account;
+        private BetGame _game;
+
+        public HisuiBetsModule(HisuiBankService service)
         {
-            121687861350105089ul,
-            124939115396333570ul,
-            145964622984380416ul,
-            168215800946098176ul,
-            168263616250904576ul,
-            168298664698052617ul,
-            175851451988312064ul
-        };
-
-        const char symbol = '\u050A';
-
-        private Game _game;
-
-        public HisuiBetsModule(DiscordClient client, IConfiguration config)
-        {
-            _bank = new BankOfHisui(config["bank"]);
-            _bank.ReadBank();
-
-            _upTimer = new Timer(cb =>
-            {
-                Console.WriteLine($"{DateTime.Now}: Increasing users' HisuiBucks.");
-                foreach (var user in _bank.Accounts)
-                {
-                    if (user.Bucks < 2500)
-                    {
-                        user.Bucks += 10;
-                    }
-                }
-                _bank.WriteBank(config["bank"]);
-            },
-            null,
-            TimeSpan.FromMinutes(60 - DateTime.Now.Minute),
-            TimeSpan.FromHours(1));
-
-            _config = config;
+            _service = service;
         }
 
-        void IModule.Install(ModuleManager manager)
+        protected override void BeforeExecute()
         {
-            Console.WriteLine("Registering 'HiusiBets'...");
+            base.BeforeExecute();
+            _service.Games.TryGetValue(Context.Channel.Id, out _game);
+            _account = _service.Bank.GetUser(Context.User.Id);
+        }
 
-            manager.Client.UserJoined += (s, e) =>
+        [Command("bet"), Permission(MinimumPermission.Everyone)]
+        [Priority(0), RequiresGameType(GameType.HungerGame)]
+        [RequireContext(ContextType.Guild)]
+        public async Task Bet(int amount, [Remainder] string target)
+        {
+            if (await CheckPreReqs(amount).ConfigureAwait(false))
             {
-                if (e.Server.Id == UInt64.Parse(_config["FGO_server"]) && !_bank.Accounts.Any(u => u.UserId == e.User.Id))
+                await ReplyAsync(_game.ProcessBet(new Bet
                 {
-                    Console.WriteLine($"{DateTime.Now} - Registering {e.User.Name} for a bank account.");
-                    _bank.Accounts.Add(new UserBucks { UserId = e.User.Id, Bucks = 100 });
-                }
-            };
+                    UserName = Context.User.Username,
+                    UserId = Context.User.Id,
+                    BettedAmount = amount,
+                    Tribute = target
+                })).ConfigureAwait(false);
+            }
+        }
 
-            manager.Client.GetService<CommandService>().CreateCommand("mybucks")
-                .Alias("bucks")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(_config["FGO_Hgames"]) || ch.Id == UInt64.Parse(_config["FGO_playground"]))
-                .Do(async cea =>
+        [Command("bet"), Permission(MinimumPermission.Everyone)]
+        [Priority(1), RequiresGameType(GameType.HungerGameDistrictsOnly)]
+        [RequireContext(ContextType.Guild)]
+        public async Task Bet(int amount, int district)
+        {
+            if (await CheckPreReqs(amount).ConfigureAwait(false))
+            {
+                await ReplyAsync(_game.ProcessBet(new Bet
                 {
-                    var bucks = _bank.Accounts.Single(u => u.UserId == cea.User.Id).Bucks;
-                    await cea.Channel.SendWithRetry($"**{cea.User.Name}** currently has {symbol}{bucks}.");
-                });
+                    UserName = Context.User.Username,
+                    UserId = Context.User.Id,
+                    BettedAmount = amount,
+                    Tribute = district.ToString()
+                })).ConfigureAwait(false);
+            }
+        }
 
-            manager.Client.GetService<CommandService>().CreateCommand("newgame")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(_config["FGO_Hgames"]) && (u.Id == UInt64.Parse(_config["Hgame_Master"]) || u.Id == UInt64.Parse(_config["Owner"])))
-                .Parameter("gametype", ParameterType.Optional)
-                .Do(async cea =>
+        [Command("bet"), Permission(MinimumPermission.Everyone)]
+        [Priority(2), RequiresGameType(GameType.SaltyBet)]
+        [RequireContext(ContextType.Guild)]
+        public async Task Bet(int amount, SaltyBetTeam team)
+        {
+            if (await CheckPreReqs(amount).ConfigureAwait(false))
+            {
+                await ReplyAsync(_game.ProcessBet(new Bet
                 {
-                    if (_game == null || !_game.GameOpen)
-                    {
-                        switch (cea.Args[0].ToLowerInvariant())
-                        {
-                            case "sb":
-                            case "salty":
-                                await cea.Channel.SendWithRetry("Starting a SaltyBet game. Bets will close shortly.");
-                                _game = new Game(_bank, cea.Channel, GameType.SaltyBet);
-                                _game.ClosingGame();
-                                break;
-                            default:
-                                await cea.Channel.SendWithRetry("A new game is starting. You may place your bets now.");
-                                _game = new Game(_bank, cea.Channel, GameType.HungerGame);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        await cea.Channel.SendWithRetry("Game is already in progress.");
-                    }
-                });
+                    UserName = Context.User.Username,
+                    UserId = Context.User.Id,
+                    BettedAmount = amount,
+                    Tribute = team.ToString()
+                })).ConfigureAwait(false);
+            }
+        }
 
-            var allins = new[] { "all", "all in", "allin" };
-            var sbColors = new[] { "red", "blue" };
-            manager.Client.GetService<CommandService>().CreateCommand("bet")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(_config["FGO_Hgames"]) /*&& !(Debugger.IsAttached && u.Id == UInt64.Parse(config["Owner"]))*/)
-                .Parameter("amount", ParameterType.Required)
-                .Parameter("tribute", ParameterType.Multiple)
-                .Description("Bet an amount of HisuiBucks on a specified tribute")
-                .Do(async cea =>
+        private async Task<bool> CheckPreReqs(int bettedAmount)
+        {
+            if (_game == null)
+            {
+                await ReplyAsync("No game to bet on.").ConfigureAwait(false);
+                return false;
+            }
+            if (!_game.BetsOpen)
+            {
+                await ReplyAsync("Bets are currently closed at this time.").ConfigureAwait(false);
+                return false;
+            }
+            if (_service.Blacklist.Contains(Context.User.Id))
+            {
+                await ReplyAsync("Not allowed to bet.").ConfigureAwait(false);
+                return false;
+            }
+            if ((_game.GameType == GameType.HungerGame || _game.GameType == GameType.HungerGameDistrictsOnly)
+                && Context.User.Id == _game.GameMaster)
+            {
+                await ReplyAsync("The Game Master is not allowed to bet.").ConfigureAwait(false);
+                return false;
+            }
+            if (bettedAmount <= 0)
+            {
+                await ReplyAsync("Cannot make a bet of 0 or less.").ConfigureAwait(false);
+                return false;
+            }
+            if (_account?.Bucks == 0)
+            {
+                await ReplyAsync("You currently have no HisuiBucks.").ConfigureAwait(false);
+                return false;
+            }
+            if (_account?.Bucks < bettedAmount)
+            {
+                await ReplyAsync("You do not have enough HisuiBucks to make that bet.").ConfigureAwait(false);
+                return false;
+            }
+            return true;
+        }
+
+        [Command("bet"), Permission(MinimumPermission.Everyone)]
+        [Priority(0), RequiresGameType(GameType.HungerGame)]
+        [RequireContext(ContextType.Guild), Hidden]
+        public Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, [Remainder] string target)
+            => (_account != null) ?
+                Bet(_account.Bucks, target) :
+                Task.CompletedTask;
+
+        [Command("bet"), Permission(MinimumPermission.Everyone)]
+        [Priority(1), RequiresGameType(GameType.HungerGameDistrictsOnly)]
+        [RequireContext(ContextType.Guild), Hidden]
+        public Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, int district)
+            => (_account != null) ?
+                Bet(_account.Bucks, district) :
+                Task.CompletedTask;
+
+        [Command("bet"), Permission(MinimumPermission.Everyone)]
+        [Priority(2), RequiresGameType(GameType.SaltyBet)]
+        [RequireContext(ContextType.Guild), Hidden]
+        public Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, SaltyBetTeam team)
+            => (_account != null)?
+                Bet(_account.Bucks, team) :
+                Task.CompletedTask;
+
+        [Command("bet"), Permission(MinimumPermission.Everyone)]
+        [Priority(-1), RequiresGameType(GameType.Any)]
+        [RequireContext(ContextType.Guild), Hidden]
+#pragma warning disable RCS1163 // Unused parameter.
+        public Task Bet([Remainder, LimitTo(StringComparison.OrdinalIgnoreCase, "it all")] string _)
+            => Context.Channel.SendFileAsync("kappa.png",
+                    text: $"**{Context.User.Username}** has bet all their bucks. Good luck.");
+#pragma warning restore RCS1163 // Unused parameter.
+
+        [Command("newgame"), Permission(MinimumPermission.Special)]
+        [RequireContext(ContextType.Guild)]
+        public Task NewGame(GameType gameType = GameType.HungerGame)
+        {
+            var actualType = (gameType == GameType.Any) ? GameType.HungerGame : gameType;
+            var game = new BetGame(_service.Bank, (ITextChannel)Context.Channel, actualType, Context.User.Id);
+
+            return (_service.TryAddNewGame(Context.Channel.Id, game)) ?
+                game.StartGame() :
+                ReplyAsync("Game is already in progress.");
+        }
+
+        [Command("checkbets"), Permission(MinimumPermission.Special)]
+        [RequireContext(ContextType.Guild), RequiresGameType(GameType.Any)]
+        public async Task CheckBets()
+        {
+            var sb = new StringBuilder("The following bets have been made:\n```\n", 2000);
+
+            foreach (var bet in _game.ActiveBets)
+            {
+                sb.AppendLine($"{bet.UserName,-20}: {HisuiBankService.Symbol}{bet.BettedAmount,-7} - {bet.Tribute}");
+
+                if (sb.Length > 1700)
                 {
-                    if (_game?.GType == GameType.HungerGame && cea.User.Id == UInt64.Parse(_config["Hgame_Master"]))
-                    {
-                        await cea.Channel.SendWithRetry("The game master is not allowed to bet in a Hunger Game.");
-                        return;
-                    }
-                    if (_game?.GameOpen == false || _game?.BetsOpen == false)
-                    {
-                        await cea.Channel.SendWithRetry("Bets are currently closed at this time.");
-                        return;
-                    }
-                    if (_blacklist.Contains(cea.User.Id))
-                    {
-                        await cea.Channel.SendWithRetry("Not allowed to bet.");
-                        return;
-                    }
-
-                    var userBucks = _bank.Accounts.SingleOrDefault(u => u.UserId == cea.User.Id).Bucks;
-                    if (userBucks == 0)
-                    {
-                        await cea.Channel.SendWithRetry("You currently have no HisuiBucks.");
-                        return;
-                    }
-                    
-                    int amount;
-                    if (allins.Contains(cea.Args[0].ToLowerInvariant()))
-                    {
-                        amount = userBucks;
-                    }
-                    else if (!Int32.TryParse(cea.Args[0], out amount))
-                    {
-                        await cea.Channel.SendWithRetry("Could not parse amount as a number.");
-                        return;
-                    }
-                    else if (amount > userBucks)
-                    {
-                        await cea.Channel.SendWithRetry($"**{cea.User.Name}** currently does not have enough HisuiBucks to make that bet.");
-                        return;
-                    }
-
-                    var target = String.Join(" ", cea.Args.Skip(1));
-                    if (_game?.GType == GameType.SaltyBet && !sbColors.ContainsIgnoreCase(target))
-                    {
-                        await cea.Channel.SendWithRetry("Argument must be `red` or `blue` in a SaltyBet.");
-                        return;
-                    }
-
-                    await cea.Channel.SendWithRetry(_game.ProcessBet(new Bet
-                    {
-                        UserName = cea.User.Name,
-                        UserId = cea.User.Id,
-                        Tribute = target,
-                        BettedAmount = amount
-                    }));
-                });
-
-            manager.Client.GetService<CommandService>().CreateCommand("checkbets")
-                .Alias("betstats")
-                .AddCheck((c, u, ch) => (ch.Id == UInt64.Parse(_config["FGO_Hgames"]) && u.Id == UInt64.Parse(_config["Hgame_Master"])) || u.Id == UInt64.Parse(_config["Owner"]))
-                .Do(async cea =>
-                {
-                    Console.WriteLine("Checking for an open game");
-                    if (_game?.GameOpen == false)
-                    {
-                        Console.WriteLine("No game open, aborting gracefully.");
-                        await cea.Channel.SendWithRetry("No game is going on at this time.");
-                        return;
-                    }
-
-                    Console.WriteLine("Finding longest name in the active bets");
-                    int longestName = _game.ActiveBets.OrderBy(b => b.UserName.Length).First().UserName.Length;
-                    Console.WriteLine($"Longest name is {longestName} chars");
-                    Console.WriteLine("Finding longest bet in active bets");
-                    int longestBet = _game.ActiveBets.OrderBy(b => b.BettedAmount.ToString().Length).First().BettedAmount.ToString().Length;
-                    Console.WriteLine($"Longest bet is {longestBet} chars");
-                    Console.WriteLine("Constructing StringBuilder");
-                    var sb = new StringBuilder("The following bets have been made:\n```\n");
-                    Console.WriteLine("Looping through active bets");
-                    foreach (var bet in _game.ActiveBets)
-                    {
-                        var nameSpaces = new String(' ', (longestName - bet.UserName.Length) + 1);
-                        var betSpaces = new String(' ', (longestBet - bet.BettedAmount.ToString().Length));
-                        var outstring = $"{bet.UserName}:{nameSpaces}{symbol}{betSpaces}{bet.BettedAmount} - {bet.Tribute}";
-                        Console.WriteLine(outstring);
-                        sb.AppendLine(outstring);
-
-                        if (sb.Length > 1700)
-                        {
-
-                            sb.Append("```");
-                            await cea.Channel.SendWithRetry(sb.ToString());
-                            sb.Clear().AppendLine("```");
-                        }
-                    }
                     sb.Append("```");
-                    Console.WriteLine("Sending result to channel");
-                    await cea.Channel.SendWithRetry(sb.ToString());
-                });
-
-            manager.Client.GetService<CommandService>().CreateCommand("closebets")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(_config["FGO_Hgames"]) && (u.Id == UInt64.Parse(_config["Hgame_Master"]) || u.Id == UInt64.Parse(_config["Owner"])))
-                .Do(async cea =>
-                {
-                    if (_game?.GameOpen == false)
-                    {
-                        await cea.Channel.SendWithRetry("No game is going on at this time.");
-                        return;
-                    }
-                    if (_game?.BetsOpen == false)
-                    {
-                        await cea.Channel.SendWithRetry("Bets are already closed.");
-                        return;
-                    }
-                    if (_game?.GType == GameType.SaltyBet)
-                    {
-                        await cea.Channel.SendWithRetry("This type of game closes automatically.");
-                        return;
-                    }
-                    await cea.Channel.SendWithRetry("Bets are going to close soon. Please place your final bets now.");
-                    _game.ClosingGame();
-                });
-
-            manager.Client.GetService<CommandService>().CreateCommand("winner")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(_config["FGO_Hgames"]) && (u.Id == UInt64.Parse(_config["Hgame_Master"]) || u.Id == UInt64.Parse(_config["Owner"])))
-                .Parameter("name", ParameterType.Multiple)
-                .Do(async cea =>
-                {
-                    if (_game?.BetsOpen == true)
-                    {
-                        _game.CloseOff();
-                    }
-                    if (_game?.GameOpen == true)
-                    {
-                        await cea.Channel.SendWithRetry(await _game.Winner(String.Join(" ", cea.Args)));
-                    }
-                });
-
-            manager.Client.GetService<CommandService>().CreateCommand("donate")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(_config["FGO_Hgames"]))
-                .Parameter("amount", ParameterType.Required)
-                .Parameter("donatee", ParameterType.Required)
-                .Do(async cea =>
-                {
-                    DateTime lastDonation;
-                    if (_donationTimeouts.TryGetValue(cea.User.Id, out lastDonation))
-                    {
-                        if ((DateTime.UtcNow - lastDonation).TotalMilliseconds == TimeSpan.FromMinutes(10).TotalMilliseconds)
-                        {
-                            await cea.Channel.SendWithRetry("You are currently in donation timeout.");
-                            return;
-                        }
-                        else
-                        {
-                            _donationTimeouts.Remove(cea.User.Id);
-                        }
-                    }
-
-                    int bucks;
-                    if (Int32.TryParse(cea.Args[0], out bucks))
-                    {
-                        if (bucks <= 0)
-                        {
-                            await cea.Channel.SendWithRetry("Cannot make a donation of 0 or less.");
-                            return;
-                        }
-                        if (bucks > _bank.Accounts.Single(u => u.UserId == cea.User.Id).Bucks)
-                        {
-                            await cea.Channel.SendWithRetry($"**{cea.User.Name}** currently does not have enough HisuiBucks to make that donation.");
-                            return;
-                        }
-
-                        var target = cea.Message.MentionedUsers.FirstOrDefault();
-                        if (target != null)
-                        {
-                            if (_blacklist.Contains(target.Id))
-                            {
-                                await cea.Channel.SendWithRetry("Unable to donate to Bot accounts.");
-                                return;
-                            }
-
-                            _bank.Accounts.Single(p => p.UserId == cea.User.Id).Bucks -= bucks;
-                            _bank.Accounts.Single(p => p.UserId == target.Id).Bucks += bucks;
-                            await cea.Channel.SendWithRetry($"**{cea.User.Name}** donated {symbol}{bucks} to **{target.Name}**.");
-                            _bank.WriteBank(_config["bank"]);
-
-                            _donationCounters.AddOrUpdate(cea.User.Id, 1, (k, v) => v++);
-                            int d;
-                            if (_donationCounters.TryGetValue(cea.User.Id, out d) && d == 10)
-                            {
-                                _donationTimeouts.Add(cea.User.Id, DateTime.UtcNow);
-                                _donationCounters.TryRemove(cea.User.Id, out d);
-                            }
-                        }
-                        else
-                        {
-                            await cea.Channel.SendWithRetry("Could not find that user.");
-                        }
-                    }
-                    else
-                    {
-                        await cea.Channel.SendWithRetry("Could not parse amount as a number.");
-                    }
-                });
-
-            manager.Client.GetService<CommandService>().CreateCommand("top")
-                .AddCheck((c, u, ch) => ch.Id == UInt64.Parse(_config["FGO_Hgames"]) && (u.Id == UInt64.Parse(_config["Hgame_Master"]) || u.Id == UInt64.Parse(_config["Owner"])))
-                .Do(async cea =>
-                {
-                    var tops = _bank.Accounts.Where(a => a.Bucks > 2500)
-                        .OrderByDescending(a => a.Bucks)
-                        .Take(10)
-                        .Select(a => new
-                        {
-                            Name = cea.Server.GetUser(a.UserId).Name,
-                            a.Bucks
-                        })
-                        .ToList();
-
-                    var longestName = tops.Max(a => a.Name.Length);
-                    var longestNum = tops.Max(a => a.Bucks.ToString().Length);
-
-                    var sb = new StringBuilder("```\n")
-                        .AppendSequence(tops, (s, a) =>
-                        {
-                            var nameSpaces = new String(' ', longestName - a.Name.Length);
-                            var numSpaces = new String(' ', longestNum - a.Bucks.ToString().Length);
-                            return s.AppendLine($"{a.Name}:{nameSpaces} {symbol}{numSpaces}{a.Bucks}");
-                        })
-                        .Append("```");
-
-                    await cea.Channel.SendWithRetry(sb.ToString());
-                });
-        }
-
-        private ConcurrentDictionary<ulong, int> _donationCounters = new ConcurrentDictionary<ulong, int>();
-        private Dictionary<ulong, DateTime> _donationTimeouts = new Dictionary<ulong, DateTime>();
-
-        public void AddNewHisuiBetsUsers(DiscordClient client, IConfiguration config)
-        {
-            var fgo = client.GetServer(UInt64.Parse(config["FGO_server"]));
-            var accounts = _bank.Accounts.Select(u => u.UserId);
-            foreach (var user in fgo.Users)
-            {
-                if (!accounts.Contains(user.Id) && user.Id != 0 && !_blacklist.Contains(user.Id))
-                {
-                    _bank.Accounts.Add(new UserBucks { UserId = user.Id, Bucks = 100 });
+                    await ReplyAsync(sb.ToString()).ConfigureAwait(false);
+                    sb.Clear().AppendLine("```");
                 }
             }
-            _bank.WriteBank(config["bank"]);
+            sb.Append("```");
+            await ReplyAsync(sb.ToString()).ConfigureAwait(false);
         }
+
+        [Command("closebets"), Permission(MinimumPermission.Special)]
+        [RequireContext(ContextType.Guild), RequiresGameType(GameType.Any)]
+        public async Task CloseBets()
+        {
+            if (!_game.BetsOpen)
+            {
+                await ReplyAsync("Bets are already closed.").ConfigureAwait(false);
+                return;
+            }
+            if (_game.GameType == GameType.SaltyBet)
+            {
+                await ReplyAsync("This type of game closes automatically.").ConfigureAwait(false);
+                return;
+            }
+
+            await ReplyAsync("Bets are going to close soon. Please place your final bets now.").ConfigureAwait(false);
+            _game.ClosingGame();
+        }
+
+        [Command("winner"), Permission(MinimumPermission.Special)]
+        [RequireContext(ContextType.Guild), RequiresGameType(GameType.Any)]
+#pragma warning disable RCS1174 // Remove redundant async/await.
+        public async Task SetWinner([Remainder] string winner)
+            => await ReplyAsync(await _game.Winner(winner).ConfigureAwait(false)).ConfigureAwait(false);
+#pragma warning restore RCS1174 // Remove redundant async/await.
+
+        [Command("bucks"), Permission(MinimumPermission.Everyone)]
+        [Alias("mybucks"), RequireContext(ContextType.Guild)]
+        public Task Bucks()
+        {
+            return ReplyAsync($"**{Context.User.Username}** currently has {HisuiBankService.Symbol}{_account.Bucks}.");
+        }
+
+        [Command("donate"), Permission(MinimumPermission.Everyone)]
+        [RequireContext(ContextType.Guild), Ratelimit(10, 10, Measure.Minutes)]
+        public async Task Donate(int amount, IUser user)
+        {
+            if (amount <= 0)
+            {
+                await ReplyAsync("Cannot make a donation of 0 or less.").ConfigureAwait(false);
+                return;
+            }
+            if (amount > _service.Bank.GetUser(Context.User.Id).Bucks)
+            {
+                await ReplyAsync($"**{Context.User.Username}** currently does not have enough HisuiBucks to make that donation.").ConfigureAwait(false);
+                return;
+            }
+            if (user.IsBot || _service.Blacklist.Contains(user.Id))
+            {
+                await ReplyAsync("Unable to donate to Bot accounts.").ConfigureAwait(false);
+                return;
+            }
+
+            _service.Bank.Donate(Context.User.Id, user.Id, amount);
+            await ReplyAsync($"**{Context.User.Username}** donated {HisuiBankService.Symbol}{amount} to **{user.Username}**.").ConfigureAwait(false);
+        }
+
+        [Command("top"), Permission(MinimumPermission.Special)]
+        [RequireContext(ContextType.Guild)]
+        public Task Tops()
+        {
+            var tops = _service.Bank.GetAllUsers()
+                .Where(a => a.Bucks > 2500)
+                .OrderByDescending(a => a.Bucks)
+                .Take(10)
+                .Select(a => new
+                {
+                    Name = Context.Guild.GetUserAsync(a.UserId).GetAwaiter().GetResult().Username,
+                    a.Bucks
+                })
+                .ToList();
+
+            var sb = new StringBuilder("```\n")
+                .AppendSequence(tops, (s, a) => s.AppendLine($"{a.Name,20}: {HisuiBankService.Symbol}{a.Bucks,-7}"))
+                .Append("```");
+
+            return ReplyAsync(sb.ToString());
+        }
+
+        public static string P { set { } }
     }
 }

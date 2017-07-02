@@ -4,9 +4,7 @@ using System.Linq;
 
 namespace MechHisui.FateGOLib
 {
-    /// <summary>
-    /// Comparer for Skill ranks.
-    /// </summary>
+    /// <summary> Comparer for Skill ranks. </summary>
     /// <remarks>"EX" > "A" > "B" > "C" etc.</remarks>
     public class RankComparer : Comparer<string>
     {
@@ -17,15 +15,13 @@ namespace MechHisui.FateGOLib
             if (String.IsNullOrWhiteSpace(y)) return 1;
             if (x == "EX") return 1;
             if (y == "EX") return -1;
-            
-
 
             if (x.First() == y.First())
             {
                 Func<char, bool> plusses = c => c == '+';
                 Func<char, bool> minusses = c => c == '-';
-                return (x.Count(plusses) > y.Count(plusses) ^
-                    x.Count(minusses) < y.Count(minusses)) ? 1 : -1;
+                return (x.Count(plusses) > y.Count(plusses)
+                    ^ x.Count(minusses) < y.Count(minusses)) ? 1 : -1;
             }
             else
             {
