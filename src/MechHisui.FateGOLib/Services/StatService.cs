@@ -135,8 +135,6 @@ namespace MechHisui.FateGOLib
         //}
 
         private static bool RegexMatchOneWord(string hay, string needle)
-            => Regex.Match(hay, String.Concat(_b, needle, _b), RegexOptions.IgnoreCase).Success;
-
-        private const string _b = @"\b";
+            => Regex.Match(hay, String.Concat(@"\b", needle, @"\b"), RegexOptions.IgnoreCase).Success;
     }
 }

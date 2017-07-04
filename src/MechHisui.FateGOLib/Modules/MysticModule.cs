@@ -66,7 +66,7 @@ namespace MechHisui.FateGOLib.Modules
 
         private static string FormatMysticCodeProfile(MysticCode code)
         {
-            StringBuilder sb = new StringBuilder()
+            var sb = new StringBuilder()
                 .AppendLine($"**Name:** {code.Code}")
                 .AppendLine($"**Skill 1:** {code.Skill1} - *{code.Skill1Effect}*")
                 .AppendLine($"**Skill 2:** {code.Skill2} - *{code.Skill2Effect}*")

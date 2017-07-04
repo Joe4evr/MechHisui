@@ -28,7 +28,7 @@ namespace Kohaku
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.
+            //optionsBuilder.
             base.OnConfiguring(optionsBuilder);
         }
     }
