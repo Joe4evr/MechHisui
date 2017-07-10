@@ -8,6 +8,9 @@
     <PackageReference Include="Microsoft.NET.Sdk" Version="1.0.0-alpha-20161104-2" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions\Discord.Addons.SimplePermissions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="kappa.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

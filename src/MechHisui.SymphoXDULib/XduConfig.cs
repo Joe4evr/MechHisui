@@ -9,5 +9,6 @@ namespace MechHisui.SymphoXDULib
         public Func<IEnumerable<Profile>> GetGears { get; set; }
         public Func<IEnumerable<Memoria>> GetMemorias { get; set; }
         public Func<IEnumerable<Song>> GetSongs { get; set; }
+        public Func<IEnumerable<XduEvent>> GetEvents { get; set; }
     }
 }

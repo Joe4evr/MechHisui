@@ -53,7 +53,7 @@ namespace MechHisui.SymphoXDULib
                     (field, skill) => field.WithIsInline(false)
                         .WithName($"{skill.SkillName} ({skill.SkillType})")
                         .WithValue($"{skill.Range} {skill.Effect} CD:{skill.Cooldown}s"))
-                .WithImageUrl(new Uri(Image))
+                .WithImageUrl(Image)
                 .Build()).ToList();
         }
     }

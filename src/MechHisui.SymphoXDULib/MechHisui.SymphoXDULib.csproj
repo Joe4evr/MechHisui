@@ -8,6 +8,10 @@
     <PackageReference Include="Discord.Addons.SimplePermissions" Version="0.10.25-rc" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions\Discord.Addons.SimplePermissions.csproj" />
+  </ItemGroup>
+
   <Import Project="..\SharedExtensions\SharedExtensions.projitems" Label="Shared" />
 
 </Project>

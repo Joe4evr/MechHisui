@@ -92,7 +92,7 @@ namespace MechHisui.FateGOLib
     //    public CEProfile CE { get; set; }
     //}
 
-    public class Event
+    public class FgoEvent
     {
         //public int Id { get; set; }
         public string EventName { get; set; }

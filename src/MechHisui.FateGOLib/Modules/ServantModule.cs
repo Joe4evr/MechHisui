@@ -24,8 +24,7 @@ namespace MechHisui.FateGOLib.Modules
         [Summary("Relay information on the specified Servant by ID.")]
         public async Task StatCmd(int id)
         {
-            var profile = _service.Config.GetServants().SingleOrDefault(p => p.Id == id) ??
-                _service.Config.GetFakeServants().SingleOrDefault(p => p.Id == id);
+            var profile = _service.Config.GetServants().SingleOrDefault(p => p.Id == id);
 
             if (profile != null)
             {

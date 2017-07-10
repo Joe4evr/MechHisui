@@ -6,7 +6,7 @@ namespace MechHisui.FateGOLib
     public sealed class FgoConfig
     {
         public Func<IEnumerable<ServantProfile>> GetServants { get; set; }
-        public Func<IEnumerable<ServantProfile>> GetFakeServants { get; set; }
+        //public Func<IEnumerable<ServantProfile>> GetFakeServants { get; set; }
         //public Func<IEnumerable<ServantAlias>> GetServantAliases { get; set; }
         public Func<string, string, bool> AddServantAlias { get; set; }
 
@@ -18,7 +18,7 @@ namespace MechHisui.FateGOLib
         //public Func<IEnumerable<MysticAlias>> GetMysticAliases { get; set; }
         public Func<string, string, bool> AddMysticAlias { get; set; }
 
-        public Func<IEnumerable<Event>> GetEvents { get; set; }
+        public Func<IEnumerable<FgoEvent>> GetEvents { get; set; }
 
         //public string GoogleClientId { get; set; }
 

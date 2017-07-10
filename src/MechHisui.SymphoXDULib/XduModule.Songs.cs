@@ -72,7 +72,7 @@ namespace MechHisui.SymphoXDULib
                             Value    = String.Join(", ", song.EquipsOn)
                         }
                     },
-                    ImageUrl    = new Uri(song.Image)
+                    ImageUrl    = song.Image
                 }.Build();
             }
         }

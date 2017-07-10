@@ -7,7 +7,7 @@
     <DefineConstants Condition="'$(RuntimeIdentifier)' == 'win10-arm'">ARM</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Discord.Net.WebSocket" Version="1.0.0-rc3-00742" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="1.0.1" />
     <PackageReference Include="WS4NetCore" Version="1.0.0-a" />
   </ItemGroup>
   <Import Project="..\SharedExtensions\SharedExtensions.projitems" Label="Shared" />

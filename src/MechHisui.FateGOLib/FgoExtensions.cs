@@ -63,7 +63,7 @@ namespace MechHisui.FateGOLib
         {
             if (predicate())
             {
-                builder.WithImageUrl(new Uri(img));
+                builder.WithImageUrl(img);
             }
 
             return builder;

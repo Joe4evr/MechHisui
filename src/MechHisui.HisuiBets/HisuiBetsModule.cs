@@ -21,9 +21,9 @@ namespace MechHisui.HisuiBets
             _service = service;
         }
 
-        protected override void BeforeExecute()
+        protected override void BeforeExecute(CommandInfo command)
         {
-            base.BeforeExecute();
+            base.BeforeExecute(command);
             _service.Games.TryGetValue(Context.Channel.Id, out _game);
             _account = _service.Bank.GetUser(Context.User.Id);
         }

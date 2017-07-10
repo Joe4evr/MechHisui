@@ -39,8 +39,8 @@ namespace MechHisui.Core
         public IEnumerable<ServantProfile> GetAllServants()
         {
             var reals = JsonConvert.DeserializeObject<List<ServantProfile>>(File.ReadAllText(Path.Combine(FgoBasePath, "Servants.json")));
-            var fakes = JsonConvert.DeserializeObject<List<ServantProfile>>(File.ReadAllText(Path.Combine(FgoBasePath, "FakeServants.json")));
-            return reals.Concat(fakes);
+            //var fakes = JsonConvert.DeserializeObject<List<ServantProfile>>(File.ReadAllText(Path.Combine(FgoBasePath, "FakeServants.json")));
+            return reals.ToList();
         }
 
         public IEnumerable<CEProfile> GetAllCEs()
@@ -53,9 +53,9 @@ namespace MechHisui.Core
             return JsonConvert.DeserializeObject<List<MysticCode>>(File.ReadAllText(Path.Combine(FgoBasePath, "MysticCodes.json")));
         }
 
-        public IEnumerable<Event> GetAllEvents()
+        public IEnumerable<FgoEvent> GetAllEvents()
         {
-            return JsonConvert.DeserializeObject<List<Event>>(File.ReadAllText(Path.Combine(FgoBasePath, "Events.json")));
+            return JsonConvert.DeserializeObject<List<FgoEvent>>(File.ReadAllText(Path.Combine(FgoBasePath, "Events.json")));
         }
     }
 

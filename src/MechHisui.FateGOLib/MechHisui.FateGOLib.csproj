@@ -8,4 +8,7 @@
     <PackageReference Include="Microsoft.NET.Sdk" Version="1.0.0-alpha-20161104-2" />
     <PackageReference Include="JiiLib" Version="0.3.2" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions\Discord.Addons.SimplePermissions.csproj" />
+  </ItemGroup>
 </Project>
