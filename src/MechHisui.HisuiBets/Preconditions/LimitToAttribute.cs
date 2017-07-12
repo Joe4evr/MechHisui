@@ -13,6 +13,12 @@ namespace MechHisui.HisuiBets
         private readonly IReadOnlyCollection<string> _options;
         private readonly StringComparer _comparer;
 
+        public LimitToAttribute(params string[] options)
+        {
+            _comparer = GetComparer(StringComparison.OrdinalIgnoreCase);
+            _options = options.ToImmutableArray();
+        }
+
         public LimitToAttribute(StringComparison comparison, params string[] options)
         {
             _comparer = GetComparer(comparison);

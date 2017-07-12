@@ -148,7 +148,7 @@ namespace MechHisui.HisuiBets
         [Priority(-1), RequiresGameType(GameType.Any)]
         [RequireContext(ContextType.Guild), Hidden]
 #pragma warning disable RCS1163 // Unused parameter.
-        public Task Bet([Remainder, LimitTo(StringComparison.OrdinalIgnoreCase, "it all")] string _)
+        public Task Bet([Remainder, LimitTo("it all")] string _)
             => Context.Channel.SendFileAsync("kappa.png",
                     text: $"**{Context.User.Username}** has bet all their bucks. Good luck.");
 #pragma warning restore RCS1163 // Unused parameter.
