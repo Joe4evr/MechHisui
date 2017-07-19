@@ -3,6 +3,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <RuntimeFrameworkVersion>2.0.0-preview1-002028-00</RuntimeFrameworkVersion>
+    <LangVersion>Latest</LangVersion>
     <RuntimeIdentifiers>win10-arm</RuntimeIdentifiers>
     <DefineConstants Condition="'$(RuntimeIdentifier)' == 'win10-arm'">ARM</DefineConstants>
   </PropertyGroup>

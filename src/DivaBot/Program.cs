@@ -21,16 +21,16 @@ namespace DivaBot
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
 
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             var p = new Program(Params.Parse(args));
             try
             {
-                p.AsyncMain().GetAwaiter().GetResult();
+                await p.AsyncMain();
             }
             catch (Exception e)
             {
-                p.Log(LogSeverity.Critical, $"Unhandled Exception: {e}").GetAwaiter().GetResult();
+                await p.Log(LogSeverity.Critical, $"Unhandled Exception: {e}");
             }
         }
 
@@ -39,8 +39,15 @@ namespace DivaBot
             var minlog = p.LogSeverity ?? LogSeverity.Info;
             _logger = new Logger(minlog).Log;
 
+            Log(LogSeverity.Verbose, $"Constructing {nameof(CommandService)}");
+            _commands = new CommandService(new CommandServiceConfig
+            {
+                CaseSensitiveCommands = false,
+                DefaultRunMode = RunMode.Sync
+            });
+
             Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
-            _store = new JsonConfigStore<DivaBotConfig>(p.ConfigPath);
+            _store = new JsonConfigStore<DivaBotConfig>(p.ConfigPath, _commands);
             using (var config = _store.Load())
             {
                 if (config.AutoResponses == null)
@@ -83,13 +90,6 @@ namespace DivaBot
 #if !ARM
                 WebSocketProvider = WS4NetProvider.Instance
 #endif
-            });
-
-            Log(LogSeverity.Verbose, $"Constructing {nameof(CommandService)}");
-            _commands = new CommandService(new CommandServiceConfig
-            {
-                CaseSensitiveCommands = false,
-                DefaultRunMode = RunMode.Sync
             });
         }
 

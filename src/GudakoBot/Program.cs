@@ -15,16 +15,16 @@ namespace GudakoBot
         private readonly Func<LogMessage, Task> _logger;
         private ulong _owner;
 
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             var p = new Program(Params.Parse(args));
             try
             {
-                p.AsyncMain().GetAwaiter().GetResult();
+                await p.AsyncMain();
             }
             catch (Exception e)
             {
-                p.Log(LogSeverity.Critical, $"Unhandled Exception: {e}").GetAwaiter().GetResult();
+                await p.Log(LogSeverity.Critical, $"Unhandled Exception: {e}");
             }
         }
 

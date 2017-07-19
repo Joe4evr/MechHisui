@@ -22,16 +22,16 @@ namespace MechHisui
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
 
-        public static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             var p = new Program(Params.Parse(args));
             try
             {
-                p.AsyncMain().GetAwaiter().GetResult();
+                await p.AsyncMain();
             }
             catch (Exception e)
             {
-                p.Log(LogSeverity.Critical, $"Unhandled Exception: {e}").GetAwaiter().GetResult();
+                await p.Log(LogSeverity.Critical, $"Unhandled Exception: {e}");
             }
         }
 
