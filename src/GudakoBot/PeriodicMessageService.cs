@@ -10,45 +10,40 @@ namespace GudakoBot
 {
     public class PeriodicMessageService
     {
-        private readonly HashSet<ulong> _channels;
+        private readonly Func<LogMessage, Task> _logger;
         private readonly Timer _timer;
         private readonly Random _rng = new Random();
 
-        private string lastLine;
+        private string _lastLine;
 
         public PeriodicMessageService(
             DiscordSocketClient client,
-            HashSet<ulong> channels,
-            IEnumerable<string> lines)
+            ulong channel,
+            IEnumerable<string> lines,
+            Func<LogMessage, Task> logger = null)
         {
-            _channels = channels ?? new HashSet<ulong>();
+            _logger = logger ?? (m => Task.CompletedTask);
 
             _timer = new Timer(async s =>
             {
-                var chs = _channels.Select(id => client.GetChannel(id) as ITextChannel);
 
                 string str;
                 lines = lines.Shuffle();
 
                 do str = lines.ElementAt(_rng.Next(maxValue: lines.Count()));
-                while (str == lastLine);
+                while (str == _lastLine);
 
-                Console.WriteLine($"{DateTime.Now}: Sending messages.");
-
-                var tasks = new List<Task>();
-                foreach (var ch in chs)
+                var ch = client.GetChannel(channel) as ITextChannel;
+                if (ch == null)
                 {
-                    if (ch == null)
-                    {
-                        Console.WriteLine($"{DateTime.Now,-19} Channel couldn't be found. Waiting for next interval.");
-                    }
-                    else
-                    {
-                        tasks.Add(ch.SendMessageAsync(str));
-                    }
+                    await _logger(new LogMessage(LogSeverity.Info, "Periodic", $"{DateTime.Now,-19} Channel couldn't be found. Waiting for next interval.")).ConfigureAwait(false);
                 }
-                await Task.WhenAll(tasks).ConfigureAwait(false);
-                lastLine = str;
+                else
+                {
+                    await ch.SendMessageAsync(str).ConfigureAwait(false);
+                }
+                
+                _lastLine = str;
             }, null, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(30));
         }
     }

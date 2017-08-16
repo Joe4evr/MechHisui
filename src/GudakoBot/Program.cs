@@ -17,14 +17,15 @@ namespace GudakoBot
 
         private static async Task Main(string[] args)
         {
-            var p = new Program(Params.Parse(args));
+            var p = Params.Parse(args);
+            var app = new Program(p);
             try
             {
-                await p.AsyncMain();
+                await app.AsyncMain(p);
             }
             catch (Exception e)
             {
-                await p.Log(LogSeverity.Critical, $"Unhandled Exception: {e}");
+                await app.Log(LogSeverity.Critical, $"Unhandled Exception: {e}");
             }
         }
 
@@ -44,6 +45,7 @@ namespace GudakoBot
                 WebSocketProvider = WS4NetProvider.Instance
 #endif
             });
+            _client.Log += _logger;
 
             //_owner = _client.GetApplicationInfoAsync().GetAwaiter().GetResult().Owner.Id;
         }
@@ -53,14 +55,14 @@ namespace GudakoBot
             return _logger(new LogMessage(severity, "Main", msg));
         }
 
-        private async Task AsyncMain()
+        private PeriodicMessageService _periodic;
+
+        private async Task AsyncMain(Params p)
         {
-            //Console.WriteLine("Loading config...");
             var config = _store.Load();
             await Log(LogSeverity.Info, $"Loaded {config.Lines.Count()} lines.").ConfigureAwait(false);
+            _periodic = new PeriodicMessageService(_client, config.FgoGeneral, config.Lines, _logger);
 
-            //Display all log messages in the console
-            _client.Log += _logger;
 
             _client.MessageReceived += async msg =>
             {
