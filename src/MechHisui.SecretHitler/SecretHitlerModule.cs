@@ -8,6 +8,7 @@ using Discord.Addons.MpGame;
 using Discord.Addons.SimplePermissions;
 using Discord.Commands;
 using MechHisui.SecretHitler.Models;
+using SharedExtensions;
 
 namespace MechHisui.SecretHitler
 {
@@ -22,9 +23,9 @@ namespace MechHisui.SecretHitler
         {
         }
 
-        protected override void BeforeExecute()
+        protected override void BeforeExecute(CommandInfo command)
         {
-            base.BeforeExecute();
+            base.BeforeExecute(command);
             _currentHouseRules = GameService.HouseRulesList.GetValueOrDefault(Context.Channel, defaultValue: HouseRules.None);
         }
 
@@ -49,7 +50,7 @@ namespace MechHisui.SecretHitler
         [RequireContext(ContextType.Guild | ContextType.Group)]
         public override async Task OpenGameCmd()
         {
-            if (GameInProgress)
+            if (GameInProgress != CurrentlyPlaying.None)
             {
                 await ReplyAsync("Another game already in progress.").ConfigureAwait(false);
             }
@@ -61,7 +62,6 @@ namespace MechHisui.SecretHitler
             {
                 if (GameService.TryUpdateOpenToJoin(Context.Channel, newValue: true, comparisonValue: false))
                 {
-                    //GameService.MakeNewPlayerList(Context.Channel);
                     GameService.HouseRulesList[Context.Channel] = HouseRules.None;
                     await ReplyAsync("Opening for a game.").ConfigureAwait(false);
                 }
@@ -72,7 +72,7 @@ namespace MechHisui.SecretHitler
         [RequireContext(ContextType.Guild | ContextType.Group)]
         public override async Task JoinGameCmd()
         {
-            if (GameInProgress)
+            if (GameInProgress != CurrentlyPlaying.None)
             {
                 await ReplyAsync("Cannot join a game already in progress.").ConfigureAwait(false);
             }
@@ -97,7 +97,7 @@ namespace MechHisui.SecretHitler
         [RequireContext(ContextType.Guild | ContextType.Group)]
         public override async Task LeaveGameCmd()
         {
-            if (GameInProgress)
+            if (GameInProgress != CurrentlyPlaying.None)
             {
                 await ReplyAsync("Cannot leave a game already in progress.").ConfigureAwait(false);
             }
@@ -118,7 +118,7 @@ namespace MechHisui.SecretHitler
         [RequireContext(ContextType.Guild | ContextType.Group)]
         public override async Task CancelGameCmd()
         {
-            if (GameInProgress)
+            if (GameInProgress != CurrentlyPlaying.None)
             {
                 await ReplyAsync("Cannot cancel a game already in progress.").ConfigureAwait(false);
             }
@@ -128,9 +128,8 @@ namespace MechHisui.SecretHitler
             }
             else
             {
-                if (GameService.TryUpdateOpenToJoin(Context.Channel, newValue: false, comparisonValue: true))
+                if (GameService.CancelGame(Context.Channel))
                 {
-                    PlayerList.Clear();
                     await ReplyAsync("Game was cancelled.").ConfigureAwait(false);
                 }
             }
@@ -151,7 +150,7 @@ namespace MechHisui.SecretHitler
 
         private async Task StartInternal(SecretHitlerConfig config)
         {
-            if (GameInProgress)
+            if (GameInProgress != CurrentlyPlaying.None)
             {
                 await ReplyAsync("Another game already in progress.").ConfigureAwait(false);
             }
@@ -217,23 +216,23 @@ namespace MechHisui.SecretHitler
         [Command("turn"), RequireGameState(GameState.EndOfTurn)]
         [RequireContext(ContextType.Guild | ContextType.Group), RequirePlayerRole(PlayerRole.President)]
         public override Task NextTurnCmd()
-            => GameInProgress ? Game.NextTurn() : ReplyAsync("No game in progress.");
+            => GameInProgress == CurrentlyPlaying.ThisGame ? Game.NextTurn() : ReplyAsync("No game in progress.");
 
         [Command("endearly"), Permission(MinimumPermission.ModRole)]
         [RequireContext(ContextType.Guild | ContextType.Group)]
         public override Task EndGameCmd()
-            => GameInProgress ? Game.EndGame("Game ended early by moderator.") : ReplyAsync("No game in progress to end.");
+            => GameInProgress == CurrentlyPlaying.ThisGame ? Game.EndGame("Game ended early by moderator.") : ReplyAsync("No game in progress to end.");
 
         [Command("state"), Permission(MinimumPermission.Everyone)]
         [RequireContext(ContextType.Guild | ContextType.Group)]
         public override Task GameStateCmd()
-            => GameInProgress ? ReplyAsync(Game.GetGameState()) : ReplyAsync("No game in progress.");
+            => GameInProgress == CurrentlyPlaying.ThisGame ? ReplyAsync(Game.GetGameState()) : ReplyAsync("No game in progress.");
 
         [Command("enable"), Permission(MinimumPermission.ModRole)]
         [RequireContext(ContextType.Guild | ContextType.Group)]
         public async Task EnableHouserule(string rule)
         {
-            if (GameInProgress)
+            if (GameInProgress != CurrentlyPlaying.None)
             {
                 await ReplyAsync("Another game already in progress.").ConfigureAwait(false);
             }
@@ -265,7 +264,7 @@ namespace MechHisui.SecretHitler
         [RequireContext(ContextType.Guild | ContextType.Group)]
         public async Task DisableHouserule(string rule)
         {
-            if (GameInProgress)
+            if (GameInProgress != CurrentlyPlaying.None)
             {
                 await ReplyAsync("Another game already in progress.").ConfigureAwait(false);
             }
@@ -276,7 +275,7 @@ namespace MechHisui.SecretHitler
             else
             {
                 var r = GetRule(rule);
-                if ((_currentHouseRules & r) == r)
+                if ((_currentHouseRules | r) != _currentHouseRules)
                 {
                     await ReplyAsync("Specified rule already disabled.").ConfigureAwait(false);
                     return;

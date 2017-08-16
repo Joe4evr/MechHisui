@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.Addons.SimplePermissions;
+using SharedExtensions;
 
 namespace MechHisui
 {

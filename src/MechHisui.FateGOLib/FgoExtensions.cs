@@ -7,8 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using JiiLib;
 using MechHisui.FateGOLib.Modules;
+using SharedExtensions;
 
 namespace MechHisui.FateGOLib
 {
@@ -20,7 +20,7 @@ namespace MechHisui.FateGOLib
             FgoConfig config,
             DiscordSocketClient client)
         {
-            var statService = new StatService(config, client);
+            var statService = new FgoStatService(config, client);
             map.AddSingleton(statService);
             return Task.WhenAll(
                 commands.AddModuleAsync<ServantModule>(),

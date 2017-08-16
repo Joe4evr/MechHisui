@@ -61,7 +61,7 @@ namespace MechHisui.SymphoXDULib
                 return new EmbedBuilder
                 {
                     Author      = new EmbedAuthorBuilder { Name = $"Song #{song.Id}: {song.Title}" },
-                    Title       = "Effect while active",
+                    Title       = "Effect:",
                     Description = song.Effect,
                     Fields      = new List<EmbedFieldBuilder>(1)
                     {
@@ -72,7 +72,7 @@ namespace MechHisui.SymphoXDULib
                             Value    = String.Join(", ", song.EquipsOn)
                         }
                     },
-                    ImageUrl    = song.Image
+                    ImageUrl    = song.Image ?? "http://i.imgur.com/hPNxdda.png"
                 }.Build();
             }
         }

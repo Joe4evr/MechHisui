@@ -23,14 +23,15 @@ namespace DivaBot
 
         private static async Task Main(string[] args)
         {
-            var p = new Program(Params.Parse(args));
+            var p = Params.Parse(args);
+            var app = new Program(p);
             try
             {
-                await p.AsyncMain();
+                await app.AsyncMain(p);
             }
             catch (Exception e)
             {
-                await p.Log(LogSeverity.Critical, $"Unhandled Exception: {e}");
+                await app.Log(LogSeverity.Critical, $"Unhandled Exception: {e}");
             }
         }
 
@@ -98,19 +99,16 @@ namespace DivaBot
             return _logger(new LogMessage(severity, "Main", msg));
         }
 
-        private async Task AsyncMain()
+        private async Task AsyncMain(Params p)
         {
             _client.Log += _logger;
             _client.Ready += () => Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");
 
-            await InitCommands().ConfigureAwait(false);
+            await InitCommands();
 
-            using (var config = _store.Load())
-            {
-                await _client.LoginAsync(TokenType.Bot, config.LoginToken).ConfigureAwait(false);
-            }
-            await _client.StartAsync().ConfigureAwait(false);
-            await Task.Delay(-1).ConfigureAwait(false);
+            await _client.LoginAsync(TokenType.Bot, p.Token.GetAndClear());
+            await _client.StartAsync();
+            await Task.Delay(-1);
         }
 
         private async Task InitCommands()
@@ -137,6 +135,8 @@ namespace DivaBot
         {
             var msg = arg as SocketUserMessage;
             if (msg == null) return;
+
+            if (msg.Author.Id == _client.CurrentUser.Id || msg.Author.IsBot) return;
 
             if (msg.Channel is IPrivateChannel
                 || (msg.Channel is SocketGuildChannel sgc

@@ -10,9 +10,9 @@ namespace MechHisui.FateGOLib.Modules
     [Name("Events")]
     public class EventsModule : ModuleBase<ICommandContext>
     {
-        private readonly StatService _service;
+        private readonly FgoStatService _service;
 
-        public EventsModule(StatService service)
+        public EventsModule(FgoStatService service)
         {
             _service = service;
         }

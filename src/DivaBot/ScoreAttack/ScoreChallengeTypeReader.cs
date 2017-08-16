@@ -10,7 +10,7 @@ namespace DivaBot
     {
         private static readonly Regex _magic = new Regex(@"(hard:(\s*)""(?<h1>.*?)""((\s*)""(?<h2>.*?)"")?(\s*)extreme:(\s*)""(?<e1>.*?)""((\s*)""(?<e2>.*?)"")?((\s*)ex(-?)ex:(\s*)""(?<ee1>.*?)""((\s*)""(?<ee2>.*?)"")?)?)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public override Task<TypeReaderResult> Read(ICommandContext context, string input)
+        public override Task<TypeReaderResult> Read(ICommandContext context, string input, IServiceProvider services)
         {
             var match = _magic.Match(input);
             if (match.Success)

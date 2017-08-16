@@ -4,16 +4,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord.Addons.SimplePermissions;
 using Discord.Commands;
-using JiiLib;
+using SharedExtensions;
 
 namespace MechHisui.FateGOLib.Modules
 {
     [Name("MysticCodes")]
     public class MysticModule : ModuleBase<ICommandContext>
     {
-        private readonly StatService _service;
+        private readonly FgoStatService _service;
 
-        public MysticModule(StatService service)
+        public MysticModule(FgoStatService service)
         {
             _service = service;
         }

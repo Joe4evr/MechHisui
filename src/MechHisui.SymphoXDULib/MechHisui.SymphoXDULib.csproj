@@ -1,17 +1,3 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Discord.Addons.SimplePermissions" Version="0.10.25-rc" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions\Discord.Addons.SimplePermissions.csproj" />
-  </ItemGroup>
-
-  <Import Project="..\SharedExtensions\SharedExtensions.projitems" Label="Shared" />
-
+    <Import Project="..\..\DiscordBotCore.props" />
 </Project>

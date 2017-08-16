@@ -1,12 +1,27 @@
-﻿#pragma warning disable RCS1093 // Remove file with no code.
-//using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
-//namespace Discord.Commands
-//{
-//    internal static class CoreExtensions
-//    {
-//        internal static T GetService<T>(this IServiceProvider services)
-//            => (T)services.GetService(typeof(T));
-//    }
-//}
-#pragma warning restore RCS1093 // Remove file with no code.
+namespace SharedExtensions
+{
+    internal static class CoreExtensions
+    {
+        /// <summary>
+        /// Indicates whether a <see cref="IEnumerable{string}"/> contains a given string case-invariantly.
+        /// </summary>
+        /// <param name="haystack">The collection of strings.</param>
+        /// <param name="needle">The string to find.</param>
+        /// <returns>True if at least one item is case-invariantly equal to the provided string, otherwise false.</returns>
+        public static bool ContainsIgnoreCase(this IEnumerable<string> haystack, string needle)
+            => haystack.Any(s => s.ToLowerInvariant() == needle.ToLowerInvariant());
+
+        /// <summary>
+        /// Indicates whether a <see cref="string"/> contains a given substring case-invariantly.
+        /// </summary>
+        /// <param name="haystack">The string to search in.</param>
+        /// <param name="needle">The substring to find.</param>
+        /// <returns>True if the string case-invariantly contains the provided substring, otherwise false.</returns>
+        public static bool ContainsIgnoreCase(this string haystack, string needle)
+            => haystack.ToLowerInvariant().Contains(needle.ToLowerInvariant());
+    }
+}

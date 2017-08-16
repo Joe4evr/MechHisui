@@ -7,14 +7,15 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.MpGame;
 using MechHisui.SecretHitler.Models;
+using SharedExtensions;
 using SharedExtensions.Collections;
 
 namespace MechHisui.SecretHitler
 {
     public sealed class SecretHitlerGame : GameBase<SecretHitlerPlayer>
     {
-        private readonly Queue<BoardSpace> _liberalTrack;
-        private readonly Queue<BoardSpace> _fascistTrack;
+        private readonly Queue<BoardSpaceType> _liberalTrack;
+        private readonly Queue<BoardSpaceType> _fascistTrack;
         private readonly SecretHitlerConfig _config;
         private readonly HouseRules _houseRules;
         private readonly AsyncObservableCollection<PlayerVote> _votes = new AsyncObservableCollection<PlayerVote>();
@@ -52,41 +53,41 @@ namespace MechHisui.SecretHitler
 
             State = GameState.Setup;
 
-            _liberalTrack = new Queue<BoardSpace>();
-            _liberalTrack.Enqueue(new BoardSpace(BoardSpaceType.Blank));
-            _liberalTrack.Enqueue(new BoardSpace(BoardSpaceType.Blank));
-            _liberalTrack.Enqueue(new BoardSpace(BoardSpaceType.Blank));
-            _liberalTrack.Enqueue(new BoardSpace(BoardSpaceType.Blank));
-            _liberalTrack.Enqueue(new BoardSpace(BoardSpaceType.LiberalWin));
+            _liberalTrack = new Queue<BoardSpaceType>();
+            _liberalTrack.Enqueue(BoardSpaceType.Blank);
+            _liberalTrack.Enqueue(BoardSpaceType.Blank);
+            _liberalTrack.Enqueue(BoardSpaceType.Blank);
+            _liberalTrack.Enqueue(BoardSpaceType.Blank);
+            _liberalTrack.Enqueue(BoardSpaceType.LiberalWin);
 
-            _fascistTrack = new Queue<BoardSpace>();
+            _fascistTrack = new Queue<BoardSpaceType>();
 
             switch (Players.Count)
             {
                 case 5:
                 case 6:
-                    _fascistTrack.Enqueue(new BoardSpace(BoardSpaceType.Blank));
-                    _fascistTrack.Enqueue(new BoardSpace(BoardSpaceType.Blank));
-                    _fascistTrack.Enqueue(new BoardSpace(BoardSpaceType.Examine));
+                    _fascistTrack.Enqueue(BoardSpaceType.Blank);
+                    _fascistTrack.Enqueue(BoardSpaceType.Blank);
+                    _fascistTrack.Enqueue(BoardSpaceType.Examine);
                     break;
                 case 7:
                 case 8:
-                    _fascistTrack.Enqueue(new BoardSpace(BoardSpaceType.Blank));
-                    _fascistTrack.Enqueue(new BoardSpace(BoardSpaceType.Investigate));
-                    _fascistTrack.Enqueue(new BoardSpace(BoardSpaceType.ChooseNextCandidate));
+                    _fascistTrack.Enqueue(BoardSpaceType.Blank);
+                    _fascistTrack.Enqueue(BoardSpaceType.Investigate);
+                    _fascistTrack.Enqueue(BoardSpaceType.ChooseNextCandidate);
                     break;
                 case 9:
                 case 10:
-                    _fascistTrack.Enqueue(new BoardSpace(BoardSpaceType.Investigate));
-                    _fascistTrack.Enqueue(new BoardSpace(BoardSpaceType.Investigate));
-                    _fascistTrack.Enqueue(new BoardSpace(BoardSpaceType.ChooseNextCandidate));
+                    _fascistTrack.Enqueue(BoardSpaceType.Investigate);
+                    _fascistTrack.Enqueue(BoardSpaceType.Investigate);
+                    _fascistTrack.Enqueue(BoardSpaceType.ChooseNextCandidate);
                     break;
                 default:
                     break;
             }
-            _fascistTrack.Enqueue(new BoardSpace(BoardSpaceType.Execution));
-            _fascistTrack.Enqueue(new BoardSpace(BoardSpaceType.ExecutionVeto));
-            _fascistTrack.Enqueue(new BoardSpace(BoardSpaceType.FascistWin));
+            _fascistTrack.Enqueue(BoardSpaceType.Execution);
+            _fascistTrack.Enqueue(BoardSpaceType.ExecutionVeto);
+            _fascistTrack.Enqueue(BoardSpaceType.FascistWin);
         }
 
         public override Task SetupGame()
@@ -482,13 +483,13 @@ namespace MechHisui.SecretHitler
             _policies.Clear();
         }
 
-        private async Task ResolveEffect(BoardSpace space, bool peopleEnacted = false)
+        private async Task ResolveEffect(BoardSpaceType space, bool peopleEnacted = false)
         {
             State = GameState.PolicyEnacted;
 
             if (peopleEnacted)
             {
-                switch (space.BoardSpaceType)
+                switch (space)
                 {
                     case BoardSpaceType.ExecutionVeto:
                         VetoUnlocked = true;
@@ -507,7 +508,7 @@ namespace MechHisui.SecretHitler
             }
             else
             {
-                switch (space.BoardSpaceType)
+                switch (space)
                 {
                     case BoardSpaceType.Blank:
                         await Channel.SendMessageAsync($"Nothing happens. Next turn when players are ready.").ConfigureAwait(false);

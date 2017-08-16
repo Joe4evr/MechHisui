@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.12
+VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{15F298D4-4066-4FF0-8269-81813A4A0BFB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{65E6608E-FD51-4D05-9E6E-303E20158FC4}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		DiscordBotCore.props = DiscordBotCore.props
+		DiscordGameCore.props = DiscordGameCore.props
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
@@ -30,15 +32,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kohaku", "src\Kohaku\Kohaku
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MechHisui", "src\MechHisui\MechHisui.csproj", "{755DDF9B-DFDC-4706-BBCE-B69445D5DB88}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Addons.SimpleAudio", "..\Discord.Addons\src\Discord.Addons.SimpleAudio\Discord.Addons.SimpleAudio.csproj", "{2766B681-1384-4BED-B5B5-976D5E972743}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Addons.SimplePermissions.EFProvider", "..\Discord.Addons\src\Discord.Addons.SimplePermissions.EFProvider\Discord.Addons.SimplePermissions.EFProvider.csproj", "{6DBE9C41-4EA9-4F88-B29A-2E3C232E14A0}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Addons.SimplePermissions", "..\Discord.Addons\src\Discord.Addons.SimplePermissions\Discord.Addons.SimplePermissions.csproj", "{9CFEA331-1EB5-45F7-96F7-41801AB1652F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MechHisui.SymphoXDULib", "src\MechHisui.SymphoXDULib\MechHisui.SymphoXDULib.csproj", "{111022A8-0D04-4DF3-A62E-465ED68B24FF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Addons.SimplePermissions.JsonProvider", "..\Discord.Addons\src\Discord.Addons.SimplePermissions.JsonProvider\Discord.Addons.SimplePermissions.JsonProvider.csproj", "{2DC46035-03E5-4043-A7A6-CF76B6B76963}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MechHisui.Tests", "test\MechHisui.Tests\MechHisui.Tests.csproj", "{189B9E0A-6F6A-4488-BBDB-2E924171D93F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{5481084F-F1AE-4E1B-B4A9-06378E0FFBF7}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -149,42 +147,6 @@ Global
 		{755DDF9B-DFDC-4706-BBCE-B69445D5DB88}.Release|x64.Build.0 = Release|Any CPU
 		{755DDF9B-DFDC-4706-BBCE-B69445D5DB88}.Release|x86.ActiveCfg = Release|Any CPU
 		{755DDF9B-DFDC-4706-BBCE-B69445D5DB88}.Release|x86.Build.0 = Release|Any CPU
-		{2766B681-1384-4BED-B5B5-976D5E972743}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2766B681-1384-4BED-B5B5-976D5E972743}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2766B681-1384-4BED-B5B5-976D5E972743}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{2766B681-1384-4BED-B5B5-976D5E972743}.Debug|x64.Build.0 = Debug|Any CPU
-		{2766B681-1384-4BED-B5B5-976D5E972743}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2766B681-1384-4BED-B5B5-976D5E972743}.Debug|x86.Build.0 = Debug|Any CPU
-		{2766B681-1384-4BED-B5B5-976D5E972743}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2766B681-1384-4BED-B5B5-976D5E972743}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2766B681-1384-4BED-B5B5-976D5E972743}.Release|x64.ActiveCfg = Release|Any CPU
-		{2766B681-1384-4BED-B5B5-976D5E972743}.Release|x64.Build.0 = Release|Any CPU
-		{2766B681-1384-4BED-B5B5-976D5E972743}.Release|x86.ActiveCfg = Release|Any CPU
-		{2766B681-1384-4BED-B5B5-976D5E972743}.Release|x86.Build.0 = Release|Any CPU
-		{6DBE9C41-4EA9-4F88-B29A-2E3C232E14A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6DBE9C41-4EA9-4F88-B29A-2E3C232E14A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6DBE9C41-4EA9-4F88-B29A-2E3C232E14A0}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{6DBE9C41-4EA9-4F88-B29A-2E3C232E14A0}.Debug|x64.Build.0 = Debug|Any CPU
-		{6DBE9C41-4EA9-4F88-B29A-2E3C232E14A0}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{6DBE9C41-4EA9-4F88-B29A-2E3C232E14A0}.Debug|x86.Build.0 = Debug|Any CPU
-		{6DBE9C41-4EA9-4F88-B29A-2E3C232E14A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6DBE9C41-4EA9-4F88-B29A-2E3C232E14A0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6DBE9C41-4EA9-4F88-B29A-2E3C232E14A0}.Release|x64.ActiveCfg = Release|Any CPU
-		{6DBE9C41-4EA9-4F88-B29A-2E3C232E14A0}.Release|x64.Build.0 = Release|Any CPU
-		{6DBE9C41-4EA9-4F88-B29A-2E3C232E14A0}.Release|x86.ActiveCfg = Release|Any CPU
-		{6DBE9C41-4EA9-4F88-B29A-2E3C232E14A0}.Release|x86.Build.0 = Release|Any CPU
-		{9CFEA331-1EB5-45F7-96F7-41801AB1652F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9CFEA331-1EB5-45F7-96F7-41801AB1652F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9CFEA331-1EB5-45F7-96F7-41801AB1652F}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{9CFEA331-1EB5-45F7-96F7-41801AB1652F}.Debug|x64.Build.0 = Debug|Any CPU
-		{9CFEA331-1EB5-45F7-96F7-41801AB1652F}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{9CFEA331-1EB5-45F7-96F7-41801AB1652F}.Debug|x86.Build.0 = Debug|Any CPU
-		{9CFEA331-1EB5-45F7-96F7-41801AB1652F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9CFEA331-1EB5-45F7-96F7-41801AB1652F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9CFEA331-1EB5-45F7-96F7-41801AB1652F}.Release|x64.ActiveCfg = Release|Any CPU
-		{9CFEA331-1EB5-45F7-96F7-41801AB1652F}.Release|x64.Build.0 = Release|Any CPU
-		{9CFEA331-1EB5-45F7-96F7-41801AB1652F}.Release|x86.ActiveCfg = Release|Any CPU
-		{9CFEA331-1EB5-45F7-96F7-41801AB1652F}.Release|x86.Build.0 = Release|Any CPU
 		{111022A8-0D04-4DF3-A62E-465ED68B24FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{111022A8-0D04-4DF3-A62E-465ED68B24FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{111022A8-0D04-4DF3-A62E-465ED68B24FF}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -197,18 +159,18 @@ Global
 		{111022A8-0D04-4DF3-A62E-465ED68B24FF}.Release|x64.Build.0 = Release|Any CPU
 		{111022A8-0D04-4DF3-A62E-465ED68B24FF}.Release|x86.ActiveCfg = Release|Any CPU
 		{111022A8-0D04-4DF3-A62E-465ED68B24FF}.Release|x86.Build.0 = Release|Any CPU
-		{2DC46035-03E5-4043-A7A6-CF76B6B76963}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2DC46035-03E5-4043-A7A6-CF76B6B76963}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2DC46035-03E5-4043-A7A6-CF76B6B76963}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{2DC46035-03E5-4043-A7A6-CF76B6B76963}.Debug|x64.Build.0 = Debug|Any CPU
-		{2DC46035-03E5-4043-A7A6-CF76B6B76963}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2DC46035-03E5-4043-A7A6-CF76B6B76963}.Debug|x86.Build.0 = Debug|Any CPU
-		{2DC46035-03E5-4043-A7A6-CF76B6B76963}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2DC46035-03E5-4043-A7A6-CF76B6B76963}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2DC46035-03E5-4043-A7A6-CF76B6B76963}.Release|x64.ActiveCfg = Release|Any CPU
-		{2DC46035-03E5-4043-A7A6-CF76B6B76963}.Release|x64.Build.0 = Release|Any CPU
-		{2DC46035-03E5-4043-A7A6-CF76B6B76963}.Release|x86.ActiveCfg = Release|Any CPU
-		{2DC46035-03E5-4043-A7A6-CF76B6B76963}.Release|x86.Build.0 = Release|Any CPU
+		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Debug|x64.Build.0 = Debug|Any CPU
+		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Debug|x86.Build.0 = Debug|Any CPU
+		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Release|x64.ActiveCfg = Release|Any CPU
+		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Release|x64.Build.0 = Release|Any CPU
+		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Release|x86.ActiveCfg = Release|Any CPU
+		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -224,5 +186,9 @@ Global
 		{D4FB70C0-5AC0-4B56-B821-7EA645B082D1} = {15F298D4-4066-4FF0-8269-81813A4A0BFB}
 		{755DDF9B-DFDC-4706-BBCE-B69445D5DB88} = {15F298D4-4066-4FF0-8269-81813A4A0BFB}
 		{111022A8-0D04-4DF3-A62E-465ED68B24FF} = {15F298D4-4066-4FF0-8269-81813A4A0BFB}
+		{189B9E0A-6F6A-4488-BBDB-2E924171D93F} = {5481084F-F1AE-4E1B-B4A9-06378E0FFBF7}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {15F6C07C-DD94-4BAB-8171-09BED4401178}
 	EndGlobalSection
 EndGlobal

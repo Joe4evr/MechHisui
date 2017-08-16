@@ -1,0 +1,19 @@
+﻿<Project>
+    <PropertyGroup Condition="'$(OutputType.ToUpper())' != 'EXE'">
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Discord.Net.Commands" Version="1.0.1" />
+        <PackageReference Include="Discord.Net.WebSocket" Version="1.0.1" />
+        <PackageReference Include="Discord.Addons.Preconditions" Version="1.0.0-rc" />
+        <PackageReference Include="Discord.Addons.SimplePermissions" Version="1.0.0-rc" />
+    </ItemGroup>
+    <PropertyGroup Condition="'$(SolutionDir)' == '' or '$(SolutionDir)' == '*undefined*'">
+        <SolutionDir>.\</SolutionDir>
+    </PropertyGroup>
+    <!--<ItemGroup>
+        <ProjectReference Include="$(SolutionDir)..\Discord.Addons\src\Discord.Addons.Preconditions\Discord.Addons.Preconditions.csproj" />
+        <ProjectReference Include="$(SolutionDir)..\Discord.Addons\src\Discord.Addons.SimplePermissions\Discord.Addons.SimplePermissions.csproj" />
+    </ItemGroup>-->
+    <Import Project="$(SolutionDir)src\SharedExtensions\SharedExtensions.projitems" Label="Shared" />
+</Project>

@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using JiiLib;
 using Discord.WebSocket;
+using SharedExtensions;
 
 namespace MechHisui.FateGOLib
 {
-    public class StatService
+    public class FgoStatService
     {
         private readonly Timer _logintimer;
-        internal readonly FgoConfig Config;
+        internal FgoConfig Config { get; }
 
-        internal StatService(FgoConfig config, DiscordSocketClient client)
+        internal FgoStatService(FgoConfig config, DiscordSocketClient client)
         {
             Config = config ?? throw new ArgumentNullException(nameof(config));
 

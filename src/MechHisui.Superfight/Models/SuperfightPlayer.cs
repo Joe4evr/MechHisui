@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.MpGame;
+using SharedExtensions;
 
 namespace MechHisui.Superfight.Models
 {

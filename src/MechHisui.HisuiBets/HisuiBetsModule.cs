@@ -6,6 +6,7 @@ using Discord;
 using Discord.Commands;
 using Discord.Addons.Preconditions;
 using Discord.Addons.SimplePermissions;
+using SharedExtensions;
 
 namespace MechHisui.HisuiBets
 {

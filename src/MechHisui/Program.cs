@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.WebSocket;
@@ -16,24 +15,25 @@ namespace MechHisui
 #pragma warning disable RCS1090 // Call 'ConfigureAwait(false)'.
     public partial class Program
     {
+        private static async Task Main(string[] args)
+        {
+            var p = Params.Parse(args);
+            var app = new Program(p);
+            try
+            {
+                await app.Start();
+            }
+            catch (Exception e)
+            {
+                await app.Log(LogSeverity.Critical, $"Unhandled Exception: {e}");
+            }
+        }
+
         private readonly IServiceCollection _map = new ServiceCollection();
         private readonly IConfigStore<MechHisuiConfig> _store;
         private readonly Func<LogMessage, Task> _logger;
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
-
-        private static async Task Main(string[] args)
-        {
-            var p = new Program(Params.Parse(args));
-            try
-            {
-                await p.AsyncMain();
-            }
-            catch (Exception e)
-            {
-                await p.Log(LogSeverity.Critical, $"Unhandled Exception: {e}");
-            }
-        }
 
         private Program(Params p)
         {
@@ -73,14 +73,14 @@ namespace MechHisui
             return _logger(new LogMessage(severity, "Main", msg));
         }
 
-        private async Task AsyncMain()
+        private async Task Start()
         {
             _client.Ready += () => Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");
 
             _client.MessageUpdated += async (before, after, channel) =>
             {
                 ulong myid = _client.CurrentUser.Id;
-                if (!(channel.GetCachedMessages(5).Any(m => m.Author.Id == myid)))
+                if (!(channel.GetCachedMessages(after.Id, Direction.After).Any(m => m.Author.Id == myid)))
                 {
                     await HandleCommand(after);
                 }
@@ -101,6 +101,8 @@ namespace MechHisui
         {
             var msg = arg as SocketUserMessage;
             if (msg == null) return;
+
+            if (msg.Author.Id == _client.CurrentUser.Id || msg.Author.IsBot) return;
 
             int pos = 0;
             var user = _client.CurrentUser;

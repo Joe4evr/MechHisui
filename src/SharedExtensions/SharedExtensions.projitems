@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Collections\AsyncObservableCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CoreExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DateTimeWithZone.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DiscordExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EntityEqualityComparer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EnumerableExtensions.cs" />

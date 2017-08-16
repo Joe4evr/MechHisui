@@ -134,7 +134,9 @@ namespace MechHisui
                     }
                 }
             };
-            _map.AddSingleton(fgo);
+            //_map.AddSingleton(fgo);
+            await _commands.UseFgoService(_map, fgo, _client);
+
             var bank = new BankOfHisui
             {
                 AddUser = (user) =>
@@ -223,6 +225,8 @@ namespace MechHisui
                     }
                 }
             };
+            await _commands.UseHisuiBank(_map, bank, _client, _logger);
+
             var xdu = new XduConfig
             {
                 GetGears = () =>
@@ -279,6 +283,7 @@ namespace MechHisui
             };
             _map.AddSingleton(new XduStatService(xdu, _client));
             await _commands.AddModuleAsync<XduModule>();
+            
             //var eval = EvalService.Builder.BuilderWithSystemAndLinq()
             //    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(StatService).Assembly.Location),
             //        "MechHisui.FateGOLib"))
@@ -293,8 +298,6 @@ namespace MechHisui
             //await _commands.AddModuleAsync<EvalModule>();
 
             await _commands.UseSimplePermissions(_client, _store, _map, _logger);
-            await _commands.UseFgoService(_map, fgo, _client);
-            await _commands.UseHisuiBank(_map, bank, _client, _logger);
             await _commands.AddDiceRoll();
 
             using (var config = _store.Load())

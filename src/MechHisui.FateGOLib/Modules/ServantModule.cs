@@ -5,16 +5,16 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.SimplePermissions;
 using Discord.Commands;
-using JiiLib;
+using SharedExtensions;
 
 namespace MechHisui.FateGOLib.Modules
 {
     [Name("Servants")]
     public class ServantModule : ModuleBase<ICommandContext>
     {
-        private readonly StatService _service;
+        private readonly FgoStatService _service;
 
-        public ServantModule(StatService service)
+        public ServantModule(FgoStatService service)
         {
             _service = service;
         }
@@ -130,7 +130,7 @@ namespace MechHisui.FateGOLib.Modules
                 .WithAuthor(auth => auth.WithName($"Servant #{profile.Id}: {profile.Rarity}☆ {profile.Class}"))
                 .WithTitle(profile.Name)
                 .WithDescriptionWhen(() => profile.Id > 0,
-                    $"More information at: [Cirno](http://fate-go.cirnopedia.org/servant_profile.php?servant={profile.Id}) | [FGO Wiki](http://fategrandorder.wikia.com/wiki/{(profile.Additional ?? profile.Name).Replace(' ', '_')})")
+                    $"More information at: [Cirno]({_cirnoBaseUrl}{profile.Id}) | [FGO Wiki]({_fgoWBaseUrl}{Uri.EscapeDataString((profile.Additional ?? profile.Name).Replace(' ', '_'))})")
                 .AddField(field => field.WithIsInline(true)
                     .WithName("Gender")
                     .WithValue(profile.Gender))
@@ -165,7 +165,7 @@ namespace MechHisui.FateGOLib.Modules
                 .AddFieldSequence(profile.ActiveSkills,
                     (field, skill) => field.WithIsInline(true)
                         .WithName($"{skill.SkillName} {skill.Rank}")
-                        .WithValue($"{skill.Effect}{(!String.IsNullOrWhiteSpace(skill.RankUpEffect) ? $"\nRank Up: {skill.RankUpEffect}" : "")}"))
+                        .WithValue($"{skill.Effect}{(!String.IsNullOrWhiteSpace(skill.RankUpEffect) ? $"\n**Rank Up:** {skill.RankUpEffect}" : "")}"))
                 .AddFieldSequence(profile.PassiveSkills,
                     (field, skill) => field.WithIsInline(true)
                         .WithName($"{skill.SkillName} {skill.Rank}")
@@ -187,6 +187,9 @@ namespace MechHisui.FateGOLib.Modules
 #endif
             return embed;
         }
+
+        private const string _cirnoBaseUrl = "http://fate-go.cirnopedia.org/servant_profile.php?servant=";
+        private const string _fgoWBaseUrl = "http://fategrandorder.wikia.com/wiki/";
 
 #if DEBUG
         private static int Sum(params int[] ns) => ns.Sum();

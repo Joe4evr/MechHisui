@@ -2,19 +2,19 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Addons.SimplePermissions;
 using Discord.Commands;
-using JiiLib;
-using Discord;
+using SharedExtensions;
 
 namespace MechHisui.FateGOLib.Modules
 {
     [Name("CEs")]
     public class CEModule : ModuleBase<ICommandContext>
     {
-        private readonly StatService _service;
+        private readonly FgoStatService _service;
 
-        public CEModule(StatService service)
+        public CEModule(FgoStatService service)
         {
             _service = service;
         }

@@ -1,12 +1,12 @@
-﻿namespace MechHisui.SecretHitler.Models
-{
-    internal sealed class BoardSpace
-    {
-        public BoardSpaceType BoardSpaceType { get; }
+﻿//namespace MechHisui.SecretHitler.Models
+//{
+//    internal sealed class BoardSpace
+//    {
+//        public BoardSpaceType BoardSpaceType { get; }
 
-        public BoardSpace(BoardSpaceType type)
-        {
-            BoardSpaceType = type;
-        }
-    }
-}
+//        public BoardSpace(BoardSpaceType type)
+//        {
+//            BoardSpaceType = type;
+//        }
+//    }
+//}

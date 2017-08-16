@@ -20,18 +20,18 @@ namespace MechHisui.SecretHitler
             var shservice = services.GetService<SecretHitlerService>();
             if (shservice != null)
             {
-                var authorId = context.User.Id;
                 var game = await shservice.GetGameFromChannelAsync(context.Channel).ConfigureAwait(false);
 
                 if (game != null)
                 {
-                    var president = game.CurrentPresident;
-                    var chancellor = game.CurrentChancellor;
+                    var authorId = context.User.Id;
+                    var presidentId = game.CurrentPresident.User.Id;
+                    var chancellorId = game.CurrentChancellor.User.Id;
 
                     switch (RequiredRole)
                     {
                         case PlayerRole.President:
-                            if (authorId == president.User.Id)
+                            if (authorId == presidentId)
                             {
                                 return PreconditionResult.FromSuccess();
                             }
@@ -40,7 +40,7 @@ namespace MechHisui.SecretHitler
                                 goto default;
                             }
                         case PlayerRole.Chancellor:
-                            if (authorId == chancellor.User.Id)
+                            if (authorId == chancellorId)
                             {
                                 return PreconditionResult.FromSuccess();
                             }
