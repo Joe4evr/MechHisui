@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using SharedExtensions;
-using WS4NetCore;
 
 namespace GudakoBot
 {
@@ -42,7 +41,7 @@ namespace GudakoBot
             {
                 LogLevel = minlog,
 #if !ARM
-                WebSocketProvider = WS4NetProvider.Instance
+                WebSocketProvider = WS4NetCore.WS4NetProvider.Instance
 #endif
             });
             _client.Log += _logger;
@@ -60,7 +59,7 @@ namespace GudakoBot
         private async Task AsyncMain(Params p)
         {
             var config = _store.Load();
-            await Log(LogSeverity.Info, $"Loaded {config.Lines.Count()} lines.").ConfigureAwait(false);
+            await Log(LogSeverity.Info, $"Loaded {config.Lines.Count()} lines.");
             _periodic = new PeriodicMessageService(_client, config.FgoGeneral, config.Lines, _logger);
 
 
@@ -69,7 +68,7 @@ namespace GudakoBot
                 if (msg.Author.Id == _owner && msg.Content == "-new")
                 {
                     await Log(LogSeverity.Info, $"{DateTime.Now}: Reloading lines").ConfigureAwait(false);
-                    config = _store.Load();
+                    _periodic.Lines = _store.Load().Lines;
                     await msg.Channel.SendMessageAsync(config.Lines.Last()).ConfigureAwait(false);
                 }
             };
@@ -81,9 +80,9 @@ namespace GudakoBot
                 _owner = (await _client.GetApplicationInfoAsync().ConfigureAwait(false)).Owner.Id;
             };
 
-            await _client.LoginAsync(TokenType.Bot, config.LoginToken).ConfigureAwait(false);
-            await _client.StartAsync().ConfigureAwait(false);
-            await Task.Delay(-1).ConfigureAwait(false);
+            await _client.LoginAsync(TokenType.Bot, config.LoginToken);
+            await _client.StartAsync();
+            await Task.Delay(-1);
         }
     }
 }

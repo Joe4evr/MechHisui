@@ -11,7 +11,7 @@ using MechHisui.Superfight.Models;
 
 namespace MechHisui.Superfight
 {
-    [Name("Superfight")]
+    [Name("Superfight"), Group("sf")]
     public sealed class SuperfightModule : MpGameModuleBase<SuperfightService, SuperfightGame, SuperfightPlayer>
     {
         private int _discusstimeout = 5;
@@ -121,7 +121,7 @@ namespace MechHisui.Superfight
             {
                 await ReplyAsync("No game has been opened at this time.").ConfigureAwait(false);
             }
-            else if (PlayerList.Count < 4)
+            else if (JoinedUsers.Count < 4)
             {
                 await ReplyAsync("Not enough players have joined.").ConfigureAwait(false);
             }
@@ -129,7 +129,7 @@ namespace MechHisui.Superfight
             {
                 if (GameService.TryUpdateOpenToJoin(Context.Channel, newValue: false, comparisonValue: true))
                 {
-                    var players = PlayerList.Select(u => new SuperfightPlayer(u, Context.Channel)).Shuffle(28);
+                    var players = JoinedUsers.Select(u => new SuperfightPlayer(u, Context.Channel)).Shuffle(28);
 
                     var game = new SuperfightGame(Context.Channel, players, GameService.Config, _discusstimeout);
                     if (GameService.TryAddNewGame(Context.Channel, game))

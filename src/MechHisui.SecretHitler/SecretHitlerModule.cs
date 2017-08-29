@@ -12,10 +12,10 @@ using SharedExtensions;
 
 namespace MechHisui.SecretHitler
 {
-    [Name("SecretHitler")]
+    [Name("SecretHitler"), Group("sh")]
     public sealed class SecretHitlerModule : MpGameModuleBase<SecretHitlerService, SecretHitlerGame, SecretHitlerPlayer>
-
     {
+        private const int _minPlayers = 5;
         private const int _maxPlayers = 10;
         private HouseRules _currentHouseRules;
 
@@ -80,7 +80,7 @@ namespace MechHisui.SecretHitler
             {
                 await ReplyAsync("No game open to join.").ConfigureAwait(false);
             }
-            else if (PlayerList.Count == _maxPlayers)
+            else if (JoinedUsers.Count == _maxPlayers)
             {
                 await ReplyAsync("Maximum number of players already joined.").ConfigureAwait(false);
             }
@@ -158,51 +158,46 @@ namespace MechHisui.SecretHitler
             {
                 await ReplyAsync("No game has been opened at this time.").ConfigureAwait(false);
             }
-            else if (PlayerList.Count < 5)
+            else if (JoinedUsers.Count < _minPlayers)
             {
                 await ReplyAsync("Not enough players have joined.").ConfigureAwait(false);
             }
             else
             {
-                int fascists = 0;
-                switch (PlayerList.Count)
+                int ReqFas(int p)
                 {
-                    case 5:
-                    case 6:
-                        fascists = 2;
-                        break;
-                    case 7:
-                    case 8:
-                        fascists = 3;
-                        break;
-                    case 9:
-                    case 10:
-                        fascists = 4;
-                        break;
-                }
-
-                var players = new List<SecretHitlerPlayer>();
-
-                for (int i = 0; i < PlayerList.Count; i++)
-                {
-                    if (players.Count == 0)
+                    switch (p)
                     {
-                        players.Add(new SecretHitlerPlayer(PlayerList.ElementAt(i), Context.Channel,
-                            config.FascistParty, config.Hitler));
+                        case 5:
+                        case 6:
+                            return 2;
+                        case 7:
+                        case 8:
+                            return 3;
+                        case 9:
+                        case 10:
+                            return 4;
+                        default:
+                            throw new InvalidOperationException("Player count should be between 5 and 10.");
                     }
-                    else if (players.Count(p => p.Party == config.FascistParty) < fascists)
+                }
+                int fascists = ReqFas(JoinedUsers.Count);
+
+                var players = JoinedUsers.Select((u, i) =>
+                {
+                    if (i == 0)
                     {
-                        players.Add(new SecretHitlerPlayer(PlayerList.ElementAt(i), Context.Channel,
-                            config.FascistParty, config.Fascist));
+                        return new SecretHitlerPlayer(u, Context.Channel, config.FascistParty, config.Hitler);
+                    }
+                    else if (i < fascists)
+                    {
+                        return new SecretHitlerPlayer(u, Context.Channel, config.FascistParty, config.Fascist);
                     }
                     else
                     {
-                        players.Add(new SecretHitlerPlayer(PlayerList.ElementAt(i), Context.Channel,
-                            config.LiberalParty, config.Liberal));
+                        return new SecretHitlerPlayer(u, Context.Channel, config.LiberalParty, config.Liberal);
                     }
-                }
-
-                players = players.Shuffle(32).ToList();
+                }).Shuffle(32);
 
                 var game = new SecretHitlerGame(Context.Channel, players, config, _currentHouseRules);
                 if (GameService.TryAddNewGame(Context.Channel, game))
@@ -292,7 +287,7 @@ namespace MechHisui.SecretHitler
             }
         }
 
-        private HouseRules GetRule(string rule)
+        private static HouseRules GetRule(string rule)
         {
             switch (rule)
             {
@@ -362,9 +357,8 @@ namespace MechHisui.SecretHitler
             }
         }
 
-        [Command("veto"), RequireGameState(GameState.ChancellorPicks)]
+        [Command("veto"), RequireGameState(GameState.ChancellorPicks), RequireVetoUnlocked]
         [RequireContext(ContextType.DM), RequirePlayerRole(PlayerRole.Chancellor)]
-        [RequireVetoUnlocked]
         public Task Veto() => Game.ChancellorVetos((IDMChannel)Context.Channel);
     }
 }

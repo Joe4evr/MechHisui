@@ -1,6 +1,7 @@
 ﻿<Project>
     <PropertyGroup Condition="'$(OutputType.ToUpper())' != 'EXE'">
         <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>7.1</LangVersion>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Discord.Net.Commands" Version="1.0.1" />

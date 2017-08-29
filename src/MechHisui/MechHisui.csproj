@@ -2,7 +2,6 @@
     <Import Project="..\..\DiscordBotCore.props" />
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <LangVersion>7.1</LangVersion>
         <TargetFramework>netcoreapp2.0</TargetFramework>
         <RuntimeIdentifiers>win;win10-arm</RuntimeIdentifiers>
         <DefineConstants Condition="'$(RuntimeIdentifier)' == 'win10-arm'">ARM</DefineConstants>

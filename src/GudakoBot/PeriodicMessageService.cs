@@ -16,6 +16,8 @@ namespace GudakoBot
 
         private string _lastLine;
 
+        internal IEnumerable<string> Lines { get; set; }
+
         public PeriodicMessageService(
             DiscordSocketClient client,
             ulong channel,
@@ -23,14 +25,14 @@ namespace GudakoBot
             Func<LogMessage, Task> logger = null)
         {
             _logger = logger ?? (m => Task.CompletedTask);
-
+            Lines = lines;
             _timer = new Timer(async s =>
             {
 
                 string str;
-                lines = lines.Shuffle();
+                Lines = Lines.Shuffle(7);
 
-                do str = lines.ElementAt(_rng.Next(maxValue: lines.Count()));
+                do str = Lines.ElementAt(_rng.Next(maxValue: lines.Count()));
                 while (str == _lastLine);
 
                 var ch = client.GetChannel(channel) as ITextChannel;
@@ -44,7 +46,7 @@ namespace GudakoBot
                 }
                 
                 _lastLine = str;
-            }, null, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(30));
+            }, null, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(60));
         }
     }
 }

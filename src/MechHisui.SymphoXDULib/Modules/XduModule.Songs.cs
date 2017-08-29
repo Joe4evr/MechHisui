@@ -63,7 +63,7 @@ namespace MechHisui.SymphoXDULib
                     Author      = new EmbedAuthorBuilder { Name = $"Song #{song.Id}: {song.Title}" },
                     Title       = "Effect:",
                     Description = song.Effect,
-                    Fields      = new List<EmbedFieldBuilder>(1)
+                    Fields      =
                     {
                         new EmbedFieldBuilder
                         {

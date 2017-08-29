@@ -8,7 +8,6 @@ using Discord.Addons.SimplePermissions;
 using Discord.Commands;
 using MechHisui.Core;
 using SharedExtensions;
-using WS4NetCore;
 
 namespace MechHisui
 {
@@ -62,7 +61,7 @@ namespace MechHisui
                 MessageCacheSize = 50,
                 LogLevel = minlog,
 #if !ARM
-                WebSocketProvider = WS4NetProvider.Instance
+                WebSocketProvider = WS4NetCore.WS4NetProvider.Instance
 #endif
             });
             _client.Log += _logger;

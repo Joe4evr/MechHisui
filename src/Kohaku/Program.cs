@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Discord;
-//using Discord.Addons.SimpleAudio;
+using Discord.Addons.SimpleAudio;
 using Discord.Addons.SimplePermissions;
 //using Discord.Addons.TriviaGames;
 using Discord.Commands;
@@ -53,14 +53,14 @@ namespace Kohaku
             Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
             //_store = new EFConfigStore<KohakuConfig, ConfigGuild, ConfigChannel, ConfigUser>(_commands);
             _store = new JsonConfigStore<KohakuConfig>(p.ConfigPath, _commands);
-            //using (var config = _store.Load())
-            //{
-            //    if (config.AudioConfig == null)
-            //    {
-            //        config.AudioConfig = new AudioConfig();
-            //        config.Save();
-            //    }
-            //}
+            using (var config = _store.Load())
+            {
+                if (config.AudioConfig == null)
+                {
+                    config.AudioConfig = new AudioConfig();
+                    config.Save();
+                }
+            }
 
             Log(LogSeverity.Verbose, $"Constructing {nameof(DiscordSocketClient)}");
             _client = new DiscordSocketClient(new DiscordSocketConfig

@@ -13,7 +13,7 @@ namespace System.Collections.Generic
         /// <param name="iterations">The amount of times the itmes should be shuffled.</param>
         /// <typeparam name="T"></typeparam>
         /// <remarks>Adapted from http://stackoverflow.com/questions/273313/. </remarks>
-        public static IEnumerable<T> Shuffle<T>(
+        public static ICollection<T> Shuffle<T>(
             this IEnumerable<T> source,
             uint iterations = 1)
         {
@@ -48,7 +48,7 @@ namespace System.Collections.Generic
         public static TValue GetValueOrDefault<TKey, TValue>(
             this IReadOnlyDictionary<TKey, TValue> dictionary,
             TKey key,
-            TValue defaultValue = default(TValue))
+            TValue defaultValue = default)
         {
             return dictionary.TryGetValue(key, out var ret) ? ret : defaultValue;
         }

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-//using Discord.Addons.SimpleAudio;
+using Discord.Addons.SimpleAudio;
 using Discord.Addons.SimplePermissions;
 //using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +14,7 @@ namespace Kohaku
     {
         public string LoginToken { get; set; }
 
-        //public AudioConfig AudioConfig { get; set; }
+        public AudioConfig AudioConfig { get; set; }
 
         //public Dictionary<string, string[]> TriviaData { get; set; }
 

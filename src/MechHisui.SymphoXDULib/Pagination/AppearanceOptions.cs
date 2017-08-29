@@ -4,10 +4,10 @@ namespace MechHisui.SymphoXDULib
 {
     internal class AppearanceOptions
     {
-        public Emoji EmoteFirst { get; set; }
-        public Emoji EmoteLast { get; set; }
-        public Emoji EmoteBack { get; set; }
-        public Emoji EmoteNext { get; set; }
-        public Emoji EmoteStop { get; set; }
+        public IEmote EmoteFirst { get; set; }
+        public IEmote EmoteLast { get; set; }
+        public IEmote EmoteBack { get; set; }
+        public IEmote EmoteNext { get; set; }
+        public IEmote EmoteStop { get; set; }
     }
 }

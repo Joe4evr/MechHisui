@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !ARM
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -61,3 +62,4 @@ namespace DivaBot
 #pragma warning restore RCS1132 // Remove redundant overriding member.
     }
 }
+#endif

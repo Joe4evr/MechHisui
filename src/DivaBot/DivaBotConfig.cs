@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if !ARM
 using Discord.Addons.SimpleAudio;
+#endif
 using Discord.Addons.SimplePermissions;
 
 namespace DivaBot
@@ -9,7 +11,9 @@ namespace DivaBot
     {
         public string LoginToken { get; set; }
 
+#if !ARM
         public AudioConfig AudioConfig { get; set; }
+#endif
 
         public Dictionary<string, string[]> AutoResponses { get; set; }
 

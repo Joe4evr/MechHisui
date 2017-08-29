@@ -7,7 +7,7 @@ namespace SharedExtensions
     internal static class CoreExtensions
     {
         /// <summary>
-        /// Indicates whether a <see cref="IEnumerable{string}"/> contains a given string case-invariantly.
+        /// Indicates whether a <see cref="IEnumerable{String}"/> contains a given string case-invariantly.
         /// </summary>
         /// <param name="haystack">The collection of strings.</param>
         /// <param name="needle">The string to find.</param>
@@ -16,7 +16,7 @@ namespace SharedExtensions
             => haystack.Any(s => s.ToLowerInvariant() == needle.ToLowerInvariant());
 
         /// <summary>
-        /// Indicates whether a <see cref="string"/> contains a given substring case-invariantly.
+        /// Indicates whether a <see cref="String"/> contains a given substring case-invariantly.
         /// </summary>
         /// <param name="haystack">The string to search in.</param>
         /// <param name="needle">The substring to find.</param>

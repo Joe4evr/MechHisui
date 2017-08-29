@@ -8,8 +8,8 @@ using Discord.Commands;
 
 namespace MechHisui.SymphoXDULib
 {
-    [Name("SymphogearXDU"), Permission(MinimumPermission.Everyone)]
     [Group("xdu")]
+    [Name("SymphogearXDU"), Permission(MinimumPermission.Everyone)]
     public partial class XduModule : ModuleBase<ICommandContext>
     {
         [Command("elements"), Alias("classes")]

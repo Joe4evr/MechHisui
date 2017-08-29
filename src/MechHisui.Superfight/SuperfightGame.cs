@@ -44,7 +44,11 @@ namespace MechHisui.Superfight
             _abilities = new Stack<Card>(a.Select(x => new Card(CardType.Ability, x)));
             _locations = new Stack<Card>(l.Select(x => new Card(CardType.Location, x)));
 
-            _debateTimer = new Timer(async cb => await StartVote().ConfigureAwait(false), null, Timeout.Infinite, Timeout.Infinite);
+            _debateTimer = new Timer(
+                async cb => await StartVote().ConfigureAwait(false),
+                null,
+                Timeout.Infinite,
+                Timeout.Infinite);
             _discusstimeout = timeout;
         }
 

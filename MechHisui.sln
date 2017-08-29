@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.3
+VisualStudioVersion = 15.0.26730.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{15F298D4-4066-4FF0-8269-81813A4A0BFB}"
 EndProject
@@ -37,6 +37,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MechHisui.Tests", "test\MechHisui.Tests\MechHisui.Tests.csproj", "{189B9E0A-6F6A-4488-BBDB-2E924171D93F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{5481084F-F1AE-4E1B-B4A9-06378E0FFBF7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Addons.SimpleAudio", "..\Discord.Addons\src\Discord.Addons.SimpleAudio\Discord.Addons.SimpleAudio.csproj", "{AFBF7EDD-F61D-44FB-97A0-2BCBFD004A3B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Addons.MpGame", "..\Discord.Addons\src\Discord.Addons.MpGame\Discord.Addons.MpGame.csproj", "{4B2771B6-8B8B-491E-9AA0-E7D0AED2CFA3}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -171,6 +175,30 @@ Global
 		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Release|x64.Build.0 = Release|Any CPU
 		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Release|x86.ActiveCfg = Release|Any CPU
 		{189B9E0A-6F6A-4488-BBDB-2E924171D93F}.Release|x86.Build.0 = Release|Any CPU
+		{AFBF7EDD-F61D-44FB-97A0-2BCBFD004A3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFBF7EDD-F61D-44FB-97A0-2BCBFD004A3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFBF7EDD-F61D-44FB-97A0-2BCBFD004A3B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AFBF7EDD-F61D-44FB-97A0-2BCBFD004A3B}.Debug|x64.Build.0 = Debug|Any CPU
+		{AFBF7EDD-F61D-44FB-97A0-2BCBFD004A3B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AFBF7EDD-F61D-44FB-97A0-2BCBFD004A3B}.Debug|x86.Build.0 = Debug|Any CPU
+		{AFBF7EDD-F61D-44FB-97A0-2BCBFD004A3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFBF7EDD-F61D-44FB-97A0-2BCBFD004A3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFBF7EDD-F61D-44FB-97A0-2BCBFD004A3B}.Release|x64.ActiveCfg = Release|Any CPU
+		{AFBF7EDD-F61D-44FB-97A0-2BCBFD004A3B}.Release|x64.Build.0 = Release|Any CPU
+		{AFBF7EDD-F61D-44FB-97A0-2BCBFD004A3B}.Release|x86.ActiveCfg = Release|Any CPU
+		{AFBF7EDD-F61D-44FB-97A0-2BCBFD004A3B}.Release|x86.Build.0 = Release|Any CPU
+		{4B2771B6-8B8B-491E-9AA0-E7D0AED2CFA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B2771B6-8B8B-491E-9AA0-E7D0AED2CFA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B2771B6-8B8B-491E-9AA0-E7D0AED2CFA3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4B2771B6-8B8B-491E-9AA0-E7D0AED2CFA3}.Debug|x64.Build.0 = Debug|Any CPU
+		{4B2771B6-8B8B-491E-9AA0-E7D0AED2CFA3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4B2771B6-8B8B-491E-9AA0-E7D0AED2CFA3}.Debug|x86.Build.0 = Debug|Any CPU
+		{4B2771B6-8B8B-491E-9AA0-E7D0AED2CFA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B2771B6-8B8B-491E-9AA0-E7D0AED2CFA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B2771B6-8B8B-491E-9AA0-E7D0AED2CFA3}.Release|x64.ActiveCfg = Release|Any CPU
+		{4B2771B6-8B8B-491E-9AA0-E7D0AED2CFA3}.Release|x64.Build.0 = Release|Any CPU
+		{4B2771B6-8B8B-491E-9AA0-E7D0AED2CFA3}.Release|x86.ActiveCfg = Release|Any CPU
+		{4B2771B6-8B8B-491E-9AA0-E7D0AED2CFA3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

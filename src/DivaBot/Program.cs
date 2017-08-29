@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Discord;
+#if !ARM
 using Discord.Addons.SimpleAudio;
+#endif
 using Discord.Addons.SimplePermissions;
 using Discord.WebSocket;
 using Discord.Commands;
 using SharedExtensions;
-using WS4NetCore;
 
 namespace DivaBot
 {
@@ -75,11 +76,13 @@ namespace DivaBot
                     config.Save();
                 }
 
+#if !ARM
                 if (config.AudioConfig == null)
                 {
                     config.AudioConfig = new AudioConfig();
                     config.Save();
                 }
+#endif
             }
 
             Log(LogSeverity.Verbose, $"Constructing {nameof(DiscordSocketClient)}");
@@ -89,7 +92,7 @@ namespace DivaBot
                 MessageCacheSize = 50,
                 LogLevel = minlog,
 #if !ARM
-                WebSocketProvider = WS4NetProvider.Instance
+                WebSocketProvider = WS4NetCore.WS4NetProvider.Instance
 #endif
             });
         }

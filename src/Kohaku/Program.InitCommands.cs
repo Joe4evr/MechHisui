@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Discord.Commands;
-//using Discord.Addons.SimpleAudio;
+using Discord.Addons.SimpleAudio;
 using Discord.Addons.SimplePermissions;
 //using MechHisui.FateGOLib;
 using Newtonsoft.Json;
@@ -70,12 +70,12 @@ namespace Kohaku
             //};
             //await _commands.UseFgoService(_map, fgo, _client);
 
-            //using (var config = _store.Load())
-            //{
-            //    //await _commands.AddTrivia<TriviaImpl>(_client, _map, config.TriviaData, _logger);
+            using (var config = _store.Load())
+            {
+                //await _commands.AddTrivia<TriviaImpl>(_client, _map, config.TriviaData, _logger);
 
-            //    //await _commands.UseAudio<AudioModuleImpl>(_map, config.AudioConfig, _logger);
-            //}
+                await _commands.UseAudio<AudioModuleImpl>(_map, config.AudioConfig, _logger);
+            }
 
             _client.MessageReceived += HandleCommand;
             _services = _map.BuildServiceProvider();
