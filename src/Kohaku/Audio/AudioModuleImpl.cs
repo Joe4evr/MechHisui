@@ -31,6 +31,12 @@ namespace Kohaku
             return base.PlayCmd(song);
         }
 
+        [Command("playlist", RunMode = RunMode.Async)]
+        public override Task PlaylistCmd()
+        {
+            return base.PlaylistCmd();
+        }
+
         [Command("pause", RunMode = RunMode.Async)]
         public override Task PauseCmd()
         {

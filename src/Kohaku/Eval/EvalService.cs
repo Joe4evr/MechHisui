@@ -22,7 +22,6 @@ namespace Kohaku
         private static readonly Regex _codeblock = new Regex(@"`{3}(?:\S*$)((?:.*\n)*)`{3}", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly Regex _exprHole = new Regex(@"{expr}", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly object[] _emptyArray = Array.Empty<object>();
-        //private static readonly AssemblyLoadContext _assemblyLoadContext = AssemblyLoadContext.Default;
 
         /// <summary> The assemblies referenced during evaluation. </summary>
         private readonly IEnumerable<MetadataReference> _references;
@@ -46,7 +45,6 @@ namespace Kohaku
             _references = references;
             _syntaxText = syntax;
             _logger = logger ?? (_ => Task.CompletedTask);
-            //_assemblyLoadContext.Unloading += _assemblyLoadContext_Unloading;
         }
 
         public async Task<string> Eval(string arg, ICommandContext ctx, IServiceProvider services)
@@ -75,8 +73,7 @@ namespace Kohaku
                 if (result.Success)
                 {
                     ms.Seek(0, SeekOrigin.Begin);
-                    var asmctx = AssemblyLoadContext.GetLoadContext(Assembly.GetEntryAssembly());
-                    asmctx.Unloading += AssemblyLoadContext_Unloading;
+                    var asmctx = AssemblyLoadContext.Default;
                     var assembly = asmctx.LoadFromStream(ms);
 
                     var type = assembly.GetType("DynamicCompile.DynEval");
@@ -89,8 +86,7 @@ namespace Kohaku
                 else
                 {
                     var failures = result.Diagnostics.Where(diagnostic =>
-                        diagnostic.IsWarningAsError
-                        || diagnostic.Severity == DiagnosticSeverity.Error);
+                        diagnostic.IsWarningAsError || diagnostic.Severity == DiagnosticSeverity.Error);
 
                     Console.Error.WriteLine(String.Join("\n", failures.Select(f => $"{f.Id}: {f.GetMessage()}")));
                     return $"**Error:** {failures.First().GetMessage()}";
@@ -98,16 +94,10 @@ namespace Kohaku
             }
         }
 
-        private void AssemblyLoadContext_Unloading(AssemblyLoadContext context)
-        {
-            _logger(new LogMessage(LogSeverity.Info, "Eval", @"AssemblyLoadContext Unloaded."));
-            context.Unloading -= AssemblyLoadContext_Unloading;
-        }
-
-        private static void CheckSyntaxTree(CSharpSyntaxTree tree)
-        {
-            var root = tree.GetCompilationUnitRoot();
-            //root.
-        }
+        //private static void CheckSyntaxTree(CSharpSyntaxTree tree)
+        //{
+        //    var root = tree.GetCompilationUnitRoot();
+        //    //root.
+        //}
     }
 }

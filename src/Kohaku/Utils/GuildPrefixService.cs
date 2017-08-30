@@ -49,12 +49,9 @@ namespace Kohaku
                         }
                     }
                 }
-                return _commands.Search(context, argPos);
             }
-            else
-            {
-                return _commands.Search(context, argPos);
-            }
+
+            return _commands.Search(context, argPos);
         }
     }
 }
