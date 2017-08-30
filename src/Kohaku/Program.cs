@@ -10,6 +10,7 @@ using Discord.Addons.SimplePermissions;
 //using Discord.Addons.TriviaGames;
 using Discord.Commands;
 using Discord.WebSocket;
+using Newtonsoft.Json;
 using SharedExtensions;
 using WS4NetCore;
 
@@ -51,13 +52,15 @@ namespace Kohaku
             });
 
             Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
-            //_store = new EFConfigStore<KohakuConfig, ConfigGuild, ConfigChannel, ConfigUser>(_commands);
-            _store = new JsonConfigStore<KohakuConfig>(p.ConfigPath, _commands);
+            _store = new EFConfigStore<KohakuConfig>(_commands);
+            //_store = new JsonConfigStore<KohakuConfig>(p.ConfigPath, _commands);
             using (var config = _store.Load())
             {
-                if (config.AudioConfig == null)
+                if (!config.Strings.Any())
                 {
-                    config.AudioConfig = new AudioConfig();
+                    config.Strings.AddRange(
+                        JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("strings.json"))
+                            .DictionarySelect((k, v) => new StringKeyValuePair { Key = k, Value = v }));
                     config.Save();
                 }
             }
@@ -86,9 +89,16 @@ namespace Kohaku
 
             using (var config = _store.Load())
             {
-                //await _commands.UseFgoService(_depmap, config.FgoConfig);
+                foreach (var mName in _commands.Modules.Select(m => m.Name).Except(config.Modules.Select(m => m.ModuleName), StringComparer.OrdinalIgnoreCase))
+                {
+                    config.Modules.Add(new ConfigModule { ModuleName = mName });
+                }
+                config.Save();
 
-                await _client.LoginAsync(TokenType.Bot, config.LoginToken);
+                //await _commands.UseFgoService(_depmap, config.FgoConfig);
+                var token = config.Strings.SingleOrDefault(t => t.Key == "Login")?.Value;
+                if (token != null)
+                    await _client.LoginAsync(TokenType.Bot, token);
             }
 
             await _client.StartAsync();

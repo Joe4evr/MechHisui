@@ -9,8 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Discord.Commands;
 using Discord.Addons.SimpleAudio;
 using Discord.Addons.SimplePermissions;
-//using MechHisui.FateGOLib;
-using Newtonsoft.Json;
+using MechHisui.FateGOLib;
+using System.Text.RegularExpressions;
+//using Newtonsoft.Json;
 
 namespace Kohaku
 {
@@ -22,59 +23,66 @@ namespace Kohaku
         {
             await _commands.UseSimplePermissions(_client, _store, _map, _logger);
 
-            var eval = EvalService.Builder.BuilderWithSystemAndLinq()
-                //.Add(new EvalReference(typeof(FgoStatService)))
-                .Add(new EvalReference(typeof(ICommandContext)));
+            //var eval = EvalService.Builder.BuilderWithSystemAndLinq()
+            //    //.Add(new EvalReference(typeof(FgoStatService)))
+            //    .Add(new EvalReference(typeof(ICommandContext)));
 
-            _map.AddSingleton(eval.Build(
-                _logger,
-                //(typeof(FgoStatService), "FgoStats"),
-                (typeof(ICommandContext), "Context")
-            ));
-            await _commands.AddModuleAsync<EvalModule>();
+            //_map.AddSingleton(eval.Build(
+            //    _logger,
+            //    //(typeof(FgoStatService), "FgoStats"),
+            //    (typeof(ICommandContext), "Context")
+            //));
+            //await _commands.AddModuleAsync<EvalModule>();
 
-            //var fgo = new FgoConfig
-            //{
-            //    GetServants = () => JsonConvert.DeserializeObject<List<ServantProfile>>(File.ReadAllText("Servants.json")),
-            //    //GetFakeServants = Enumerable.Empty<ServantProfile>,
-            //    //GetServantAliases = () =>
-            //    //{
-            //    //    using (var config = _store.Load())
-            //    //    {
-            //    //        return JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(config.FgoBasePath, "ServantAlias.json")))
-            //    //            .Join(config.GetAllServants(), kv => kv.Value, s => s.Name, (kv, s) => new ServantAlias { Alias = kv.Key, Servant = s });
-            //    //    }
-            //    //},
-            //    AddServantAlias = (name, alias) => false,
-            //    GetCEs = Enumerable.Empty<CEProfile>,
-            //    //GetCEAliases = () =>
-            //    //{
-            //    //    using (var config = _store.Load())
-            //    //    {
-            //    //        return JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(config.FgoBasePath, "CEAlias.json")))
-            //    //            .Join(config.GetAllCEs(), kv => kv.Value, ce => ce.Name, (kv, ce) => new CEAlias { Alias = kv.Key, CE = ce });
-            //    //    }
-            //    //},
-            //    AddCEAlias = (ce, alias) => false,
-            //    GetMystics = Enumerable.Empty<MysticCode>,
-            //    //GetMysticAliases = () =>
-            //    //{
-            //    //    using (var config = _store.Load())
-            //    //    {
-            //    //        return JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(config.FgoBasePath, "MysticAlias.json")))
-            //    //            .Join(config.GetAllMystics(), kv => kv.Value, myst => myst.Code, (kv, myst) => new MysticAlias { Alias = kv.Key, Code = myst });
-            //    //    }
-            //    //},
-            //    AddMysticAlias = (code, alias) => false,
-            //    GetEvents = Enumerable.Empty<FgoEvent>
-            //};
+            var fgo = new FgoConfig
+            {
+                FindServants = term =>
+                {
+                    using (var config = _store.Load())
+                    {
+                        return config.Servants.Where(s => s.Name.Equals(term, StringComparison.OrdinalIgnoreCase))
+                            .Concat(config.ServantAliases.Where(a => a.Alias.Equals(term, StringComparison.OrdinalIgnoreCase))
+                                .Select(a => a.Servant))
+                            .Distinct();
+                    }
+                },
+                AddServantAlias = (name, alias) =>
+                {
+                    using (var config = _store.Load())
+                    {
+                        if (config.Servants.Any(s => s.Aliases.Any(a => a.Alias == alias)))
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            var srv = config.Servants.SingleOrDefault(s => s.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                            if (srv != null)
+                            {
+                                var al = new ServantAlias { Servant = srv, Alias = alias };
+                                srv.Aliases.Add(al);
+                                config.Save();
+                                return true;
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
+                    }
+
+                },
+            };
             //await _commands.UseFgoService(_map, fgo, _client);
 
             using (var config = _store.Load())
             {
-                //await _commands.AddTrivia<TriviaImpl>(_client, _map, config.TriviaData, _logger);
-
-                await _commands.UseAudio<AudioModuleImpl>(_map, config.AudioConfig, _logger);
+                await _commands.UseAudio<AudioModuleImpl>(_map,
+                    new AudioConfig
+                    {
+                        FFMpegPath = config.Strings.Single(s => s.Key == "FFMpegPath").Value,
+                        MusicBasePath = config.Strings.Single(s => s.Key == "MusicBasePath").Value,
+                    }, _logger);
             }
 
             _client.MessageReceived += HandleCommand;

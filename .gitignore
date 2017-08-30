@@ -193,3 +193,4 @@ FakesAssemblies/
 **/config.json
 **/project.lock.json
 *.dll
+src/Kohaku/strings.json

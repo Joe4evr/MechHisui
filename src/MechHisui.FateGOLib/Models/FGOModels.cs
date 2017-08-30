@@ -23,14 +23,16 @@ namespace MechHisui.FateGOLib
         public string NoblePhantasm { get; set; }
         public string NoblePhantasmEffect { get; set; }
         public string NoblePhantasmRankUpEffect { get; set; }
-        public ICollection<string> Traits { get; set; }
+        //public ICollection<string> Traits { get; set; }
+        public ICollection<ServantTrait> Traits { get; set; }
         public string Attribute { get; set; }
         public ICollection<ServantSkill> ActiveSkills { get; set; }
         public ICollection<ServantSkill> PassiveSkills { get; set; }
         public string Additional { get; set; }
         public string Image { get; set; }
         public bool Obtainable { get; set; }
-        public ICollection<string> Aliases { get; set; }
+        //public ICollection<string> Aliases { get; set; }
+        public ICollection<ServantAlias> Aliases { get; set; }
 
         public override string ToString()
         {
@@ -38,28 +40,28 @@ namespace MechHisui.FateGOLib
         }
     }
 
-    //public class ServantTrait
-    //{
-    //    //public int Id { get; set; }
-    //    public string Trait { get; set; }
-    //    public bool IsAutoComputed { get; set; }
-    //}
+    public class ServantTrait
+    {
+        public int Id { get; set; }
+        public string Trait { get; set; }
+        public bool IsAutoComputed { get; set; }
+    }
 
     public class ServantSkill
     {
-        //public int Id { get; set; }
+        public int Id { get; set; }
         public string SkillName { get; set; }
         public string Rank { get; set; }
         public string Effect { get; set; }
         public string RankUpEffect { get; set; }
     }
 
-    //public class ServantAlias
-    //{
-    //    public int Id { get; set; }
-    //    public string Alias { get; set; }
-    //    public ServantProfile Servant { get; set; }
-    //}
+    public class ServantAlias
+    {
+        public int Id { get; set; }
+        public string Alias { get; set; }
+        public ServantProfile Servant { get; set; }
+    }
 
     public class CEProfile
     {
@@ -125,7 +127,7 @@ namespace MechHisui.FateGOLib
 
     public class NodeDrop
     {
-        //public int Id { get; set; }
+        public int Id { get; set; }
         public string Map { get; set; }
         public string NodeJP { get; set; }
         public string NodeEN { get; set; }
@@ -134,7 +136,7 @@ namespace MechHisui.FateGOLib
 
     public class NameOnlyServant
     {
-        //public int Id { get; set; }
+        public int Id { get; set; }
         public string Class { get; set; }
         public string Name { get; set; }
     }

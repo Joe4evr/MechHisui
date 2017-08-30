@@ -88,7 +88,7 @@ namespace Kohaku
                     var failures = result.Diagnostics.Where(diagnostic =>
                         diagnostic.IsWarningAsError || diagnostic.Severity == DiagnosticSeverity.Error);
 
-                    Console.Error.WriteLine(String.Join("\n", failures.Select(f => $"{f.Id}: {f.GetMessage()}")));
+                    Console.Error.WriteLine(System.String.Join("\n", failures.Select(f => $"{f.Id}: {f.GetMessage()}")));
                     return $"**Error:** {failures.First().GetMessage()}";
                 }
             }

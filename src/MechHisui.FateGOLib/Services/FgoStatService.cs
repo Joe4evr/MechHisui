@@ -27,37 +27,38 @@ namespace MechHisui.FateGOLib
             TimeSpan.FromHours(24));
         }
 
-        public IEnumerable<ServantProfile> LookupStats(string servant, bool fullsearch = false)
+        public IEnumerable<ServantProfile> LookupStats(string term, bool fullsearch = false)
         {
-            var list = Config.GetServants();
-            var servants = list
-                .Where(p => p.Name.Equals(servant, StringComparison.OrdinalIgnoreCase));
+            var list = Config.FindServants(term)
+                .Where(s => RegexMatchOneWord(s.Name, term) || s.Aliases.Any(a => RegexMatchOneWord(a.Alias, term)))
+                .ToList();
 
-            if (!servants.Any() || fullsearch)
-            {
-                servants = servants.Concat(list.Where(p => RegexMatchOneWord(p.Name, servant)));
+            //if (!servants.Any() || fullsearch)
+            //{
+            //    servants = servants.Concat(list.Where(p => RegexMatchOneWord(p.Name, servant)));
 
-                if (!servants.Any() || fullsearch)
-                {
-                    var lookup = list
-                        .Where(s => s.Aliases.Any(a => a.Equals(servant, StringComparison.OrdinalIgnoreCase)))
-                        .ToList();
+            //    if (!servants.Any() || fullsearch)
+            //    {
+            //        var lookup = list
+            //            .Where(s => s.Aliases.Any(a => a.Equals(servant, StringComparison.OrdinalIgnoreCase)))
+            //            .ToList();
 
-                    if (lookup.Count == 0 || fullsearch)
-                    {
-                        lookup = lookup.Concat(list
-                            .Where(s => s.Aliases.Any(a => RegexMatchOneWord(a, servant))))
-                            .ToList();
-                    }
+            //        if (lookup.Count == 0 || fullsearch)
+            //        {
+            //            lookup = lookup.Concat(list
+            //                .Where(s => s.Aliases.Any(a => RegexMatchOneWord(a, servant))))
+            //                .ToList();
+            //        }
 
-                    if (lookup.Count > 0)
-                    {
-                        servants = servants.Concat(list.Where(p => lookup.Any(l => l.Id == p.Id)));
-                    }
-                }
-            }
+            //        if (lookup.Count > 0)
+            //        {
+            //            servants = servants.Concat(list.Where(p => lookup.Any(l => l.Id == p.Id)));
+            //        }
+            //    }
+            //}
 
-            return servants.ToList();
+            //return servants.ToList();
+            return list;
         }
 
         public IEnumerable<CEProfile> LookupCE(string name, bool fullsearch = false)

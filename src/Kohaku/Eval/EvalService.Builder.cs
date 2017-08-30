@@ -53,9 +53,9 @@ namespace Kohaku
             /// the command is allowed to run.</param>
             public EvalService Build(Func<LogMessage, Task> logger = null, params(Type Type, string FieldName)[] argTypes)
             {
-                var fields = String.Join("\n", argTypes.Select(t => $"private readonly {t.Type.Name} {t.FieldName};"));
-                var ctorArgs = $"public DynEval({String.Join(", ", argTypes.Select(t => $"{t.Type.Name} {t.FieldName}"))})";
-                var assigns = String.Join(";\n", argTypes.Select(t => $"this.{t.FieldName} = {t.FieldName};"));
+                var fields = System.String.Join("\n", argTypes.Select(((Type Type, string FieldName) t) => $"private readonly {t.Type.Name} {t.FieldName};"));
+                var ctorArgs = $"public DynEval({System.String.Join(", ", argTypes.Select(((Type Type, string FieldName) t) => $"{t.Type.Name} {t.FieldName}"))})";
+                var assigns = System.String.Join(";\n", argTypes.Select(((Type Type, string FieldName) t) => $"this.{t.FieldName} = {t.FieldName};"));
                 var ctor = $@"{fields}
 {ctorArgs}
 {{

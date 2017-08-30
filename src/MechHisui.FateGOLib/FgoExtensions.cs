@@ -23,7 +23,7 @@ namespace MechHisui.FateGOLib
             var statService = new FgoStatService(config, client);
             map.AddSingleton(statService);
             return Task.WhenAll(
-                commands.AddModuleAsync<ServantModule>(),
+                //commands.AddModuleAsync<ServantModule>(),
                 commands.AddModuleAsync<CEModule>(),
                 commands.AddModuleAsync<MysticModule>(),
                 commands.AddModuleAsync<EventsModule>()
@@ -110,7 +110,7 @@ namespace MechHisui.FateGOLib
         public static IEnumerable<ServantProfile> WherePassiveEffect(this IEnumerable<ServantProfile> profiles, string effect)
             => profiles.Where(p => p.PassiveSkills.Any(s => s.Effect.Contains(effect)));
 
-        public static IEnumerable<ServantProfile> WhereTrait(this IEnumerable<ServantProfile> profiles, string trait)
-            => profiles.Where(p => p.Traits.Any(t => t.ContainsIgnoreCase(trait)));
+        //public static IEnumerable<ServantProfile> WhereTrait(this IEnumerable<ServantProfile> profiles, string trait)
+        //    => profiles.Where(p => p.Traits.Any(t => t.ContainsIgnoreCase(trait)));
     }
 }
