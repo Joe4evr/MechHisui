@@ -2,10 +2,11 @@
     <PropertyGroup Condition="'$(OutputType.ToUpper())' != 'EXE'">
         <TargetFramework>netstandard2.0</TargetFramework>
         <LangVersion>7.1</LangVersion>
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Discord.Net.Commands" Version="1.0.1" />
-        <PackageReference Include="Discord.Net.WebSocket" Version="1.0.1" />
+        <!--<PackageReference Include="Discord.Net.Commands" Version="1.0.1" />
+        <PackageReference Include="Discord.Net.WebSocket" Version="1.0.1" />-->
         <PackageReference Include="Discord.Addons.Preconditions" Version="1.0.0-rc" />
         <!--<PackageReference Include="Discord.Addons.SimplePermissions" Version="1.0.0-rc" />-->
     </ItemGroup>

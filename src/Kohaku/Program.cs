@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Discord;
-using Discord.Addons.SimpleAudio;
 using Discord.Addons.SimplePermissions;
 //using Discord.Addons.TriviaGames;
 using Discord.Commands;
@@ -51,9 +51,13 @@ namespace Kohaku
                 DefaultRunMode = RunMode.Sync
             });
 
-            Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
-            _store = new EFConfigStore<KohakuConfig>(_commands);
+            Log(LogSeverity.Verbose, "Constructing ConfigStore");
+            _store = new EFConfigStore<KohakuConfig>(_commands, options => options
+                    //.UseSqlServer(p.ConnectionString)
+                    .UseSqlite(p.ConnectionString)
+                );
             //_store = new JsonConfigStore<KohakuConfig>(p.ConfigPath, _commands);
+            Log(LogSeverity.Verbose, "Loading Config");
             using (var config = _store.Load())
             {
                 if (!config.Strings.Any())
@@ -70,7 +74,9 @@ namespace Kohaku
             {
                 MessageCacheSize = 50,
                 LogLevel = minlog,
+#if !ARM
                 WebSocketProvider = WS4NetProvider.Instance
+#endif
             });
             _client.Log += _logger;
             _commands.Log += _logger;
@@ -89,11 +95,11 @@ namespace Kohaku
 
             using (var config = _store.Load())
             {
-                foreach (var mName in _commands.Modules.Select(m => m.Name).Except(config.Modules.Select(m => m.ModuleName), StringComparer.OrdinalIgnoreCase))
-                {
-                    config.Modules.Add(new ConfigModule { ModuleName = mName });
-                }
-                config.Save();
+                //foreach (var mName in _commands.Modules.Select(m => m.Name).Except(config.Modules.Select(m => m.ModuleName), StringComparer.OrdinalIgnoreCase))
+                //{
+                //    config.Modules.Add(new ConfigModule { ModuleName = mName });
+                //}
+                //config.Save();
 
                 //await _commands.UseFgoService(_depmap, config.FgoConfig);
                 var token = config.Strings.SingleOrDefault(t => t.Key == "Login")?.Value;

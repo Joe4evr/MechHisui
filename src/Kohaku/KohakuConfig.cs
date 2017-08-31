@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Discord.Addons.SimpleAudio;
+//using Discord.Addons.SimpleAudio;
 using Discord.Addons.SimplePermissions;
+using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using MechHisui.FateGOLib;
 
@@ -24,7 +26,7 @@ namespace Kohaku
     //    //public List<ServantProfile> TestProfiles { get; set; }
     //}
 
-    internal class KohakuConfig : EFBaseConfigContext
+    public sealed class KohakuConfig : EFBaseConfigContext
     {
         public DbSet<StringKeyValuePair> Strings { get; set; }
 
@@ -33,25 +35,24 @@ namespace Kohaku
         public DbSet<ServantTrait> Traits { get; set; }
         public DbSet<ServantAlias> ServantAliases { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public KohakuConfig(DbContextOptions options, CommandService commandService) : base(options, commandService)
         {
-            optionsBuilder.UseInMemoryDatabase();
-
-            base.OnConfiguring(optionsBuilder);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ServantProfile>()
                 .HasMany(s => s.ActiveSkills);
+
             modelBuilder.Entity<ServantProfile>()
                 .HasMany(s => s.PassiveSkills);
+
             modelBuilder.Entity<ServantProfile>()
                 .HasMany(s => s.Traits);
+
             modelBuilder.Entity<ServantProfile>()
                 .HasMany(s => s.Aliases)
                 .WithOne(a => a.Servant);
-
 
             base.OnModelCreating(modelBuilder);
         }
@@ -59,9 +60,10 @@ namespace Kohaku
 
     public class StringKeyValuePair
     {
-        [Key]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Key { get; set; }
 
+        [Required]
         public string Value { get; set; }
     }
 }

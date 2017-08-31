@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
+//using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Discord.Commands;
-using Discord.Addons.SimpleAudio;
+//using Discord.Addons.SimpleAudio;
 using Discord.Addons.SimplePermissions;
 using MechHisui.FateGOLib;
 using System.Text.RegularExpressions;
@@ -75,15 +75,15 @@ namespace Kohaku
             };
             //await _commands.UseFgoService(_map, fgo, _client);
 
-            using (var config = _store.Load())
-            {
-                await _commands.UseAudio<AudioModuleImpl>(_map,
-                    new AudioConfig
-                    {
-                        FFMpegPath = config.Strings.Single(s => s.Key == "FFMpegPath").Value,
-                        MusicBasePath = config.Strings.Single(s => s.Key == "MusicBasePath").Value,
-                    }, _logger);
-            }
+            //using (var config = _store.Load())
+            //{
+            //    await _commands.UseAudio<AudioModuleImpl>(_map,
+            //        new AudioConfig
+            //        {
+            //            FFMpegPath = config.Strings.Single(s => s.Key == "FFMpegPath").Value,
+            //            MusicBasePath = config.Strings.Single(s => s.Key == "MusicBasePath").Value,
+            //        }, _logger);
+            //}
 
             _client.MessageReceived += HandleCommand;
             _services = _map.BuildServiceProvider();
