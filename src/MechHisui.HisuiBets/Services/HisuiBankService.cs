@@ -59,18 +59,19 @@ namespace MechHisui.HisuiBets
             {
                 if (!user.IsBot && !Blacklist.Contains(user.Id))
                 {
-                    await Bank.AddUser(user);
-                    await Log(LogSeverity.Info, $"Registered {user.Username} for a bank account.");
+                    if (await Bank.AddUser(user))
+                        await Log(LogSeverity.Info, $"Registered {user.Username} for a bank account.");
                 }
             };
             client.GuildAvailable += async guild =>
             {
+                await guild.DownloadUsersAsync();
                 foreach (var user in guild.Users.Except(Bank.GetAllUsers().Select(a => guild.GetUser(a.UserId)), _userComparer))
                 {
                     if (!user.IsBot && !Blacklist.Contains(user.Id))
                     {
-                        await Bank.AddUser(user);
-                        await Log(LogSeverity.Info, $"Registered {user.Username} for a bank account.");
+                        if (await Bank.AddUser(user))
+                            await Log(LogSeverity.Info, $"Registered {user.Username} for a bank account.");
                     }
                 }
             };

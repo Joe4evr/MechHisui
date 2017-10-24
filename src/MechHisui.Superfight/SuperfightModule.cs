@@ -8,6 +8,7 @@ using Discord.Addons.SimplePermissions;
 using Discord.Commands;
 using MechHisui.Superfight.Preconditions;
 using MechHisui.Superfight.Models;
+using SharedExtensions;
 
 namespace MechHisui.Superfight
 {

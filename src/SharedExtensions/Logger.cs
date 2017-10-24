@@ -10,10 +10,10 @@ namespace SharedExtensions
         private readonly LogSeverity _minimum;
         private readonly StreamWriter _logFile;
 
-        public Logger(LogSeverity minimum)
-        {
+        public Logger(LogSeverity minimum, string logPath = null)
+        { 
             _minimum = minimum;
-            string logdir = Path.Combine(Directory.GetCurrentDirectory(), "logs");
+            string logdir = Path.Combine(Directory.GetCurrentDirectory(), logPath ?? "logs");
             Directory.CreateDirectory(logdir);
             _logFile = File.AppendText(Path.Combine(logdir, $"{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.log"));
         }

@@ -20,13 +20,48 @@ namespace MechHisui
         {
             var fgo = new FgoConfig
             {
-                GetServants = () =>
+                FindServants = term =>
                 {
+                    //    using (var config = _store.Load())
+                    //    {
+                    //        return config.Servants.Where(s => s.Name.Equals(term, StringComparison.OrdinalIgnoreCase))
+                    //            .Concat(config.ServantAliases.Where(a => a.Alias.Equals(term, StringComparison.OrdinalIgnoreCase))
+                    //                .Select(a => a.Servant))
+                    //            .Distinct();
+                    //    }
                     using (var config = _store.Load())
                     {
-                        return JsonConvert.DeserializeObject<List<ServantProfile>>(File.ReadAllText(Path.Combine(config.FgoBasePath, "Servants.json")));
+                        return config.GetAllServants()
+                            .Where(s => s.Name.Equals(term, StringComparison.OrdinalIgnoreCase) || s.Aliases.Any(a => a.Alias.Equals(term, StringComparison.OrdinalIgnoreCase)))
+                            .Distinct();
                     }
                 },
+                //AddServantAlias = (name, alias) =>
+                //{
+                //    using (var config = _store.Load())
+                //    {
+                //        if (config.Servants.Any(s => s.Aliases.Any(a => a.Alias == alias)))
+                //        {
+                //            return false;
+                //        }
+                //        else
+                //        {
+                //            var srv = config.Servants.SingleOrDefault(s => s.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                //            if (srv != null)
+                //            {
+                //                var al = new ServantAlias { Servant = srv, Alias = alias };
+                //                srv.Aliases.Add(al);
+                //                config.Save();
+                //                return true;
+                //            }
+                //            else
+                //            {
+                //                return false;
+                //            }
+                //        }
+                //    }
+
+                //},
                 //GetFakeServants = () =>
                 //{
                 //    using (var config = _store.Load())
@@ -42,24 +77,7 @@ namespace MechHisui
                 //            .Join(config.GetAllServants(), kv => kv.Value, s => s.Name, (kv, s) => new ServantAlias { Alias = kv.Key, Servant = s });
                 //    }
                 //},
-                AddServantAlias = (name, alias) =>
-                {
-                    using (var config = _store.Load())
-                    {
-                        var all = config.GetAllServants();
-                        var srv = all.SingleOrDefault(s => s.Name == name);
-                        if (srv == null)
-                        {
-                            return false;
-                        }
-                        else
-                        {
-                            srv.Aliases.Add(alias);
-                            File.WriteAllText(Path.Combine(config.FgoBasePath, "Servants.json"), JsonConvert.SerializeObject(all, Formatting.Indented));
-                            return true;
-                        }
-                    }
-                },
+
                 GetCEs = () =>
                 {
                     using (var config = _store.Load())
@@ -67,14 +85,14 @@ namespace MechHisui
                         return config.GetAllCEs();
                     }
                 },
-                //GetCEAliases = () =>
-                //{
-                //    using (var config = _store.Load())
-                //    {
-                //        return JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(config.FgoBasePath, "CEAlias.json")))
-                //            .Join(config.GetAllCEs(), kv => kv.Value, ce => ce.Name, (kv, ce) => new CEAlias { Alias = kv.Key, CE = ce });
-                //    }
-                //},
+                GetCEAliases = () =>
+                {
+                    using (var config = _store.Load())
+                    {
+                        return JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(config.FgoBasePath, "CEAlias.json")))
+                            .Join(config.GetAllCEs(), kv => kv.Value, ce => ce.Name, (kv, ce) => new CEAlias { Alias = kv.Key, CE = ce });
+                    }
+                },
                 AddCEAlias = (ce, alias) =>
                 {
                     using (var config = _store.Load())
@@ -100,14 +118,14 @@ namespace MechHisui
                         return config.GetAllMystics();
                     }
                 },
-                //GetMysticAliases = () =>
-                //{
-                //    using (var config = _store.Load())
-                //    {
-                //        return JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(config.FgoBasePath, "MysticAlias.json")))
-                //            .Join(config.GetAllMystics(), kv => kv.Value, myst => myst.Code, (kv, myst) => new MysticAlias { Alias = kv.Key, Code = myst });
-                //    }
-                //},
+                GetMysticAliases = () =>
+                {
+                    using (var config = _store.Load())
+                    {
+                        return JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(config.FgoBasePath, "MysticAlias.json")))
+                            .Join(config.GetAllMystics(), kv => kv.Value, myst => myst.Code, (kv, myst) => new MysticAlias { Alias = kv.Key, Code = myst });
+                    }
+                },
                 AddMysticAlias = (code, alias) =>
                 {
                     using (var config = _store.Load())
@@ -137,152 +155,68 @@ namespace MechHisui
             //_map.AddSingleton(fgo);
             await _commands.UseFgoService(_map, fgo, _client);
 
-            var bank = new BankOfHisui
-            {
-                AddUser = (user) =>
-                {
-                    using (var config = _store.Load())
-                    {
-                        config.AddBankAccount(user);
-                    }
-                    return Task.CompletedTask;
-                },
-                GetAllUsers = () =>
-                {
-                    using (var config = _store.Load())
-                    {
-                        return config.GetBankAccounts();
-                    }
-                },
-                GetUser = (id) =>
-                {
-                    using (var config = _store.Load())
-                    {
-                        return config.GetBankAccounts().Single(u => u.UserId == id);
-                    }
-                },
-                CashOut = (bets, winner) =>
-                {
-                    int l = 0;
-                    var winners = bets.Where(b => b.Tribute.Equals(winner, StringComparison.OrdinalIgnoreCase)).ToList();
-                    var wholeSum = bets.Sum(b => b.BettedAmount);
-                    decimal loserSum = bets
-                        .Where(b => !b.Tribute.Equals(winner, StringComparison.OrdinalIgnoreCase))
-                        .Sum(b => b.BettedAmount);
-                    decimal winnerSum = wholeSum - loserSum;
+            //var bank = new BankOfHisui
+            //{
+                
+            //};
+            //await _commands.UseHisuiBank(_map, bank, _client, _logger);
 
-                    var windict = new Dictionary<ulong, int>();
+            //var xdu = new XduConfig
+            //{
+            //    GetGears = () =>
+            //    {
+            //        using (var config = _store.Load())
+            //        {
+            //            string path = config.XduBasePath;
+            //            var hibiki = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Hibiki.json")));
+            //            hibiki.ForEach(p => p.CharacterName = "Hibiki Tachibana");
+            //            var tsubasa = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Tsubasa.json")));
+            //            tsubasa.ForEach(p => p.CharacterName = "Tsubasa Kazanari");
+            //            var chris = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Chris.json")));
+            //            chris.ForEach(p => p.CharacterName = "Chris Yukine");
 
-                    using (var config = _store.Load())
-                    {
-                        var all = config.GetBankAccounts();
-                        foreach (var user in winners)
-                        {
-                            var payout = (int)((loserSum / winnerSum) * user.BettedAmount) + user.BettedAmount;
-                            var us = all.SingleOrDefault(u => u.UserId == user.UserId);
-                            us.Bucks += payout;
-                            windict.Add(us.UserId, payout);
-                            l += payout;
-                        }
-                        config.Save();
-                    }
-                    return new BetResult
-                    {
-                        RoundingLoss = l,
-                        Winners = windict
-                    };
-                },
-                Interest = () =>
-                {
-                    using (var config = _store.Load())
-                    {
-                        var all = config.GetBankAccounts().Where(u => u.Bucks < 2500);
-                        foreach (var u in all)
-                        {
-                            u.Bucks += 10;
-                        }
-                        config.Save();
-                    }
-                },
-                Donate = (donor, receiver, amount) =>
-                {
-                    using (var config = _store.Load())
-                    {
-                        var all = config.GetBankAccounts();
+            //            var maria = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Maria.json")));
+            //            maria.ForEach(p => p.CharacterName = "Maria Cadenzavna Eve");
+            //            var shirabe = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Shirabe.json")));
+            //            shirabe.ForEach(p => p.CharacterName = "Shirabe Tsukuyomi");
+            //            var kirika = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Kirika.json")));
+            //            kirika.ForEach(p => p.CharacterName = "Kirika Akatsuki");
 
-                        all.Single(u => donor == u.UserId).Bucks -= amount;
-                        all.Single(u => receiver == u.UserId).Bucks += amount;
-                        config.Save();
-                    }
-                },
-                Take = (id, amount) =>
-                {
-                    using (var config = _store.Load())
-                    {
-                        var all = config.GetBankAccounts();
-                        all.Single(u => u.UserId == id).Bucks -= amount;
-                        config.Save();
-                    }
-                }
-            };
-            await _commands.UseHisuiBank(_map, bank, _client, _logger);
-
-            var xdu = new XduConfig
-            {
-                GetGears = () =>
-                {
-                    using (var config = _store.Load())
-                    {
-                        string path = config.XduBasePath;
-                        var hibiki = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Hibiki.json")));
-                        hibiki.ForEach(p => p.CharacterName = "Hibiki Tachibana");
-                        var tsubasa = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Tsubasa.json")));
-                        tsubasa.ForEach(p => p.CharacterName = "Tsubasa Kazanari");
-                        var chris = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Chris.json")));
-                        chris.ForEach(p => p.CharacterName = "Chris Yukine");
-
-                        var maria = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Maria.json")));
-                        maria.ForEach(p => p.CharacterName = "Maria Cadenzavna Eve");
-                        var shirabe = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Shirabe.json")));
-                        shirabe.ForEach(p => p.CharacterName = "Shirabe Tsukuyomi");
-                        var kirika = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Kirika.json")));
-                        kirika.ForEach(p => p.CharacterName = "Kirika Akatsuki");
-
-                        var serena = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Serena.json")));
-                        serena.ForEach(p => p.CharacterName = "Serena Cadenzavna Eve");
-                        var kanade = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Kanade.json")));
-                        kanade.ForEach(p => p.CharacterName = "Kanade Amou");
-                        var miku = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Miku.json")));
-                        miku.ForEach(p => p.CharacterName = "Miku Kohinata");
-                        return hibiki.Concat(tsubasa).Concat(chris)
-                            .Concat(maria).Concat(shirabe).Concat(kirika)
-                            .Concat(serena).Concat(kanade).Concat(miku).ToList();
-                    }
-                },
-                GetMemorias = () =>
-                {
-                    using (var config = _store.Load())
-                    {
-                        return JsonConvert.DeserializeObject<List<Memoria>>(File.ReadAllText(Path.Combine(config.XduBasePath, "Memoria.json")));
-                    }
-                },
-                GetSongs = () =>
-                {
-                    using (var config = _store.Load())
-                    {
-                        return JsonConvert.DeserializeObject<List<Song>>(File.ReadAllText(Path.Combine(config.XduBasePath, "Songs.json")));
-                    }
-                },
-                GetEvents = () =>
-                {
-                    using (var config = _store.Load())
-                    {
-                        return JsonConvert.DeserializeObject<List<XduEvent>>(File.ReadAllText(Path.Combine(config.XduBasePath, "Events.json")));
-                    }
-                }
-            };
-            _map.AddSingleton(new XduStatService(xdu, _client));
-            await _commands.AddModuleAsync<XduModule>();
+            //            var serena = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Serena.json")));
+            //            serena.ForEach(p => p.CharacterName = "Serena Cadenzavna Eve");
+            //            var kanade = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Kanade.json")));
+            //            kanade.ForEach(p => p.CharacterName = "Kanade Amou");
+            //            var miku = JsonConvert.DeserializeObject<List<Profile>>(File.ReadAllText(Path.Combine(path, "Miku.json")));
+            //            miku.ForEach(p => p.CharacterName = "Miku Kohinata");
+            //            return hibiki.Concat(tsubasa).Concat(chris)
+            //                .Concat(maria).Concat(shirabe).Concat(kirika)
+            //                .Concat(serena).Concat(kanade).Concat(miku).ToList();
+            //        }
+            //    },
+            //    GetMemorias = () =>
+            //    {
+            //        using (var config = _store.Load())
+            //        {
+            //            return JsonConvert.DeserializeObject<List<Memoria>>(File.ReadAllText(Path.Combine(config.XduBasePath, "Memoria.json")));
+            //        }
+            //    },
+            //    GetSongs = () =>
+            //    {
+            //        using (var config = _store.Load())
+            //        {
+            //            return JsonConvert.DeserializeObject<List<Song>>(File.ReadAllText(Path.Combine(config.XduBasePath, "Songs.json")));
+            //        }
+            //    },
+            //    GetEvents = () =>
+            //    {
+            //        using (var config = _store.Load())
+            //        {
+            //            return JsonConvert.DeserializeObject<List<XduEvent>>(File.ReadAllText(Path.Combine(config.XduBasePath, "Events.json")));
+            //        }
+            //    }
+            //};
+            //_map.AddSingleton(new XduStatService(xdu, _client));
+            //await _commands.AddModuleAsync<XduModule>();
             
             //var eval = EvalService.Builder.BuilderWithSystemAndLinq()
             //    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(StatService).Assembly.Location),
@@ -302,8 +236,8 @@ namespace MechHisui
 
             using (var config = _store.Load())
             {
-                await _commands.AddSecretHitler(_map, JsonConvert.DeserializeObject<List<SecretHitlerConfig>>(File.ReadAllText(Path.Combine(config.SHConfigPath, "shitler.json"))));
-                await _commands.AddSuperFight(_map, config.SuperfightBasePath);
+                //await _commands.AddSecretHitler(_map, JsonConvert.DeserializeObject<List<SecretHitlerConfig>>(File.ReadAllText(Path.Combine(config.SHConfigPath, "shitler.json"))));
+                //await _commands.AddSuperFight(_map, config.SuperfightBasePath);
             }
 
             _client.MessageReceived += HandleCommand;

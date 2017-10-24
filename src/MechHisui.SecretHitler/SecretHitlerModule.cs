@@ -9,6 +9,7 @@ using Discord.Addons.SimplePermissions;
 using Discord.Commands;
 using MechHisui.SecretHitler.Models;
 using SharedExtensions;
+using SharedExtensions.Collections;
 
 namespace MechHisui.SecretHitler
 {

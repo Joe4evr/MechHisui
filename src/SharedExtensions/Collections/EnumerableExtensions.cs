@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 
-namespace System.Collections.Generic
+namespace SharedExtensions
 {
     internal static class EnumerableExtensions
     {
@@ -57,5 +58,25 @@ namespace System.Collections.Generic
             this IDictionary<TKey, TValue> source,
             Func<TKey, TValue, TResult> selector)
                 => source.Select(kvp => selector(kvp.Key, kvp.Value));
+
+        public static void InsertAt<T>(this Stack<T> stack, uint index, T item)
+        {
+            if (index > stack.Count)
+                throw new ArgumentOutOfRangeException("Insertion index may not be greater than the stack's current size.", nameof(index));
+
+            if (index == 0)
+            {
+                stack.Push(item);
+                return;
+            }
+
+            var buffer = new T[index];
+            for (int i = 0; i < buffer.Length; i++)
+                buffer[i] = stack.Pop();
+
+            stack.Push(item);
+            for (int i = buffer.Length - 1; i >= 0; i--)
+                stack.Push(buffer[i]);
+        }
     }
 }

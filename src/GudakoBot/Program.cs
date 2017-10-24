@@ -31,7 +31,7 @@ namespace GudakoBot
         private Program(Params p)
         {
             var minlog = p.LogSeverity ?? LogSeverity.Info;
-            _logger = new Logger(minlog).Log;
+            _logger = new Logger(minlog, p.LogPath).Log;
 
             Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
             _store = new ConfigStore(p.ConfigPath);

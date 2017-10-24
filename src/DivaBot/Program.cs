@@ -39,7 +39,7 @@ namespace DivaBot
         private Program(Params p)
         {
             var minlog = p.LogSeverity ?? LogSeverity.Info;
-            _logger = new Logger(minlog).Log;
+            _logger = new Logger(minlog, p.LogPath).Log;
 
             Log(LogSeverity.Verbose, $"Constructing {nameof(CommandService)}");
             _commands = new CommandService(new CommandServiceConfig
@@ -109,7 +109,11 @@ namespace DivaBot
 
             await InitCommands();
 
-            await _client.LoginAsync(TokenType.Bot, p.Token.GetAndClear());
+            using (var config =  _store.Load())
+            {
+                await _client.LoginAsync(TokenType.Bot, config.LoginToken);
+            }
+
             await _client.StartAsync();
             await Task.Delay(-1);
         }

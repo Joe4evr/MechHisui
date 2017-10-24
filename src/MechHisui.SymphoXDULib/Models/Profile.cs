@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Discord;
+using SharedExtensions;
 
 namespace MechHisui.SymphoXDULib
 {
-    public class Profile
+    public class XduProfile
     {
         public int Rarity { get; set; }
         public Dictionary<string, CharacterVariation> Variations { get; set; }

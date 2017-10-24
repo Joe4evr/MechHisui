@@ -2,7 +2,7 @@
 
 namespace MechHisui.SymphoXDULib
 {
-    public class Song
+    public class XduSong
     {
         public int Id { get; set; }
         public string Title { get; set; }

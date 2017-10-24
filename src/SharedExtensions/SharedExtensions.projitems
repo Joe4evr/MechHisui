@@ -14,7 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DateTimeWithZone.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DiscordExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EntityEqualityComparer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EnumerableExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\EnumerableExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Logger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Params.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringBuilderExtensions.cs" />

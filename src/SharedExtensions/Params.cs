@@ -6,7 +6,8 @@ namespace SharedExtensions
     internal sealed class Params
     {
         public string ConfigPath { get; private set; }
-        public string ConnectionString { get; set; }
+        public string ConnectionString { get; private set; }
+        public string LogPath { get; private set; }
         public LogSeverity? LogSeverity { get; private set; }
         public int? Shards { get; private set; }
         public int? ShardId { get; private set; }
@@ -35,6 +36,10 @@ namespace SharedExtensions
                     case "-l":
                     case "-log":
                         p.LogSeverity = (LogSeverity)Enum.Parse(typeof(LogSeverity), parameters[i + 1], ignoreCase: true);
+                        continue;
+                    case "-lp":
+                    case "-logpath":
+                        p.LogPath = parameters[i + 1];
                         continue;
                     case "-s":
                     case "-shards":

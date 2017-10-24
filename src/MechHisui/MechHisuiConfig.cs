@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,9 +10,11 @@ using Discord.Addons.SimplePermissions;
 using MechHisui.FateGOLib;
 using MechHisui.SecretHitler;
 using MechHisui.HisuiBets;
+using MechHisui.SymphoXDULib;
 using Newtonsoft.Json;
 using System.Linq;
 using Discord.WebSocket;
+using Discord.Commands;
 
 namespace MechHisui.Core
 {
@@ -59,46 +63,68 @@ namespace MechHisui.Core
         }
     }
 
-    //    public class MechHisuiConfig : EFBaseConfigContext<HisuiGuild, HisuiChannel, HisuiUser>
-    //    {
-    //        public DbSet<ServantProfile> Servants { get; set; }
-    //        public DbSet<ServantProfile> FakeServants { get; set; }
-    //        public DbSet<ServantAlias> ServantAliases { get; set; }
-    //        public DbSet<CEProfile> CEs { get; set; }
-    //        public DbSet<CEAlias> CEAliases { get; set; }
-    //        public DbSet<MysticCode> MysticCodes { get; set; }
-    //        public DbSet<MysticAlias> MysticAliases { get; set; }
-    //        public DbSet<Event> Events { get; set; }
-    //        public DbSet<NameOnlyServant> NameOnlyServants { get; set; }
-    //        public DbSet<FriendData> FriendData { get; set; }
-    //        public DbSet<StringDict> MiscStrings { get; set; }
-    //        public DbSet<SecretHitlerConfig> SHConfigs { get; set; }
-
-    //        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //        {
-    //            optionsBuilder.UseSqlite(File.ReadAllText("conn.txt"));
-
-    //            base.OnConfiguring(optionsBuilder);
-    //        }
-    //    }
-
-    //    public sealed class HisuiUser : ConfigUser
-    //    {
-    //        public int Bucks { get; set; } = 100;
-    //    }
-
-    //    public sealed class HisuiChannel : ConfigChannel<HisuiUser>
+    //public class MechHisuiConfig : EFBaseConfigContext<HisuiGuild, HisuiChannel, HisuiUser>
+    //{
+    //    public MechHisuiConfig(DbContextOptions options, CommandService commandService) : base(options, commandService)
     //    {
     //    }
 
-    //    public sealed class HisuiGuild : ConfigGuild<HisuiChannel, HisuiUser>
-    //    {
-    //    }
+    //    //FGO
+    //    public DbSet<ServantProfile> Servants { get; set; }
+    //    public DbSet<ServantSkill> FgoSkills { get; set; }
+    //    public DbSet<ServantTrait> Traits { get; set; }
+    //    public DbSet<ServantAlias> ServantAliases { get; set; }
+    //    public DbSet<CEProfile> CEs { get; set; }
+    //    public DbSet<CEAlias> CEAliases { get; set; }
+    //    public DbSet<MysticCode> MysticCodes { get; set; }
+    //    public DbSet<MysticAlias> MysticAliases { get; set; }
+    //    public DbSet<FgoEvent> FgoEvents { get; set; }
+    //    //public DbSet<NameOnlyServant> NameOnlyServants { get; set; }
+    //    public DbSet<FgoFriendData> FgoFriendData { get; set; }
 
-    //    public sealed class StringDict
+    //    //XDU
+    //    //public DbSet<XduProfile> XduCharacters { get; set; }
+    //    public DbSet<CharacterVariation> XduCharacters { get; set; }
+    //    public DbSet<XduSkill> XduSkills { get; set; }
+    //    public DbSet<Memoria> Memorias { get; set; }
+    //    public DbSet<XduSong> XduSongs { get; set; }
+    //    public DbSet<XduEvent> XduEvents { get; set; }
+
+    //    //misc
+    //    public DbSet<StringKeyValuePair> Strings { get; set; }
+    //    public DbSet<SecretHitlerConfig> SHConfigs { get; set; }
+
+    //    protected override void OnModelCreating(ModelBuilder modelBuilder)
     //    {
-    //        public int Id { get; set; }
-    //        public string Key { get; set; }
-    //        public string Value { get; set; }
+    //        modelBuilder.Entity<HisuiUser>()
+    //            .HasOne(u => u.FriendData);
+
+
+    //        modelBuilder.Entity<XduSkill>()
+    //            .Property(s => s.Id)
+    //            .ValueGeneratedOnAdd();
+
+    //        modelBuilder.Entity<CharacterVariation>()
+    //            .Property(v => v.Id)
+    //            .ValueGeneratedNever();
+
+    //        modelBuilder.Entity<CharacterVariation>()
+    //            .HasMany(v => v.Skills);
+
+    //        modelBuilder.Entity<Memoria>()
+    //            .Property(v => v.Id)
+    //            .ValueGeneratedNever();
+
+    //        base.OnModelCreating(modelBuilder);
     //    }
+    //}
+
+    //public class StringKeyValuePair
+    //{
+    //    [Key]
+    //    public string Key { get; set; }
+
+    //    [Required]
+    //    public string Value { get; set; }
+    //}
 }

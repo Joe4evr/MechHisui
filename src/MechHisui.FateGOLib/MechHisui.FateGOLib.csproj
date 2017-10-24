@@ -1,6 +1,3 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
     <Import Project="..\..\DiscordBotCore.props" />
-    <ItemGroup>
-      <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions\Discord.Addons.SimplePermissions.csproj" />
-    </ItemGroup>
 </Project>

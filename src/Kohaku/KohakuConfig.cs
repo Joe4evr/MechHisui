@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Discord.Addons.SimplePermissions;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
-using MechHisui.FateGOLib;
+//using MechHisui.FateGOLib;
 
 namespace Kohaku
 {
@@ -30,10 +30,10 @@ namespace Kohaku
     {
         public DbSet<StringKeyValuePair> Strings { get; set; }
 
-        public DbSet<ServantProfile> Servants { get; set; }
-        public DbSet<ServantSkill> Skills { get; set; }
-        public DbSet<ServantTrait> Traits { get; set; }
-        public DbSet<ServantAlias> ServantAliases { get; set; }
+        //public DbSet<ServantProfile> Servants { get; set; }
+        //public DbSet<ServantSkill> Skills { get; set; }
+        //public DbSet<ServantTrait> Traits { get; set; }
+        //public DbSet<ServantAlias> ServantAliases { get; set; }
 
         public KohakuConfig(DbContextOptions options, CommandService commandService) : base(options, commandService)
         {
@@ -41,18 +41,18 @@ namespace Kohaku
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<ServantProfile>()
-                .HasMany(s => s.ActiveSkills);
+            //modelBuilder.Entity<ServantProfile>()
+            //    .HasMany(s => s.ActiveSkills);
 
-            modelBuilder.Entity<ServantProfile>()
-                .HasMany(s => s.PassiveSkills);
+            //modelBuilder.Entity<ServantProfile>()
+            //    .HasMany(s => s.PassiveSkills);
 
-            modelBuilder.Entity<ServantProfile>()
-                .HasMany(s => s.Traits);
+            //modelBuilder.Entity<ServantProfile>()
+            //    .HasMany(s => s.Traits);
 
-            modelBuilder.Entity<ServantProfile>()
-                .HasMany(s => s.Aliases)
-                .WithOne(a => a.Servant);
+            //modelBuilder.Entity<ServantProfile>()
+            //    .HasMany(s => s.Aliases)
+            //    .WithOne(a => a.Servant);
 
             base.OnModelCreating(modelBuilder);
         }

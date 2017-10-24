@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using SharedExtensions.Collections;
 
 namespace DivaBot
 {
@@ -35,7 +36,7 @@ namespace DivaBot
                 "Outlook not so good",
                 "Very doubtful"
             };
-            Options = new HashSet<string>(o.Concat(additionalOptions ?? Enumerable.Empty<string>()).Shuffle(28));
+            //Options = new HashSet<string>(o.Concat(additionalOptions ?? Enumerable.Empty<string>()).Shuffle(28));
         }
     }
 }

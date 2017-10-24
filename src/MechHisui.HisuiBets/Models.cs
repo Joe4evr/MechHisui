@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Discord.WebSocket;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace MechHisui.HisuiBets
 {
@@ -23,14 +24,14 @@ namespace MechHisui.HisuiBets
 
     public sealed class BankOfHisui
     {
-        public Func<SocketGuildUser, Task> AddUser { get; set; }
-        public Func<IEnumerable<UserAccount>> GetAllUsers { get; set; }
+        public Func<SocketGuildUser, Task<bool>> AddUser { get; set; } = user => Task.FromResult(false);
+        public Func<IEnumerable<UserAccount>> GetAllUsers { get; set; } = Enumerable.Empty<UserAccount>;
         public Func<ulong, UserAccount> GetUser { get; set; }
         public Func<IEnumerable<Bet>, string, BetResult> CashOut { get; set; }
 
-        public Action Interest { get; set; }
-        public Action<ulong, ulong, int> Donate { get; set; }
-        public Action<ulong, int> Take { get; set; }
+        public Action Interest { get; set; } = () => { };
+        public Action<ulong, ulong, int> Donate { get; set; } = (from, to, amount) => { };
+        public Action<ulong, int> Take { get; set; } = (from, amount) => { };
     }
 
     public sealed class BetResult

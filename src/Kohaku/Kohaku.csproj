@@ -21,10 +21,10 @@
         <PackageReference Include="WS4NetCore" Version="1.0.0-a" />
     </ItemGroup>
     <ItemGroup>
-        <!--<ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimpleAudio\Discord.Addons.SimpleAudio.csproj" />-->
+        <!--<ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimpleAudio\Discord.Addons.SimpleAudio.csproj" />
         <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions.EFProvider\Discord.Addons.SimplePermissions.EFProvider.csproj" />
         <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions\Discord.Addons.SimplePermissions.csproj" />
-        <ProjectReference Include="..\MechHisui.FateGOLib\MechHisui.FateGOLib.csproj" />
+        <ProjectReference Include="..\MechHisui.FateGOLib\MechHisui.FateGOLib.csproj" />-->
     </ItemGroup>
     <ItemGroup>
         <None Update="opus.dll">

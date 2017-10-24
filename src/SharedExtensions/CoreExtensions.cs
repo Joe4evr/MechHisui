@@ -23,5 +23,11 @@ namespace SharedExtensions
         /// <returns>True if the string case-invariantly contains the provided substring, otherwise false.</returns>
         public static bool ContainsIgnoreCase(this string haystack, string needle)
             => haystack.ToLowerInvariant().Contains(needle.ToLowerInvariant());
+
+        public static void Deconstruct<TKey, TValue>(this KeyValuePair<TKey, TValue> kvp, out TKey key, out TValue val)
+        {
+            key = kvp.Key;
+            val = kvp.Value;
+        }
     }
 }

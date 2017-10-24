@@ -12,6 +12,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using SharedExtensions;
+using SharedExtensions.Collections;
 using WS4NetCore;
 
 namespace Kohaku

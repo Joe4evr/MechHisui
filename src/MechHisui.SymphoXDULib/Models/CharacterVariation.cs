@@ -15,6 +15,6 @@ namespace MechHisui.SymphoXDULib
         public int Ctd { get; set; }
         public string LeaderSkill { get; set; }
         public string PassiveSkill { get; set; }
-        public IList<Skill> Skills { get; set; }
+        public IList<XduSkill> Skills { get; set; }
     }
 }

@@ -87,12 +87,12 @@ namespace MechHisui.FateGOLib
         }
     }
 
-    //public class CEAlias
-    //{
-    //    public int Id { get; set; }
-    //    public string Alias { get; set; }
-    //    public CEProfile CE { get; set; }
-    //}
+    public class CEAlias
+    {
+        public int Id { get; set; }
+        public string Alias { get; set; }
+        public CEProfile CE { get; set; }
+    }
 
     public class FgoEvent
     {
@@ -118,12 +118,12 @@ namespace MechHisui.FateGOLib
         public ICollection<string> Aliases { get; set; }
     }
 
-    //public class MysticAlias
-    //{
-    //    public int Id { get; set; }
-    //    public string Alias { get; set; }
-    //    public MysticCode Code { get; set; }
-    //}
+    public class MysticAlias
+    {
+        public int Id { get; set; }
+        public string Alias { get; set; }
+        public MysticCode Code { get; set; }
+    }
 
     public class NodeDrop
     {
@@ -152,10 +152,10 @@ namespace MechHisui.FateGOLib
     //    //    .TotalMinutes / FgoHelpers.PerAP.TotalMinutes);
     //}
 
-    public class FriendData
+    public class FgoFriendData
     {
         public int Id { get; set; }
-        public ulong User { get; set; }
+        //public ulong User { get; set; }
         public string FriendCode { get; set; }
         public string Class { get; set; }
         public string Servant { get; set; }

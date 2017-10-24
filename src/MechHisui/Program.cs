@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +9,7 @@ using Discord.WebSocket;
 using Discord.Addons.SimplePermissions;
 using Discord.Commands;
 using MechHisui.Core;
+using Newtonsoft.Json;
 using SharedExtensions;
 
 namespace MechHisui
@@ -37,7 +40,7 @@ namespace MechHisui
         private Program(Params p)
         {
             var minlog = p.LogSeverity ?? LogSeverity.Info;
-            _logger = new Logger(minlog).Log;
+            _logger = new Logger(minlog, p.LogPath).Log;
 
             Log(LogSeverity.Verbose, $"Constructing {nameof(CommandService)}");
             _commands = new CommandService(new CommandServiceConfig
@@ -50,9 +53,16 @@ namespace MechHisui
             Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
             _store = new JsonConfigStore<MechHisuiConfig>(p.ConfigPath, _commands);
 
-            using (var config = _store.Load())
-            {
-            }
+            //using (var config = _store.Load())
+            //{
+            //    if (!config.Strings.Any())
+            //    {
+            //        config.Strings.AddRange(
+            //            JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("strings.json"))
+            //                .DictionarySelect((k, v) => new StringKeyValuePair { Key = k, Value = v }));
+            //        config.Save();
+            //    }
+            //}
 
             Log(LogSeverity.Verbose, $"Constructing {nameof(DiscordSocketClient)}");
             _client = new DiscordSocketClient(new DiscordSocketConfig
@@ -89,7 +99,9 @@ namespace MechHisui
 
             using (var config = _store.Load())
             {
-                await _client.LoginAsync(TokenType.Bot, config.Token);
+                //var token = config.Strings.SingleOrDefault(t => t.Key == "Login")?.Value;
+                //if (token != null)
+                    await _client.LoginAsync(TokenType.Bot, config.Token);
             }
 
             await _client.StartAsync();
