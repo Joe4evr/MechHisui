@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Discord;
 #if !ARM
@@ -10,11 +11,12 @@ using Discord.Addons.SimplePermissions;
 using Discord.WebSocket;
 using Discord.Commands;
 using SharedExtensions;
+using System.Linq;
 
 namespace DivaBot
 {
 #pragma warning disable RCS1090 // Call 'ConfigureAwait(false)'.
-    internal class Program
+    internal partial class Program
     {
         private readonly IServiceCollection _map = new ServiceCollection();
         private readonly IConfigStore<DivaBotConfig> _store;
@@ -48,41 +50,44 @@ namespace DivaBot
                 DefaultRunMode = RunMode.Sync
             });
 
-            Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
-            _store = new JsonConfigStore<DivaBotConfig>(p.ConfigPath, _commands);
+            //Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
+            //_store = new JsonConfigStore<DivaBotConfig>(p.ConfigPath, _commands);
+            _store = new EFConfigStore<DivaBotConfig, DivaGuild, DivaChannel, DivaUser>(
+                _commands, opts => opts.UseSqlite(p.ConnectionString));
+
             using (var config = _store.Load())
             {
-                if (config.AutoResponses == null)
-                {
-                    config.AutoResponses = new Dictionary<string, string[]>();
-                    config.Save();
-                }
+//                if (config.AutoResponses == null)
+//                {
+//                    config.AutoResponses = new Dictionary<string, string[]>();
+//                    config.Save();
+//                }
 
-                if (config.CurrentChallenges == null)
-                {
-                    config.CurrentChallenges = new Dictionary<ulong, ScoreAttackChallenge>();
-                    config.Save();
-                }
+//                if (config.CurrentChallenges == null)
+//                {
+//                    config.CurrentChallenges = new Dictionary<ulong, ScoreAttackChallenge>();
+//                    config.Save();
+//                }
 
-                if (config.TagResponses == null)
-                {
-                    config.TagResponses = new Dictionary<string, string>();
-                    config.Save();
-                }
+//                if (config.TagResponses == null)
+//                {
+//                    config.TagResponses = new Dictionary<string, string>();
+//                    config.Save();
+//                }
 
-                if (config.Additional8BallOptions == null)
-                {
-                    config.Additional8BallOptions = new List<string>();
-                    config.Save();
-                }
+//                if (config.Additional8BallOptions == null)
+//                {
+//                    config.Additional8BallOptions = new List<string>();
+//                    config.Save();
+//                }
 
-#if !ARM
-                if (config.AudioConfig == null)
-                {
-                    config.AudioConfig = new AudioConfig();
-                    config.Save();
-                }
-#endif
+//#if !ARM
+//                if (config.AudioConfig == null)
+//                {
+//                    config.AudioConfig = new AudioConfig();
+//                    config.Save();
+//                }
+//#endif
             }
 
             Log(LogSeverity.Verbose, $"Constructing {nameof(DiscordSocketClient)}");
@@ -111,31 +116,11 @@ namespace DivaBot
 
             using (var config =  _store.Load())
             {
-                await _client.LoginAsync(TokenType.Bot, config.LoginToken);
+                await _client.LoginAsync(TokenType.Bot, config.Strings.Single(s => s.Key == "LoginToken").Value);
             }
 
             await _client.StartAsync();
             await Task.Delay(-1);
-        }
-
-        private async Task InitCommands()
-        {
-            await Log(LogSeverity.Verbose, "Initializing commands");
-            await _commands.UseSimplePermissions(_client, _store, _map, _logger);
-            await _commands.AddTagResponses(_map, _store, _client);
-            await _commands.AddScoreAttack(_map, _store, _client);
-            using (var config = _store.Load())
-            {
-                _map.AddSingleton(new EightBallService(config.Additional8BallOptions));
-                await _commands.AddModuleAsync<EightBallModule>();
-#if !ARM
-                await _commands.UseAudio<AudioModImpl>(_map, config.AudioConfig, _logger);
-#endif
-            }
-
-            //await _commands.AddModuleAsync<TestModule>();
-
-            _client.MessageReceived += CmdHandler;
         }
 
         private async Task CmdHandler(SocketMessage arg)

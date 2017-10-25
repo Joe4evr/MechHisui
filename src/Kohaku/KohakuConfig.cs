@@ -35,7 +35,8 @@ namespace Kohaku
         //public DbSet<ServantTrait> Traits { get; set; }
         //public DbSet<ServantAlias> ServantAliases { get; set; }
 
-        public KohakuConfig(DbContextOptions options, CommandService commandService) : base(options, commandService)
+        public KohakuConfig(DbContextOptions options, CommandService commandService)
+            : base(options, commandService)
         {
         }
 
