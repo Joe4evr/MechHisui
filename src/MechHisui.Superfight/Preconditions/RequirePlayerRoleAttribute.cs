@@ -15,13 +15,13 @@ namespace MechHisui.Superfight.Preconditions
             Role = role;
         }
 
-        public async override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var sfservice = services.GetService<SuperfightService>();
             if (sfservice != null)
             {
                 var authorId = context.User.Id;
-                var game = await sfservice.GetGameFromChannelAsync(context.Channel).ConfigureAwait(false);
+                var game = sfservice.GetGameFromChannel(context.Channel);
 
                 if (game != null)
                 {
@@ -32,17 +32,16 @@ namespace MechHisui.Superfight.Preconditions
                     {
                         case PlayerRole.Fighter:
                             return (fighter1.User.Id == context.User.Id || fighter2.User.Id == context.User.Id)
-                                ? PreconditionResult.FromSuccess()
-                                : PreconditionResult.FromError("Cannot use command at this time.");
+                                ? Task.FromResult(PreconditionResult.FromSuccess())
+                                : Task.FromResult(PreconditionResult.FromError("Cannot use command at this time."));
                         case PlayerRole.NonFighter:
                             return !(fighter1.User.Id == context.User.Id || fighter2.User.Id == context.User.Id)
-                                ? PreconditionResult.FromSuccess()
-                                : PreconditionResult.FromError("Cannot use command at this time.");
-                    }
+                                ? Task.FromResult(PreconditionResult.FromSuccess())
+                                : Task.FromResult(PreconditionResult.FromError("Cannot use command at this time."));                    }
                 }
-                return PreconditionResult.FromError("No game.");
+                return Task.FromResult(PreconditionResult.FromError("No game."));
             }
-            return PreconditionResult.FromError("No service.");
+            return Task.FromResult(PreconditionResult.FromError("No service."));
         }
     }
 

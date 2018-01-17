@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{15F298D4-4066-4FF0-8269-81813A4A0BFB}"
 EndProject
@@ -40,9 +40,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{5481084F-F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MechHisui.ExplodingKittens", "src\MechHisui.ExplodingKittens\MechHisui.ExplodingKittens.csproj", "{F5564BC0-BFE4-4AC4-99AB-321D0A33456C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MechHisui.Core", "src\MechHisui.Core\MechHisui.Core.csproj", "{DB12FB69-7525-46D9-A489-79BCA96CA5C9}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Discord.Addons.Core", "..\Discord.Addons\src\Discord.Addons.Core\Discord.Addons.Core.shproj", "{5B64B425-B901-4249-A189-ACC033579086}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Addons.SimpleAudio", "..\Discord.Addons\src\Discord.Addons.SimpleAudio\Discord.Addons.SimpleAudio.csproj", "{1AEE0DB4-BF64-4951-900F-B591E5D77817}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\SharedExtensions\SharedExtensions.projitems*{11e7bd48-424c-431a-b93b-0985cffbb6b0}*SharedItemsImports = 13
+		..\Discord.Addons\src\Discord.Addons.Core\Discord.Addons.Core.projitems*{5b64b425-b901-4249-a189-acc033579086}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -185,6 +192,30 @@ Global
 		{F5564BC0-BFE4-4AC4-99AB-321D0A33456C}.Release|x64.Build.0 = Release|Any CPU
 		{F5564BC0-BFE4-4AC4-99AB-321D0A33456C}.Release|x86.ActiveCfg = Release|Any CPU
 		{F5564BC0-BFE4-4AC4-99AB-321D0A33456C}.Release|x86.Build.0 = Release|Any CPU
+		{DB12FB69-7525-46D9-A489-79BCA96CA5C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB12FB69-7525-46D9-A489-79BCA96CA5C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB12FB69-7525-46D9-A489-79BCA96CA5C9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DB12FB69-7525-46D9-A489-79BCA96CA5C9}.Debug|x64.Build.0 = Debug|Any CPU
+		{DB12FB69-7525-46D9-A489-79BCA96CA5C9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DB12FB69-7525-46D9-A489-79BCA96CA5C9}.Debug|x86.Build.0 = Debug|Any CPU
+		{DB12FB69-7525-46D9-A489-79BCA96CA5C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB12FB69-7525-46D9-A489-79BCA96CA5C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB12FB69-7525-46D9-A489-79BCA96CA5C9}.Release|x64.ActiveCfg = Release|Any CPU
+		{DB12FB69-7525-46D9-A489-79BCA96CA5C9}.Release|x64.Build.0 = Release|Any CPU
+		{DB12FB69-7525-46D9-A489-79BCA96CA5C9}.Release|x86.ActiveCfg = Release|Any CPU
+		{DB12FB69-7525-46D9-A489-79BCA96CA5C9}.Release|x86.Build.0 = Release|Any CPU
+		{1AEE0DB4-BF64-4951-900F-B591E5D77817}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AEE0DB4-BF64-4951-900F-B591E5D77817}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AEE0DB4-BF64-4951-900F-B591E5D77817}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1AEE0DB4-BF64-4951-900F-B591E5D77817}.Debug|x64.Build.0 = Debug|Any CPU
+		{1AEE0DB4-BF64-4951-900F-B591E5D77817}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1AEE0DB4-BF64-4951-900F-B591E5D77817}.Debug|x86.Build.0 = Debug|Any CPU
+		{1AEE0DB4-BF64-4951-900F-B591E5D77817}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AEE0DB4-BF64-4951-900F-B591E5D77817}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AEE0DB4-BF64-4951-900F-B591E5D77817}.Release|x64.ActiveCfg = Release|Any CPU
+		{1AEE0DB4-BF64-4951-900F-B591E5D77817}.Release|x64.Build.0 = Release|Any CPU
+		{1AEE0DB4-BF64-4951-900F-B591E5D77817}.Release|x86.ActiveCfg = Release|Any CPU
+		{1AEE0DB4-BF64-4951-900F-B591E5D77817}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -202,6 +233,7 @@ Global
 		{111022A8-0D04-4DF3-A62E-465ED68B24FF} = {15F298D4-4066-4FF0-8269-81813A4A0BFB}
 		{189B9E0A-6F6A-4488-BBDB-2E924171D93F} = {5481084F-F1AE-4E1B-B4A9-06378E0FFBF7}
 		{F5564BC0-BFE4-4AC4-99AB-321D0A33456C} = {15F298D4-4066-4FF0-8269-81813A4A0BFB}
+		{DB12FB69-7525-46D9-A489-79BCA96CA5C9} = {15F298D4-4066-4FF0-8269-81813A4A0BFB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {15F6C07C-DD94-4BAB-8171-09BED4401178}

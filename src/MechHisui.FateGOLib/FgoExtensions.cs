@@ -17,7 +17,7 @@ namespace MechHisui.FateGOLib
         public static Task UseFgoService(
             this CommandService commands,
             IServiceCollection map,
-            FgoConfig config,
+            IFgoConfig config,
             DiscordSocketClient client)
         {
             var statService = new FgoStatService(config, client);

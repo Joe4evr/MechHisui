@@ -106,13 +106,12 @@ namespace MechHisui.ExplodingKittens
 
             if (_turn > 1)
             {
-                if ((_expansioRules & ExpansioRules.ImplodingKittens) == ExpansioRules.ImplodingKittens
-                    && _deck.Peek() is ImplodingKitten ik && ik.IsFaceUp)
-                {
-#pragma warning disable CS0219 // Variable is assigned but its value is never used
-                    var im = "Oh my, the next card is the face-up Imploding Kitten!";
-#pragma warning restore CS0219 // Variable is assigned but its value is never used
-                }
+                //if (IsFaceupImplodingKitten(card))
+                //{
+                //#pragma warning disable CS0219 // Variable is assigned but its value is never used
+                //    var im = "Oh my, the next card is the face-up Imploding Kitten!";
+                //#pragma warning restore CS0219 // Variable is assigned but its value is never used
+                //}
 
                 if (TurnPlayer.Value.IsAttacked)
                 {
@@ -120,10 +119,12 @@ namespace MechHisui.ExplodingKittens
                     return Channel.SendMessageAsync($"**{TurnPlayer.Value.User.Username}** was attacked and plays another turn.");
                 }
 
-
-
                 do TurnPlayer = Reverse ? TurnPlayer.Previous : TurnPlayer.Next;
                 while (!TurnPlayer.Value.HasExploded);
+            }
+            else
+            {
+                TurnPlayer = TurnPlayer.Next;
             }
 
             return Channel.SendMessageAsync($"It is turn {_turn}, and **{TurnPlayer.Value.User.Username}** may play.");
@@ -178,8 +179,7 @@ namespace MechHisui.ExplodingKittens
                 await TurnPlayer.Value.SendMessageAsync("YOU HAVE DRAWN AN EXPLODING KITTEN! DEFUSE IT QUICKLY IF YOU CAN!");
                 _explodeTimer.Change(TimeSpan.FromSeconds(10), Timeout.InfiniteTimeSpan);
             }
-            else if ((_expansioRules & ExpansioRules.ImplodingKittens) == ExpansioRules.ImplodingKittens
-                    && card is ImplodingKitten ik && ik.IsFaceUp)
+            else if (IsFaceupImplodingKitten(card))
             {
                 await Channel.SendMessageAsync($"**{TurnPlayer.Value.User.Username}** has drawn the face-up Imploding Kitten!");
                 TurnPlayer.Value.Explode();
@@ -192,6 +192,13 @@ namespace MechHisui.ExplodingKittens
                 await Channel.SendMessageAsync($"**{TurnPlayer.Value.User.Username}** has safely drawn a card.");
                 await NextTurn();
             }
+        }
+
+        private bool IsFaceupImplodingKitten(ExplodingKitttensCard card)
+        {
+            return (_expansioRules & ExpansioRules.ImplodingKittens) == ExpansioRules.ImplodingKittens
+                    && card is ImplodingKitten ik
+                    && ik.IsFaceUp;
         }
 
         public Task EndTurnWithoutDraw() => NextTurn();

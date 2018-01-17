@@ -23,7 +23,7 @@ namespace MechHisui.SymphoXDULib
             [Command, Alias("stats", "stat")]
             public Task CharaCmd(int id)
             {
-                var memoria = _stats.Config.GetMemorias().SingleOrDefault(p => p.Id == id);
+                var memoria = _stats.Config.GetMemoria(id);
                 return (memoria != null)
                     ? ReplyAsync("", embed: FormatMemoria(memoria))
                     : ReplyAsync("Unknown/Not a Memoria ID");

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
+using Discord;
 using Discord.WebSocket;
 using SharedExtensions;
 
@@ -11,9 +13,12 @@ namespace MechHisui.FateGOLib
     public class FgoStatService
     {
         private readonly Timer _logintimer;
-        internal FgoConfig Config { get; }
+        internal IFgoConfig Config { get; }
 
-        internal FgoStatService(FgoConfig config, DiscordSocketClient client)
+        public FgoStatService(
+            IFgoConfig config,
+            DiscordSocketClient client,
+            Func<LogMessage, Task> logger = null)
         {
             Config = config ?? throw new ArgumentNullException(nameof(config));
 
@@ -63,7 +68,7 @@ namespace MechHisui.FateGOLib
 
         public IEnumerable<CEProfile> LookupCE(string name, bool fullsearch = false)
         {
-            var list = Config.GetCEs();
+            var list = Config.AllCEs();
             var ces = list
                 .Where(ce => ce.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
@@ -74,13 +79,13 @@ namespace MechHisui.FateGOLib
                 if (!ces.Any() || fullsearch)
                 {
                     var lookup = list
-                        .Where(ce => ce.Aliases.Any(a => a.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                        .Where(ce => ce.Aliases.Any(a => a.Alias.Equals(name, StringComparison.OrdinalIgnoreCase)))
                         .ToList();
 
                     if (lookup.Count == 0 || fullsearch)
                     {
                         lookup = lookup.Concat(list
-                            .Where(ce => ce.Aliases.Any(a => RegexMatchOneWord(a, name))))
+                            .Where(ce => ce.Aliases.Any(a => RegexMatchOneWord(a.Alias, name))))
                             .ToList();
                     }
 
@@ -96,7 +101,7 @@ namespace MechHisui.FateGOLib
 
         public IEnumerable<MysticCode> LookupMystic(string code, bool fullsearch = false)
         {
-            var list = Config.GetMystics();
+            var list = Config.AllMystics();
             var mystics = list
                 .Where(m => m.Code.Equals(code, StringComparison.OrdinalIgnoreCase))
                 .ToList();
@@ -108,13 +113,13 @@ namespace MechHisui.FateGOLib
                 if (mystics.Count == 0 || fullsearch)
                 {
                     var lookup = list
-                        .Where(m => m.Aliases.Any(a => a.Equals(code, StringComparison.OrdinalIgnoreCase)))
+                        .Where(m => m.Aliases.Any(a => a.Alias.Equals(code, StringComparison.OrdinalIgnoreCase)))
                         .ToList();
 
                     if (lookup.Count == 0 || fullsearch)
                     {
                         lookup = lookup.Concat(list
-                            .Where(m => m.Aliases.Any(a => RegexMatchOneWord(a, code))))
+                            .Where(m => m.Aliases.Any(a => RegexMatchOneWord(a.Alias, code))))
                             .ToList();
                     }
 

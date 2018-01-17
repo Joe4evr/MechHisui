@@ -11,7 +11,7 @@ using SharedExtensions;
 namespace MechHisui.HisuiBets
 {
     [Name("HisuiBets")]
-    public sealed class HisuiBetsModule : ModuleBase<ICommandContext>
+    public sealed class HisuiBetsModule : ModuleBase<SocketCommandContext>
     {
         private readonly HisuiBankService _service;
         private UserAccount _account;
@@ -40,7 +40,7 @@ namespace MechHisui.HisuiBets
                 {
                     UserName = Context.User.Username,
                     UserId = Context.User.Id,
-                    BettedAmount = amount,
+                    BettedAmount = (uint)amount,
                     Tribute = target
                 })).ConfigureAwait(false);
             }
@@ -57,7 +57,7 @@ namespace MechHisui.HisuiBets
                 {
                     UserName = Context.User.Username,
                     UserId = Context.User.Id,
-                    BettedAmount = amount,
+                    BettedAmount = (uint)amount,
                     Tribute = district.ToString()
                 })).ConfigureAwait(false);
             }
@@ -74,7 +74,7 @@ namespace MechHisui.HisuiBets
                 {
                     UserName = Context.User.Username,
                     UserId = Context.User.Id,
-                    BettedAmount = amount,
+                    BettedAmount = (uint)amount,
                     Tribute = team.ToString()
                 })).ConfigureAwait(false);
             }
@@ -226,35 +226,35 @@ namespace MechHisui.HisuiBets
         {
             if (amount <= 0)
             {
-                await ReplyAsync("Cannot make a donation of 0 or less.").ConfigureAwait(false);
+                await ReplyAsync("Cannot make a donation of 0 or less.");
                 return;
             }
             if (amount > _service.Bank.GetUser(Context.User.Id).Bucks)
             {
-                await ReplyAsync($"**{Context.User.Username}** currently does not have enough HisuiBucks to make that donation.").ConfigureAwait(false);
+                await ReplyAsync($"**{Context.User.Username}** currently does not have enough HisuiBucks to make that donation.");
                 return;
             }
             if (user.IsBot || _service.Blacklist.Contains(user.Id))
             {
-                await ReplyAsync("Unable to donate to Bot accounts.").ConfigureAwait(false);
+                await ReplyAsync("Unable to donate to Bot accounts.");
                 return;
             }
 
-            _service.Bank.Donate(Context.User.Id, user.Id, amount);
-            await ReplyAsync($"**{Context.User.Username}** donated {HisuiBankService.Symbol}{amount} to **{user.Username}**.").ConfigureAwait(false);
+            _service.Bank.Donate(Context.User.Id, user.Id, (uint)amount);
+            await ReplyAsync($"**{Context.User.Username}** donated {HisuiBankService.Symbol}{amount} to **{user.Username}**.");
         }
 
         [Command("top"), Permission(MinimumPermission.Special)]
         [RequireContext(ContextType.Guild)]
-        public Task Tops()
+        public async Task Tops()
         {
-            var tops = _service.Bank.GetAllUsers()
+            var tops = (await _service.Bank.GetAllUsers())
                 .Where(a => a.Bucks > 2500)
                 .OrderByDescending(a => a.Bucks)
                 .Take(10)
                 .Select(a => new
                 {
-                    Name = Context.Guild.GetUserAsync(a.UserId).GetAwaiter().GetResult().Username,
+                    Name = Context.Guild.GetUser(a.UserId).Username,
                     a.Bucks
                 })
                 .ToList();
@@ -263,9 +263,7 @@ namespace MechHisui.HisuiBets
                 .AppendSequence(tops, (s, a) => s.AppendLine($"{a.Name,20}: {HisuiBankService.Symbol}{a.Bucks,-7}"))
                 .Append("```");
 
-            return ReplyAsync(sb.ToString());
+            await ReplyAsync(sb.ToString());
         }
-
-        public static string P { set { } }
     }
 }

@@ -22,9 +22,9 @@ namespace MechHisui.FateGOLib.Modules
         public Task EventCmd()
         {
             var sb = new StringBuilder();
-            var events = _service.Config.GetEvents();
+            var currentEvents = _service.Config.GetCurrentEvents();
             var utcNow = DateTime.UtcNow;
-            var currentEvents = events.Where(e => utcNow > e.StartTime && utcNow < e.EndTime);
+            //var currentEvents = events.Where(e => utcNow > e.StartTime && utcNow < e.EndTime);
 
             if (currentEvents.Any())
             {
@@ -61,7 +61,7 @@ namespace MechHisui.FateGOLib.Modules
                 sb.AppendLine("No events currently going on.");
             }
 
-            var nextEvent = events.FirstOrDefault(e => e.StartTime > utcNow) ?? events.FirstOrDefault(e => !e.StartTime.HasValue);
+            var nextEvent = currentEvents.FirstOrDefault(e => e.StartTime > utcNow) ?? currentEvents.FirstOrDefault(e => !e.StartTime.HasValue);
             if (nextEvent != null)
             {
                 if (nextEvent.StartTime.HasValue)

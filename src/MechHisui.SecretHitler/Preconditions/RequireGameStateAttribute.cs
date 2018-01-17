@@ -15,22 +15,22 @@ namespace MechHisui.SecretHitler
             RequiredState = state;
         }
 
-        public async override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var shservice = services.GetService<SecretHitlerService>();
             if (shservice != null)
             {
-                var game = await shservice.GetGameFromChannelAsync(context.Channel).ConfigureAwait(false);
+                var game = shservice.GetGameFromChannel(context.Channel);
 
                 if (game != null)
                 {
                     return (game.State == RequiredState)
-                        ? PreconditionResult.FromSuccess()
-                        : PreconditionResult.FromError("Cannot use command at this time.");
+                        ? Task.FromResult(PreconditionResult.FromSuccess())
+                        : Task.FromResult(PreconditionResult.FromError("Cannot use command at this time."));
                 }
-                return PreconditionResult.FromError("No game.");
+                return Task.FromResult(PreconditionResult.FromError("No game active in this channel."));
             }
-            return PreconditionResult.FromError("No service.");
+            return Task.FromResult(PreconditionResult.FromError($"Service {nameof(SecretHitlerService)} not found."));
         }
     }
 }

@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using Discord.Addons.SimplePermissions;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.DependencyInjection;
 //using MechHisui.FateGOLib;
 
 namespace Kohaku
@@ -18,7 +20,7 @@ namespace Kohaku
     //{
     //    public string LoginToken { get; set; }
 
-    //    public AudioConfig AudioConfig { get; set; }
+    //    //public AudioConfig AudioConfig { get; set; }
 
     //    //public Dictionary<string, string[]> TriviaData { get; set; }
 
@@ -26,7 +28,12 @@ namespace Kohaku
     //    //public List<ServantProfile> TestProfiles { get; set; }
     //}
 
-    public sealed class KohakuConfig : EFBaseConfigContext
+    public class KohakuUser : ConfigUser
+    {
+        public string FgoFriendCode { get; set; }
+    }
+
+    public sealed class KohakuConfig : EFBaseConfigContext<KohakuUser>
     {
         public DbSet<StringKeyValuePair> Strings { get; set; }
 
@@ -66,5 +73,18 @@ namespace Kohaku
 
         [Required]
         public string Value { get; set; }
+    }
+
+    public class Factory : IDesignTimeDbContextFactory<KohakuConfig>
+    {
+        public KohakuConfig CreateDbContext(string[] args)
+        {
+            var map = new ServiceCollection()
+                .AddSingleton(new CommandService())
+                .AddDbContext<KohakuConfig>(opt => opt.UseSqlite(@"Data Source=test.sqlite"))
+                .BuildServiceProvider();
+
+            return map.GetService<KohakuConfig>();
+        }
     }
 }

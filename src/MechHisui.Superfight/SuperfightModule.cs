@@ -61,7 +61,7 @@ namespace MechHisui.Superfight
             }
             else
             {
-                if (GameService.AddUser(Context.Channel, Context.User))
+                if (await GameService.AddUser(Context.Channel, Context.User).ConfigureAwait(false))
                 {
                     await ReplyAsync($"**{Context.User.Username}** has joined.").ConfigureAwait(false);
                 }
@@ -82,7 +82,7 @@ namespace MechHisui.Superfight
             }
             else
             {
-                if (GameService.RemoveUser(Context.Channel, Context.User))
+                if (await GameService.RemoveUser(Context.Channel, Context.User).ConfigureAwait(false))
                 {
                     await ReplyAsync($"**{Context.User.Username}** has left.").ConfigureAwait(false);
                 }
@@ -103,7 +103,7 @@ namespace MechHisui.Superfight
             }
             else
             {
-                if (GameService.CancelGame(Context.Channel))
+                if (await GameService.CancelGame(Context.Channel).ConfigureAwait(false))
                 {
                     await ReplyAsync("Game was canceled.").ConfigureAwait(false);
                 }

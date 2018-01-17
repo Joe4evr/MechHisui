@@ -11,7 +11,7 @@ namespace SharedExtensions
         public LogSeverity? LogSeverity { get; private set; }
         public int? Shards { get; private set; }
         public int? ShardId { get; private set; }
-        //public GetOnce<string> Token { get; private set; }
+        public string Token { get; private set; }
 
         private Params()
         {
@@ -49,9 +49,9 @@ namespace SharedExtensions
                     case "-shardid":
                         p.ShardId = Int32.Parse(parameters[i + 1]);
                         continue;
-                    //case "-t":
-                    //    p.Token = new GetOnce<string>(parameters[i + 1]);
-                    //    break;
+                    case "-t":
+                        p.Token = parameters[i + 1];
+                        break;
                     default:
                         continue;
                 }

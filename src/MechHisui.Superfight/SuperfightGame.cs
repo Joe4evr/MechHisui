@@ -35,7 +35,7 @@ namespace MechHisui.Superfight
             IEnumerable<SuperfightPlayer> players,
             SuperfightConfig cfg,
             int timeout)
-            : base(channel, players)
+            : base(channel, players, setFirstPlayerImmediately: false)
         {
             var c = cfg.Characters.Shuffle(28);
             var a = cfg.Abilities.Shuffle(28);
@@ -210,28 +210,17 @@ namespace MechHisui.Superfight
         {
             var sb = new StringBuilder($"State of the game at turn {_turn}:\n")
                 .AppendLine($"Turn state is {State}.")
-                .AppendLine("Players are:");
-            foreach (var p in Players)
-            {
-                if (TurnPlayers.Contains(p))
-                {
-                    sb.Append($"*{p.User.Username}*");
-                }
-                else
-                {
-                    sb.Append(p.User.Username);
-                }
-
-                sb.Append($" ({p.Points} points)");
-
-                if (p != Players.Last())
-                {
-                    sb.Append(", ");
-                }
-            }
+                .AppendLine($"Players are: {String.Join(", ", Players.Select(FormatPlayer))}");
             sb.Append("\n(*Italic* = current turn players.)");
 
             return sb.ToString();
+
+            string FormatPlayer(SuperfightPlayer player)
+            {
+                return TurnPlayers.Contains(player)
+                    ? $"*{player.User.Username}* ({player.Points} points)"
+                    : $"{player.User.Username} ({player.Points} points)";
+            }
         }
     }
 }

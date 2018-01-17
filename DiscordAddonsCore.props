@@ -1,0 +1,32 @@
+﻿<Project>
+    <PropertyGroup Label="Configuration">
+        <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
+        <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+        <WarningLevel>0</WarningLevel>
+    </PropertyGroup>
+    <PropertyGroup>
+        <PackageId>$(AssemblyName)</PackageId>
+        <RootNamespace>$(AssemblyName)</RootNamespace>
+        <Title>$(AssemblyName)</Title>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PackageProjectUrl>https://github.com/Joe4evr/Discord.Addons</PackageProjectUrl>
+        <PackageLicenseUrl>http://opensource.org/licenses/MIT</PackageLicenseUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>git://github.com/Joe4evr/Discord.Addons</RepositoryUrl>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <!--<TargetFrameworks>netstandard2.0</TargetFrameworks>-->
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Discord.Net.Commands" Version="1.0.2" />
+        <PackageReference Include="Discord.Net.WebSocket" Version="1.0.2" />
+    </ItemGroup>
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <Optimize>True</Optimize>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(SolutionDir)' == '' or '$(SolutionDir)' == '*undefined*'">
+        <SolutionDir>.\</SolutionDir>
+    </PropertyGroup>
+    <!--<Import Project=".\Analyzers.props" Condition="'$(Configuration)' == 'Debug'"/>-->
+    <Import Project="$(SolutionDir)src\Discord.Addons.Core\Discord.Addons.Core.projitems" Label="Shared" />
+</Project>

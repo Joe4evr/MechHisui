@@ -10,7 +10,7 @@ namespace MechHisui.SymphoXDULib
 {
     public sealed class XduStatService
     {
-        internal readonly XduConfig Config;
+        internal IXduConfig Config { get; }
 
         private readonly ConcurrentDictionary<ulong, PaginatedMessage> _paginated = new ConcurrentDictionary<ulong, PaginatedMessage>();
         internal const string EmoteBack = "◀";
@@ -20,7 +20,10 @@ namespace MechHisui.SymphoXDULib
         private readonly Func<LogMessage, Task> _logger;
         private readonly DiscordSocketClient _sockClient;
 
-        public XduStatService(XduConfig config, DiscordSocketClient client)
+        public XduStatService(
+            IXduConfig config,
+            DiscordSocketClient client,
+            Func<LogMessage, Task> logger = null)
         {
             Config = config;
             client.ReactionAdded += Client_ReactionAdded;
@@ -78,7 +81,7 @@ namespace MechHisui.SymphoXDULib
                             if (desc != null && Int32.TryParse(GetId(desc), out var id))
                             {
                                 await Task.WhenAll(
-                                    pagedmsg.ResetPages(Config.GetGears().Single(p => p.Variations.Any(v => v.Value.Id == id)).ToEmbedPages()),
+                                    pagedmsg.ResetPages(Config.GetGear(id).ToEmbedPages()),
                                     pagedmsg.Msg.RemoveReactionAsync(reaction.Emote, reaction.User.Value),
                                     pagedmsg.Msg.RemoveReactionAsync(reaction.Emote, _sockClient.CurrentUser)).ConfigureAwait(false);
                                 pagedmsg.ListenForSelect = false;

@@ -24,9 +24,9 @@ namespace MechHisui.SymphoXDULib
             public Task EventCmd()
             {
                 var sb = new StringBuilder();
-                var events = _stats.Config.GetEvents();
+                var currentEvents = _stats.Config.GetCurrentEvents();
                 var utcNow = DateTime.UtcNow;
-                var currentEvents = events.Where(e => utcNow > e.StartTime && utcNow < e.EndTime);
+                //var currentEvents = events.Where(e => utcNow > e.StartTime && utcNow < e.EndTime);
 
                 if (currentEvents.Any())
                 {
@@ -63,7 +63,7 @@ namespace MechHisui.SymphoXDULib
                     sb.AppendLine("No events currently going on.");
                 }
 
-                var nextEvent = events.FirstOrDefault(e => e.StartTime > utcNow) ?? events.FirstOrDefault(e => !e.StartTime.HasValue);
+                var nextEvent = currentEvents.FirstOrDefault(e => e.StartTime > utcNow) ?? currentEvents.FirstOrDefault(e => !e.StartTime.HasValue);
                 if (nextEvent != null)
                 {
                     if (nextEvent.StartTime.HasValue)

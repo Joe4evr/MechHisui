@@ -9,22 +9,21 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Discord.Addons.SimplePermissions.EFProvider" Version="1.0.0-rc" />
-        <!--<PackageReference Include="Microsoft.CodeAnalysis.Common" Version="2.3.1" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.3.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.0.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.0" />-->
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0" PrivateAssets="All" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" PrivateAssets="All" />
         <!--<PackageReference Include="Microsoft.Net.Compilers" Version="2.3.1" />
         <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />-->
+        <PackageReference Include="Discord.Addons.SimpleAudio" Version="1.0.0-rc2" />
         <PackageReference Include="WS4NetCore" Version="1.0.0-a" />
     </ItemGroup>
     <ItemGroup>
-        <!--<ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimpleAudio\Discord.Addons.SimpleAudio.csproj" />
-        <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions.EFProvider\Discord.Addons.SimplePermissions.EFProvider.csproj" />
-        <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions\Discord.Addons.SimplePermissions.csproj" />
-        <ProjectReference Include="..\MechHisui.FateGOLib\MechHisui.FateGOLib.csproj" />-->
+        <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <!--<ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimpleAudio\Discord.Addons.SimpleAudio.csproj" />-->
     </ItemGroup>
     <ItemGroup>
         <None Update="opus.dll">
@@ -34,7 +33,7 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="strings.json">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 </Project>

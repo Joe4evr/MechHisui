@@ -43,13 +43,13 @@ namespace MechHisui.FateGOLib.Modules
         [Command("listmystic"), Permission(MinimumPermission.Everyone)]
         public Task ListMysticsCmd()
         {
-            return ReplyAsync(String.Join("\n", _service.Config.GetMystics().Select(m => $"**{m.Code}** *({String.Join(", ", m.Aliases)})*")));
+            return ReplyAsync(String.Join("\n", _service.Config.AllMystics().Select(m => $"**{m.Code}** *({String.Join(", ", m.Aliases)})*")));
         }
 
         [Command("mysticalias"), Permission(MinimumPermission.ModRole)]
         public Task MysticAliasCmd(string code, string alias)
         {
-            if (!_service.Config.GetMystics().Select(c => c.Code).Contains(code))
+            if (!_service.Config.FindMystics(code).Select(c => c.Code).Contains(code))
             {
                 return ReplyAsync("Could not find name to add alias for.");
             }
@@ -60,7 +60,7 @@ namespace MechHisui.FateGOLib.Modules
             }
             else
             {
-                return ReplyAsync($"Alias `{alias}` already exists for CE `{_service.Config.GetMystics().Single(c => c.Aliases.Contains(alias)).Code}`.");
+                return ReplyAsync($"Alias `{alias}` already exists for CE `{_service.Config.AllMystics().Single(c => c.Aliases.Any(a => a.Alias == alias)).Code}`.");
             }
         }
 

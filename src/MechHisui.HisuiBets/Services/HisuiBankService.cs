@@ -19,7 +19,7 @@ namespace MechHisui.HisuiBets
         private readonly Func<LogMessage, Task> _logger;
         private readonly ConcurrentDictionary<ulong, BetGame> _games = new ConcurrentDictionary<ulong, BetGame>();
 
-        internal BankOfHisui Bank { get; }
+        internal IBankOfHisui Bank { get; }
         internal ulong[] Blacklist { get; } = new[]
         {
             121687861350105089ul,
@@ -34,7 +34,7 @@ namespace MechHisui.HisuiBets
 
         internal IReadOnlyDictionary<ulong, BetGame> Games => _games;
 
-        internal HisuiBankService(BankOfHisui bank, DiscordSocketClient client, Func<LogMessage, Task> logger)
+        public HisuiBankService(IBankOfHisui bank, DiscordSocketClient client, Func<LogMessage, Task> logger)
         {
             Bank = bank;
             _logger = logger;
@@ -66,7 +66,7 @@ namespace MechHisui.HisuiBets
             client.GuildAvailable += async guild =>
             {
                 await guild.DownloadUsersAsync();
-                foreach (var user in guild.Users.Except(Bank.GetAllUsers().Select(a => guild.GetUser(a.UserId)), _userComparer))
+                foreach (var user in guild.Users.Except((await Bank.GetAllUsers()).Select(a => guild.GetUser(a.UserId)), _userComparer))
                 {
                     if (!user.IsBot && !Blacklist.Contains(user.Id))
                     {
@@ -108,7 +108,7 @@ namespace MechHisui.HisuiBets
         public static Task UseHisuiBank(
             this CommandService commands,
             IServiceCollection map,
-            BankOfHisui bank,
+            IBankOfHisui bank,
             DiscordSocketClient client,
             Func<LogMessage, Task> logger = null)
         {

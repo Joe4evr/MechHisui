@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
 using Discord.Addons.MpGame;
 using Discord.Addons.SimplePermissions;
-using Discord.Commands;
 using MechHisui.SecretHitler.Models;
 using SharedExtensions;
-using SharedExtensions.Collections;
 
 namespace MechHisui.SecretHitler
 {
@@ -87,7 +86,7 @@ namespace MechHisui.SecretHitler
             }
             else
             {
-                if (GameService.AddUser(Context.Channel, Context.User))
+                if (await GameService.AddUser(Context.Channel, Context.User).ConfigureAwait(false))
                 {
                         await ReplyAsync($"**{Context.User.Username}** has joined.").ConfigureAwait(false);
                 }
@@ -108,7 +107,7 @@ namespace MechHisui.SecretHitler
             }
             else
             {
-                if (GameService.RemoveUser(Context.Channel, Context.User))
+                if (await GameService.RemoveUser(Context.Channel, Context.User).ConfigureAwait(false))
                 {
                     await ReplyAsync($"**{Context.User.Username}** has left.").ConfigureAwait(false);
                 }
@@ -129,7 +128,7 @@ namespace MechHisui.SecretHitler
             }
             else
             {
-                if (GameService.CancelGame(Context.Channel))
+                if (await GameService.CancelGame(Context.Channel).ConfigureAwait(false))
                 {
                     await ReplyAsync("Game was cancelled.").ConfigureAwait(false);
                 }
@@ -304,19 +303,19 @@ namespace MechHisui.SecretHitler
 
         [Command("nominate"), RequireGameState(GameState.StartOfTurn)]
         [RequireContext(ContextType.Guild | ContextType.Group), RequirePlayerRole(PlayerRole.President)]
-        public Task NominatePlayer(IUser user) => Game.NominatedChancellor(user);
+        public Task NominatePlayer(SecretHitlerPlayer player) => Game.NominatedChancellor(player);
 
         [Command("elect"), RequireGameState(GameState.SpecialElection)]
         [RequireContext(ContextType.Guild | ContextType.Group), RequirePlayerRole(PlayerRole.President)]
-        public Task ElectPlayer(IUser user) => Game.SpecialElection(user);
+        public Task ElectPlayer(SecretHitlerPlayer player) => Game.SpecialElection(player);
 
         [Command("investigate"), RequireGameState(GameState.Investigating)]
         [RequireContext(ContextType.Guild | ContextType.Group), RequirePlayerRole(PlayerRole.President)]
-        public Task InvestigatePlayer(IUser user) => Game.InvestigatePlayer(user);
+        public Task InvestigatePlayer(SecretHitlerPlayer player) => Game.InvestigatePlayer(player);
 
         [Command("kill"), RequireGameState(GameState.Kill)]
         [RequireContext(ContextType.Guild | ContextType.Group), RequirePlayerRole(PlayerRole.President)]
-        public Task KillPlayer(IUser user) => Game.KillPlayer(user);
+        public Task KillPlayer(SecretHitlerPlayer player) => Game.KillPlayer(player);
 
         [Command("veto"), RequireGameState(GameState.ChancellorVetod)]
         [RequireContext(ContextType.Guild | ContextType.Group), RequirePlayerRole(PlayerRole.President)]

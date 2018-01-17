@@ -8,6 +8,8 @@ namespace MechHisui.SecretHitler.Models
         internal string Party { get; }
         internal string Role { get; }
         internal bool IsAlive { get; private set; } = true;
+        internal bool IsConfirmedNotHitler { get; private set; } = false;
+        internal bool IsInvestigated { get; private set; } = false;
 
         public SecretHitlerPlayer(
             IUser user, IMessageChannel channel,
@@ -19,5 +21,7 @@ namespace MechHisui.SecretHitler.Models
         }
 
         internal void Killed() => IsAlive = false;
+        internal void ConfirmedNotHitler() => IsConfirmedNotHitler = true;
+        internal void Investigated() => IsInvestigated = true;
     }
 }

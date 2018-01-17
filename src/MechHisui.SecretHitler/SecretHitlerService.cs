@@ -1,12 +1,14 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Discord;
-using Discord.Addons.MpGame;
 using Discord.Commands;
+using Discord.WebSocket;
+using Discord.Addons.MpGame;
 using MechHisui.SecretHitler.Models;
-using System.Linq;
 
 namespace MechHisui.SecretHitler
 {
@@ -17,7 +19,10 @@ namespace MechHisui.SecretHitler
 
         internal readonly IReadOnlyDictionary<string, SecretHitlerConfig> Configs;
 
-        public SecretHitlerService(Dictionary<string, SecretHitlerConfig> configs)
+        public SecretHitlerService(IReadOnlyDictionary<string, SecretHitlerConfig> configs,
+            DiscordSocketClient client,
+            Func<LogMessage, Task> logger = null)
+            : base(client, logger)
         {
             Configs = configs;
         }
@@ -27,10 +32,15 @@ namespace MechHisui.SecretHitler
     {
         public static Task AddSecretHitler(
             this CommandService cmds,
+            DiscordSocketClient client,
             IServiceCollection map,
-            IEnumerable<SecretHitlerConfig> configs)
+            IEnumerable<SecretHitlerConfig> configs,
+            Func<LogMessage, Task> logger = null)
         {
-            map.AddSingleton(new SecretHitlerService(configs.ToDictionary(keySelector: shc => shc.Key)));
+            map.AddSingleton(new SecretHitlerService(configs.ToDictionary(keySelector: shc => shc.Key), client, logger)
+                //.AddPlayerTypereader<SecretHitlerService,SecretHitlerGame, SecretHitlerPlayer>(cmds)
+                );
+            
             return cmds.AddModuleAsync<SecretHitlerModule>();
         }
     }

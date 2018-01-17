@@ -20,8 +20,8 @@ namespace MechHisui.SecretHitler
         private readonly Queue<BoardSpaceType> _liberalTrack = new Queue<BoardSpaceType>(5);
         private readonly Queue<BoardSpaceType> _fascistTrack = new Queue<BoardSpaceType>(6);
         private readonly AsyncObservableCollection<PlayerVote> _votes = new AsyncObservableCollection<PlayerVote>();
-        private readonly List<SecretHitlerPlayer> _confirmedNot = new List<SecretHitlerPlayer>(5);
-        private readonly List<SecretHitlerPlayer> _investigated = new List<SecretHitlerPlayer>(2);
+        //private readonly List<SecretHitlerPlayer> _confirmedNot = new List<SecretHitlerPlayer>(5);
+        //private readonly List<SecretHitlerPlayer> _investigated = new List<SecretHitlerPlayer>(2);
         private readonly List<PolicyType> _drawnPolicies = new List<PolicyType>();
         private readonly Stack<PolicyType> _discards = new Stack<PolicyType>();
 
@@ -48,7 +48,7 @@ namespace MechHisui.SecretHitler
             IEnumerable<SecretHitlerPlayer> players,
             SecretHitlerConfig config,
             HouseRules houseRules)
-            : base(channel, players)
+            : base(channel, players, setFirstPlayerImmediately: true)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _houseRules = houseRules;
@@ -135,10 +135,11 @@ namespace MechHisui.SecretHitler
         {
             _turn++;
             State = GameState.StartOfTurn;
+            _takenVeto = false;
             _lastChancellor = CurrentChancellor;
             _chancellorNominee = null;
             CurrentChancellor = null;
-            _takenVeto = false;
+
             if (_turn > 1)
             {
                 _lastPresident = CurrentPresident;
@@ -158,58 +159,49 @@ namespace MechHisui.SecretHitler
                     while (!CurrentPresident.IsAlive);
                 }
             }
+
             return Channel.SendMessageAsync($"It is turn {_turn}, the {_config.President} is **{CurrentPresident.User.Username}**. Please choose your {_config.Chancellor}.");
         }
 
-        public async Task NominatedChancellor(IUser nominee)
+        public async Task NominatedChancellor(SecretHitlerPlayer nominee)
         {
-            _chancellorNominee = Players.Single(p => p.User.Id == nominee.Id);
+            if (nominee.User.Id == CurrentPresident.User.Id)
+            {
+                await Channel.SendMessageAsync($"**{nominee.User.Username}** is the current {_config.President} and is therefore ineligible.").ConfigureAwait(false);
+                return;
+            }
+            if (nominee.User.Id == _lastChancellor?.User.Id)
+            {
+                await Channel.SendMessageAsync($"**{nominee.User.Username}** has been the {_config.Chancellor} last turn and is therefore ineligible.").ConfigureAwait(false);
+                return;
+            }
+            if (nominee.User.Id == _lastPresident?.User.Id && Players.Count > 5)
+            {
+                await Channel.SendMessageAsync($"**{nominee.User.Username}** has been the {_config.President} last turn and is therefore ineligible.").ConfigureAwait(false);
+                return;
+            }
+            if (!nominee.IsAlive)
+            {
+                await Channel.SendMessageAsync($"**{nominee.User.Username}** is dead and is therefore ineligible.").ConfigureAwait(false);
+                return;
+            }
             if (_turn == 1 && (_houseRules & HouseRules.SkipFirstElection) == HouseRules.SkipFirstElection)
             {
                 await Channel.SendMessageAsync($"Because of the applied house rule, this vote will be skipped.").ConfigureAwait(false);
-                CurrentChancellor = _chancellorNominee;
+                CurrentChancellor = nominee;
                 await DrawPolicies().ConfigureAwait(false);
                 return;
             }
-            if (_chancellorNominee.User.Id == CurrentPresident.User.Id)
-            {
-                await Channel.SendMessageAsync($"**{nominee.Username}** is the current {_config.President} and is therefore ineligible.").ConfigureAwait(false);
-                return;
-            }
-            if (_chancellorNominee.User.Id == _lastChancellor?.User.Id)
-            {
-                await Channel.SendMessageAsync($"**{nominee.Username}** has been the {_config.Chancellor} last turn and is therefore ineligible.").ConfigureAwait(false);
-                return;
-            }
-            if (_chancellorNominee.User.Id == _lastPresident?.User.Id && Players.Count > 5)
-            {
-                await Channel.SendMessageAsync($"**{nominee.Username}** has been the {_config.President} last turn and is therefore ineligible.").ConfigureAwait(false);
-                return;
-            }
-            if (!_chancellorNominee.IsAlive)
-            {
-                await Channel.SendMessageAsync($"**{nominee.Username}** is dead and is therefore ineligible.").ConfigureAwait(false);
-                return;
-            }
 
+            _chancellorNominee = nominee;
             State = GameState.VoteForGovernment;
             _votes.Clear();
             _votes.CollectionChangedAsync += VotesChanged;
-            await Channel.SendMessageAsync($"**{CurrentPresident.User.Username}** has nominated **{nominee.Username}** as their {_config.Chancellor}. PM me `{_config.Yes}` or `{_config.No}` to vote on this proposal.").ConfigureAwait(false);
+            await Channel.SendMessageAsync($"**{CurrentPresident.User.Username}** has nominated **{nominee.User.Username}** as their {_config.Chancellor}. PM me `{_config.Yes}` or `{_config.No}` to vote on this proposal.").ConfigureAwait(false);
             foreach (var player in LivingPlayers)
             {
-                await player.SendMessageAsync($"**{CurrentPresident.User.Username}** nominated **{nominee.Username}** as {_config.Chancellor}. Do you agree?").ConfigureAwait(false);
+                await player.SendMessageAsync($"**{CurrentPresident.User.Username}** nominated **{nominee.User.Username}** as {_config.Chancellor}. Do you agree?").ConfigureAwait(false);
                 await Task.Delay(1000).ConfigureAwait(false);
-            }
-        }
-
-        private async Task VotesChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add
-                && e.NewItems is IList<PlayerVote> l
-                && l.Count == Players.Count(p => p.IsAlive))
-            {
-                await VotingResults(l).ConfigureAwait(false);
             }
         }
 
@@ -238,6 +230,16 @@ namespace MechHisui.SecretHitler
             }
         }
 
+        private async Task VotesChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add
+                && e.NewItems is IList<PlayerVote> l
+                && l.Count == LivingPlayers.Count())
+            {
+                await VotingResults(l).ConfigureAwait(false);
+            }
+        }
+
         private async Task VotingResults(IList<PlayerVote> votes)
         {
             _votes.CollectionChangedAsync -= VotesChanged;
@@ -257,7 +259,7 @@ namespace MechHisui.SecretHitler
             else
             {
                 CurrentChancellor = _chancellorNominee;
-                if (_fascistTrack.Count <= 3 && !_confirmedNot.Any(u => u.User.Id == CurrentChancellor.User.Id))
+                if (_fascistTrack.Count <= 3 && !CurrentChancellor.IsConfirmedNotHitler)
                 {
                     sb.Append($"The vote has gone through. Now to ask: **Are you {_config.Hitler}**?");
                     await Channel.SendMessageAsync(sb.ToString()).ConfigureAwait(false);
@@ -270,7 +272,7 @@ namespace MechHisui.SecretHitler
                     }
                     else
                     {
-                        _confirmedNot.Add(CurrentChancellor);
+                        CurrentChancellor.ConfirmedNotHitler();
                         await Channel.SendMessageAsync($"**{chosen.Username}** is Not {_config.Hitler} (Confirmed). {_config.Parliament} can function.").ConfigureAwait(false);
                         await DrawPolicies().ConfigureAwait(false);
                     }
@@ -336,9 +338,11 @@ namespace MechHisui.SecretHitler
             int pick = nr - 1;
             var tmp = _drawnPolicies[pick];
             await dms.SendMessageAsync($"Removing a {(tmp == PolicyType.Fascist ? _config.Fascist : _config.Liberal)} {_config.Policy}.").ConfigureAwait(false);
+
             _discards.Push(tmp);
             _drawnPolicies.RemoveAt(pick);
             await Channel.SendMessageAsync($"The {_config.President} has discarded one {_config.Policy}.").ConfigureAwait(false);
+
             await Task.Delay(1000).ConfigureAwait(false);
             await ChancellorPick().ConfigureAwait(false);
         }
@@ -369,19 +373,22 @@ namespace MechHisui.SecretHitler
             var tmp = _drawnPolicies[pick];
             _drawnPolicies.RemoveAt(pick);
             await dms.SendMessageAsync($"Playing a {(tmp == PolicyType.Fascist ? _config.Fascist : _config.Liberal)} {_config.Policy}.").ConfigureAwait(false);
+
             _discards.Push(_drawnPolicies.Single());
+            _drawnPolicies.Clear();
             await Channel.SendMessageAsync($"The {_config.Chancellor} has discarded one {_config.Policy} and played a **{(tmp == PolicyType.Fascist ? _config.Fascist : _config.Liberal)}** {_config.Policy}.").ConfigureAwait(false);
+
             _electionTracker = 0;
             if (_deck.Count < 3)
             {
                 await ReshuffleDeck().ConfigureAwait(false);
             }
             await Task.Delay(1000).ConfigureAwait(false);
+
             var space = (tmp == PolicyType.Fascist)
                 ? _fascistTrack.Dequeue()
                 : _liberalTrack.Dequeue();
             await ResolveEffect(space).ConfigureAwait(false);
-            _drawnPolicies.Clear();
         }
 
         private async Task ResolveEffect(BoardSpaceType space, bool peopleEnacted = false)
@@ -451,34 +458,32 @@ namespace MechHisui.SecretHitler
             }
         }
 
-        public async Task InvestigatePlayer(IUser target)
+        public async Task InvestigatePlayer(SecretHitlerPlayer target)
         {
-            if (target != null && LivingPlayers.Any(p => p.User.Id == target.Id))
+            if (target != null)
             {
-                if (_investigated.Any(p => p.User.Id == target.Id))
+                if (target.IsInvestigated)
                 {
-                    await Channel.SendMessageAsync($"Player **{target.Username}** has already been investigated this game.").ConfigureAwait(false);
+                    await Channel.SendMessageAsync($"Player **{target.User.Username}** has already been investigated this game.").ConfigureAwait(false);
                     return;
                 }
 
-                await Channel.SendMessageAsync($"The {_config.President} is investigating **{target.Username}**'s loyalty.").ConfigureAwait(false);
+                await Channel.SendMessageAsync($"The {_config.President} is investigating **{target.User.Username}**'s loyalty.").ConfigureAwait(false);
                 await Task.Delay(1000).ConfigureAwait(false);
-                var player = LivingPlayers.Single(p => p.User.Id == target.Id);
-                _investigated.Add(player);
-                await CurrentPresident.SendMessageAsync($"**{player.User.Username}** belongs to the **{player.Party}**. You are not required to answer truthfully.").ConfigureAwait(false);
+                target.Investigated();
+                await CurrentPresident.SendMessageAsync($"**{target.User.Username}** belongs to the **{target.Party}**. You are not required to be truthful.").ConfigureAwait(false);
                 State = GameState.EndOfTurn;
             }
         }
 
-        public Task SpecialElection(IUser target)
+        public Task SpecialElection(SecretHitlerPlayer target)
         {
-            var tPlayer = LivingPlayers.SingleOrDefault(p => p.User.Id == target.Id);
-            if (tPlayer != null && tPlayer.User.Id != CurrentPresident.User.Id)
+            if (target != null && target.User.Id != CurrentPresident.User.Id)
             {
                 State = GameState.EndOfTurn;
-                _specialElected = tPlayer;
+                _specialElected = target;
                 _afterSpecial = TurnPlayer.Next;
-                return Channel.SendMessageAsync($"The {_config.President} has Special Elected **{target.Username}**.");
+                return Channel.SendMessageAsync($"The {_config.President} has Special Elected **{target.User.Username}**.");
             }
             else
             {
@@ -486,23 +491,22 @@ namespace MechHisui.SecretHitler
             }
         }
 
-        public async Task KillPlayer(IUser target)
+        public async Task KillPlayer(SecretHitlerPlayer target)
         {
-            if (target != null && LivingPlayers.Any(p => p.User.Id == target.Id))
+            if (target != null)
             {
                 State = GameState.EndOfTurn;
-                var player = LivingPlayers.Single(p => p.User.Id == target.Id);
-                player.Killed();
-                await Channel.SendMessageAsync(String.Format(_config.Kill, player.User.Username)).ConfigureAwait(false);
+                target.Killed();
+                await Channel.SendMessageAsync(String.Format(_config.Kill, target.User.Username)).ConfigureAwait(false);
                 await Task.Delay(3500).ConfigureAwait(false);
-                if (player.Role == _config.Hitler)
+                if (target.Role == _config.Hitler)
                 {
                     await EndGame(String.Format(_config.HitlerWasKilled, _config.Hitler, _config.LiberalParty)).ConfigureAwait(false);
                 }
                 else
                 {
-                    _confirmedNot.Add(player);
-                    await Channel.SendMessageAsync(String.Format(_config.HitlerNotKilled, player.User.Username, _config.Hitler)).ConfigureAwait(false);
+                    target.ConfirmedNotHitler();
+                    await Channel.SendMessageAsync(String.Format(_config.HitlerNotKilled, target.User.Username, _config.Hitler)).ConfigureAwait(false);
                 }
             }
         }
@@ -575,7 +579,7 @@ namespace MechHisui.SecretHitler
                 .AppendFormat(_config.ThePeopleState + '\n', 3 - _electionTracker)
                 .AppendLine($"{_deck.Count} {_config.Policies} in the deck.")
                 .AppendLine($"{_discards.Count} {_config.Policies} discarded.")
-                .AppendSequence(_confirmedNot, (b, p) => b.AppendLine($"**{p.User.Username}** is Not {_config.Hitler} (Confirmed)."))
+                .AppendSequence(Players.Where(p => p.IsConfirmedNotHitler), (b, p) => b.AppendLine($"**{p.User.Username}** is Not {_config.Hitler} (Confirmed)."))
                 .AppendSequence(Players.Where(p => !p.IsAlive), (b, p) => b.AppendLine($"**{p.User.Username}** is Dead."))
                 .Append($"The order of players is: ")
                 .AppendLine(String.Join(" -> ", Players.Select(p =>

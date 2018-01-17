@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="..\..\DiscordBotCore.props" />
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.0</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Discord.Addons.SimplePermissions.EFProvider" Version="1.0.0-rc" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.0.0" />
+        <!--<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.0" />-->
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\MechHisui.FateGOLib\MechHisui.FateGOLib.csproj" />
+        <ProjectReference Include="..\MechHisui.HisuiBets\MechHisui.HisuiBets.csproj" />
+        <ProjectReference Include="..\MechHisui.SecretHitler\MechHisui.SecretHitler.csproj" />
+        <ProjectReference Include="..\MechHisui.SymphoXDULib\MechHisui.SymphoXDULib.csproj" />
+    </ItemGroup>
+</Project>

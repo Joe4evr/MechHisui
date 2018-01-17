@@ -22,7 +22,7 @@ namespace MechHisui.FateGOLib.Modules
         [Command("ce"), Permission(MinimumPermission.Everyone), Priority(5)]
         public async Task CECmd(int id)
         {
-            var ce = _service.Config.GetCEs().SingleOrDefault(p => p.Id == id);
+            var ce = _service.Config.GetCE(id);
 
             if (ce != null)
             {
@@ -59,8 +59,8 @@ namespace MechHisui.FateGOLib.Modules
         public async Task AllCECmd([Remainder] string ceeffect)
         {
             var ces = (ceeffect == "event")
-                        ? _service.Config.GetCEs().Where(c => !String.IsNullOrWhiteSpace(c.EventEffect)).ToList()
-                        : _service.Config.GetCEs().Where(c => c.Effect.ContainsIgnoreCase(ceeffect)).ToList();
+                ? _service.Config.AllCEs().Where(c => !String.IsNullOrWhiteSpace(c.EventEffect)).ToList()
+                : _service.Config.AllCEs().Where(c => c.Effect.ContainsIgnoreCase(ceeffect)).ToList();
 
             if (ces.Count > 0)
             {
@@ -86,7 +86,7 @@ namespace MechHisui.FateGOLib.Modules
         [Command("cealias"), Permission(MinimumPermission.ModRole)]
         public Task CEAlisCmd(string ce, string alias)
         {
-            if (!_service.Config.GetCEs().Select(c => c.Name).Contains(ce))
+            if (!_service.Config.FindCEs(ce).Select(c => c.Name).Contains(ce))
             {
                 return ReplyAsync("Could not find name to add alias for.");
             }
@@ -97,7 +97,7 @@ namespace MechHisui.FateGOLib.Modules
             }
             else
             {
-                return ReplyAsync($"Alias `{alias}` already exists for CE `{_service.Config.GetCEs().Single(c => c.Aliases.Contains(alias)).Name}`.");
+                return ReplyAsync($"Alias `{alias}` already exists for CE `{_service.Config.AllCEs().Single(c => c.Aliases.Any(a => a.Alias == alias)).Name}`.");
             }
         }
 

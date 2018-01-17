@@ -22,8 +22,7 @@ namespace MechHisui.SymphoXDULib
             [Command, Alias("stats", "stat")]
             public Task CharaCmd(int id)
             {
-                var profile = _stats.Config.GetGears()
-                    .SingleOrDefault(p => p.Variations.Any(v => v.Value.Id == id));
+                var profile = _stats.Config.GetGear(id);
                 return (profile != null)
                     ? SendResults(profile.ToEmbedPages(), _stats, Context, listenForSelect: false)
                     : ReplyAsync("Unknown/Not a Gear ID");
@@ -32,8 +31,7 @@ namespace MechHisui.SymphoXDULib
             [Command("search")]
             public Task SearchChara(string name)
             {
-                var pages = _stats.Config.GetGears()
-                    .Where(p => RegexMatchOneWord(p.CharacterName, name) || p.Aliases.Any(a => RegexMatchOneWord(a, name)))
+                var pages = _stats.Config.FindGears(name)
                     .SelectMany(p => p.ToEmbedPages())
                     .ToList();
                 return SendResults(pages, _stats, Context, listenForSelect: true);

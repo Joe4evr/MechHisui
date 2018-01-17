@@ -194,4 +194,5 @@ FakesAssemblies/
 **/project.lock.json
 *.dll
 src/Kohaku/strings.json
+[Mm]igrations/
 *.sqlite

@@ -24,7 +24,7 @@ namespace MechHisui.SymphoXDULib
             [Command]
             public Task GetSong(int id)
             {
-                var song = _stats.Config.GetSongs().SingleOrDefault(s => s.Id == id);
+                var song = _stats.Config.GetSong(id);
                 return (song != null)
                     ? ReplyAsync("", embed: FormatSong(song))
                     : ReplyAsync("Unknown/Not a Song ID");
@@ -33,7 +33,7 @@ namespace MechHisui.SymphoXDULib
             [Command("search"), Alias("for", "by")]
             public Task Find(string singer)
             {
-                var songs = _stats.Config.GetSongs()
+                var songs = _stats.Config.AllSongs()
                     .Where(s => s.EquipsOn.Contains(singer, StringComparer.OrdinalIgnoreCase))
                     .OrderBy(s => s.Id)
                     .Select(s => FormatSong(s)).ToList();

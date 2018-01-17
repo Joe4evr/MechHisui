@@ -18,10 +18,10 @@ namespace MechHisui.HisuiBets
         internal readonly GameType GameType;
         private readonly Timer _countDown;
         private readonly ITextChannel _channel;
-        private readonly BankOfHisui _bank;
+        private readonly IBankOfHisui _bank;
         private bool _isClosing = false;
 
-        public BetGame(BankOfHisui bank, ITextChannel channel, GameType type, ulong master)
+        public BetGame(IBankOfHisui bank, ITextChannel channel, GameType type, ulong master)
         {
             _bank = bank;
             _channel = channel;
@@ -127,8 +127,8 @@ namespace MechHisui.HisuiBets
                 await Close().ConfigureAwait(false);
             }
 
-            int wholeSum = ActiveBets.Sum(b => b.BettedAmount);
-            var result = _bank.CashOut(ActiveBets, winner);
+            var wholeSum = ActiveBets.Sum(b => b.BettedAmount);
+            var result = await _bank.CashOut(ActiveBets, winner);
 
             if (result.Winners.Count > 0)
             {

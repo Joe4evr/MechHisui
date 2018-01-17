@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.WebSocket;
-using Discord.Addons.SimplePermissions;
 using Discord.Commands;
-using MechHisui.Core;
-using Newtonsoft.Json;
 using SharedExtensions;
 
 namespace MechHisui
@@ -23,7 +17,7 @@ namespace MechHisui
             var app = new Program(p);
             try
             {
-                await app.Start();
+                await app.Start(p);
             }
             catch (Exception e)
             {
@@ -31,38 +25,15 @@ namespace MechHisui
             }
         }
 
-        private readonly IServiceCollection _map = new ServiceCollection();
-        private readonly IConfigStore<MechHisuiConfig> _store;
         private readonly Func<LogMessage, Task> _logger;
         private readonly DiscordSocketClient _client;
+        private readonly IServiceProvider _services;
         private readonly CommandService _commands;
 
         private Program(Params p)
         {
             var minlog = p.LogSeverity ?? LogSeverity.Info;
             _logger = new Logger(minlog, p.LogPath).Log;
-
-            Log(LogSeverity.Verbose, $"Constructing {nameof(CommandService)}");
-            _commands = new CommandService(new CommandServiceConfig
-            {
-                CaseSensitiveCommands = false,
-                DefaultRunMode = RunMode.Sync
-            });
-            _commands.Log += _logger;
-
-            Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
-            _store = new JsonConfigStore<MechHisuiConfig>(p.ConfigPath, _commands);
-
-            //using (var config = _store.Load())
-            //{
-            //    if (!config.Strings.Any())
-            //    {
-            //        config.Strings.AddRange(
-            //            JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("strings.json"))
-            //                .DictionarySelect((k, v) => new StringKeyValuePair { Key = k, Value = v }));
-            //        config.Save();
-            //    }
-            //}
 
             Log(LogSeverity.Verbose, $"Constructing {nameof(DiscordSocketClient)}");
             _client = new DiscordSocketClient(new DiscordSocketConfig
@@ -74,7 +45,34 @@ namespace MechHisui
                 WebSocketProvider = WS4NetCore.WS4NetProvider.Instance
 #endif
             });
+
+            Log(LogSeverity.Verbose, $"Constructing {nameof(CommandService)}");
+            _commands = new CommandService(new CommandServiceConfig
+            {
+                CaseSensitiveCommands = false,
+                DefaultRunMode = RunMode.Sync
+            });
+
+            _commands.Log += _logger;
             _client.Log += _logger;
+
+            _services = ConfigureServices(_client, _commands, p, this, _logger);
+
+            _client.MessageReceived += HandleCommand;
+
+            //Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
+            //_store = new JsonConfigStore<MechHisuiConfig>(p.ConfigPath, _commands);
+
+            //using (var config = _store.Load())
+            //{
+            //    if (!config.Strings.Any())
+            //    {
+            //        config.Strings.AddRange(
+            //            JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("strings.json"))
+            //                .DictionarySelect((k, v) => new StringKeyValuePair { Key = k, Value = v }));
+            //        config.Save();
+            //    }
+            //}
         }
 
         private Task Log(LogSeverity severity, string msg)
@@ -82,7 +80,7 @@ namespace MechHisui
             return _logger(new LogMessage(severity, "Main", msg));
         }
 
-        private async Task Start()
+        private async Task Start(Params p)
         {
             _client.Ready += () => Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");
 
@@ -95,16 +93,12 @@ namespace MechHisui
                 }
             };
 
-            await InitCommands();
-
-            using (var config = _store.Load())
+            if (p.Token != null)
             {
-                //var token = config.Strings.SingleOrDefault(t => t.Key == "Login")?.Value;
-                //if (token != null)
-                    await _client.LoginAsync(TokenType.Bot, config.Token);
+                await _client.LoginAsync(TokenType.Bot, p.Token);
+                await _client.StartAsync();
             }
 
-            await _client.StartAsync();
             await Task.Delay(-1);
         }
 
@@ -120,7 +114,7 @@ namespace MechHisui
             if (msg.HasCharPrefix('.', ref pos) || msg.HasMentionPrefix(user, ref pos))
             {
                 var context = new SocketCommandContext(_client, msg);
-                var result = await _commands.ExecuteAsync(context, pos, services: _map.BuildServiceProvider());
+                var result = await _commands.ExecuteAsync(context, pos, services: _services);
 
                 if (!result.IsSuccess && result.Error != CommandError.UnknownCommand
                     && context.Guild?.Id == 161445678633975808ul)
@@ -130,5 +124,4 @@ namespace MechHisui
             }
         }
     }
-#pragma warning restore RCS1090 // Call 'ConfigureAwait(false)'.
 }
