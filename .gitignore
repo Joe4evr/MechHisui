@@ -196,3 +196,4 @@ FakesAssemblies/
 src/Kohaku/strings.json
 [Mm]igrations/
 *.sqlite
+*launchSettings.json
