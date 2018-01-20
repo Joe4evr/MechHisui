@@ -33,13 +33,14 @@ namespace MechHisui.SecretHitler
         [RequireContext(ContextType.Guild | ContextType.Group)]
         public async Task RulesCmd()
         {
+            var keys = GameService.GetKeys();
             var sb = new StringBuilder("How to play:\n")
                 .AppendLine("There are three roles: Liberal, Fascist, and Hitler.")
                 .AppendLine("Hitler does not know who his fellow Fascists are, but the Fascists know who Hitler is (except in 5 or 6 player games).")
                 .AppendLine("Liberals will always start off not knowing anything.")
                 .AppendLine("If 6 Fascist Policies are enacted, or Hitler is chosen as Chancellor in the late-game, the Fascists win.")
                 .AppendLine("If 5 Liberal Policies are enacted, or Hitler is successfully killed, the Liberals win.")
-                .AppendWhen(() => GameService.Configs.Keys.Any(), b =>  b.AppendLine($"The following themes are available too: `{String.Join("`, `", GameService.Configs.Keys)}`"))
+                .AppendWhen(() => keys.Any(), b => b.AppendLine($"The following themes are available too: `{String.Join("`, `", keys)}`"))
                 .AppendLine("For more details: http://secrethitler.com/assets/Secret_Hitler_Rules.pdf ")
                 .Append("Good luck, have fun.");
 
@@ -135,20 +136,22 @@ namespace MechHisui.SecretHitler
             }
         }
 
-        [Command("start"), Permission(MinimumPermission.ModRole)]
+        [Command("start"), Permission(MinimumPermission.ModRole)] //:thinking:
         [RequireContext(ContextType.Guild | ContextType.Group)]
         public override Task StartGameCmd()
-            => StartInternal(SecretHitlerConfig.Default);
+            => StartInternal(DefaultSecretHitlerTheme.Instance);
 
-        [Command("start"), Permission(MinimumPermission.ModRole)] //rly?
+        [Command("start"), Permission(MinimumPermission.ModRole)] //:thinking:
         [RequireContext(ContextType.Guild | ContextType.Group)]
-        public Task StartGameCmd(string configName)
+        public Task StartGameCmd(string themeName)
         {
-            return GameService.Configs.TryGetValue(configName, out var config) ?
-                 StartInternal(config) : ReplyAsync("Could not find that config.");
+            var theme = GameService.GetTheme(themeName);
+            return theme != null
+                ? StartInternal(theme)
+                : ReplyAsync("Could not find that config.");
         }
 
-        private async Task StartInternal(SecretHitlerConfig config)
+        private async Task StartInternal(ISecretHitlerTheme theme)
         {
             if (GameInProgress != CurrentlyPlaying.None)
             {
@@ -187,19 +190,19 @@ namespace MechHisui.SecretHitler
                 {
                     if (i == 0)
                     {
-                        return new SecretHitlerPlayer(u, Context.Channel, config.FascistParty, config.Hitler);
+                        return new SecretHitlerPlayer(u, Context.Channel, theme.FascistParty, theme.Hitler);
                     }
                     else if (i < fascists)
                     {
-                        return new SecretHitlerPlayer(u, Context.Channel, config.FascistParty, config.Fascist);
+                        return new SecretHitlerPlayer(u, Context.Channel, theme.FascistParty, theme.Fascist);
                     }
                     else
                     {
-                        return new SecretHitlerPlayer(u, Context.Channel, config.LiberalParty, config.Liberal);
+                        return new SecretHitlerPlayer(u, Context.Channel, theme.LiberalParty, theme.Liberal);
                     }
                 }).Shuffle(32);
 
-                var game = new SecretHitlerGame(Context.Channel, players, config, _currentHouseRules);
+                var game = new SecretHitlerGame(Context.Channel, players, theme, _currentHouseRules);
                 if (GameService.TryAddNewGame(Context.Channel, game))
                 {
                     await game.SetupGame().ConfigureAwait(false);

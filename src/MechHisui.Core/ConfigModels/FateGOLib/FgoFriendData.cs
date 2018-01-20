@@ -1,8 +1,11 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using MechHisui.FateGOLib;
 
-namespace MechHisui.FateGOLib
+namespace MechHisui.Core
 {
-    //public class UserAP
+    //public sealed class UserAP
     //{
     //    public int StartAP { get; set; }
     //    public ulong UserID { get; set; }
@@ -13,12 +16,16 @@ namespace MechHisui.FateGOLib
     //    //    .TotalMinutes / FgoHelpers.PerAP.TotalMinutes);
     //}
 
-    public class FgoFriendData
+    public sealed class FgoFriendData : IFgoFriendData
     {
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        //public ulong User { get; set; }
+
         public string FriendCode { get; set; }
         public string Class { get; set; }
         public string Servant { get; set; }
+
+        public HisuiUser User { get; set; }
+        public int UserFK { get; set; }
     }
 }

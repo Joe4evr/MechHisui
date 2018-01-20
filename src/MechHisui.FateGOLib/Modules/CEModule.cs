@@ -101,7 +101,7 @@ namespace MechHisui.FateGOLib.Modules
             }
         }
 
-        private static Embed FormatCEProfile(CEProfile ce)
+        private static Embed FormatCEProfile(ICEProfile ce)
         {
             return new EmbedBuilder()
                 .WithAuthor(auth => auth.WithName($"CE #{ce.Id}: {ce.Rarity}☆ Cost {ce.Cost}"))

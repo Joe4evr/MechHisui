@@ -32,7 +32,7 @@ namespace MechHisui.FateGOLib
             TimeSpan.FromHours(24));
         }
 
-        public IEnumerable<ServantProfile> LookupStats(string term, bool fullsearch = false)
+        public IEnumerable<IServantProfile> LookupStats(string term, bool fullsearch = false)
         {
             var list = Config.FindServants(term)
                 .Where(s => RegexMatchOneWord(s.Name, term) || s.Aliases.Any(a => RegexMatchOneWord(a.Alias, term)))
@@ -66,7 +66,7 @@ namespace MechHisui.FateGOLib
             return list;
         }
 
-        public IEnumerable<CEProfile> LookupCE(string name, bool fullsearch = false)
+        public IEnumerable<ICEProfile> LookupCE(string name, bool fullsearch = false)
         {
             var list = Config.AllCEs();
             var ces = list
@@ -99,7 +99,7 @@ namespace MechHisui.FateGOLib
             return ces.ToList();
         }
 
-        public IEnumerable<MysticCode> LookupMystic(string code, bool fullsearch = false)
+        public IEnumerable<IMysticCode> LookupMystic(string code, bool fullsearch = false)
         {
             var list = Config.AllMystics();
             var mystics = list

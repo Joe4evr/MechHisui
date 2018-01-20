@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
-using MechHisui.FateGOLib;
 
 namespace MechHisui.Core
 {
@@ -10,9 +9,14 @@ namespace MechHisui.Core
     {
         //FGO
         public DbSet<ServantProfile> Servants { get; set; }
-        public DbSet<ServantSkill> FgoSkills { get; set; }
+        public DbSet<ActiveSkill> FgoActiveSkills { get; set; }
+        public DbSet<PassiveSkill> FgoPassiveSkills { get; set; }
         public DbSet<ServantTrait> Traits { get; set; }
         public DbSet<ServantAlias> ServantAliases { get; set; }
+
+        public DbSet<ServantActiveSkill> ProfileActiveSkills { get; set; }
+        public DbSet<ServantPassiveSkill> ProfilePassiveSkills { get; set; }
+        public DbSet<ServantProfileTrait> ProfileTraits { get; set; }
 
         public DbSet<CEProfile> CEs { get; set; }
         public DbSet<CEAlias> CEAliases { get; set; }
@@ -25,5 +29,43 @@ namespace MechHisui.Core
         public DbSet<NameOnlyServant> NameOnlyServants { get; set; }
 
         public DbSet<FgoFriendData> FgoFriendData { get; set; }
+
+        private static void ConfigureFgoModel(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<HisuiUser>()
+                .HasOne(u => u.FriendData)
+                .WithOne(f => f.User)
+                .HasForeignKey<FgoFriendData>(f => f.UserFK);
+
+
+            modelBuilder.Entity<ServantProfile>()
+                .HasOne(p => p.Bond10);
+
+            modelBuilder.Entity<ServantProfile>()
+                .HasMany(p => p.Traits)
+                .WithOne(t => t.Servant);
+
+            modelBuilder.Entity<ServantProfile>()
+                .HasMany(p => p.ActiveSkills)
+                .WithOne(s => s.Servant);
+
+            modelBuilder.Entity<ServantProfile>()
+                .HasMany(p => p.PassiveSkills)
+                .WithOne(s => s.Servant);
+
+            modelBuilder.Entity<ServantProfile>()
+                .HasMany(p => p.Aliases)
+                .WithOne(a => a.Servant);
+
+
+            modelBuilder.Entity<CEProfile>()
+                .HasMany(c => c.Aliases)
+                .WithOne(a => a.CE);
+
+
+            modelBuilder.Entity<MysticCode>()
+                .HasMany(m => m.Aliases)
+                .WithOne(a => a.Code);
+        }
     }
 }

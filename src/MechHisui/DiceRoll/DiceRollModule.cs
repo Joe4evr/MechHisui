@@ -43,12 +43,12 @@ namespace MechHisui
         }
     }
 
-    public static class DiceRollExtensions
-    {
-        public static Task AddDiceRoll(this CommandService commands)
-        {
-            commands.AddTypeReader<DiceRoll>(new DiceTypeReader());
-            return commands.AddModuleAsync<DiceRollModule>();
-        }
-    }
+    //public static class DiceRollExtensions
+    //{
+    //    public static Task AddDiceRoll(this CommandService commands)
+    //    {
+    //        commands.AddTypeReader<DiceRoll>(new DiceTypeReader());
+    //        return commands.AddModuleAsync<DiceRollModule>();
+    //    }
+    //}
 }

@@ -50,7 +50,7 @@ namespace MechHisui.Core
                 if (exists == null)
                 {
                     config.Users.Add(new HisuiUser { UserId = user.Id });
-                    config.Save();
+                    config.SaveChanges();
                     return Task.FromResult(true);
                 }
                 else
@@ -82,7 +82,7 @@ namespace MechHisui.Core
                     windict.Add(us.UserId, payout);
                     loss += payout;
                 }
-                config.Save();
+                config.SaveChanges();
             }
             return Task.FromResult(new BetResult
             {
@@ -101,7 +101,7 @@ namespace MechHisui.Core
                 {
                     donor.BankBalance -= (int)amount;
                     recepient.BankBalance += (int)amount;
-                    config.Save();
+                    config.SaveChanges();
                 }
             }
         }
@@ -110,12 +110,12 @@ namespace MechHisui.Core
         {
             using (var config = _store.Load())
             {
-                config.Users.FromSql("UPDATE * SET BankBalance + 10 WHERE BankBalance < 2500");
-                config.Save();
+                config.Users.FromSql("UPDATE Users SET BankBalance = BankBalance + 10 WHERE BankBalance < 2500");
+                config.SaveChanges();
             }
         }
 
-        public void Take(ulong debtorId, uint amount)
+        public void Withdraw(ulong debtorId, uint amount)
         {
             using (var config = _store.Load())
             {
@@ -123,13 +123,48 @@ namespace MechHisui.Core
                 if (debtor != null)
                 {
                     debtor.BankBalance -= (int)amount;
-                    config.Save();
+                    config.SaveChanges();
                 }
+            }
+        }
+
+        public void AddToVault(uint amount)
+        {
+            using (var config = _store.Load())
+            {
+                var vault = GetVault(config);
+                if (vault != null)
+                {
+                    vault.IntValue += (int)amount;
+                    config.SaveChanges();
+                }
+            }
+        }
+
+        public int RetrieveFromVault(uint amount)
+        {
+            using (var config = _store.Load())
+            {
+                var vault = GetVault(config);
+                if (vault != null)
+                {
+                    var withdraw = (int)amount;
+                    if (vault.IntValue > withdraw)
+                    {
+                        vault.IntValue -= withdraw;
+                        config.SaveChanges();
+                        return withdraw;
+                    }
+                }
+                return 0;
             }
         }
 
         //helpers
         private static HisuiUser GetConfigUser(ulong userId, MechHisuiConfig config)
             => config.Users.SingleOrDefault(u => u.UserId == userId);
+
+        private static NamedScalar GetVault(MechHisuiConfig config)
+            => config.Scalars.SingleOrDefault(s => s.Key == "Vault");
     }
 }

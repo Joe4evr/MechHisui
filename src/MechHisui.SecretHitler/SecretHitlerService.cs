@@ -14,34 +14,50 @@ namespace MechHisui.SecretHitler
 {
     public sealed class SecretHitlerService : MpGameService<SecretHitlerGame, SecretHitlerPlayer>
     {
-        internal readonly ConcurrentDictionary<IMessageChannel, HouseRules> HouseRulesList
+        internal ConcurrentDictionary<IMessageChannel, HouseRules> HouseRulesList { get; }
             = new ConcurrentDictionary<IMessageChannel, HouseRules>(MessageChannelComparer);
 
-        internal readonly IReadOnlyDictionary<string, SecretHitlerConfig> Configs;
+        private ConcurrentDictionary<string, ISecretHitlerTheme> CachedThemes { get; }
+            = new ConcurrentDictionary<string, ISecretHitlerTheme>();
 
-        public SecretHitlerService(IReadOnlyDictionary<string, SecretHitlerConfig> configs,
+        private readonly ISecretHitlerConfig _config;
+
+        public SecretHitlerService(ISecretHitlerConfig config,
             DiscordSocketClient client,
             Func<LogMessage, Task> logger = null)
             : base(client, logger)
         {
-            Configs = configs;
+            _config = config;
         }
+
+        internal ISecretHitlerTheme GetTheme(string key)
+        {
+            if (!CachedThemes.TryGetValue(key, out var theme))
+            {
+                theme = _config.GetTheme(key);
+                CachedThemes.TryAdd(key, theme);
+            }
+            return theme;
+        }
+
+        internal IEnumerable<string> GetKeys()
+            => _config.GetKeys();
     }
 
-    public static class SHExtensions
-    {
-        public static Task AddSecretHitler(
-            this CommandService cmds,
-            DiscordSocketClient client,
-            IServiceCollection map,
-            IEnumerable<SecretHitlerConfig> configs,
-            Func<LogMessage, Task> logger = null)
-        {
-            map.AddSingleton(new SecretHitlerService(configs.ToDictionary(keySelector: shc => shc.Key), client, logger)
-                //.AddPlayerTypereader<SecretHitlerService,SecretHitlerGame, SecretHitlerPlayer>(cmds)
-                );
+    //public static class SHExtensions
+    //{
+    //    public static Task AddSecretHitler(
+    //        this CommandService cmds,
+    //        DiscordSocketClient client,
+    //        IServiceCollection map,
+    //        IEnumerable<SecretHitlerConfig> configs,
+    //        Func<LogMessage, Task> logger = null)
+    //    {
+    //        map.AddSingleton(new SecretHitlerService(configs.ToDictionary(keySelector: shc => shc.Key), client, logger)
+    //            //.AddPlayerTypereader<SecretHitlerService,SecretHitlerGame, SecretHitlerPlayer>(cmds)
+    //            );
             
-            return cmds.AddModuleAsync<SecretHitlerModule>();
-        }
-    }
+    //        return cmds.AddModuleAsync<SecretHitlerModule>();
+    //    }
+    //}
 }

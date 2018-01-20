@@ -33,13 +33,13 @@ namespace MechHisui.Superfight
         public SuperfightGame(
             IMessageChannel channel,
             IEnumerable<SuperfightPlayer> players,
-            SuperfightConfig cfg,
+            ISuperfightConfig cfg,
             int timeout)
             : base(channel, players, setFirstPlayerImmediately: false)
         {
-            var c = cfg.Characters.Shuffle(28);
-            var a = cfg.Abilities.Shuffle(28);
-            var l = cfg.Locations.Shuffle(28);
+            var c = cfg.GetCharacters().Shuffle(28);
+            var a = cfg.GetAbilities().Shuffle(28);
+            var l = cfg.GetLocations().Shuffle(28);
 
             _characters = new Stack<Card>(c.Select(x => new Card(CardType.Character, x)));
             _abilities = new Stack<Card>(a.Select(x => new Card(CardType.Ability, x)));

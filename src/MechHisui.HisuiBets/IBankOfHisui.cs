@@ -14,6 +14,9 @@ namespace MechHisui.HisuiBets
         Task<BetResult> CashOut(IEnumerable<Bet> bets, string winner);
         void Interest();
         void Donate(ulong donorId, ulong recepientId, uint amount);
-        void Take(ulong debtorId, uint amount);
+        void Withdraw(ulong debtorId, uint amount);
+
+        void AddToVault(uint amount);
+        int RetrieveFromVault(uint amount);
     }
 }

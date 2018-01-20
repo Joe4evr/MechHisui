@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Discord;
@@ -18,6 +19,7 @@ namespace SharedExtensions
             _logFile = File.AppendText(Path.Combine(logdir, $"{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.log"));
         }
 
+        [DebuggerStepThrough]
         public Task Log(LogMessage lmsg)
         {
             string logline = $"{DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss"),-19} [{lmsg.Severity,8}] {lmsg.Source}: {lmsg.Message} {lmsg.Exception}";

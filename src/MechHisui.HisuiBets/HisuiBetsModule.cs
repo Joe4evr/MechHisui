@@ -14,12 +14,15 @@ namespace MechHisui.HisuiBets
     public sealed class HisuiBetsModule : ModuleBase<SocketCommandContext>
     {
         private readonly HisuiBankService _service;
+        //private readonly Random _rng;
+
         private UserAccount _account;
         private BetGame _game;
 
         public HisuiBetsModule(HisuiBankService service)
         {
             _service = service;
+            //_rng = rng;
         }
 
         protected override void BeforeExecute(CommandInfo command)
@@ -172,7 +175,7 @@ namespace MechHisui.HisuiBets
         {
             var sb = new StringBuilder("The following bets have been made:\n```\n", 2000);
 
-            foreach (var bet in _game.ActiveBets)
+            foreach (var bet in _game.ActiveBets.Bets)
             {
                 sb.AppendLine($"{bet.UserName,-20}: {HisuiBankService.Symbol}{bet.BettedAmount,-7} - {bet.Tribute}");
 

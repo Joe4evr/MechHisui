@@ -27,8 +27,8 @@
         <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions\Discord.Addons.SimplePermissions.csproj" />-->
         <ProjectReference Include="..\MechHisui.Core\MechHisui.Core.csproj" />
     </ItemGroup>
-    <ItemGroup>
+    <!--<ItemGroup>
         <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
-    </ItemGroup>
+    </ItemGroup>-->
     <!--<Import Project="..\SharedExtensions\SharedExtensions.projitems" Label="Shared" />-->
 </Project>

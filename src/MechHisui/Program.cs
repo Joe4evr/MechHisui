@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Discord.Commands;
+using Discord.Addons.SimplePermissions;
+using MechHisui.HisuiBets;
 using SharedExtensions;
 
 namespace MechHisui
@@ -35,7 +38,7 @@ namespace MechHisui
             var minlog = p.LogSeverity ?? LogSeverity.Info;
             _logger = new Logger(minlog, p.LogPath).Log;
 
-            Log(LogSeverity.Verbose, $"Constructing {nameof(DiscordSocketClient)}");
+            Log(LogSeverity.Info, $"Constructing {nameof(DiscordSocketClient)}");
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 AlwaysDownloadUsers = true,
@@ -46,7 +49,7 @@ namespace MechHisui
 #endif
             });
 
-            Log(LogSeverity.Verbose, $"Constructing {nameof(CommandService)}");
+            Log(LogSeverity.Info, $"Constructing {nameof(CommandService)}");
             _commands = new CommandService(new CommandServiceConfig
             {
                 CaseSensitiveCommands = false,
@@ -56,23 +59,9 @@ namespace MechHisui
             _commands.Log += _logger;
             _client.Log += _logger;
 
-            _services = ConfigureServices(_client, _commands, p, this, _logger);
+            _services = ConfigureServices(_client, _commands, p, _logger);
 
             _client.MessageReceived += HandleCommand;
-
-            //Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
-            //_store = new JsonConfigStore<MechHisuiConfig>(p.ConfigPath, _commands);
-
-            //using (var config = _store.Load())
-            //{
-            //    if (!config.Strings.Any())
-            //    {
-            //        config.Strings.AddRange(
-            //            JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("strings.json"))
-            //                .DictionarySelect((k, v) => new StringKeyValuePair { Key = k, Value = v }));
-            //        config.Save();
-            //    }
-            //}
         }
 
         private Task Log(LogSeverity severity, string msg)
@@ -82,6 +71,11 @@ namespace MechHisui
 
         private async Task Start(Params p)
         {
+            //await _commands.AddModulesAsync(Assembly.GetEntryAssembly());
+            await _commands.AddModuleAsync<PermissionsModule>();
+            await _commands.AddModuleAsync<DiceRollModule>();
+            await _commands.AddModuleAsync<HisuiBetsModule>();
+
             _client.Ready += () => Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");
 
             _client.MessageUpdated += async (before, after, channel) =>

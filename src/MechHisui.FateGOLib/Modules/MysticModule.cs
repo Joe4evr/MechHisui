@@ -64,7 +64,7 @@ namespace MechHisui.FateGOLib.Modules
             }
         }
 
-        private static string FormatMysticCodeProfile(MysticCode code)
+        private static string FormatMysticCodeProfile(IMysticCode code)
         {
             var sb = new StringBuilder()
                 .AppendLine($"**Name:** {code.Code}")

@@ -11,9 +11,9 @@ namespace MechHisui.Core
         //XDU
         //public DbSet<XduProfile> XduCharacters { get; set; }
         //public DbSet<CharacterVariation> XduCharacters { get; set; }
-        public DbSet<XduSkill> XduSkills { get; set; }
-        public DbSet<Memoria> Memorias { get; set; }
-        public DbSet<XduSong> XduSongs { get; set; }
-        public DbSet<XduEvent> XduEvents { get; set; }
+        //public DbSet<XduSkill> XduSkills { get; set; }
+        //public DbSet<Memoria> Memorias { get; set; }
+        //public DbSet<XduSong> XduSongs { get; set; }
+        //public DbSet<XduEvent> XduEvents { get; set; }
     }
 }

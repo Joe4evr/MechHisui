@@ -1,17 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.DependencyInjection;
 using Discord.Commands;
-using Discord.WebSocket;
 using Discord.Addons.SimplePermissions;
-
-using MechHisui.SecretHitler;
 using MechHisui.SymphoXDULib;
 
 namespace MechHisui.Core
@@ -23,40 +15,44 @@ namespace MechHisui.Core
         }
 
         //misc
-        public DbSet<StringKeyValuePair> Strings { get; set; }
-        public DbSet<SecretHitlerConfig> SHConfigs { get; set; }
+        public DbSet<NamedScalar> Scalars { get; set; }
+        public DbSet<SecretHitlerTheme> SHThemes { get; set; }
+        public DbSet<SuperfightCard> SFCards { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<HisuiUser>()
-                .HasOne(u => u.FriendData);
+            ConfigureFgoModel(modelBuilder);
 
 
-            modelBuilder.Entity<XduSkill>()
-                .Property(s => s.Id)
-                .ValueGeneratedOnAdd();
+            //modelBuilder.Entity<XduSkill>()
+            //    .Property(s => s.Id)
+            //    .ValueGeneratedOnAdd();
 
-            modelBuilder.Entity<CharacterVariation>()
-                .Property(v => v.Id)
-                .ValueGeneratedNever();
+            //modelBuilder.Entity<CharacterVariation>()
+            //    .Property(v => v.Id)
+            //    .ValueGeneratedNever();
 
-            modelBuilder.Entity<CharacterVariation>()
-                .HasMany(v => v.Skills);
+            //modelBuilder.Entity<CharacterVariation>()
+            //    .HasMany(v => v.Skills);
 
-            modelBuilder.Entity<Memoria>()
-                .Property(v => v.Id)
-                .ValueGeneratedNever();
+            //modelBuilder.Entity<Memoria>()
+            //    .Property(v => v.Id)
+            //    .ValueGeneratedNever();
 
             base.OnModelCreating(modelBuilder);
         }
     }
 
-    public class StringKeyValuePair
+    public class ConfigFactory : IDesignTimeDbContextFactory<MechHisuiConfig>
     {
-        [Key]
-        public string Key { get; set; }
+        public MechHisuiConfig CreateDbContext(string[] args)
+        {
+            var map = new ServiceCollection()
+                .AddSingleton(new CommandService())
+                .AddDbContext<MechHisuiConfig>(opt => opt.UseSqlite(@"Data Source=test.sqlite"))
+                .BuildServiceProvider();
 
-        [Required]
-        public string Value { get; set; }
+            return map.GetService<MechHisuiConfig>();
+        }
     }
 }

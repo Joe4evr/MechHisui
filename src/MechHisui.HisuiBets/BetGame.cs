@@ -11,25 +11,36 @@ namespace MechHisui.HisuiBets
     public class BetGame
     {
         private const char _symbol = '\u050A';
-        public List<Bet> ActiveBets { get; } = new List<Bet>();
-        public bool BetsOpen { get; private set; }
-        public ulong GameMaster { get; }
+        private static readonly Random _rng = new Random();
 
-        internal readonly GameType GameType;
+        internal BetCollection ActiveBets { get; } = new BetCollection();
+        internal bool BetsOpen { get; private set; }
+        internal uint Bonus { get; private set; }
+        internal ulong GameMaster { get; }
+        internal GameType GameType { get; }
+
+
         private readonly Timer _countDown;
         private readonly ITextChannel _channel;
         private readonly IBankOfHisui _bank;
+
         private bool _isClosing = false;
 
-        public BetGame(IBankOfHisui bank, ITextChannel channel, GameType type, ulong master)
+        public BetGame(
+            IBankOfHisui bank,
+            ITextChannel channel,
+            GameType type,
+            //Random rng,
+            ulong master)
         {
             _bank = bank;
             _channel = channel;
+            //_rng = rng;
             GameType = type;
             GameMaster = master;
 
             BetsOpen = true;
-            _countDown = new Timer(async cb => await Close().ConfigureAwait(false), null,
+            _countDown = new Timer(async cb => await Close(false).ConfigureAwait(false), null,
             Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
         }
 
@@ -39,18 +50,26 @@ namespace MechHisui.HisuiBets
             _countDown.Change(TimeSpan.FromSeconds(45), Timeout.InfiniteTimeSpan);
         }
 
-        private async Task Close()
+        private async Task Close(bool atEnd)
         {
             if (_isClosing)
             {
                 _isClosing = false;
                 CloseOff();
-                var highest = ActiveBets.OrderByDescending(b => b.BettedAmount).First();
-                var most = ActiveBets.GroupBy(b => b.Tribute, StringComparer.OrdinalIgnoreCase)
+                var highest = ActiveBets.Bets.OrderByDescending(b => b.BettedAmount).First();
+                var most = ActiveBets.Bets.GroupBy(b => b.Tribute, StringComparer.OrdinalIgnoreCase)
                     .Select(b => new { Count = b.Count(), Tribute = b.Key })
                     .OrderByDescending(b => b.Count)
                     .First();
-                var sb = new StringBuilder($"Bets are closed. {ActiveBets.Count} bets are in. The pot is {_symbol}{ActiveBets.Sum(b => b.BettedAmount)}.\n")
+
+                var sb = new StringBuilder($"Bets are closed. {ActiveBets.Bets.Count} bets are in.\n");
+                if ((!atEnd && _rng.Next(maxValue: 250) > 245) || Bonus > 0)
+                {
+                    var b = (Bonus > 0) ? Bonus : 1500;
+                    ActiveBets.Bonus = _bank.RetrieveFromVault(b);
+                    sb.AppendLine($"BONUS: An additional {_symbol}{b} is added to the pot.");
+                }
+                sb.AppendLine($"The pot is {_symbol}{ActiveBets.Bets.Sum(b => b.BettedAmount) + ActiveBets.Bonus}.\n")
                     .AppendLine($"The highest bet is {_symbol}{highest.BettedAmount} on `{highest.Tribute}`.")
                     .Append($"The most bets are {most.Count} on `{most.Tribute}`.");
 
@@ -61,9 +80,9 @@ namespace MechHisui.HisuiBets
         internal void CloseOff()
         {
             BetsOpen = false;
-            foreach (var bet in ActiveBets)
+            foreach (var bet in ActiveBets.Bets)
             {
-                _bank.Take(bet.UserId, bet.BettedAmount);
+                _bank.Withdraw(bet.UserId, bet.BettedAmount);
             }
         }
 
@@ -72,7 +91,7 @@ namespace MechHisui.HisuiBets
             if (bet.BettedAmount < 50) return "Minimum bet must be 50.";
 
             bool replace = false;
-            var tmp = ActiveBets.SingleOrDefault(b => b.UserId == bet.UserId);
+            var tmp = ActiveBets.Bets.SingleOrDefault(b => b.UserId == bet.UserId);
             if (tmp != null)
             {
                 if (GameType == GameType.SaltyBet)
@@ -84,11 +103,11 @@ namespace MechHisui.HisuiBets
                     return "Not allowed to replace an existing bet with less than previous bet.";
                 }
 
-                ActiveBets.Remove(tmp);
+                ActiveBets.Bets.Remove(tmp);
                 replace = true;
             }
 
-            ActiveBets.Add(bet);
+            ActiveBets.Bets.Add(bet);
             if (replace)
             {
                 return $"Replaced **{bet.UserName}**'s bet with {_symbol}{bet.BettedAmount} to {bet.Tribute}.";
@@ -124,11 +143,11 @@ namespace MechHisui.HisuiBets
             if (_isClosing)
             {
                 _countDown.Change(Timeout.Infinite, Timeout.Infinite);
-                await Close().ConfigureAwait(false);
+                await Close(true).ConfigureAwait(false);
             }
 
-            var wholeSum = ActiveBets.Sum(b => b.BettedAmount);
-            var result = await _bank.CashOut(ActiveBets, winner);
+            var wholeSum = (uint)ActiveBets.Bets.Sum(b => (int)b.BettedAmount);
+            var result = await _bank.CashOut(ActiveBets.Bets, winner);
 
             if (result.Winners.Count > 0)
             {
@@ -146,17 +165,25 @@ namespace MechHisui.HisuiBets
                         sb.Append($"**{user.Key}** ({_symbol}{user.Value}), ");
                     }
 
-                    ret = sb.Append($"and {_symbol}{wholeSum - result.RoundingLoss} has been lost due to rounding.").ToString();
+                    _bank.AddToVault(result.RoundingLoss);
+                    ret = sb.Append($"and {_symbol}{wholeSum - result.RoundingLoss} was stashed.").ToString();
                 }
             }
             else
             {
-                ret = "No bets were made on the winner of this game.";
+                _bank.AddToVault(wholeSum);
+                ret = "No bets were made on the winner of this game. The funds were stashed in the vault.";
             }
             await GameEnd?.Invoke(_channel.Id);
             return ret;
         }
 
         internal event Func<ulong, Task> GameEnd;
+
+        internal class BetCollection
+        {
+            public List<Bet> Bets { get; } = new List<Bet>();
+            public int Bonus { get; set; } = 0;
+        }
     }
 }

@@ -6,23 +6,23 @@ namespace MechHisui.FateGOLib
 {
     public interface IFgoConfig
     {
-        IEnumerable<ServantProfile> AllServants();
-        IEnumerable<ServantProfile> FindServants(string name);
-        ServantProfile GetServant(int id);
+        IEnumerable<IServantProfile> AllServants();
+        IEnumerable<IServantProfile> FindServants(string name);
+        IServantProfile GetServant(int id);
         bool AddServantAlias(string servant, string alias);
 
-        IEnumerable<CEProfile> AllCEs();
-        IEnumerable<CEProfile> FindCEs(string name);
-        CEProfile GetCE(int id);
+        IEnumerable<ICEProfile> AllCEs();
+        IEnumerable<ICEProfile> FindCEs(string name);
+        ICEProfile GetCE(int id);
         bool AddCEAlias(string ce, string alias);
 
-        IEnumerable<MysticCode> AllMystics();
-        IEnumerable<MysticCode> FindMystics(string name);
-        MysticCode GetMystic(int id);
+        IEnumerable<IMysticCode> AllMystics();
+        IEnumerable<IMysticCode> FindMystics(string name);
+        IMysticCode GetMystic(int id);
         bool AddMysticAlias(string mystic, string alias);
 
-        IEnumerable<FgoEvent> AllEvents();
-        IEnumerable<FgoEvent> GetCurrentEvents();
+        IEnumerable<IFgoEvent> AllEvents();
+        IEnumerable<IFgoEvent> GetCurrentEvents();
     }
 
     //public sealed class FgoConfig

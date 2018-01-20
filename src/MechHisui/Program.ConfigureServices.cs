@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +7,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Discord.Addons.SimplePermissions;
 using MechHisui.Core;
+using MechHisui.ExplodingKittens;
 using MechHisui.FateGOLib;
 using MechHisui.HisuiBets;
 using MechHisui.SecretHitler;
@@ -26,34 +24,36 @@ namespace MechHisui
             DiscordSocketClient client,
             CommandService commands,
             Params parameters,
-            Program program,
             Func<LogMessage, Task> logger = null)
         {
-            program.Log(LogSeverity.Info, $"Creating ConfigStore");
+            logger?.Invoke(new LogMessage(LogSeverity.Info, "Main", "Creating ConfigStore"));
             var store = new MechHisuiConfigStore(commands,
                 options => options.UseSqlite(parameters.ConnectionString));
 
-            var bank = new BankOfHisui(store);
-            var fgo = new FgoConfig(store);
-            var xdu = new XduConfig(store);
+            //using (var config = store.Load())
+            //{
+            //}
 
-            using (var config = store.Load())
-            {
-                var shconfigs = config.SHConfigs.ToDictionary(c => c.Key);
-                var sfcfgpath = config.Strings.SingleOrDefault(s => s.Key == "SuperfightPath")?.Value;
+            var bank     = new BankOfHisui(store);
+            //var fgo      = new FgoConfig(store);
+            //var shconfig = new SecretHitlerConfig(store);
+            //var sfconfig = new SuperfightConfig(store);
+            //var xdu      = new XduConfig(store);
 
-                var map = new ServiceCollection()
-                    .AddSingleton(new PermissionsService(store, commands, client, logger))
-                    .AddSingleton(new HisuiBankService(bank, client, logger))
-                    .AddSingleton(new FgoStatService(fgo, client, logger))
-                    .AddSingleton(new XduStatService(xdu, client, logger))
-                    .AddSingleton(new SecretHitlerService(shconfigs, client, logger))
-                    .AddSingleton(new SuperfightService(client, sfcfgpath, logger));
+            commands.AddTypeReader<DiceRoll>(new DiceTypeReader());
 
-                return map.BuildServiceProvider();
-            }
+            var map = new ServiceCollection()
+                //.AddSingleton(new Random())
+                .AddSingleton(new PermissionsService(store, commands, client, logger))
+                //.AddSingleton(new FgoStatService(fgo, client, logger))
+                //.AddSingleton(new XduStatService(xdu, client, logger))
+                //.AddSingleton(new SecretHitlerService(shconfig, client, logger))
+                //.AddSingleton(new SuperfightService(sfconfig, client, logger))
+                //.AddSingleton(new ExKitService(client, logger))
+                .AddSingleton(new HisuiBankService(bank, client, logger));
 
-
+            return map.BuildServiceProvider();
+        }
 
 
             ////var eval = EvalService.Builder.BuilderWithSystemAndLinq()
@@ -70,6 +70,5 @@ namespace MechHisui
             ////await _commands.AddModuleAsync<EvalModule>();
 
             //await _commands.AddDiceRoll();
-        }
     }
 }

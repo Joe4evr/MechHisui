@@ -8,7 +8,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using MechHisui.FateGOLib.Modules;
-using SharedExtensions;
 
 namespace MechHisui.FateGOLib
 {
@@ -98,16 +97,16 @@ namespace MechHisui.FateGOLib
                     ? TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time")
                     : TimeZoneInfo.FindSystemTimeZoneById("Asia/Tokyo");
 
-        public static IEnumerable<ServantProfile> WhereActive(this IEnumerable<ServantProfile> profiles, string skill)
+        public static IEnumerable<IServantProfile> WhereActive(this IEnumerable<IServantProfile> profiles, string skill)
             => profiles.Where(p => p.ActiveSkills.Any(s => s.SkillName == skill));
 
-        public static IEnumerable<ServantProfile> WhereActiveEffect(this IEnumerable<ServantProfile> profiles, string effect)
+        public static IEnumerable<IServantProfile> WhereActiveEffect(this IEnumerable<IServantProfile> profiles, string effect)
             => profiles.Where(p => p.ActiveSkills.Any(s => s.Effect.Contains(effect)));
 
-        public static IEnumerable<ServantProfile> WherePassive(this IEnumerable<ServantProfile> profiles, string skill)
+        public static IEnumerable<IServantProfile> WherePassive(this IEnumerable<IServantProfile> profiles, string skill)
             => profiles.Where(p => p.PassiveSkills.Any(s => s.SkillName == skill));
 
-        public static IEnumerable<ServantProfile> WherePassiveEffect(this IEnumerable<ServantProfile> profiles, string effect)
+        public static IEnumerable<IServantProfile> WherePassiveEffect(this IEnumerable<IServantProfile> profiles, string effect)
             => profiles.Where(p => p.PassiveSkills.Any(s => s.Effect.Contains(effect)));
 
         //public static IEnumerable<ServantProfile> WhereTrait(this IEnumerable<ServantProfile> profiles, string trait)

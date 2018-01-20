@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Discord.Addons.SimplePermissions;
-using Discord.WebSocket;
 using MechHisui.FateGOLib;
 
 namespace MechHisui.Core
@@ -19,17 +15,17 @@ namespace MechHisui.Core
         }
 
 
-        public IEnumerable<ServantProfile> AllServants()
+        public IEnumerable<IServantProfile> AllServants()
         {
             throw new NotImplementedException();
         }
 
-        public ServantProfile GetServant(int id)
+        public IServantProfile GetServant(int id)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<ServantProfile> FindServants(string name)
+        public IEnumerable<IServantProfile> FindServants(string name)
         {
             throw new NotImplementedException();
         }
@@ -40,17 +36,17 @@ namespace MechHisui.Core
         }
 
 
-        public IEnumerable<CEProfile> AllCEs()
+        public IEnumerable<ICEProfile> AllCEs()
         {
             throw new NotImplementedException();
         }
 
-        public CEProfile GetCE(int id)
+        public ICEProfile GetCE(int id)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<CEProfile> FindCEs(string name)
+        public IEnumerable<ICEProfile> FindCEs(string name)
         {
             throw new NotImplementedException();
         }
@@ -61,17 +57,17 @@ namespace MechHisui.Core
         }
 
 
-        public IEnumerable<MysticCode> AllMystics()
+        public IEnumerable<IMysticCode> AllMystics()
         {
             throw new NotImplementedException();
         }
 
-        public MysticCode GetMystic(int id)
+        public IMysticCode GetMystic(int id)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<MysticCode> FindMystics(string name)
+        public IEnumerable<IMysticCode> FindMystics(string name)
         {
             throw new NotImplementedException();
         }
@@ -82,12 +78,12 @@ namespace MechHisui.Core
         }
 
 
-        public IEnumerable<FgoEvent> AllEvents()
+        public IEnumerable<IFgoEvent> AllEvents()
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<FgoEvent> GetCurrentEvents()
+        public IEnumerable<IFgoEvent> GetCurrentEvents()
         {
             throw new NotImplementedException();
         }

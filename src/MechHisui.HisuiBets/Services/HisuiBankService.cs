@@ -15,7 +15,7 @@ namespace MechHisui.HisuiBets
     {
         public const char Symbol = '\u050A';
         private static readonly IEqualityComparer<SocketGuildUser> _userComparer = Comparers.UserComparer;
-        private readonly Timer _upTimer;
+        private readonly Timer _interestTimer;
         private readonly Func<LogMessage, Task> _logger;
         private readonly ConcurrentDictionary<ulong, BetGame> _games = new ConcurrentDictionary<ulong, BetGame>();
 
@@ -34,46 +34,47 @@ namespace MechHisui.HisuiBets
 
         internal IReadOnlyDictionary<ulong, BetGame> Games => _games;
 
-        public HisuiBankService(IBankOfHisui bank, DiscordSocketClient client, Func<LogMessage, Task> logger)
+        public HisuiBankService(
+            IBankOfHisui bank,
+            DiscordSocketClient client,
+            Func<LogMessage, Task> logger = null)
         {
             Bank = bank;
-            _logger = logger;
-            _upTimer = new Timer(cb =>
+            _logger = logger ?? (_ => Task.CompletedTask);
+            _interestTimer = new Timer(_ =>
             {
-                Log(LogSeverity.Info, "Increasing users' HisuiBucks.");
+                Log(LogSeverity.Verbose, "Increasing users' HisuiBucks.");
                 Bank.Interest();
-                //foreach (var user in Bank.Accounts)
-                //{
-                //    if (user.Bucks < 2500)
-                //    {
-                //        user.Bucks += 10;
-                //    }
-                //}
-                //Bank.WriteBank();
-            },
-            null,
+            }, null,
             TimeSpan.FromMinutes(60 - DateTime.Now.Minute),
             TimeSpan.FromHours(1));
 
-            client.UserJoined += async user => //Bank.AddUser;
+            client.UserJoined += async user =>
             {
                 if (!user.IsBot && !Blacklist.Contains(user.Id))
                 {
                     if (await Bank.AddUser(user))
-                        await Log(LogSeverity.Info, $"Registered {user.Username} for a bank account.");
+                        await Log(LogSeverity.Verbose, $"Registered {user.Username} for a bank account.");
                 }
             };
-            client.GuildAvailable += async guild =>
+
+            client.GuildAvailable += guild =>
             {
-                await guild.DownloadUsersAsync();
-                foreach (var user in guild.Users.Except((await Bank.GetAllUsers()).Select(a => guild.GetUser(a.UserId)), _userComparer))
+                Task.Run(async () =>
                 {
-                    if (!user.IsBot && !Blacklist.Contains(user.Id))
+                    await guild.DownloadUsersAsync();
+                    var allAccounts = await Bank.GetAllUsers();
+                    var newUsers = guild.Users.Except(allAccounts.Select(a => guild.GetUser(a.UserId)), _userComparer);
+                    foreach (var user in newUsers)
                     {
-                        if (await Bank.AddUser(user))
-                            await Log(LogSeverity.Info, $"Registered {user.Username} for a bank account.");
+                        if (!user.IsBot && !Blacklist.Contains(user.Id))
+                        {
+                            if (await Bank.AddUser(user))
+                                await Log(LogSeverity.Info, $"Registered {user.Username} for a bank account.");
+                        }
                     }
-                }
+                });
+                return Task.CompletedTask;
             };
         }
 
@@ -103,17 +104,17 @@ namespace MechHisui.HisuiBets
         }
     }
 
-    public static class HisuiBankExtensions
-    {
-        public static Task UseHisuiBank(
-            this CommandService commands,
-            IServiceCollection map,
-            IBankOfHisui bank,
-            DiscordSocketClient client,
-            Func<LogMessage, Task> logger = null)
-        {
-            map.AddSingleton(new HisuiBankService(bank, client, logger ?? (msg => Task.CompletedTask)));
-            return commands.AddModuleAsync<HisuiBetsModule>();
-        }
-    }
+    //public static class HisuiBankExtensions
+    //{
+    //    public static Task UseHisuiBank(
+    //        this CommandService commands,
+    //        IServiceCollection map,
+    //        IBankOfHisui bank,
+    //        DiscordSocketClient client,
+    //        Func<LogMessage, Task> logger = null)
+    //    {
+    //        map.AddSingleton(new HisuiBankService(bank, client, logger ?? (msg => Task.CompletedTask)));
+    //        return commands.AddModuleAsync<HisuiBetsModule>();
+    //    }
+    //}
 }

@@ -14,7 +14,7 @@ namespace MechHisui.SecretHitler
 {
     public sealed class SecretHitlerGame : GameBase<SecretHitlerPlayer>
     {
-        private readonly SecretHitlerConfig _config;
+        private readonly ISecretHitlerTheme _theme;
         private readonly HouseRules _houseRules;
 
         private readonly Queue<BoardSpaceType> _liberalTrack = new Queue<BoardSpaceType>(5);
@@ -46,11 +46,11 @@ namespace MechHisui.SecretHitler
         internal SecretHitlerGame(
             IMessageChannel channel,
             IEnumerable<SecretHitlerPlayer> players,
-            SecretHitlerConfig config,
+            ISecretHitlerTheme theme,
             HouseRules houseRules)
             : base(channel, players, setFirstPlayerImmediately: true)
         {
-            _config = config ?? throw new ArgumentNullException(nameof(config));
+            _theme = theme ?? throw new ArgumentNullException(nameof(theme));
             _houseRules = houseRules;
 
             _liberalTrack.Enqueue(BoardSpaceType.Blank);
@@ -101,26 +101,26 @@ namespace MechHisui.SecretHitler
             foreach (var player in Players)
             {
                 var otherFacists = Players.Where(p =>
-                        p.Party == _config.FascistParty
+                        p.Party == _theme.FascistParty
                         && p.User.Id != player.User.Id
-                        && p.Role != _config.Hitler).ToList();
+                        && p.Role != _theme.Hitler).ToList();
 
                 var sb = new StringBuilder($"Your party is **{player.Party}**. ")
                     .AppendLine($"Your role is **{player.Role}**.")
-                    .AppendWhen(() => player.Role == _config.Hitler, b =>
+                    .AppendWhen(() => player.Role == _theme.Hitler, b =>
                         otherFacists.Count == 1
                         ? b.Append($"Your teammate is **{otherFacists.Single().User.Username}**. Use this information wisely.")
                         : b.Append("Guard your secret well."))
-                    .AppendWhen(() => player.Party == _config.FascistParty && player.Role != _config.Hitler, b =>
+                    .AppendWhen(() => player.Party == _theme.FascistParty && player.Role != _theme.Hitler, b =>
                     {
                         if (otherFacists.Count == 1)
                         {
-                            return b.Append($"{_config.Hitler} is **{otherFacists.Single().User.Username}**. Use this information wisely.");
+                            return b.Append($"{_theme.Hitler} is **{otherFacists.Single().User.Username}**. Use this information wisely.");
                         }
                         else
                         {
                             b.AppendLine($"Your teammates are **{String.Join("**, **", otherFacists.Select(p => p.User.Username))}**.");
-                            return b.Append($"{_config.Hitler} is **{Players.Single(p => p.Role == _config.Hitler).User.Username}**. Use this information wisely.");
+                            return b.Append($"{_theme.Hitler} is **{Players.Single(p => p.Role == _theme.Hitler).User.Username}**. Use this information wisely.");
                         }
                     });
 
@@ -160,24 +160,24 @@ namespace MechHisui.SecretHitler
                 }
             }
 
-            return Channel.SendMessageAsync($"It is turn {_turn}, the {_config.President} is **{CurrentPresident.User.Username}**. Please choose your {_config.Chancellor}.");
+            return Channel.SendMessageAsync($"It is turn {_turn}, the {_theme.President} is **{CurrentPresident.User.Username}**. Please choose your {_theme.Chancellor}.");
         }
 
         public async Task NominatedChancellor(SecretHitlerPlayer nominee)
         {
             if (nominee.User.Id == CurrentPresident.User.Id)
             {
-                await Channel.SendMessageAsync($"**{nominee.User.Username}** is the current {_config.President} and is therefore ineligible.").ConfigureAwait(false);
+                await Channel.SendMessageAsync($"**{nominee.User.Username}** is the current {_theme.President} and is therefore ineligible.").ConfigureAwait(false);
                 return;
             }
             if (nominee.User.Id == _lastChancellor?.User.Id)
             {
-                await Channel.SendMessageAsync($"**{nominee.User.Username}** has been the {_config.Chancellor} last turn and is therefore ineligible.").ConfigureAwait(false);
+                await Channel.SendMessageAsync($"**{nominee.User.Username}** has been the {_theme.Chancellor} last turn and is therefore ineligible.").ConfigureAwait(false);
                 return;
             }
             if (nominee.User.Id == _lastPresident?.User.Id && Players.Count > 5)
             {
-                await Channel.SendMessageAsync($"**{nominee.User.Username}** has been the {_config.President} last turn and is therefore ineligible.").ConfigureAwait(false);
+                await Channel.SendMessageAsync($"**{nominee.User.Username}** has been the {_theme.President} last turn and is therefore ineligible.").ConfigureAwait(false);
                 return;
             }
             if (!nominee.IsAlive)
@@ -197,10 +197,10 @@ namespace MechHisui.SecretHitler
             State = GameState.VoteForGovernment;
             _votes.Clear();
             _votes.CollectionChangedAsync += VotesChanged;
-            await Channel.SendMessageAsync($"**{CurrentPresident.User.Username}** has nominated **{nominee.User.Username}** as their {_config.Chancellor}. PM me `{_config.Yes}` or `{_config.No}` to vote on this proposal.").ConfigureAwait(false);
+            await Channel.SendMessageAsync($"**{CurrentPresident.User.Username}** has nominated **{nominee.User.Username}** as their {_theme.Chancellor}. PM me `{_theme.Yes}` or `{_theme.No}` to vote on this proposal.").ConfigureAwait(false);
             foreach (var player in LivingPlayers)
             {
-                await player.SendMessageAsync($"**{CurrentPresident.User.Username}** nominated **{nominee.User.Username}** as {_config.Chancellor}. Do you agree?").ConfigureAwait(false);
+                await player.SendMessageAsync($"**{CurrentPresident.User.Username}** nominated **{nominee.User.Username}** as {_theme.Chancellor}. Do you agree?").ConfigureAwait(false);
                 await Task.Delay(1000).ConfigureAwait(false);
             }
         }
@@ -211,11 +211,11 @@ namespace MechHisui.SecretHitler
                 && LivingPlayers.Any(p => p.User.Id == user.Id))
             {
                 Vote v;
-                if (vote.Equals(_config.Yes, StringComparison.OrdinalIgnoreCase))
+                if (vote.Equals(_theme.Yes, StringComparison.OrdinalIgnoreCase))
                 {
                     v = Vote.Yes;
                 }
-                else if (vote.Equals(_config.No, StringComparison.OrdinalIgnoreCase))
+                else if (vote.Equals(_theme.No, StringComparison.OrdinalIgnoreCase))
                 {
                     v = Vote.No;
                 }
@@ -248,12 +248,12 @@ namespace MechHisui.SecretHitler
             int opposed = votes.Count(v => v.Vote == Vote.No);
             var sb = new StringBuilder($"The results are in.\n")
                 .AppendSequence(votes, (b, vote) =>
-                    b.AppendLine($"**{vote.User.Username}**: {(vote.Vote == Vote.Yes ? _config.Yes : _config.No)}"))
+                    b.AppendLine($"**{vote.User.Username}**: {(vote.Vote == Vote.Yes ? _theme.Yes : _theme.No)}"))
                 .AppendLine($"Total in favor: {favored} - Total opposed: {opposed}");
 
             if (opposed >= favored)
             {
-                sb.Append($"The vote has **not** gone through. {_config.Parliament} is stalled and ");
+                sb.Append($"The vote has **not** gone through. {_theme.Parliament} is stalled and ");
                 await HungParliament(sb);
             }
             else
@@ -261,25 +261,25 @@ namespace MechHisui.SecretHitler
                 CurrentChancellor = _chancellorNominee;
                 if (_fascistTrack.Count <= 3 && !CurrentChancellor.IsConfirmedNotHitler)
                 {
-                    sb.Append($"The vote has gone through. Now to ask: **Are you {_config.Hitler}**?");
+                    sb.Append($"The vote has gone through. Now to ask: **Are you {_theme.Hitler}**?");
                     await Channel.SendMessageAsync(sb.ToString()).ConfigureAwait(false);
                     await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
                     var chosen = CurrentChancellor.User;
-                    if (Players.Single(p => p.Role == _config.Hitler).User.Id == chosen.Id)
+                    if (Players.Single(p => p.Role == _theme.Hitler).User.Id == chosen.Id)
                     {
-                        await Channel.SendMessageAsync($"**{chosen.Username}** is, in fact, {_config.Hitler}.").ConfigureAwait(false);
-                        await EndGame(_config.FascistsWin).ConfigureAwait(false);
+                        await Channel.SendMessageAsync($"**{chosen.Username}** is, in fact, {_theme.Hitler}.").ConfigureAwait(false);
+                        await EndGame(_theme.FascistsWin).ConfigureAwait(false);
                     }
                     else
                     {
                         CurrentChancellor.ConfirmedNotHitler();
-                        await Channel.SendMessageAsync($"**{chosen.Username}** is Not {_config.Hitler} (Confirmed). {_config.Parliament} can function.").ConfigureAwait(false);
+                        await Channel.SendMessageAsync($"**{chosen.Username}** is Not {_theme.Hitler} (Confirmed). {_theme.Parliament} can function.").ConfigureAwait(false);
                         await DrawPolicies().ConfigureAwait(false);
                     }
                 }
                 else
                 {
-                    sb.Append($"The vote has gone through. {_config.Parliament} can function.");
+                    sb.Append($"The vote has gone through. {_theme.Parliament} can function.");
                     await Channel.SendMessageAsync(sb.ToString()).ConfigureAwait(false);
                     await DrawPolicies().ConfigureAwait(false);
                 }
@@ -292,22 +292,22 @@ namespace MechHisui.SecretHitler
             switch (_electionTracker)
             {
                 case 1:
-                    sb.Append(_config.ThePeopleOne);
+                    sb.Append(_theme.FirstStall);
                     await Channel.SendMessageAsync(sb.ToString()).ConfigureAwait(false);
                     break;
                 case 2:
-                    sb.Append(_config.ThePeopleTwo);
+                    sb.Append(_theme.SecondStall);
                     await Channel.SendMessageAsync(sb.ToString()).ConfigureAwait(false);
                     break;
                 case 3:
-                    sb.AppendLine(_config.ThePeopleThree);
+                    sb.AppendLine(_theme.ThirdStall);
                     await Channel.SendMessageAsync(sb.ToString()).ConfigureAwait(false);
                     await Task.Delay(5000).ConfigureAwait(false);
                     _electionTracker = 0;
                     _lastChancellor = null;
                     _lastPresident = null;
                     var pol = _deck.Pop();
-                    await Channel.SendMessageAsync(String.Format(_config.ThePeopleEnacted, pol.ToString())).ConfigureAwait(false);
+                    await Channel.SendMessageAsync(_theme.ThePeopleEnacted(pol.ToString())).ConfigureAwait(false);
                     await ResolveEffect(((pol == PolicyType.Fascist) ? _fascistTrack : _liberalTrack).Dequeue(), peopleEnacted: true).ConfigureAwait(false);
                     if (_deck.Count < 3)
                     {
@@ -323,12 +323,12 @@ namespace MechHisui.SecretHitler
 
             _drawnPolicies.Clear();
             _drawnPolicies.AddRange(new[] { _deck.Pop(), _deck.Pop(), _deck.Pop() });
-            var sb = new StringBuilder($"You have drawn the following {_config.Policies}:\n");
+            var sb = new StringBuilder($"You have drawn the following {_theme.Policies}:\n");
             for (int i = 0; i < _drawnPolicies.Count; i++)
             {
-                sb.AppendLine($"\t**{i + 1}**: {(_drawnPolicies[i] == PolicyType.Fascist ? _config.Fascist : _config.Liberal)}");
+                sb.AppendLine($"\t**{i + 1}**: {(_drawnPolicies[i] == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)}");
             }
-            sb.Append($"Which {_config.Policy} will you discard? The other two are automatically sent to your {_config.Chancellor}.");
+            sb.Append($"Which {_theme.Policy} will you discard? The other two are automatically sent to your {_theme.Chancellor}.");
 
             return CurrentPresident.SendMessageAsync(sb.ToString());
         }
@@ -337,11 +337,11 @@ namespace MechHisui.SecretHitler
         {
             int pick = nr - 1;
             var tmp = _drawnPolicies[pick];
-            await dms.SendMessageAsync($"Removing a {(tmp == PolicyType.Fascist ? _config.Fascist : _config.Liberal)} {_config.Policy}.").ConfigureAwait(false);
+            await dms.SendMessageAsync($"Removing a {(tmp == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)} {_theme.Policy}.").ConfigureAwait(false);
 
             _discards.Push(tmp);
             _drawnPolicies.RemoveAt(pick);
-            await Channel.SendMessageAsync($"The {_config.President} has discarded one {_config.Policy}.").ConfigureAwait(false);
+            await Channel.SendMessageAsync($"The {_theme.President} has discarded one {_theme.Policy}.").ConfigureAwait(false);
 
             await Task.Delay(1000).ConfigureAwait(false);
             await ChancellorPick().ConfigureAwait(false);
@@ -350,15 +350,15 @@ namespace MechHisui.SecretHitler
         private Task ChancellorPick()
         {
             State = GameState.ChancellorPicks;
-            var sb = new StringBuilder($"The {_config.President} has given you these {_config.Policies}:");
+            var sb = new StringBuilder($"The {_theme.President} has given you these {_theme.Policies}:");
             for (int i = 0; i < _drawnPolicies.Count; i++)
             {
-                sb.AppendLine($"\t**{i + 1}**: {(_drawnPolicies[i] == PolicyType.Fascist ? _config.Fascist : _config.Liberal)}");
+                sb.AppendLine($"\t**{i + 1}**: {(_drawnPolicies[i] == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)}");
             }
 
             if (!VetoUnlocked)
             {
-                sb.Append($"Which {_config.Policy} will you play?");
+                sb.Append($"Which {_theme.Policy} will you play?");
             }
             else
             {
@@ -372,11 +372,11 @@ namespace MechHisui.SecretHitler
             int pick = nr - 1;
             var tmp = _drawnPolicies[pick];
             _drawnPolicies.RemoveAt(pick);
-            await dms.SendMessageAsync($"Playing a {(tmp == PolicyType.Fascist ? _config.Fascist : _config.Liberal)} {_config.Policy}.").ConfigureAwait(false);
+            await dms.SendMessageAsync($"Playing a {(tmp == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)} {_theme.Policy}.").ConfigureAwait(false);
 
             _discards.Push(_drawnPolicies.Single());
             _drawnPolicies.Clear();
-            await Channel.SendMessageAsync($"The {_config.Chancellor} has discarded one {_config.Policy} and played a **{(tmp == PolicyType.Fascist ? _config.Fascist : _config.Liberal)}** {_config.Policy}.").ConfigureAwait(false);
+            await Channel.SendMessageAsync($"The {_theme.Chancellor} has discarded one {_theme.Policy} and played a **{(tmp == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)}** {_theme.Policy}.").ConfigureAwait(false);
 
             _electionTracker = 0;
             if (_deck.Count < 3)
@@ -401,13 +401,13 @@ namespace MechHisui.SecretHitler
                 {
                     case BoardSpaceType.ExecutionVeto:
                         VetoUnlocked = true;
-                        await Channel.SendMessageAsync($"The {_config.President} and {_config.Chancellor} may veto from now.").ConfigureAwait(false);
+                        await Channel.SendMessageAsync($"The {_theme.President} and {_theme.Chancellor} may veto from now.").ConfigureAwait(false);
                         return;
                     case BoardSpaceType.FascistWin:
-                        await EndGame(_config.FascistsWin).ConfigureAwait(false);
+                        await EndGame(_theme.FascistsWin).ConfigureAwait(false);
                         return;
                     case BoardSpaceType.LiberalWin:
-                        await EndGame(_config.LiberalsWin).ConfigureAwait(false);
+                        await EndGame(_theme.LiberalsWin).ConfigureAwait(false);
                         return;
                     default:
                         await Channel.SendMessageAsync($"No action is taken.").ConfigureAwait(false);
@@ -422,37 +422,37 @@ namespace MechHisui.SecretHitler
                         await Channel.SendMessageAsync($"Nothing happens. Next turn when players are ready.").ConfigureAwait(false);
                         return;
                     case BoardSpaceType.Examine:
-                        await Channel.SendMessageAsync($"The {_config.President} may see the top 3 cards from the {_config.Policy} deck.").ConfigureAwait(false);
+                        await Channel.SendMessageAsync($"The {_theme.President} may see the top 3 cards from the {_theme.Policy} deck.").ConfigureAwait(false);
                         string tops = String.Join("**, **", new[]
                         {
-                            _deck.ElementAt(0) == PolicyType.Fascist ? _config.Fascist : _config.Liberal,
-                            _deck.ElementAt(1) == PolicyType.Fascist ? _config.Fascist : _config.Liberal,
-                            _deck.ElementAt(2) == PolicyType.Fascist ? _config.Fascist : _config.Liberal
+                            _deck.ElementAt(0) == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal,
+                            _deck.ElementAt(1) == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal,
+                            _deck.ElementAt(2) == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal
                         });
-                        await CurrentPresident.SendMessageAsync($"The top 3 {_config.Policy} cards are **{tops}**").ConfigureAwait(false);
+                        await CurrentPresident.SendMessageAsync($"The top 3 {_theme.Policy} cards are **{tops}**").ConfigureAwait(false);
                         return;
                     case BoardSpaceType.Investigate:
                         State = GameState.Investigating;
-                        await Channel.SendMessageAsync($"The {_config.President} may investigate 1 (one) player's Party affinity.").ConfigureAwait(false);
+                        await Channel.SendMessageAsync($"The {_theme.President} may investigate 1 (one) player's Party affinity.").ConfigureAwait(false);
                         return;
                     case BoardSpaceType.ChooseNextCandidate:
                         State = GameState.SpecialElection;
-                        await Channel.SendMessageAsync($"The current {_config.President} may choose the next turn's {_config.President}.").ConfigureAwait(false);
+                        await Channel.SendMessageAsync($"The current {_theme.President} may choose the next turn's {_theme.President}.").ConfigureAwait(false);
                         return;
                     case BoardSpaceType.Execution:
                         State = GameState.Kill;
-                        await Channel.SendMessageAsync($"The {_config.President} may choose another player to kill.").ConfigureAwait(false);
+                        await Channel.SendMessageAsync($"The {_theme.President} may choose another player to kill.").ConfigureAwait(false);
                         return;
                     case BoardSpaceType.ExecutionVeto:
                         VetoUnlocked = true;
                         State = GameState.Kill;
-                        await Channel.SendMessageAsync($"The {_config.President} may choose another player to kill. Also, the {_config.President} and {_config.Chancellor} may veto.").ConfigureAwait(false);
+                        await Channel.SendMessageAsync($"The {_theme.President} may choose another player to kill. Also, the {_theme.President} and {_theme.Chancellor} may veto.").ConfigureAwait(false);
                         return;
                     case BoardSpaceType.FascistWin:
-                        await EndGame(_config.FascistsWin).ConfigureAwait(false);
+                        await EndGame(_theme.FascistsWin).ConfigureAwait(false);
                         return;
                     case BoardSpaceType.LiberalWin:
-                        await EndGame(_config.LiberalsWin).ConfigureAwait(false);
+                        await EndGame(_theme.LiberalsWin).ConfigureAwait(false);
                         return;
                 }
             }
@@ -468,7 +468,7 @@ namespace MechHisui.SecretHitler
                     return;
                 }
 
-                await Channel.SendMessageAsync($"The {_config.President} is investigating **{target.User.Username}**'s loyalty.").ConfigureAwait(false);
+                await Channel.SendMessageAsync($"The {_theme.President} is investigating **{target.User.Username}**'s loyalty.").ConfigureAwait(false);
                 await Task.Delay(1000).ConfigureAwait(false);
                 target.Investigated();
                 await CurrentPresident.SendMessageAsync($"**{target.User.Username}** belongs to the **{target.Party}**. You are not required to be truthful.").ConfigureAwait(false);
@@ -483,7 +483,7 @@ namespace MechHisui.SecretHitler
                 State = GameState.EndOfTurn;
                 _specialElected = target;
                 _afterSpecial = TurnPlayer.Next;
-                return Channel.SendMessageAsync($"The {_config.President} has Special Elected **{target.User.Username}**.");
+                return Channel.SendMessageAsync($"The {_theme.President} has Special Elected **{target.User.Username}**.");
             }
             else
             {
@@ -497,16 +497,16 @@ namespace MechHisui.SecretHitler
             {
                 State = GameState.EndOfTurn;
                 target.Killed();
-                await Channel.SendMessageAsync(String.Format(_config.Kill, target.User.Username)).ConfigureAwait(false);
+                await Channel.SendMessageAsync(_theme.Kill(target.User.Username)).ConfigureAwait(false);
                 await Task.Delay(3500).ConfigureAwait(false);
-                if (target.Role == _config.Hitler)
+                if (target.Role == _theme.Hitler)
                 {
-                    await EndGame(String.Format(_config.HitlerWasKilled, _config.Hitler, _config.LiberalParty)).ConfigureAwait(false);
+                    await EndGame(_theme.HitlerWasKilled()).ConfigureAwait(false);
                 }
                 else
                 {
                     target.ConfirmedNotHitler();
-                    await Channel.SendMessageAsync(String.Format(_config.HitlerNotKilled, target.User.Username, _config.Hitler)).ConfigureAwait(false);
+                    await Channel.SendMessageAsync(_theme.HitlerNotKilled(target.User.Username)).ConfigureAwait(false);
                 }
             }
         }
@@ -516,7 +516,7 @@ namespace MechHisui.SecretHitler
             if (!_takenVeto)
             {
                 State = GameState.ChancellorVetod;
-                return Channel.SendMessageAsync($"The {_config.Chancellor} has opted to veto. Do you consent, Mr./Mrs. {_config.President}?");
+                return Channel.SendMessageAsync($"The {_theme.Chancellor} has opted to veto. Do you consent, Mr./Mrs. {_theme.President}?");
             }
             else
             {
@@ -530,7 +530,7 @@ namespace MechHisui.SecretHitler
             {
                 if (consent.Equals("approved", StringComparison.OrdinalIgnoreCase))
                 {
-                    await Channel.SendMessageAsync($"The {_config.President} has approved the {_config.Chancellor}'s veto. Next turn when players are ready.").ConfigureAwait(false);
+                    await Channel.SendMessageAsync($"The {_theme.President} has approved the {_theme.Chancellor}'s veto. Next turn when players are ready.").ConfigureAwait(false);
                     foreach (var p in _drawnPolicies)
                     {
                         _discards.Push(p);
@@ -542,7 +542,7 @@ namespace MechHisui.SecretHitler
                 }
                 else if (consent.Equals("denied", StringComparison.OrdinalIgnoreCase))
                 {
-                    await Channel.SendMessageAsync($"The {_config.President} has denied veto and the {_config.Chancellor} must play.").ConfigureAwait(false);
+                    await Channel.SendMessageAsync($"The {_theme.President} has denied veto and the {_theme.Chancellor} must play.").ConfigureAwait(false);
                     State = GameState.ChancellorPicks;
                     _takenVeto = true;
                 }
@@ -557,8 +557,8 @@ namespace MechHisui.SecretHitler
         {
             var sb = new StringBuilder(endmsg)
                 .AppendLine("\nThe game is over.")
-                .AppendLine($"The {_config.Fascist}s were **{String.Join("**, **", Players.Where(p => p.Party == _config.FascistParty).Select(p => p.User.Username))}**.")
-                .AppendLine($"The {_config.Liberal}s were **{String.Join("**, **", Players.Where(p => p.Party == _config.LiberalParty).Select(p => p.User.Username))}**.");
+                .AppendLine($"The {_theme.Fascist}s were **{String.Join("**, **", Players.Where(p => p.Party == _theme.FascistParty).Select(p => p.User.Username))}**.")
+                .AppendLine($"The {_theme.Liberal}s were **{String.Join("**, **", Players.Where(p => p.Party == _theme.LiberalParty).Select(p => p.User.Username))}**.");
             return base.EndGame(sb.ToString());
         }
 
@@ -567,19 +567,19 @@ namespace MechHisui.SecretHitler
             var temp = _deck.Concat(_discards);
             _deck = new Stack<PolicyType>(temp.Shuffle(28));
             _discards.Clear();
-            return Channel.SendMessageAsync($"The {_config.Policy} Deck has been reshuffled.");
+            return Channel.SendMessageAsync($"The {_theme.Policy} Deck has been reshuffled.");
         }
 
         public override string GetGameState()
         {
             var sb = new StringBuilder($"State of the board at turn {_turn}:\n")
                 .AppendLine($"Turn state is {State}.")
-                .AppendLine($"{5 - _liberalTrack.Count} {_config.Liberal} {_config.Policies} passed.")
-                .AppendLine($"{6 - _fascistTrack.Count} {_config.Fascist} {_config.Policies} passed.")
-                .AppendFormat(_config.ThePeopleState + '\n', 3 - _electionTracker)
-                .AppendLine($"{_deck.Count} {_config.Policies} in the deck.")
-                .AppendLine($"{_discards.Count} {_config.Policies} discarded.")
-                .AppendSequence(Players.Where(p => p.IsConfirmedNotHitler), (b, p) => b.AppendLine($"**{p.User.Username}** is Not {_config.Hitler} (Confirmed)."))
+                .AppendLine($"{5 - _liberalTrack.Count} {_theme.Liberal} {_theme.Policies} passed.")
+                .AppendLine($"{6 - _fascistTrack.Count} {_theme.Fascist} {_theme.Policies} passed.")
+                .AppendLine(_theme.ThePeopleState(3 - _electionTracker))
+                .AppendLine($"{_deck.Count} {_theme.Policies} in the deck.")
+                .AppendLine($"{_discards.Count} {_theme.Policies} discarded.")
+                .AppendSequence(Players.Where(p => p.IsConfirmedNotHitler), (b, p) => b.AppendLine($"**{p.User.Username}** is Not {_theme.Hitler} (Confirmed)."))
                 .AppendSequence(Players.Where(p => !p.IsAlive), (b, p) => b.AppendLine($"**{p.User.Username}** is Dead."))
                 .Append($"The order of players is: ")
                 .AppendLine(String.Join(" -> ", Players.Select(p =>
@@ -599,7 +599,7 @@ namespace MechHisui.SecretHitler
                     }
                     return n;
                 })))
-                .Append($"(*Italic* = current {_config.President}/{_config.Chancellor}, **bold** = last {_config.President}/{_config.Chancellor}.)");
+                .Append($"(*Italic* = current {_theme.President}/{_theme.Chancellor}, **bold** = last {_theme.President}/{_theme.Chancellor}.)");
 
             return sb.ToString();
         }
