@@ -60,12 +60,12 @@ namespace MechHisui.Core
             }
         }
 
-        public Task<BetResult> CashOut(IEnumerable<Bet> bets, string winner)
+        public Task<BetResult> CashOut(BetCollection betcollection, string winner)
         {
             uint loss = 0;
-            var winners = bets.Where(b => b.Tribute.Equals(winner, StringComparison.OrdinalIgnoreCase)).ToList();
-            var wholeSum = bets.Sum(b => b.BettedAmount);
-            decimal loserSum = bets
+            var winners = betcollection.Bets.Where(b => b.Tribute.Equals(winner, StringComparison.OrdinalIgnoreCase)).ToList();
+            var wholeSum = betcollection.Bets.Sum(b => b.BettedAmount) + betcollection.Bonus;
+            decimal loserSum = betcollection.Bets
                 .Where(b => !b.Tribute.Equals(winner, StringComparison.OrdinalIgnoreCase))
                 .Sum(b => b.BettedAmount);
             decimal winnerSum = wholeSum - loserSum;
@@ -91,7 +91,7 @@ namespace MechHisui.Core
             });
         }
 
-        public void Donate(ulong donorId, ulong recepientId, uint amount)
+        public bool Donate(ulong donorId, ulong recepientId, uint amount)
         {
             using (var config = _store.Load())
             {
@@ -102,7 +102,9 @@ namespace MechHisui.Core
                     donor.BankBalance -= (int)amount;
                     recepient.BankBalance += (int)amount;
                     config.SaveChanges();
+                    return true;
                 }
+                return false;
             }
         }
 
@@ -110,7 +112,7 @@ namespace MechHisui.Core
         {
             using (var config = _store.Load())
             {
-                config.Users.FromSql("UPDATE Users SET BankBalance = BankBalance + 10 WHERE BankBalance < 2500");
+                config.Users.FromSql(@"UPDATE Users SET BankBalance = BankBalance + 10 WHERE BankBalance < 2500");
                 config.SaveChanges();
             }
         }
@@ -160,7 +162,7 @@ namespace MechHisui.Core
             }
         }
 
-        //helpers
+        //query helpers
         private static HisuiUser GetConfigUser(ulong userId, MechHisuiConfig config)
             => config.Users.SingleOrDefault(u => u.UserId == userId);
 

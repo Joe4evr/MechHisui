@@ -15,6 +15,7 @@ namespace MechHisui.Core
             _store = store;
         }
 
+
         public IEnumerable<string> GetKeys()
         {
             using (var config = _store.Load())

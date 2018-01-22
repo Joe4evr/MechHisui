@@ -25,7 +25,7 @@ namespace MechHisui.Core
         public string EventEffectMax { get; set; }
         public string Image { get; set; }
         public bool Obtainable { get; set; }
-        public ICollection<CEAlias> Aliases { get; set; }
+        public IEnumerable<CEAlias> Aliases { get; set; }
 
         IEnumerable<ICEAlias> ICEProfile.Aliases => Aliases;
 

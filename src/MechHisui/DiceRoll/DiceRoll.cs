@@ -17,9 +17,8 @@ namespace MechHisui
             Sides = sides;
         }
 
-        public IEnumerable<int> Roll()
+        public IEnumerable<int> Roll(Random rng)
         {
-            var rng = new Random();
             var dice = Enumerable.Range(1, Sides);
             for (int i = 0; i < Amount; i++)
             {

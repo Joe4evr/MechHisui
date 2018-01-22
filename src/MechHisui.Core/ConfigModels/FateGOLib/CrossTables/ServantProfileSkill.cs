@@ -11,6 +11,8 @@ namespace MechHisui.Core
 
         public ServantProfile Servant { get; set; }
         public ActiveSkill Skill { get; set; }
+
+        public override string ToString() => $"{Servant.ToString()} - {Skill.ToString()}";
     }
 
     public sealed class ServantPassiveSkill
@@ -20,6 +22,8 @@ namespace MechHisui.Core
 
         public ServantProfile Servant { get; set; }
         public PassiveSkill Skill { get; set; }
+
+        public override string ToString() => $"{Servant.ToString()} - {Skill.ToString()}";
     }
 
 }

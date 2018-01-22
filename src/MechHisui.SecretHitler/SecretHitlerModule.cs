@@ -148,7 +148,7 @@ namespace MechHisui.SecretHitler
             var theme = GameService.GetTheme(themeName);
             return theme != null
                 ? StartInternal(theme)
-                : ReplyAsync("Could not find that config.");
+                : ReplyAsync("Could not find that theme.");
         }
 
         private async Task StartInternal(ISecretHitlerTheme theme)
@@ -181,7 +181,7 @@ namespace MechHisui.SecretHitler
                         case 10:
                             return 4;
                         default:
-                            throw new InvalidOperationException("Player count should be between 5 and 10.");
+                            throw new InvalidOperationException("Player count should be a minimum of 5 and a maximum of 10.");
                     }
                 }
                 int fascists = ReqFas(JoinedUsers.Count);

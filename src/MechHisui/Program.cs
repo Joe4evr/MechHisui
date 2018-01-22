@@ -8,6 +8,7 @@ using Discord.Commands;
 using Discord.Addons.SimplePermissions;
 using MechHisui.HisuiBets;
 using SharedExtensions;
+using MechHisui.FateGOLib;
 
 namespace MechHisui
 {
@@ -75,6 +76,7 @@ namespace MechHisui
             await _commands.AddModuleAsync<PermissionsModule>();
             await _commands.AddModuleAsync<DiceRollModule>();
             await _commands.AddModuleAsync<HisuiBetsModule>();
+            await _commands.AddModuleAsync<FgoModule>();
 
             _client.Ready += () => Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");
 

@@ -5,86 +5,88 @@ using System.Threading.Tasks;
 using Discord.Addons.SimplePermissions;
 using Discord.Commands;
 
-namespace MechHisui.FateGOLib.Modules
+namespace MechHisui.FateGOLib
 {
-    [Name("Events")]
-    public class EventsModule : ModuleBase<ICommandContext>
+    public partial class FgoModule : ModuleBase
     {
-        private readonly FgoStatService _service;
-
-        public EventsModule(FgoStatService service)
+        [Name("Events")]
+        public sealed class EventsModule : ModuleBase<ICommandContext>
         {
-            _service = service;
-        }
+            private readonly FgoStatService _service;
 
-        [Command("event"), Permission(MinimumPermission.Everyone)]
-        [Alias("events")]
-        public Task EventCmd()
-        {
-            var sb = new StringBuilder();
-            var currentEvents = _service.Config.GetCurrentEvents();
-            var utcNow = DateTime.UtcNow;
-            //var currentEvents = events.Where(e => utcNow > e.StartTime && utcNow < e.EndTime);
-
-            if (currentEvents.Any())
+            public EventsModule(FgoStatService service)
             {
-                sb.Append("**Current Event(s):** ");
-                foreach (var ev in currentEvents)
-                {
-                    if (ev.EndTime.HasValue)
-                    {
-                        string doneAt = (ev.EndTime.Value - utcNow).ToNiceString();
-                        sb.AppendLine($"{ev.EventName} for {doneAt}.");
-                    }
-                    else
-                    {
-                        sb.AppendLine($"{ev.EventName} for unknown time.");
-                    }
-
-                    if (!String.IsNullOrEmpty(ev.EventGacha))
-                    {
-                        sb.AppendLine($"\t**Event gacha rate up on:** {ev.EventGacha}.");
-                    }
-                    else
-                    {
-                        sb.AppendLine("\tNo event gacha for this event.");
-                    }
-
-                    //if (!String.IsNullOrEmpty(ev.InfoLink))
-                    //{
-                    //    sb.AppendLine($"\t{ev.InfoLink}");
-                    //}
-                }
-            }
-            else
-            {
-                sb.AppendLine("No events currently going on.");
+                _service = service;
             }
 
-            var nextEvent = currentEvents.FirstOrDefault(e => e.StartTime > utcNow) ?? currentEvents.FirstOrDefault(e => !e.StartTime.HasValue);
-            if (nextEvent != null)
+            [Command("event"), Permission(MinimumPermission.Everyone)]
+            [Alias("events")]
+            public Task EventCmd()
             {
-                if (nextEvent.StartTime.HasValue)
+                var sb = new StringBuilder();
+                var utcNow = DateTime.UtcNow;
+                var currentEvents = _service.Config.GetCurrentEvents();
+
+                if (currentEvents.Any())
                 {
-                    string eta = (nextEvent.StartTime.Value - utcNow).ToNiceString();
-                    sb.AppendLine($"**Next Event:** {nextEvent.EventName}, planned to start in {eta}.");
+                    sb.Append("**Current Event(s):** ");
+                    foreach (var ev in currentEvents)
+                    {
+                        if (ev.EndTime.HasValue)
+                        {
+                            string doneAt = (ev.EndTime.Value - utcNow).ToNiceString();
+                            sb.AppendLine($"{ev.EventName} for {doneAt}.");
+                        }
+                        else
+                        {
+                            sb.AppendLine($"{ev.EventName} for unknown time.");
+                        }
+
+                        if (!String.IsNullOrEmpty(ev.EventGacha))
+                        {
+                            sb.AppendLine($"\t**Event gacha rate up on:** {ev.EventGacha}.");
+                        }
+                        else
+                        {
+                            sb.AppendLine("\tNo event gacha for this event.");
+                        }
+
+                        //if (!String.IsNullOrEmpty(ev.InfoLink))
+                        //{
+                        //    sb.AppendLine($"\t{ev.InfoLink}");
+                        //}
+                    }
                 }
                 else
                 {
-                    sb.AppendLine($"**Next Event:** {nextEvent.EventName}, planned to start at an unknown time.");
+                    sb.AppendLine("No events currently going on.");
                 }
 
-                if (!String.IsNullOrEmpty(nextEvent.InfoLink))
+                var nextEvent = currentEvents.FirstOrDefault(e => e.StartTime > utcNow) ?? currentEvents.FirstOrDefault(e => !e.StartTime.HasValue);
+                if (nextEvent != null)
                 {
-                    sb.AppendLine(nextEvent.InfoLink);
+                    if (nextEvent.StartTime.HasValue)
+                    {
+                        string eta = (nextEvent.StartTime.Value - utcNow).ToNiceString();
+                        sb.AppendLine($"**Next Event:** {nextEvent.EventName}, planned to start in {eta}.");
+                    }
+                    else
+                    {
+                        sb.AppendLine($"**Next Event:** {nextEvent.EventName}, planned to start at an unknown time.");
+                    }
+
+                    if (!String.IsNullOrEmpty(nextEvent.InfoLink))
+                    {
+                        sb.AppendLine(nextEvent.InfoLink);
+                    }
                 }
+                else
+                {
+                    sb.AppendLine("No known upcoming events.");
+                }
+                sb.Append("KanColle Collab never ever");
+                return ReplyAsync(sb.ToString());
             }
-            else
-            {
-                sb.AppendLine("No known upcoming events.");
-            }
-            sb.Append("KanColle Collab never ever");
-            return ReplyAsync(sb.ToString());
         }
     }
 }

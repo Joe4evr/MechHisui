@@ -17,6 +17,12 @@ namespace Discord
         {
             public override bool Equals(TEntity x, TEntity y)
             {
+                var xNull = x == null;
+                var yNull = y == null;
+
+                if (xNull && yNull) return true;
+                if (xNull ^ yNull) return false;
+
                 return x.Id.Equals(y.Id);
             }
 

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MechHisui.Core
 {
-    public class NamedScalar
+    public sealed class NamedScalar
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public string Key { get; set; }

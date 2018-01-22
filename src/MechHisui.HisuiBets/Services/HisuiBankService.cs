@@ -65,12 +65,15 @@ namespace MechHisui.HisuiBets
                     await guild.DownloadUsersAsync();
                     var allAccounts = await Bank.GetAllUsers();
                     var newUsers = guild.Users.Except(allAccounts.Select(a => guild.GetUser(a.UserId)), _userComparer);
+                    if (!newUsers.Any()) return;
+
+                    await Log(LogSeverity.Info, $"Registering new users in {guild.Name}");
                     foreach (var user in newUsers)
                     {
                         if (!user.IsBot && !Blacklist.Contains(user.Id))
                         {
                             if (await Bank.AddUser(user))
-                                await Log(LogSeverity.Info, $"Registered {user.Username} for a bank account.");
+                                await Log(LogSeverity.Verbose, $"Registered {user.Username} for a bank account.");
                         }
                     }
                 });

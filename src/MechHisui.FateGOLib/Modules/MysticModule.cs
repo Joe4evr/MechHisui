@@ -6,73 +6,76 @@ using Discord.Addons.SimplePermissions;
 using Discord.Commands;
 using SharedExtensions;
 
-namespace MechHisui.FateGOLib.Modules
+namespace MechHisui.FateGOLib
 {
-    [Name("MysticCodes")]
-    public class MysticModule : ModuleBase<ICommandContext>
+    public partial class FgoModule : ModuleBase
     {
-        private readonly FgoStatService _service;
-
-        public MysticModule(FgoStatService service)
+        [Name("MysticCodes")]
+        public sealed class MysticModule : ModuleBase<ICommandContext>
         {
-            _service = service;
-        }
+            private readonly FgoStatService _service;
 
-        [Command("mystic"), Permission(MinimumPermission.Everyone)]
-        public async Task MysticCmd(string name)
-        {
-            var codes = _service.LookupMystic(name);
-
-            if (codes.Count() == 1)
+            public MysticModule(FgoStatService service)
             {
-                await ReplyAsync(FormatMysticCodeProfile(codes.Single())).ConfigureAwait(false);
-            }
-            else if (codes.Count() > 1)
-            {
-                var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
-                    .AppendSequence(codes, (s, m) => s.AppendLine($"**{m.Code}** *({String.Join(", ", m.Aliases)})*"));
-
-                await ReplyAsync(sb.ToString()).ConfigureAwait(false);
-            }
-            else
-            {
-                await ReplyAsync("Specified Mystic Code not found. Please use `.listmystic` for the list of available Mystic Codes.").ConfigureAwait(false);
-            }
-        }
-
-        [Command("listmystic"), Permission(MinimumPermission.Everyone)]
-        public Task ListMysticsCmd()
-        {
-            return ReplyAsync(String.Join("\n", _service.Config.AllMystics().Select(m => $"**{m.Code}** *({String.Join(", ", m.Aliases)})*")));
-        }
-
-        [Command("mysticalias"), Permission(MinimumPermission.ModRole)]
-        public Task MysticAliasCmd(string code, string alias)
-        {
-            if (!_service.Config.FindMystics(code).Select(c => c.Code).Contains(code))
-            {
-                return ReplyAsync("Could not find name to add alias for.");
+                _service = service;
             }
 
-            if (_service.Config.AddMysticAlias(code, alias.ToLowerInvariant()))
+            [Command("mystic"), Permission(MinimumPermission.Everyone)]
+            public async Task MysticCmd(string name)
             {
-                return ReplyAsync($"Added alias `{alias}` for `{code}`.");
-            }
-            else
-            {
-                return ReplyAsync($"Alias `{alias}` already exists for CE `{_service.Config.AllMystics().Single(c => c.Aliases.Any(a => a.Alias == alias)).Code}`.");
-            }
-        }
+                var codes = _service.LookupMystic(name);
 
-        private static string FormatMysticCodeProfile(IMysticCode code)
-        {
-            var sb = new StringBuilder()
-                .AppendLine($"**Name:** {code.Code}")
-                .AppendLine($"**Skill 1:** {code.Skill1} - *{code.Skill1Effect}*")
-                .AppendLine($"**Skill 2:** {code.Skill2} - *{code.Skill2Effect}*")
-                .AppendLine($"**Skill 3:** {code.Skill3} - *{code.Skill3Effect}*")
-                .Append(code.Image);
-            return sb.ToString();
+                if (codes.Count() == 1)
+                {
+                    await ReplyAsync(FormatMysticCodeProfile(codes.Single())).ConfigureAwait(false);
+                }
+                else if (codes.Count() > 1)
+                {
+                    var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
+                        .AppendSequence(codes, (s, m) => s.AppendLine($"**{m.Code}** *({String.Join(", ", m.Aliases)})*"));
+
+                    await ReplyAsync(sb.ToString()).ConfigureAwait(false);
+                }
+                else
+                {
+                    await ReplyAsync("Specified Mystic Code not found. Please use `.listmystic` for the list of available Mystic Codes.").ConfigureAwait(false);
+                }
+            }
+
+            [Command("listmystic"), Permission(MinimumPermission.Everyone)]
+            public Task ListMysticsCmd()
+            {
+                return ReplyAsync(String.Join("\n", _service.Config.AllMystics().Select(m => $"**{m.Code}** *({String.Join(", ", m.Aliases)})*")));
+            }
+
+            //[Command("mysticalias"), Permission(MinimumPermission.ModRole)]
+            //public Task MysticAliasCmd(string code, string alias)
+            //{
+            //    if (!_service.Config.FindMystics(code).Select(c => c.Code).Contains(code))
+            //    {
+            //        return ReplyAsync("Could not find name to add alias for.");
+            //    }
+
+            //    if (_service.Config.AddMysticAlias(code, alias.ToLowerInvariant()))
+            //    {
+            //        return ReplyAsync($"Added alias `{alias}` for `{code}`.");
+            //    }
+            //    else
+            //    {
+            //        return ReplyAsync($"Alias `{alias}` already exists for CE `{_service.Config.AllMystics().Single(c => c.Aliases.Any(a => a.Alias == alias)).Code}`.");
+            //    }
+            //}
+
+            private static string FormatMysticCodeProfile(IMysticCode code)
+            {
+                var sb = new StringBuilder()
+                    .AppendLine($"**Name:** {code.Code}")
+                    .AppendLine($"**Skill 1:** {code.Skill1} - *{code.Skill1Effect}*")
+                    .AppendLine($"**Skill 2:** {code.Skill2} - *{code.Skill2Effect}*")
+                    .AppendLine($"**Skill 3:** {code.Skill3} - *{code.Skill3Effect}*")
+                    .Append(code.Image);
+                return sb.ToString();
+            }
         }
     }
 }

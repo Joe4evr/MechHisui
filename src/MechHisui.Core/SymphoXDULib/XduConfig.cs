@@ -15,6 +15,7 @@ namespace MechHisui.Core
             _store = store;
         }
 
+
         public IEnumerable<XduProfile> AllGears()
         {
             throw new NotImplementedException();
@@ -72,5 +73,8 @@ namespace MechHisui.Core
         {
             throw new NotImplementedException();
         }
+
+
+        //query helpers
     }
 }

@@ -35,7 +35,7 @@ namespace MechHisui
             //}
 
             var bank     = new BankOfHisui(store);
-            //var fgo      = new FgoConfig(store);
+            var fgo      = new FgoConfig(store);
             //var shconfig = new SecretHitlerConfig(store);
             //var sfconfig = new SuperfightConfig(store);
             //var xdu      = new XduConfig(store);
@@ -43,12 +43,12 @@ namespace MechHisui
             commands.AddTypeReader<DiceRoll>(new DiceTypeReader());
 
             var map = new ServiceCollection()
-                //.AddSingleton(new Random())
+                .AddSingleton(new Random())
                 .AddSingleton(new PermissionsService(store, commands, client, logger))
-                //.AddSingleton(new FgoStatService(fgo, client, logger))
-                //.AddSingleton(new XduStatService(xdu, client, logger))
+                .AddSingleton(new FgoStatService(fgo, client, logger))
                 //.AddSingleton(new SecretHitlerService(shconfig, client, logger))
                 //.AddSingleton(new SuperfightService(sfconfig, client, logger))
+                //.AddSingleton(new XduStatService(xdu, client, logger))
                 //.AddSingleton(new ExKitService(client, logger))
                 .AddSingleton(new HisuiBankService(bank, client, logger));
 

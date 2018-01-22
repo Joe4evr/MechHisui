@@ -37,10 +37,10 @@ namespace MechHisui.Core
         public string Image { get; set; }
         public bool Obtainable { get; set; }
 
-        public ICollection<ServantProfileTrait> Traits { get; set; }
-        public ICollection<ServantActiveSkill> ActiveSkills { get; set; }
-        public ICollection<ServantPassiveSkill> PassiveSkills { get; set; }
-        public ICollection<ServantAlias> Aliases { get; set; }
+        public IEnumerable<ServantProfileTrait> Traits { get; set; }
+        public IEnumerable<ServantActiveSkill> ActiveSkills { get; set; }
+        public IEnumerable<ServantPassiveSkill> PassiveSkills { get; set; }
+        public IEnumerable<ServantAlias> Aliases { get; set; }
 
         ICEProfile IServantProfile.Bond10 => Bond10;
         IEnumerable<IServantTrait> IServantProfile.Traits => Traits.Select(t => t.Trait);

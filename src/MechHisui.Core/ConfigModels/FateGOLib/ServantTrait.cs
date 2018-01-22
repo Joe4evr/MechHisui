@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MechHisui.FateGOLib;
@@ -12,6 +13,7 @@ namespace MechHisui.Core
 
         public string Trait { get; set; }
         public bool IsAutoComputed { get; set; }
+        public IEnumerable<ServantProfileTrait> Servants { get; set; }
 
         public override string ToString() => Trait;
     }

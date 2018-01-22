@@ -20,7 +20,7 @@ namespace MechHisui.Core
         public string Skill3 { get; set; }
         public string Skill3Effect { get; set; }
         public string Image { get; set; }
-        public ICollection<MysticAlias> Aliases { get; set; }
+        public IEnumerable<MysticAlias> Aliases { get; set; }
 
         IEnumerable<IMysticAlias> IMysticCode.Aliases => Aliases;
 

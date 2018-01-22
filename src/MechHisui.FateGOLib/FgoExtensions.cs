@@ -3,31 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.Extensions.DependencyInjection;
 using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
-using MechHisui.FateGOLib.Modules;
 
 namespace MechHisui.FateGOLib
 {
     public static class FgoExtensions
     {
-        public static Task UseFgoService(
-            this CommandService commands,
-            IServiceCollection map,
-            IFgoConfig config,
-            DiscordSocketClient client)
-        {
-            var statService = new FgoStatService(config, client);
-            map.AddSingleton(statService);
-            return Task.WhenAll(
-                //commands.AddModuleAsync<ServantModule>(),
-                commands.AddModuleAsync<CEModule>(),
-                commands.AddModuleAsync<MysticModule>(),
-                commands.AddModuleAsync<EventsModule>()
-            );
-        }
+        //public static Task UseFgoService(
+        //    this CommandService commands,
+        //    IServiceCollection map,
+        //    IFgoConfig config,
+        //    DiscordSocketClient client)
+        //{
+        //    var statService = new FgoStatService(config, client);
+        //    map.AddSingleton(statService);
+        //    return Task.WhenAll(
+        //        //commands.AddModuleAsync<ServantModule>(),
+        //        //commands.AddModuleAsync<CEModule>(),
+        //        //commands.AddModuleAsync<MysticModule>(),
+        //        //commands.AddModuleAsync<EventsModule>()
+        //    );
+        //}
 
         internal static EmbedBuilder AddFieldSequence<T>(
             this EmbedBuilder builder,

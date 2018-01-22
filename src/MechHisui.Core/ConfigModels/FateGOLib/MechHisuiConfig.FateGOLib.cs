@@ -45,17 +45,52 @@ namespace MechHisui.Core
                 .HasMany(p => p.Traits)
                 .WithOne(t => t.Servant);
 
+            modelBuilder.Entity<ServantProfileTrait>()
+                .HasOne(t => t.Servant)
+                .WithMany(p => p.Traits);
+
+            modelBuilder.Entity<ServantProfileTrait>()
+                .HasOne(t => t.Trait);
+
+            modelBuilder.Entity<ServantTrait>()
+                .HasMany(t => t.Servants)
+                .WithOne(t => t.Trait);
+
             modelBuilder.Entity<ServantProfile>()
                 .HasMany(p => p.ActiveSkills)
                 .WithOne(s => s.Servant);
+
+            modelBuilder.Entity<ServantActiveSkill>()
+                .HasOne(s => s.Servant)
+                .WithMany(p => p.ActiveSkills);
+
+            modelBuilder.Entity<ServantActiveSkill>()
+                .HasOne(s => s.Skill)
+                .WithMany(a => a.Servants);
+
+            modelBuilder.Entity<ActiveSkill>()
+                .HasMany(a => a.Servants)
+                .WithOne(s => s.Skill);
 
             modelBuilder.Entity<ServantProfile>()
                 .HasMany(p => p.PassiveSkills)
                 .WithOne(s => s.Servant);
 
+            modelBuilder.Entity<ServantPassiveSkill>()
+                .HasOne(s => s.Servant)
+                .WithMany(p => p.PassiveSkills);
+
+            modelBuilder.Entity<ServantPassiveSkill>()
+                .HasOne(s => s.Skill)
+                .WithMany(p => p.Servants);
+
             modelBuilder.Entity<ServantProfile>()
                 .HasMany(p => p.Aliases)
                 .WithOne(a => a.Servant);
+
+            modelBuilder.Entity<ServantAlias>()
+                .HasOne(a => a.Servant)
+                .WithMany(p => p.Aliases);
 
 
             modelBuilder.Entity<CEProfile>()

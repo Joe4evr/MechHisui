@@ -175,7 +175,7 @@ namespace MechHisui.HisuiBets
         {
             var sb = new StringBuilder("The following bets have been made:\n```\n", 2000);
 
-            foreach (var bet in _game.ActiveBets.Bets)
+            foreach (var bet in _game._betTracker)
             {
                 sb.AppendLine($"{bet.UserName,-20}: {HisuiBankService.Symbol}{bet.BettedAmount,-7} - {bet.Tribute}");
 

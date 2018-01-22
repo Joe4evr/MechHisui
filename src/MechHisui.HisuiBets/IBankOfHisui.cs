@@ -11,10 +11,10 @@ namespace MechHisui.HisuiBets
         Task<IEnumerable<UserAccount>> GetAllUsers();
 
         Task<bool> AddUser(SocketGuildUser user);
-        Task<BetResult> CashOut(IEnumerable<Bet> bets, string winner);
-        void Interest();
-        void Donate(ulong donorId, ulong recepientId, uint amount);
+        Task<BetResult> CashOut(BetCollection bets, string winner);
+        bool Donate(ulong donorId, ulong recepientId, uint amount);
         void Withdraw(ulong debtorId, uint amount);
+        void Interest();
 
         void AddToVault(uint amount);
         int RetrieveFromVault(uint amount);

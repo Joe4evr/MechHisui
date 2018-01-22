@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MechHisui.FateGOLib;
@@ -15,6 +16,8 @@ namespace MechHisui.Core
         public string Effect { get; set; }
         public string RankUpEffect { get; set; }
 
+        public IEnumerable<ServantActiveSkill> Servants { get; set; }
+
         public override string ToString() => $"{SkillName}: {Rank}";
     }
 
@@ -27,6 +30,8 @@ namespace MechHisui.Core
         public string SkillName { get; set; }
         public string Rank { get; set; }
         public string Effect { get; set; }
+
+        public ICollection<ServantPassiveSkill> Servants { get; set; }
 
         public override string ToString() => $"{SkillName}: {Rank}";
     }
