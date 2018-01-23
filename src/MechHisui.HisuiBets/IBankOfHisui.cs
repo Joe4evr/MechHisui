@@ -7,13 +7,14 @@ namespace MechHisui.HisuiBets
 {
     public interface IBankOfHisui
     {
-        UserAccount GetUser(ulong id);
-        Task<IEnumerable<UserAccount>> GetAllUsers();
+        IBankAccount GetUser(ulong id);
+        Task<IEnumerable<IBankAccount>> GetAllUsers();
 
         Task<bool> AddUser(SocketGuildUser user);
         Task<BetResult> CashOut(BetCollection bets, string winner);
-        bool Donate(ulong donorId, ulong recepientId, uint amount);
-        void Withdraw(ulong debtorId, uint amount);
+        bool Donate(DonationRequest request);
+        void Withdraw(WithdrawalRequest request);
+        void Withdraw(IEnumerable<WithdrawalRequest> requests);
         void Interest();
 
         void AddToVault(uint amount);

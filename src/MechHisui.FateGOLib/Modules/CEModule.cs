@@ -39,7 +39,7 @@ namespace MechHisui.FateGOLib
             [Command("ce"), Permission(MinimumPermission.Everyone)]
             public async Task CECmd([Remainder] string name)
             {
-                var potentials = _service.LookupCE(name);
+                var potentials = _service.Config.FindCEs(name);
                 if (potentials.Count() == 1)
                 {
                     await ReplyAsync("", embed: FormatCEProfile(potentials.Single())).ConfigureAwait(false);
@@ -57,33 +57,33 @@ namespace MechHisui.FateGOLib
                 }
             }
 
-            //[Command("allce"), Permission(MinimumPermission.Everyone)]
-            //public async Task AllCECmd([Remainder] string ceeffect)
-            //{
-            //    var ces = (ceeffect == "event")
-            //        ? _service.Config.AllCEs().Where(c => !String.IsNullOrWhiteSpace(c.EventEffect)).ToList()
-            //        : _service.Config.AllCEs().Where(c => c.Effect.ContainsIgnoreCase(ceeffect)).ToList();
+            [Command("allce"), Permission(MinimumPermission.Everyone)]
+            public async Task AllCECmd([Remainder] string ceeffect)
+            {
+                var ces = (ceeffect == "event")
+                    ? _service.Config.AllCEs().Where(c => !String.IsNullOrWhiteSpace(c.EventEffect)).ToList()
+                    : _service.Config.AllCEs().Where(c => c.Effect.ContainsIgnoreCase(ceeffect)).ToList();
 
-            //    if (ces.Count > 0)
-            //    {
-            //        var sb = new StringBuilder($"**{ceeffect}:**\n", 2000);
-            //        foreach (var c in ces)
-            //        {
-            //            sb.Append($"**{c.Name}** - {c.Effect}")
-            //                .AppendLine(!String.IsNullOrWhiteSpace(c.EventEffect) ? $" **Event:** {c.EventEffect}" : "");
-            //            if (sb.Length > 1700)
-            //            {
-            //                await ReplyAsync(sb.ToString()).ConfigureAwait(false);
-            //                sb.Clear();
-            //            }
-            //        }
-            //        await ReplyAsync(sb.ToString()).ConfigureAwait(false);
-            //    }
-            //    else
-            //    {
-            //        await ReplyAsync("No such CEs found. Please try another term.").ConfigureAwait(false);
-            //    }
-            //}
+                if (ces.Count > 0)
+                {
+                    var sb = new StringBuilder($"**{ceeffect}:**\n", 2000);
+                    foreach (var c in ces)
+                    {
+                        sb.Append($"**{c.Name}** - {c.Effect}")
+                            .AppendLine(!String.IsNullOrWhiteSpace(c.EventEffect) ? $" **Event:** {c.EventEffect}" : "");
+                        if (sb.Length > 1700)
+                        {
+                            await ReplyAsync(sb.ToString()).ConfigureAwait(false);
+                            sb.Clear();
+                        }
+                    }
+                    await ReplyAsync(sb.ToString()).ConfigureAwait(false);
+                }
+                else
+                {
+                    await ReplyAsync("No such CEs found. Please try another term.").ConfigureAwait(false);
+                }
+            }
 
             //[Command("cealias"), Permission(MinimumPermission.ModRole)]
             //public Task CEAlisCmd(string ce, string alias)

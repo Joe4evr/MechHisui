@@ -27,6 +27,18 @@ namespace MechHisui.Core
             }
         }
 
+        //public IEnumerable<string> SearchServants(ServantFilterOptions options)
+        //{
+        //    using (var config = _store.Load())
+        //    {
+        //        return options.WithSelect(
+        //            options.WithOrderBy(
+        //                QueryServants(config).ToList()
+        //            .Where(options.WithFilters)))
+        //            .ToList();
+        //    }
+        //}
+
         public IServantProfile GetServant(int id)
         {
             using (var config = _store.Load())

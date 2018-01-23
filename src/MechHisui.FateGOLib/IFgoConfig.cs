@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MechHisui.FateGOLib
 {
     public interface IFgoConfig
     {
         IEnumerable<IServantProfile> AllServants();
+        //IEnumerable<string> SearchServants(ServantFilterOptions options);
         IEnumerable<IServantProfile> FindServants(string name);
         IServantProfile GetServant(int id);
         bool AddServantAlias(string servant, string alias);

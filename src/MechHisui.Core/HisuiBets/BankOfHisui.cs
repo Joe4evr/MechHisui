@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Discord.Addons.SimplePermissions;
@@ -20,16 +21,16 @@ namespace MechHisui.Core
 
 
         //read-only operations
-        public Task<IEnumerable<UserAccount>> GetAllUsers()
+        public Task<IEnumerable<IBankAccount>> GetAllUsers()
         {
             using (var config = _store.Load())
             {
-                IEnumerable<UserAccount> uas = config.Users.Select(u => new UserAccount { UserId = u.UserId, Bucks = u.BankBalance }).ToList();
+                IEnumerable<IBankAccount> uas = config.Users.Select(u => new UserAccount { UserId = u.UserId, Bucks = u.BankBalance }).ToList();
                 return Task.FromResult(uas);
             }
         }
 
-        public UserAccount GetUser(ulong id)
+        public IBankAccount GetUser(ulong id)
         {
             using (var config = _store.Load())
             {
@@ -64,11 +65,12 @@ namespace MechHisui.Core
         {
             uint loss = 0;
             var winners = betcollection.Bets.Where(b => b.Tribute.Equals(winner, StringComparison.OrdinalIgnoreCase)).ToList();
-            var wholeSum = betcollection.Bets.Sum(b => b.BettedAmount) + betcollection.Bonus;
+
             decimal loserSum = betcollection.Bets
                 .Where(b => !b.Tribute.Equals(winner, StringComparison.OrdinalIgnoreCase))
                 .Sum(b => b.BettedAmount);
-            decimal winnerSum = wholeSum - loserSum;
+
+            decimal winnerSum = betcollection.WholeSum - loserSum;
 
             var windict = new Dictionary<ulong, uint>();
 
@@ -91,16 +93,17 @@ namespace MechHisui.Core
             });
         }
 
-        public bool Donate(ulong donorId, ulong recepientId, uint amount)
+        public bool Donate(DonationRequest request)
         {
             using (var config = _store.Load())
             {
-                var donor = GetConfigUser(donorId, config);
-                var recepient = GetConfigUser(recepientId, config);
+                var donor = GetConfigUser(request.DonorId, config);
+                var recepient = GetConfigUser(request.RecepientId, config);
+                var amount = (int)request.Amount;
                 if (donor != null && recepient != null && donor.BankBalance >= amount)
                 {
-                    donor.BankBalance -= (int)amount;
-                    recepient.BankBalance += (int)amount;
+                    donor.BankBalance -= amount;
+                    recepient.BankBalance += amount;
                     config.SaveChanges();
                     return true;
                 }
@@ -112,20 +115,36 @@ namespace MechHisui.Core
         {
             using (var config = _store.Load())
             {
-                config.Users.FromSql(@"UPDATE Users SET BankBalance = BankBalance + 10 WHERE BankBalance < 2500");
+                config.Users.FromSql(@"UPDATE Users SET BankBalance = BankBalance + 10 WHERE BankBalance < 2500").Load();
                 config.SaveChanges();
             }
         }
 
-        public void Withdraw(ulong debtorId, uint amount)
+        public void Withdraw(WithdrawalRequest request)
         {
             using (var config = _store.Load())
             {
-                var debtor = GetConfigUser(debtorId, config);
+                var debtor = GetConfigUser(request.AccountId, config);
                 if (debtor != null)
                 {
-                    debtor.BankBalance -= (int)amount;
+                    debtor.BankBalance -= (int)request.Amount;
                     config.SaveChanges();
+                }
+            }
+        }
+
+        public void Withdraw(IEnumerable<WithdrawalRequest> requests)
+        {
+            using (var config = _store.Load())
+            {
+                foreach (var request in requests)
+                {
+                    var debtor = GetConfigUser(request.AccountId, config);
+                    if (debtor != null)
+                    {
+                        debtor.BankBalance -= (int)request.Amount;
+                        config.SaveChanges();
+                    }
                 }
             }
         }

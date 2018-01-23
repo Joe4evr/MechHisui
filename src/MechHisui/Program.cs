@@ -50,18 +50,10 @@ namespace MechHisui
 #endif
             });
 
-            Log(LogSeverity.Info, $"Constructing {nameof(CommandService)}");
-            _commands = new CommandService(new CommandServiceConfig
-            {
-                CaseSensitiveCommands = false,
-                DefaultRunMode = RunMode.Sync
-            });
+            _services = ConfigureServices(_client, p, out _commands, _logger);
 
             _commands.Log += _logger;
             _client.Log += _logger;
-
-            _services = ConfigureServices(_client, _commands, p, _logger);
-
             _client.MessageReceived += HandleCommand;
         }
 
@@ -98,26 +90,30 @@ namespace MechHisui
             await Task.Delay(-1);
         }
 
-        private async Task HandleCommand(SocketMessage arg)
+        private Task HandleCommand(SocketMessage arg)
         {
             var msg = arg as SocketUserMessage;
-            if (msg == null) return;
+            if (msg == null) return Task.CompletedTask;
 
-            if (msg.Author.Id == _client.CurrentUser.Id || msg.Author.IsBot) return;
+            if (msg.Author.Id == _client.CurrentUser.Id || msg.Author.IsBot) return Task.CompletedTask;
 
             int pos = 0;
             var user = _client.CurrentUser;
             if (msg.HasCharPrefix('.', ref pos) || msg.HasMentionPrefix(user, ref pos))
             {
-                var context = new SocketCommandContext(_client, msg);
-                var result = await _commands.ExecuteAsync(context, pos, services: _services);
-
-                if (!result.IsSuccess && result.Error != CommandError.UnknownCommand
-                    && context.Guild?.Id == 161445678633975808ul)
+                Task.Run(async () =>
                 {
-                    await msg.Channel.SendMessageAsync(result.ErrorReason);
-                }
+                    var context = new SocketCommandContext(_client, msg);
+                    var result = await _commands.ExecuteAsync(context, pos, services: _services);
+
+                    if (!result.IsSuccess && result.Error != CommandError.UnknownCommand
+                    && context.Guild?.Id == 161445678633975808ul)
+                    {
+                        await msg.Channel.SendMessageAsync(result.ErrorReason);
+                    }
+                });
             }
+            return Task.CompletedTask;
         }
     }
 }

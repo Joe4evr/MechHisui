@@ -12,7 +12,7 @@ namespace MechHisui.FateGOLib
     [Name("FGO")]
     public sealed partial class FgoModule : ModuleBase
     {
-        [Name("Servants")]
+        [Name("Servants"), Group("servant")]
         public sealed class ServantModule : ModuleBase<ICommandContext>
         {
             private readonly FgoStatService _service;
@@ -22,7 +22,7 @@ namespace MechHisui.FateGOLib
                 _service = service;
             }
 
-            [Command("servant"), Permission(MinimumPermission.Everyone)]
+            [Command, Permission(MinimumPermission.Everyone)]
             [Alias("stat", "stats"), Priority(5)]
             [Summary("Relay information on the specified Servant by ID.")]
             public async Task StatCmd(int id)
@@ -35,7 +35,7 @@ namespace MechHisui.FateGOLib
                 }
             }
 
-            [Command("servant"), Permission(MinimumPermission.Everyone)]
+            [Command, Permission(MinimumPermission.Everyone)]
             [Alias("stat", "stats")]
             [Summary("Relay information on the specified Servant. Alternative names acceptable.")]
             public Task StatCmd([Remainder] string name)
@@ -50,7 +50,7 @@ namespace MechHisui.FateGOLib
                     return ReplyAsync("Never ever.");
                 }
 
-                var potentials = _service.LookupStats(name);
+                var potentials = _service.Config.FindServants(name);
                 if (potentials.Count() == 1)
                 {
                     return ReplyAsync("", embed: FormatServantProfile(potentials.Single()));
@@ -126,6 +126,16 @@ namespace MechHisui.FateGOLib
             //        return ReplyAsync($"**{trait}:** {String.Join(", ", servants)}.");
             //    }
             //}
+
+            //[Command("filter"), Permission(MinimumPermission.Everyone)]
+            //public Task Filter([Remainder] ServantFilterOptions options)
+            //{
+            //    var matches = _service.Config.SearchServants(options);
+            //    return (matches.Any())
+            //        ? ReplyAsync("No matches were found for that query")
+            //        : ReplyAsync($"**Result:** {String.Join(", ", matches)}");
+            //}
+
 
             private static Embed FormatServantProfile(IServantProfile profile)
             {

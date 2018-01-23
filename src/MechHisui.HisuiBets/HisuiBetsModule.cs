@@ -7,16 +7,18 @@ using Discord.Commands;
 using Discord.Addons.Preconditions;
 using Discord.Addons.SimplePermissions;
 using SharedExtensions;
+using System.IO;
+using System.Reflection;
 
 namespace MechHisui.HisuiBets
 {
-    [Name("HisuiBets")]
+    [Name("HisuiBets"), RequireContext(ContextType.Guild)]
     public sealed class HisuiBetsModule : ModuleBase<SocketCommandContext>
     {
         private readonly HisuiBankService _service;
         //private readonly Random _rng;
 
-        private UserAccount _account;
+        private IBankAccount _account;
         private BetGame _game;
 
         public HisuiBetsModule(HisuiBankService service)
@@ -34,7 +36,6 @@ namespace MechHisui.HisuiBets
 
         [Command("bet"), Permission(MinimumPermission.Everyone)]
         [Priority(0), RequiresGameType(GameType.HungerGame)]
-        [RequireContext(ContextType.Guild)]
         public async Task Bet(int amount, [Remainder] string target)
         {
             if (await CheckPreReqs(amount).ConfigureAwait(false))
@@ -51,7 +52,6 @@ namespace MechHisui.HisuiBets
 
         [Command("bet"), Permission(MinimumPermission.Everyone)]
         [Priority(1), RequiresGameType(GameType.HungerGameDistrictsOnly)]
-        [RequireContext(ContextType.Guild)]
         public async Task Bet(int amount, int district)
         {
             if (await CheckPreReqs(amount).ConfigureAwait(false))
@@ -68,7 +68,6 @@ namespace MechHisui.HisuiBets
 
         [Command("bet"), Permission(MinimumPermission.Everyone)]
         [Priority(2), RequiresGameType(GameType.SaltyBet)]
-        [RequireContext(ContextType.Guild)]
         public async Task Bet(int amount, SaltyBetTeam team)
         {
             if (await CheckPreReqs(amount).ConfigureAwait(false))
@@ -126,7 +125,7 @@ namespace MechHisui.HisuiBets
 
         [Command("bet"), Permission(MinimumPermission.Everyone)]
         [Priority(0), RequiresGameType(GameType.HungerGame)]
-        [RequireContext(ContextType.Guild), Hidden]
+        [Hidden]
         public Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, [Remainder] string target)
             => (_account != null) ?
                 Bet(_account.Bucks, target) :
@@ -134,7 +133,7 @@ namespace MechHisui.HisuiBets
 
         [Command("bet"), Permission(MinimumPermission.Everyone)]
         [Priority(1), RequiresGameType(GameType.HungerGameDistrictsOnly)]
-        [RequireContext(ContextType.Guild), Hidden]
+        [Hidden]
         public Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, int district)
             => (_account != null) ?
                 Bet(_account.Bucks, district) :
@@ -142,23 +141,21 @@ namespace MechHisui.HisuiBets
 
         [Command("bet"), Permission(MinimumPermission.Everyone)]
         [Priority(2), RequiresGameType(GameType.SaltyBet)]
-        [RequireContext(ContextType.Guild), Hidden]
+        [Hidden]
         public Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, SaltyBetTeam team)
             => (_account != null)?
                 Bet(_account.Bucks, team) :
                 Task.CompletedTask;
 
-        [Command("bet"), Permission(MinimumPermission.Everyone)]
-        [Priority(-1), RequiresGameType(GameType.Any)]
-        [RequireContext(ContextType.Guild), Hidden]
+        [Command("bet it all"), Permission(MinimumPermission.Everyone)]
+        [Priority(3), RequiresGameType(GameType.Any), Hidden]
 #pragma warning disable RCS1163 // Unused parameter.
-        public Task Bet([Remainder, LimitTo("it all")] string _)
-            => Context.Channel.SendFileAsync("kappa.png",
+        public Task Bet()
+            => Context.Channel.SendFileAsync(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "kappa.png"),
                     text: $"**{Context.User.Username}** has bet all their bucks. Good luck.");
 #pragma warning restore RCS1163 // Unused parameter.
 
         [Command("newgame"), Permission(MinimumPermission.Special)]
-        [RequireContext(ContextType.Guild)]
         public Task NewGame(GameType gameType = GameType.HungerGame)
         {
             var actualType = (gameType == GameType.Any) ? GameType.HungerGame : gameType;
@@ -170,7 +167,7 @@ namespace MechHisui.HisuiBets
         }
 
         [Command("checkbets"), Permission(MinimumPermission.Special)]
-        [RequireContext(ContextType.Guild), RequiresGameType(GameType.Any)]
+        [RequiresGameType(GameType.Any)]
         public async Task CheckBets()
         {
             var sb = new StringBuilder("The following bets have been made:\n```\n", 2000);
@@ -191,7 +188,7 @@ namespace MechHisui.HisuiBets
         }
 
         [Command("closebets"), Permission(MinimumPermission.Special)]
-        [RequireContext(ContextType.Guild), RequiresGameType(GameType.Any)]
+        [RequiresGameType(GameType.Any)]
         public async Task CloseBets()
         {
             if (!_game.BetsOpen)
@@ -210,45 +207,41 @@ namespace MechHisui.HisuiBets
         }
 
         [Command("winner"), Permission(MinimumPermission.Special)]
-        [RequireContext(ContextType.Guild), RequiresGameType(GameType.Any)]
+        [RequiresGameType(GameType.Any)]
 #pragma warning disable RCS1174 // Remove redundant async/await.
         public async Task SetWinner([Remainder] string winner)
             => await ReplyAsync(await _game.Winner(winner).ConfigureAwait(false)).ConfigureAwait(false);
 #pragma warning restore RCS1174 // Remove redundant async/await.
 
         [Command("bucks"), Permission(MinimumPermission.Everyone)]
-        [Alias("mybucks"), RequireContext(ContextType.Guild)]
+        [Alias("mybucks")]
         public Task Bucks()
         {
             return ReplyAsync($"**{Context.User.Username}** currently has {HisuiBankService.Symbol}{_account.Bucks}.");
         }
 
         [Command("donate"), Permission(MinimumPermission.Everyone)]
-        [RequireContext(ContextType.Guild), Ratelimit(10, 10, Measure.Minutes)]
-        public async Task Donate(int amount, IUser user)
+        [Ratelimit(10, 10, Measure.Minutes)]
+        public Task Donate(int amount, IUser recipient)
         {
             if (amount <= 0)
             {
-                await ReplyAsync("Cannot make a donation of 0 or less.");
-                return;
+                return ReplyAsync("Cannot make a donation of 0 or less.");
             }
-            if (amount > _service.Bank.GetUser(Context.User.Id).Bucks)
+            if (amount > _account.Bucks)
             {
-                await ReplyAsync($"**{Context.User.Username}** currently does not have enough HisuiBucks to make that donation.");
-                return;
+                return ReplyAsync($"**{Context.User.Username}** currently does not have enough HisuiBucks to make that donation.");
             }
-            if (user.IsBot || _service.Blacklist.Contains(user.Id))
+            if (recipient.IsBot || _service.Blacklist.Contains(recipient.Id))
             {
-                await ReplyAsync("Unable to donate to Bot accounts.");
-                return;
+                return ReplyAsync("Unable to donate to Bot accounts.");
             }
 
-            _service.Bank.Donate(Context.User.Id, user.Id, (uint)amount);
-            await ReplyAsync($"**{Context.User.Username}** donated {HisuiBankService.Symbol}{amount} to **{user.Username}**.");
+            _service.Bank.Donate(new DonationRequest((uint)amount, _account.UserId, recipient.Id));
+            return ReplyAsync($"**{Context.User.Username}** donated {HisuiBankService.Symbol}{amount} to **{recipient.Username}**.");
         }
 
         [Command("top"), Permission(MinimumPermission.Special)]
-        [RequireContext(ContextType.Guild)]
         public async Task Tops()
         {
             var tops = (await _service.Bank.GetAllUsers())

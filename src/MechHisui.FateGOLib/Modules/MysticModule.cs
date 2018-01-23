@@ -23,7 +23,7 @@ namespace MechHisui.FateGOLib
             [Command("mystic"), Permission(MinimumPermission.Everyone)]
             public async Task MysticCmd(string name)
             {
-                var codes = _service.LookupMystic(name);
+                var codes = _service.Config.FindMystics(name);
 
                 if (codes.Count() == 1)
                 {

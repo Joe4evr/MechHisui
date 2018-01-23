@@ -13,9 +13,7 @@ namespace SharedExtensions
         public int? ShardId { get; private set; }
         public string Token { get; private set; }
 
-        private Params()
-        {
-        }
+        private Params() { }
 
         public static Params Parse(string[] parameters)
         {

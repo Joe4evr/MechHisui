@@ -22,37 +22,54 @@ namespace MechHisui
     {
         private static IServiceProvider ConfigureServices(
             DiscordSocketClient client,
-            CommandService commands,
             Params parameters,
+            out CommandService commands,
             Func<LogMessage, Task> logger = null)
         {
-            logger?.Invoke(new LogMessage(LogSeverity.Info, "Main", "Creating ConfigStore"));
-            var store = new MechHisuiConfigStore(commands,
-                options => options.UseSqlite(parameters.ConnectionString));
+            logger?.Invoke(new LogMessage(LogSeverity.Info, "Main", $"Constructing {nameof(CommandService)}"));
+            commands = new CommandService(new CommandServiceConfig
+            {
+                CaseSensitiveCommands = false,
+                DefaultRunMode = RunMode.Sync
+            });
 
-            //using (var config = store.Load())
-            //{
-            //}
+            try
+            {
+                logger?.Invoke(new LogMessage(LogSeverity.Info, "Main", "Constructing ConfigStore"));
+                //logger?.Invoke(new LogMessage(LogSeverity.Debug, "Main", $"ConnectionString value: '{parameters.ConnectionString}'"));
+                var store = new MechHisuiConfigStore(commands,
+                    options =>  options.UseSqlite(parameters.ConnectionString));
 
-            var bank     = new BankOfHisui(store);
-            var fgo      = new FgoConfig(store);
-            //var shconfig = new SecretHitlerConfig(store);
-            //var sfconfig = new SuperfightConfig(store);
-            //var xdu      = new XduConfig(store);
+                //using (var config = store.Load())
+                //{
+                //}
 
-            commands.AddTypeReader<DiceRoll>(new DiceTypeReader());
+                var bank = new BankOfHisui(store);
+                var fgo = new FgoConfig(store);
+                //var shconfig = new SecretHitlerConfig(store);
+                //var sfconfig = new SuperfightConfig(store);
+                //var xdu      = new XduConfig(store);
 
-            var map = new ServiceCollection()
-                .AddSingleton(new Random())
-                .AddSingleton(new PermissionsService(store, commands, client, logger))
-                .AddSingleton(new FgoStatService(fgo, client, logger))
-                //.AddSingleton(new SecretHitlerService(shconfig, client, logger))
-                //.AddSingleton(new SuperfightService(sfconfig, client, logger))
-                //.AddSingleton(new XduStatService(xdu, client, logger))
-                //.AddSingleton(new ExKitService(client, logger))
-                .AddSingleton(new HisuiBankService(bank, client, logger));
+                commands.AddTypeReader<DiceRoll>(new DiceTypeReader());
+                //commands.AddTypeReader<ServantFilterOptions>(new ServantFilterTypeReader());
 
-            return map.BuildServiceProvider();
+                var map = new ServiceCollection()
+                    .AddSingleton(new Random())
+                    .AddSingleton(new PermissionsService(store, commands, client, logger))
+                    .AddSingleton(new FgoStatService(fgo, client, logger))
+                    //.AddSingleton(new SecretHitlerService(shconfig, client, logger))
+                    //.AddSingleton(new SuperfightService(sfconfig, client, logger))
+                    //.AddSingleton(new XduStatService(xdu, client, logger))
+                    //.AddSingleton(new ExKitService(client, logger))
+                    .AddSingleton(new HisuiBankService(bank, client, logger));
+
+                return map.BuildServiceProvider();
+            }
+            catch (Exception ex)
+            {
+                logger?.Invoke(new LogMessage(LogSeverity.Critical, "Main", "Uncaught Exception", ex));
+                throw;
+            }
         }
 
 

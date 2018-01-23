@@ -70,7 +70,7 @@ namespace MechHisui.HisuiBets
                 if ((!atEnd && _rng.Next(maxValue: 250) > 245) //TODO: fiddle with values
                     || Bonus > 0)
                 {
-                    var b = (Bonus > 0) ? Bonus : 1500u; //TODO: fiddle with values
+                    var b = (Bonus > 0) ? Bonus : (uint)(_betTracker.Count * 300); //TODO: fiddle with values
                     _finalBets.Bonus = _bank.RetrieveFromVault(b);
                     sb.AppendLine($"BONUS: An additional {_symbol}{b} is added to the pot.");
                 }
@@ -85,10 +85,7 @@ namespace MechHisui.HisuiBets
         internal void CloseOff()
         {
             BetsOpen = false;
-            foreach (var bet in _betTracker)
-            {
-                _bank.Withdraw(bet.UserId, bet.BettedAmount);
-            }
+            _bank.Withdraw(_betTracker.Select(b => new WithdrawalRequest(b.BettedAmount, b.UserId)));
         }
 
         public string ProcessBet(Bet bet)
@@ -151,8 +148,8 @@ namespace MechHisui.HisuiBets
                 await Close(true).ConfigureAwait(false);
             }
 
-            var wholeSum = (uint)_finalBets.Bets.Sum(b => (int)b.BettedAmount);
             var result = await _bank.CashOut(_finalBets, winner);
+            var wholeSum = _finalBets.WholeSum;
 
             if (result.Winners.Count > 0)
             {

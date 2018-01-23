@@ -12,10 +12,8 @@
     </ItemGroup>
     <ItemGroup>
         <None Include="Program.ConfigureServices.cs" />
-        <None Update="e_sqlite3.dll">
-            <CopyToOutputDirectory Condition="'$(RuntimeIdentifier)' == 'win10-arm'">
-                Always
-            </CopyToOutputDirectory>
+        <None Update="e_sqlite3.dll" Condition="'$(RuntimeIdentifier)' == 'win10-arm'">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
     <ItemGroup>
