@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 
@@ -8,8 +9,11 @@ namespace SharedExtensions
 {
     internal sealed class Logger
     {
+        public static Func<LogMessage, Task> NoOpLogger { get; } = (_ => Task.CompletedTask);
+
         private readonly LogSeverity _minimum;
         private readonly StreamWriter _logFile;
+        private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
         public Logger(LogSeverity minimum, string logPath = null)
         { 
@@ -17,14 +21,18 @@ namespace SharedExtensions
             string logdir = Path.Combine(Directory.GetCurrentDirectory(), logPath ?? "logs");
             Directory.CreateDirectory(logdir);
             _logFile = File.AppendText(Path.Combine(logdir, $"{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.log"));
+            _logFile.AutoFlush = true;
         }
 
         [DebuggerStepThrough]
-        public Task Log(LogMessage lmsg)
+        public async Task Log(LogMessage lmsg)
         {
             string logline = $"{DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss"),-19} [{lmsg.Severity,8}] {lmsg.Source}: {lmsg.Message} {lmsg.Exception}";
-            _logFile.WriteLine(logline);
-            _logFile.Flush();
+
+            await _lock.WaitAsync();
+            await _logFile.WriteLineAsync(logline);
+            _lock.Release();
+
             if (lmsg.Severity <= _minimum)
             {
                 switch (lmsg.Severity)
@@ -47,7 +55,6 @@ namespace SharedExtensions
                 Console.WriteLine(logline);
                 Console.ResetColor();
             }
-            return Task.CompletedTask;
         }
     }
 }

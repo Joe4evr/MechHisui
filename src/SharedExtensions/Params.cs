@@ -56,29 +56,5 @@ namespace SharedExtensions
             }
             return p;
         }
-
-        ///// <summary>Wraps an object to be gettable only once.</summary>
-        //internal sealed class GetOnce<T>
-        //{
-        //    private T _item;
-        //    private bool _gotten = false;
-
-        //    public GetOnce(T item)
-        //    {
-        //        _item = item;
-        //    }
-
-        //    /// <summary>Gets and clears the inner object.</summary>
-        //    /// <exception cref="InvalidOperationException">The inner object was already cleared.</exception>
-        //    public T GetAndClear()
-        //    {
-        //        if (_gotten) throw new InvalidOperationException("Item is already cleared.");
-
-        //        var i = _item;
-        //        _item = default;
-        //        _gotten = true;
-        //        return i;
-        //    }
-        //}
     }
 }
