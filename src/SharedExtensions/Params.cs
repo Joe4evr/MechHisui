@@ -49,7 +49,7 @@ namespace SharedExtensions
                         continue;
                     case "-t":
                         p.Token = parameters[i + 1];
-                        break;
+                        continue;
                     default:
                         continue;
                 }
