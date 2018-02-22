@@ -6,7 +6,7 @@ using Discord.Commands;
 namespace MechHisui.SecretHitler
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-    internal class RequireVetoUnlockedAttribute : PreconditionAttribute
+    internal sealed class RequireVetoUnlockedAttribute : PreconditionAttribute
     {
         public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
         {

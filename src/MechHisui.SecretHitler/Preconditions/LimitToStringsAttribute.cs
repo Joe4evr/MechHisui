@@ -8,12 +8,12 @@ using Discord.Commands;
 namespace MechHisui.SecretHitler
 {
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
-    internal class LimitToAttribute : ParameterPreconditionAttribute
+    internal sealed class LimitToStringsAttribute : ParameterPreconditionAttribute
     {
         private readonly IReadOnlyCollection<string> _options;
         private readonly StringComparer _comparer;
 
-        public LimitToAttribute(StringComparison comparison, params string[] options)
+        public LimitToStringsAttribute(StringComparison comparison, params string[] options)
         {
             _comparer = GetComparer(comparison);
             _options = options.ToImmutableArray();

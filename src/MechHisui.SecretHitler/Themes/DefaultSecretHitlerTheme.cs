@@ -1,6 +1,6 @@
 ﻿namespace MechHisui.SecretHitler
 {
-    internal class DefaultSecretHitlerTheme : ISecretHitlerTheme
+    internal sealed class DefaultSecretHitlerTheme : ISecretHitlerTheme
     {
         public static readonly ISecretHitlerTheme Instance = new DefaultSecretHitlerTheme();
 

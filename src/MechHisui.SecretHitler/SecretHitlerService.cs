@@ -18,7 +18,7 @@ namespace MechHisui.SecretHitler
             = new ConcurrentDictionary<IMessageChannel, HouseRules>(MessageChannelComparer);
 
         private ConcurrentDictionary<string, ISecretHitlerTheme> CachedThemes { get; }
-            = new ConcurrentDictionary<string, ISecretHitlerTheme>();
+            = new ConcurrentDictionary<string, ISecretHitlerTheme>(StringComparer.OrdinalIgnoreCase);
 
         private readonly ISecretHitlerConfig _config;
 
@@ -35,7 +35,10 @@ namespace MechHisui.SecretHitler
             if (!CachedThemes.TryGetValue(key, out var theme))
             {
                 theme = _config.GetTheme(key);
-                CachedThemes.TryAdd(key, theme);
+                if (theme != null)
+                {
+                    CachedThemes.TryAdd(key, theme);
+                }
             }
             return theme;
         }

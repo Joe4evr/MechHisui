@@ -254,7 +254,7 @@ namespace MechHisui.SecretHitler
             if (opposed >= favored)
             {
                 sb.Append($"The vote has **not** gone through. {_theme.Parliament} is stalled and ");
-                await HungParliament(sb);
+                await HungParliament(sb).ConfigureAwait(false);
             }
             else
             {
@@ -335,12 +335,11 @@ namespace MechHisui.SecretHitler
 
         public async Task PresidentDiscards(IDMChannel dms, int nr)
         {
-            int pick = nr - 1;
-            var tmp = _drawnPolicies[pick];
+            var tmp = _drawnPolicies.TakeAt(nr - 1);
             await dms.SendMessageAsync($"Removing a {(tmp == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)} {_theme.Policy}.").ConfigureAwait(false);
 
             _discards.Push(tmp);
-            _drawnPolicies.RemoveAt(pick);
+            //_drawnPolicies.RemoveAt(pick);
             await Channel.SendMessageAsync($"The {_theme.President} has discarded one {_theme.Policy}.").ConfigureAwait(false);
 
             await Task.Delay(1000).ConfigureAwait(false);
@@ -369,9 +368,8 @@ namespace MechHisui.SecretHitler
 
         public async Task ChancellorPlays(IDMChannel dms, int nr)
         {
-            int pick = nr - 1;
-            var tmp = _drawnPolicies[pick];
-            _drawnPolicies.RemoveAt(pick);
+            var tmp = _drawnPolicies.TakeAt(nr - 1);
+            //_drawnPolicies.RemoveAt(pick);
             await dms.SendMessageAsync($"Playing a {(tmp == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)} {_theme.Policy}.").ConfigureAwait(false);
 
             _discards.Push(_drawnPolicies.Single());
