@@ -31,8 +31,8 @@ namespace MechHisui.HisuiBets
             }
             else
             {
-                return Task.FromResult(PreconditionResult.FromSuccess());
-                //return Task.FromResult(PreconditionResult.FromError("No game going on."));
+                //return Task.FromResult(PreconditionResult.FromSuccess());
+                return Task.FromResult(PreconditionResult.FromError("No game going on."));
             }
         }
     }

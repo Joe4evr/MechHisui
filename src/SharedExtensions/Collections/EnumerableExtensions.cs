@@ -47,11 +47,11 @@ namespace SharedExtensions
         }
 
         public static TValue GetValueOrDefault<TKey, TValue>(
-            this IReadOnlyDictionary<TKey, TValue> dictionary,
+            this IReadOnlyDictionary<TKey, TValue> source,
             TKey key,
             TValue defaultValue = default)
         {
-            return dictionary.TryGetValue(key, out var ret) ? ret : defaultValue;
+            return source.TryGetValue(key, out var ret) ? ret : defaultValue;
         }
 
         public static IEnumerable<TResult> DictionarySelect<TKey, TValue, TResult>(
@@ -59,24 +59,58 @@ namespace SharedExtensions
             Func<TKey, TValue, TResult> selector)
                 => source.Select(kvp => selector(kvp.Key, kvp.Value));
 
-        public static void InsertAt<T>(this Stack<T> stack, uint index, T item)
+        public static void InsertAt<T>(this Stack<T> source, uint index, T item)
         {
-            if (index > stack.Count)
+            if (index > source.Count)
                 throw new ArgumentOutOfRangeException("Insertion index may not be greater than the stack's current size.", nameof(index));
 
             if (index == 0)
             {
-                stack.Push(item);
+                source.Push(item);
                 return;
             }
 
             var buffer = new T[index];
             for (int i = 0; i < buffer.Length; i++)
-                buffer[i] = stack.Pop();
+                buffer[i] = source.Pop();
 
-            stack.Push(item);
+            source.Push(item);
             for (int i = buffer.Length - 1; i >= 0; i--)
-                stack.Push(buffer[i]);
+                source.Push(buffer[i]);
+        }
+
+        public static T TakeAt<T>(this IList<T> source, int index)
+        {
+            var result = source[index];
+            if (result != null)
+            {
+                source.RemoveAt(index);
+            }
+            return result;
+        }
+
+        public static T TakeFirstOrDefault<T>(this IList<T> source, Func<T, bool> predicate)
+        {
+            var result = source.FirstOrDefault(predicate);
+            if (result != null)
+            {
+                source.Remove(result);
+            }
+            return result;
+        }
+
+        public static IEnumerable<TResult> Permutate<T1, T2, TResult>(
+            this IEnumerable<T1> source1,
+            IEnumerable<T2> source2,
+            Func<T1, T2, TResult> selector)
+        {
+            foreach (var item1 in source1)
+            {
+                foreach (var item2 in source2)
+                {
+                    yield return selector(item1, item2);
+                }
+            }
         }
     }
 }

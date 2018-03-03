@@ -213,15 +213,21 @@ namespace MechHisui.SecretHitler
             [Command("turn"), RequireGameState(GameState.EndOfTurn)]
             [RequirePlayerRole(PlayerRole.President)]
             public override Task NextTurnCmd()
-                => GameInProgress == CurrentlyPlaying.ThisGame ? Game.NextTurn() : ReplyAsync("No game in progress.");
+                => GameInProgress == CurrentlyPlaying.ThisGame
+                    ? Game.NextTurn()
+                    : ReplyAsync("No game in progress.");
 
             [Command("endearly"), Permission(MinimumPermission.ModRole)]
             public override Task EndGameCmd()
-                => GameInProgress == CurrentlyPlaying.ThisGame ? Game.EndGame("Game ended early by moderator.") : ReplyAsync("No game in progress to end.");
+                => GameInProgress == CurrentlyPlaying.ThisGame
+                    ? Game.EndGame("Game ended early by moderator.")
+                    : ReplyAsync("No game in progress to end.");
 
             [Command("state")]
             public override Task GameStateCmd()
-                => GameInProgress == CurrentlyPlaying.ThisGame ? ReplyAsync(Game.GetGameState()) : ReplyAsync("No game in progress.");
+                => GameInProgress == CurrentlyPlaying.ThisGame
+                    ? ReplyAsync(Game.GetGameState())
+                    : ReplyAsync("No game in progress.");
 
             [Command("enable"), Permission(MinimumPermission.ModRole)]
             public async Task EnableHouserule(string rule)

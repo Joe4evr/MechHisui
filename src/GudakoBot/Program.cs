@@ -55,13 +55,14 @@ namespace GudakoBot
         }
 
         private PeriodicMessageService _periodic;
+        private AprilFools _aprilFools;
 
         private async Task AsyncMain(Params p)
         {
             var config = _store.Load();
             await Log(LogSeverity.Info, $"Loaded {config.Lines.Count()} lines.");
             _periodic = new PeriodicMessageService(_client, config.FgoGeneral, config.Lines, _logger);
-
+            _aprilFools = new AprilFools(_client, config.FgoGeneral);
 
             _client.MessageReceived += async msg =>
             {

@@ -1,9 +1,9 @@
-﻿namespace MechHisui.Superfight.Models
+﻿namespace MechHisui.Superfight
 {
-    internal enum CardType
+    public enum CardType
     {
         Character = 0,
-        Ability = 1,
-        Location = 2
+        Ability   = 1,
+        Location  = 2
     }
 }

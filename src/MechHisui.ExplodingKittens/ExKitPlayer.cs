@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.MpGame;
+using SharedExtensions;
 using MechHisui.ExplodingKittens.Cards;
 
 namespace MechHisui.ExplodingKittens
@@ -18,17 +19,24 @@ namespace MechHisui.ExplodingKittens
 
         private IList<ExplodingKitttensCard> _hand = new List<ExplodingKitttensCard>();
 
-        public ExKitPlayer(IUser user, IMessageChannel channel) : base(user, channel)
+        public ExKitPlayer(IUser user, IMessageChannel channel)
+            : base(user, channel)
         {
         }
 
-        internal void AddToHand(ExplodingKitttensCard card) => _hand.Add(card);
+        internal void AddToHand(ExplodingKitttensCard card)
+            => _hand.Add(card);
 
         internal Task SendHand()
-        {
-            return SendMessageAsync($"You have:\n{String.Join("\n", _hand.Select((c, i) => $"{i}: {c.CardName}"))}");
-        }
+            => SendMessageAsync($"You have:\n{String.Join("\n", _hand.Select((c, i) => $"{i}: {c.CardName}"))}");
 
-        public void Explode() => HasExploded = true;
+        internal void Explode()
+            => HasExploded = true;
+
+        internal ExplodingKitttensCard TakeCard(int index)
+            => _hand.TakeAt(index);
+
+        internal DefuseCard TakeDefuse()
+            => (DefuseCard)_hand.TakeFirstOrDefault(c => c is DefuseCard);
     }
 }

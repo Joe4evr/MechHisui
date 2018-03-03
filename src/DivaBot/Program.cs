@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +12,6 @@ using Discord.Addons.SimplePermissions;
 using Discord.WebSocket;
 using Discord.Commands;
 using SharedExtensions;
-using System.Linq;
 
 namespace DivaBot
 {
@@ -55,8 +55,8 @@ namespace DivaBot
             _store = new EFConfigStore<DivaBotConfig, DivaGuild, DivaChannel, DivaUser>(
                 _commands, opts => opts.UseSqlite(p.ConnectionString));
 
-            using (var config = _store.Load())
-            {
+            //using (var config = _store.Load())
+            //{
 //                if (config.AutoResponses == null)
 //                {
 //                    config.AutoResponses = new Dictionary<string, string[]>();
@@ -88,7 +88,7 @@ namespace DivaBot
 //                    config.Save();
 //                }
 //#endif
-            }
+            //}
 
             Log(LogSeverity.Verbose, $"Constructing {nameof(DiscordSocketClient)}");
             _client = new DiscordSocketClient(new DiscordSocketConfig
@@ -114,7 +114,7 @@ namespace DivaBot
 
             await InitCommands();
 
-            using (var config =  _store.Load())
+            using (var config = _store.Load())
             {
                 await _client.LoginAsync(TokenType.Bot, config.Strings.Single(s => s.Key == "LoginToken").Value);
             }

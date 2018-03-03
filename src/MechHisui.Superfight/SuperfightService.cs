@@ -11,7 +11,7 @@ namespace MechHisui.Superfight
     public sealed class SuperfightService : MpGameService<SuperfightGame, SuperfightPlayer>
     {
         internal ISuperfightConfig Config { get; }
-        internal ConcurrentDictionary<ulong, int> DiscussionTimer { get; } = new ConcurrentDictionary<ulong, int>();
+        internal ConcurrentDictionary<IMessageChannel, int> DiscussionTimer { get; } = new ConcurrentDictionary<IMessageChannel, int>(MessageChannelComparer);
 
         public SuperfightService(
             ISuperfightConfig config,

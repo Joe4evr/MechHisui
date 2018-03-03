@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MechHisui.ExplodingKittens.Cards
@@ -10,7 +8,8 @@ namespace MechHisui.ExplodingKittens.Cards
         public ExplodingKitttensCard One { get; }
         public ExplodingKitttensCard Two { get; }
 
-        public Pair(ExplodingKitttensCard one, ExplodingKitttensCard two) : base(ExKitConstants.Pair)
+        public Pair(ExplodingKitttensCard one, ExplodingKitttensCard two)
+            : base(ExKitConstants.Pair)
         {
             One = one;
             Two = two;

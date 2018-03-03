@@ -13,16 +13,17 @@ namespace MechHisui.Superfight.Models
     {
         public int Points { get; private set; } = 0;
         internal int HandSize => _hand.Count;
-        internal List<Card> Tentative { get; } = new List<Card>();
+        internal Dictionary<CardType, ISuperfightCard> Tentative { get; } = new Dictionary<CardType, ISuperfightCard>();
         internal bool ConfirmedPlay { get; set; } = false;
 
-        private readonly List<Card> _hand = new List<Card>();
+        private readonly List<ISuperfightCard> _hand = new List<ISuperfightCard>();
 
-        public SuperfightPlayer(IUser user, IMessageChannel channel) : base(user, channel)
+        public SuperfightPlayer(IUser user, IMessageChannel channel)
+            : base(user, channel)
         {
         }
 
-        internal void Draw(Card card)
+        internal void Draw(ISuperfightCard card)
         {
             Tentative.Clear();
             _hand.Add(card);
@@ -31,9 +32,8 @@ namespace MechHisui.Superfight.Models
         public Task SendHand()
         {
             ConfirmedPlay = false;
-            int i = 1;
             var sb = new StringBuilder("Your Hand:\n")
-                .AppendSequence(_hand, (b, c) => b.AppendLine($"[{i++}]: **{c.Type}** - {c.Text}"))
+                .AppendLine(String.Join("\n", _hand.Select((c, i) => $"[{i+1}]: **{c.Type}** - {c.Text}")))
                 .Append($"Please pick one {CardType.Character} and one {CardType.Ability} card.");
 
             return SendMessageAsync(sb.ToString());
@@ -42,23 +42,19 @@ namespace MechHisui.Superfight.Models
         public string ChooseCard(int i)
         {
             var tc = _hand[i - 1];
-            if (Tentative.Any(c => c.Type == tc.Type))
-            {
-                Tentative.RemoveAll(c => c.Type == tc.Type);
-                return $"Replacing your tentative {tc.Type} card to `{tc.Text}`";
-            }
-            else
-            {
-                Tentative.Add(tc);
-                return $"Added {tc.Type}: `{tc.Text}` to tentative play.";
-            }
+            var result = (Tentative.TryGetValue(tc.Type, out var card))
+                ? $"Replacing your tentative **{tc.Type}** card from `{card.Text}` to `{tc.Text}`"
+                : $"Added **{tc.Type}**: `{tc.Text}` to tentative play.";
+
+            Tentative[tc.Type] = tc;
+            return result;
         }
 
-        internal List<Card> Confirm()
+        internal IReadOnlyList<ISuperfightCard> Confirm()
         {
             ConfirmedPlay = true;
-            _hand.RemoveAll(c => Tentative.Select(t => t.Text).Contains(c.Text));
-            return Tentative;
+            _hand.RemoveAll(c => Tentative.Select(t => t.Value.Text).Contains(c.Text));
+            return Tentative.Select(t => t.Value).ToList();
         }
 
         public void AddPoint() => Points++;

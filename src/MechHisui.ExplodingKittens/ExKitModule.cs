@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using Discord;
 using Discord.Commands;
 using Discord.Addons.MpGame;
 
 namespace MechHisui.ExplodingKittens
 {
     [Name("Exploding Kittens"), Group("exk")]
-    public sealed class ExKitModule : MpGameModuleBase<ExKitService, ExKitGame, ExKitPlayer>
+    public sealed partial class ExKitModule : MpGameModuleBase<ExKitService, ExKitGame, ExKitPlayer>
     {
         private const int _min = 2;
 
-        public ExKitModule(ExKitService gameService) : base(gameService)
+        public ExKitModule(ExKitService gameService)
+            : base(gameService)
         {
         }
 

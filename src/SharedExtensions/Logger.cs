@@ -29,8 +29,8 @@ namespace SharedExtensions
         {
             string logline = $"{DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss"),-19} [{lmsg.Severity,8}] {lmsg.Source}: {lmsg.Message} {lmsg.Exception}";
 
-            await _lock.WaitAsync();
-            await _logFile.WriteLineAsync(logline);
+            await _lock.WaitAsync().ConfigureAwait(false);
+            await _logFile.WriteLineAsync(logline).ConfigureAwait(false);
             _lock.Release();
 
             if (lmsg.Severity <= _minimum)

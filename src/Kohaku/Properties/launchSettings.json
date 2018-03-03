@@ -2,7 +2,7 @@
   "profiles": {
     "Kohaku": {
       "commandName": "Project",
-      "commandLineArgs": "-conn \"Data Source=C:/projects/MechHisui/src/Kohaku.sqlite\""
+      "commandLineArgs": "-db \"Data Source=../MechHisui.Core.EF/test.sqlite\" -t \"MjM2NzkxMDY2MDA1NjAyMzA0.DFilJQ.5rxv4iCBjm2694SMpOh20SoDFmA\""
     }
   }
 }

@@ -5,8 +5,8 @@ namespace MechHisui.Superfight
 {
     public interface ISuperfightConfig
     {
-        IEnumerable<string> GetCharacters();
-        IEnumerable<string> GetAbilities();
-        IEnumerable<string> GetLocations();
+        IEnumerable<ISuperfightCard> GetCharacters();
+        IEnumerable<ISuperfightCard> GetAbilities();
+        IEnumerable<ISuperfightCard> GetLocations();
     }
 }

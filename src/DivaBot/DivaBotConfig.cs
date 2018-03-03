@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-#if !ARM
-using Discord.Addons.SimpleAudio;
-#endif
+//#if !ARM
+//using Discord.Addons.SimpleAudio;
+//#endif
 using Discord.Addons.SimplePermissions;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
@@ -27,12 +27,14 @@ namespace DivaBot
     //        public List<string> Additional8BallOptions { get; set; }
     //    }
 
-    public class DivaBotConfig : EFBaseConfigContext<DivaGuild, DivaChannel, DivaUser>
+    public sealed class DivaBotConfig : EFBaseConfigContext<DivaGuild, DivaChannel, DivaUser>
+        //: DbContext
     {
         public DbSet<StringKeyValuePair> Strings { get; set; }
 
         public DivaBotConfig(DbContextOptions options, CommandService commandService)
             : base(options, commandService)
+            //: base(options)
         {
         }
     }

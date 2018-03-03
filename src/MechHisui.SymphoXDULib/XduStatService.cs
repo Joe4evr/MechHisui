@@ -81,7 +81,7 @@ namespace MechHisui.SymphoXDULib
                             if (desc != null && Int32.TryParse(GetId(desc), out var id))
                             {
                                 await Task.WhenAll(
-                                    pagedmsg.ResetPages(Config.GetGear(id).ToEmbedPages()),
+                                    pagedmsg.Msg.ModifyAsync(m => m.Embed = XduModule.XduCharacters.FormatCharacter(Config.GetGear(id))),
                                     pagedmsg.Msg.RemoveReactionAsync(reaction.Emote, reaction.User.Value),
                                     pagedmsg.Msg.RemoveReactionAsync(reaction.Emote, _sockClient.CurrentUser)).ConfigureAwait(false);
                                 pagedmsg.ListenForSelect = false;

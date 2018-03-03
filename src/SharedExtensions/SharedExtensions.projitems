@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Collections\AsyncObservableCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\Pile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CoreExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DateTimeWithZone.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DependencyInjection\RegisterAttribute.cs" />
@@ -19,5 +20,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Logger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Params.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringBuilderExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WSModels.cs" />
   </ItemGroup>
 </Project>

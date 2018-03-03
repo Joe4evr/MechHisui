@@ -28,7 +28,7 @@ namespace MechHisui.FateGOLib
 
                 if (ce != null)
                 {
-                    await ReplyAsync("", embed: FormatCEProfile(ce)).ConfigureAwait(false);
+                    await ReplyAsync(String.Empty, embed: FormatCEProfile(ce)).ConfigureAwait(false);
                 }
                 else
                 {
@@ -42,7 +42,7 @@ namespace MechHisui.FateGOLib
                 var potentials = _service.Config.FindCEs(name);
                 if (potentials.Count() == 1)
                 {
-                    await ReplyAsync("", embed: FormatCEProfile(potentials.Single())).ConfigureAwait(false);
+                    await ReplyAsync(String.Empty, embed: FormatCEProfile(potentials.Single())).ConfigureAwait(false);
                 }
                 else if (potentials.Count() > 1)
                 {
@@ -70,7 +70,7 @@ namespace MechHisui.FateGOLib
                     foreach (var c in ces)
                     {
                         sb.Append($"**{c.Name}** - {c.Effect}")
-                            .AppendLine(!String.IsNullOrWhiteSpace(c.EventEffect) ? $" **Event:** {c.EventEffect}" : "");
+                            .AppendLine(!String.IsNullOrWhiteSpace(c.EventEffect) ? $" **Event:** {c.EventEffect}" : String.Empty);
                         if (sb.Length > 1700)
                         {
                             await ReplyAsync(sb.ToString()).ConfigureAwait(false);

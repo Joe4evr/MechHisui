@@ -7,12 +7,12 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Discord.Addons.SimplePermissions;
 using MechHisui.Core;
-using MechHisui.ExplodingKittens;
+//using MechHisui.ExplodingKittens;
 using MechHisui.FateGOLib;
 using MechHisui.HisuiBets;
-using MechHisui.SecretHitler;
-using MechHisui.Superfight;
-using MechHisui.SymphoXDULib;
+//using MechHisui.SecretHitler;
+//using MechHisui.Superfight;
+//using MechHisui.SymphoXDULib;
 using SharedExtensions;
 
 namespace MechHisui
@@ -23,16 +23,9 @@ namespace MechHisui
         private static IServiceProvider ConfigureServices(
             DiscordSocketClient client,
             Params parameters,
-            out CommandService commands,
+            CommandService commands,
             Func<LogMessage, Task> logger = null)
         {
-            logger?.Invoke(new LogMessage(LogSeverity.Info, "Main", $"Constructing {nameof(CommandService)}"));
-            commands = new CommandService(new CommandServiceConfig
-            {
-                CaseSensitiveCommands = false,
-                DefaultRunMode = RunMode.Sync
-            });
-
             try
             {
                 logger?.Invoke(new LogMessage(LogSeverity.Info, "Main", "Constructing ConfigStore"));

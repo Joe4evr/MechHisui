@@ -40,7 +40,7 @@ namespace MechHisui.SymphoXDULib
         {
             if (pages.Count == 0)
             {
-                await context.Channel.SendMessageAsync("No results found");
+                await context.Channel.SendMessageAsync("No results found").ConfigureAwait(false);
                 return;
             }
 

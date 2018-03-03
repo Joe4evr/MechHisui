@@ -13,16 +13,16 @@ namespace DivaBot
         {
             await Log(LogSeverity.Verbose, "Initializing commands");
             await _commands.UseSimplePermissions(_client, _store, _map, _logger);
-            await _commands.AddTagResponses(_map, _store, _client);
-            await _commands.AddScoreAttack(_map, _store, _client);
-            using (var config = _store.Load())
-            {
+            //await _commands.AddTagResponses(_map, _store, _client);
+            //await _commands.AddScoreAttack(_map, _store, _client);
+            //using (var config = _store.Load())
+            //{
                 //_map.AddSingleton(new EightBallService(config.Additional8BallOptions));
                 //await _commands.AddModuleAsync<EightBallModule>();
 #if !ARM
                 //await _commands.UseAudio<AudioModImpl>(_map, config.AudioConfig, _logger);
 #endif
-            }
+            //}
 
             //await _commands.AddModuleAsync<TestModule>();
 

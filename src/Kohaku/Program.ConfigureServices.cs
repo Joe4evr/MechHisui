@@ -3,20 +3,22 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+//using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 //using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.Commands;
-using Discord.Addons.SimpleAudio;
-using Discord.Addons.SimplePermissions;
-//using MechHisui.FateGOLib;
-//using System.Text.RegularExpressions;
 using Discord.WebSocket;
-//using Newtonsoft.Json;
+//using Discord.Addons.SimpleAudio;
+using Discord.Addons.SimplePermissions;
+using MechHisui.Core;
+using SharedExtensions;
 
 namespace Kohaku
 {
+    using MechHisuiConfigStore = EFConfigStore<MechHisuiConfig, HisuiGuild, HisuiChannel, HisuiUser>;
 #pragma warning disable CA2007, CA1001
     internal partial class Program
     {
@@ -24,39 +26,49 @@ namespace Kohaku
 
         private static IServiceProvider ConfigureServices(
             DiscordSocketClient client,
-            //CommandService commands,
-            IConfigStore<KohakuConfig> store,
+            CommandService commands,
+            Params p,
+            //IConfigStore<KohakuConfig> store,
             Func<LogMessage, Task> logger = null)
         {
+            logger?.Invoke(new LogMessage(LogSeverity.Verbose, "Main", "Constructing ConfigStore"));
+            var store = new MechHisuiConfigStore(commands,
+                options => options
+                    //.UseSqlServer(p.ConnectionString)
+                    .UseSqlite(p.ConnectionString)
+                );
+
+
             var map = new ServiceCollection()
-                .AddSingleton(new TestService(store));
+                //.AddSingleton(new TestService(store))
+                .AddSingleton(new PermissionsService(store, commands, client, logger));
 
-            using (var config = store.Load())
-            {
-                string ffmpeg = config.Strings.SingleOrDefault(t => t.Key == "FFMpegPath")?.Value;
-                string musicpath = config.Strings.SingleOrDefault(t => t.Key == "MusicBasePath")?.Value;
-                var audioCfg = new AudioConfig(
-                    ffmpegPath: ffmpeg,
-                    musicBasePath: musicpath)
-                {
-                    GuildConfigs =
-                    {
-                        [161445678633975808] = new StandardAudioGuildConfig
-                        {
-                            VoiceChannelId = 161445679418441729,
-                            MessageChannelId = 161445678633975808,
-                            AutoConnect = true,
-                            AutoPlay = false,
-                            AllowCommands = true,
-                            AllowReactions = true,
-                        }
-                    }
-                };
+            //using (var config = store.Load())
+            //{
+            //    string ffmpeg = config.Strings.SingleOrDefault(t => t.Key == "FFMpegPath")?.Value;
+            //    string musicpath = config.Strings.SingleOrDefault(t => t.Key == "MusicBasePath")?.Value;
+            //    var audioCfg = new AudioConfig(
+            //        ffmpegPath: ffmpeg,
+            //        musicBasePath: musicpath)
+            //    {
+            //        GuildConfigs =
+            //        {
+            //            [161445678633975808] = new StandardAudioGuildConfig
+            //            {
+            //                VoiceChannelId = 161445679418441729,
+            //                MessageChannelId = 161445678633975808,
+            //                AutoConnect = true,
+            //                AutoPlay = false,
+            //                AllowCommands = true,
+            //                AllowReactions = true,
+            //            }
+            //        }
+            //    };
 
-                map.AddSingleton(new AudioService(client, audioCfg, logger));
+            //    map.AddSingleton(new AudioService(client, audioCfg, logger));
 
-                //var fgoCfg = 
-            }
+            //    //var fgoCfg = 
+            //}
 
 
             return map.BuildServiceProvider();

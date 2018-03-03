@@ -29,7 +29,7 @@ namespace MechHisui.SymphoXDULib
                     : ReplyAsync("Unknown/Not a Memoria ID");
             }
 
-            internal static Embed FormatMemoria(Memoria memoria)
+            internal static Embed FormatMemoria(IMemoria memoria)
             {
                 return new EmbedBuilder
                 {

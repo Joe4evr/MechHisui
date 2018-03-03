@@ -29,7 +29,7 @@
         <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions.JsonProvider\Discord.Addons.SimplePermissions.JsonProvider.csproj" />
         <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions.EFProvider\Discord.Addons.SimplePermissions.EFProvider.csproj" />
         <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions\Discord.Addons.SimplePermissions.csproj" />-->
-        <ProjectReference Include="..\MechHisui.Core\MechHisui.Core.csproj" />
+        <ProjectReference Include="..\MechHisui.Core.EF\MechHisui.Core.EF.csproj" />
     </ItemGroup>
     <!--<ItemGroup>
         <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />

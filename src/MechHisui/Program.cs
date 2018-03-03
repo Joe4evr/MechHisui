@@ -15,6 +15,8 @@ namespace MechHisui
 #pragma warning disable RCS1090 // Call 'ConfigureAwait(false)'.
     public partial class Program
     {
+        private const string Version = "MH v1.3-test";
+
         private static async Task Main(string[] args)
         {
             var p = Params.Parse(args);
@@ -50,7 +52,14 @@ namespace MechHisui
 #endif
             });
 
-            _services = ConfigureServices(_client, p, out _commands, _logger);
+            Log(LogSeverity.Info, $"Constructing {nameof(CommandService)}");
+            _commands = new CommandService(new CommandServiceConfig
+            {
+                CaseSensitiveCommands = false,
+                LogLevel = minlog,
+                DefaultRunMode = RunMode.Sync
+            });
+            _services = ConfigureServices(_client, p, _commands, _logger);
 
             _commands.Log += _logger;
             _client.Log += _logger;
@@ -70,7 +79,12 @@ namespace MechHisui
             await _commands.AddModuleAsync<HisuiBetsModule>();
             await _commands.AddModuleAsync<FgoModule>();
 
-            _client.Ready += () => Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");
+            _client.Ready += async () =>
+            {
+                await Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");
+                await _client.SetGameAsync(Version);
+            };
+
 
             _client.MessageUpdated += async (before, after, channel) =>
             {
@@ -97,21 +111,26 @@ namespace MechHisui
 
             if (msg.Author.Id == _client.CurrentUser.Id || msg.Author.IsBot) return Task.CompletedTask;
 
-            int pos = 0;
-            var user = _client.CurrentUser;
-            if (msg.HasCharPrefix('.', ref pos) || msg.HasMentionPrefix(user, ref pos))
+            if (msg.Channel is IPrivateChannel
+                || (msg.Channel is SocketGuildChannel sgc
+                    && sgc.Guild.CurrentUser.GetPermissions(sgc).SendMessages))
             {
-                Task.Run(async () =>
+                int pos = 0;
+                var user = _client.CurrentUser;
+                if (msg.HasCharPrefix('.', ref pos) || msg.HasMentionPrefix(user, ref pos))
                 {
-                    var context = new SocketCommandContext(_client, msg);
-                    var result = await _commands.ExecuteAsync(context, pos, services: _services);
-
-                    if (!result.IsSuccess && result.Error != CommandError.UnknownCommand
-                    && context.Guild?.Id == 161445678633975808ul)
+                    Task.Run(async () =>
                     {
-                        await msg.Channel.SendMessageAsync(result.ErrorReason);
-                    }
-                });
+                        var context = new SocketCommandContext(_client, msg);
+                        var result = await _commands.ExecuteAsync(context, pos, services: _services);
+
+                        if (!result.IsSuccess && (result.Error != CommandError.UnknownCommand
+                            || context.Guild?.Id == 161445678633975808ul))
+                        {
+                            await msg.Channel.SendMessageAsync(result.ErrorReason);
+                        }
+                    });
+                }
             }
             return Task.CompletedTask;
         }

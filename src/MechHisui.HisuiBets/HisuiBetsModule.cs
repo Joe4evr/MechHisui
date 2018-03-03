@@ -16,37 +16,38 @@ namespace MechHisui.HisuiBets
     public sealed class HisuiBetsModule : ModuleBase<SocketCommandContext>
     {
         private readonly HisuiBankService _service;
-        //private readonly Random _rng;
+        private readonly Random _rng;
 
         private IBankAccount _account;
         private BetGame _game;
+        private int _minimumBet = 50;
 
-        public HisuiBetsModule(HisuiBankService service)
+        public HisuiBetsModule(HisuiBankService service, Random rng)
         {
             _service = service;
-            //_rng = rng;
+            _rng = rng;
         }
 
         protected override void BeforeExecute(CommandInfo command)
         {
             base.BeforeExecute(command);
             _service.Games.TryGetValue(Context.Channel.Id, out _game);
-            _account = _service.Bank.GetUser(Context.User.Id);
+            _account = _service.Bank.GetAccount(Context.User);
         }
 
         [Command("bet"), Permission(MinimumPermission.Everyone)]
         [Priority(0), RequiresGameType(GameType.HungerGame)]
         public async Task Bet(int amount, [Remainder] string target)
         {
-            if (await CheckPreReqs(amount).ConfigureAwait(false))
+            if (_account != null && await CheckPreReqs(amount).ConfigureAwait(false))
             {
-                await ReplyAsync(_game.ProcessBet(new Bet
+                await ReplyAsync(await _game.ProcessBet(new Bet
                 {
                     UserName = Context.User.Username,
                     UserId = Context.User.Id,
                     BettedAmount = (uint)amount,
-                    Tribute = target
-                })).ConfigureAwait(false);
+                    Target = target
+                }).ConfigureAwait(false)).ConfigureAwait(false);
             }
         }
 
@@ -54,15 +55,15 @@ namespace MechHisui.HisuiBets
         [Priority(1), RequiresGameType(GameType.HungerGameDistrictsOnly)]
         public async Task Bet(int amount, int district)
         {
-            if (await CheckPreReqs(amount).ConfigureAwait(false))
+            if (_account != null && await CheckPreReqs(amount).ConfigureAwait(false))
             {
-                await ReplyAsync(_game.ProcessBet(new Bet
+                await ReplyAsync(await _game.ProcessBet(new Bet
                 {
                     UserName = Context.User.Username,
                     UserId = Context.User.Id,
                     BettedAmount = (uint)amount,
-                    Tribute = district.ToString()
-                })).ConfigureAwait(false);
+                    Target = district.ToString()
+                }).ConfigureAwait(false)).ConfigureAwait(false);
             }
         }
 
@@ -70,15 +71,15 @@ namespace MechHisui.HisuiBets
         [Priority(2), RequiresGameType(GameType.SaltyBet)]
         public async Task Bet(int amount, SaltyBetTeam team)
         {
-            if (await CheckPreReqs(amount).ConfigureAwait(false))
+            if (_account != null && await CheckPreReqs(amount).ConfigureAwait(false))
             {
-                await ReplyAsync(_game.ProcessBet(new Bet
+                await ReplyAsync(await _game.ProcessBet(new Bet
                 {
                     UserName = Context.User.Username,
                     UserId = Context.User.Id,
                     BettedAmount = (uint)amount,
-                    Tribute = team.ToString()
-                })).ConfigureAwait(false);
+                    Target = team.ToString()
+                }).ConfigureAwait(false)).ConfigureAwait(false);
             }
         }
 
@@ -110,6 +111,11 @@ namespace MechHisui.HisuiBets
                 await ReplyAsync("Cannot make a bet of 0 or less.").ConfigureAwait(false);
                 return false;
             }
+            if (bettedAmount < _minimumBet)
+            {
+                await ReplyAsync($"Minimum bet must be {_minimumBet}.").ConfigureAwait(false);
+                return false;
+            }
             if (_account?.Bucks == 0)
             {
                 await ReplyAsync("You currently have no HisuiBucks.").ConfigureAwait(false);
@@ -126,31 +132,34 @@ namespace MechHisui.HisuiBets
         [Command("bet"), Permission(MinimumPermission.Everyone)]
         [Priority(0), RequiresGameType(GameType.HungerGame)]
         [Hidden]
-        public Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, [Remainder] string target)
-            => (_account != null) ?
-                Bet(_account.Bucks, target) :
-                Task.CompletedTask;
+        public async Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, [Remainder] string target)
+        {
+            if (_account != null && await CheckPreReqs(_account.Bucks).ConfigureAwait(false))
+                await Bet(_account.Bucks, target).ConfigureAwait(false);
+        }
 
         [Command("bet"), Permission(MinimumPermission.Everyone)]
         [Priority(1), RequiresGameType(GameType.HungerGameDistrictsOnly)]
         [Hidden]
-        public Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, int district)
-            => (_account != null) ?
-                Bet(_account.Bucks, district) :
-                Task.CompletedTask;
+        public async Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, int district)
+        {
+            if (_account != null && await CheckPreReqs(_account.Bucks).ConfigureAwait(false))
+                await Bet(_account.Bucks, district).ConfigureAwait(false);
+        }
 
         [Command("bet"), Permission(MinimumPermission.Everyone)]
         [Priority(2), RequiresGameType(GameType.SaltyBet)]
         [Hidden]
-        public Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, SaltyBetTeam team)
-            => (_account != null)?
-                Bet(_account.Bucks, team) :
-                Task.CompletedTask;
+        public async Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, SaltyBetTeam team)
+        {
+            if (_account != null && await CheckPreReqs(_account.Bucks).ConfigureAwait(false))
+                await Bet(_account.Bucks, team).ConfigureAwait(false);
+        }
 
         [Command("bet it all"), Permission(MinimumPermission.Everyone)]
-        [Priority(3), RequiresGameType(GameType.Any), Hidden]
+        [Priority(5), RequiresGameType(GameType.Any), Hidden]
 #pragma warning disable RCS1163 // Unused parameter.
-        public Task Bet()
+        public Task BetItAll()
             => Context.Channel.SendFileAsync(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "kappa.png"),
                     text: $"**{Context.User.Username}** has bet all their bucks. Good luck.");
 #pragma warning restore RCS1163 // Unused parameter.
@@ -159,7 +168,7 @@ namespace MechHisui.HisuiBets
         public Task NewGame(GameType gameType = GameType.HungerGame)
         {
             var actualType = (gameType == GameType.Any) ? GameType.HungerGame : gameType;
-            var game = new BetGame(_service.Bank, (ITextChannel)Context.Channel, actualType, Context.User.Id);
+            var game = new BetGame(_service.Bank, (ITextChannel)Context.Channel, actualType, _rng, Context.User.Id);
 
             return (_service.TryAddNewGame(Context.Channel.Id, game)) ?
                 game.StartGame() :
@@ -172,9 +181,9 @@ namespace MechHisui.HisuiBets
         {
             var sb = new StringBuilder("The following bets have been made:\n```\n", 2000);
 
-            foreach (var bet in _game._betTracker)
+            foreach (var bet in await _service.Bank.RetrieveAllBets(Context.Channel as ITextChannel).ConfigureAwait(false))
             {
-                sb.AppendLine($"{bet.UserName,-20}: {HisuiBankService.Symbol}{bet.BettedAmount,-7} - {bet.Tribute}");
+                sb.AppendLine($"{bet.UserName,-20}: {HisuiBankService.Symbol}{bet.BettedAmount,-7} - {bet.Target}");
 
                 if (sb.Length > 1700)
                 {
@@ -216,35 +225,44 @@ namespace MechHisui.HisuiBets
         [Command("bucks"), Permission(MinimumPermission.Everyone)]
         [Alias("mybucks")]
         public Task Bucks()
-        {
-            return ReplyAsync($"**{Context.User.Username}** currently has {HisuiBankService.Symbol}{_account.Bucks}.");
-        }
+            => ReplyAsync($"**{Context.User.Username}** currently has {HisuiBankService.Symbol}{_account.Bucks}.");
 
         [Command("donate"), Permission(MinimumPermission.Everyone)]
         [Ratelimit(10, 10, Measure.Minutes)]
-        public Task Donate(int amount, IUser recipient)
+        public async Task Donate(int amount, IUser recipient)
         {
             if (amount <= 0)
             {
-                return ReplyAsync("Cannot make a donation of 0 or less.");
-            }
-            if (amount > _account.Bucks)
-            {
-                return ReplyAsync($"**{Context.User.Username}** currently does not have enough HisuiBucks to make that donation.");
+                await ReplyAsync("Cannot make a donation of 0 or less.").ConfigureAwait(false);
             }
             if (recipient.IsBot || _service.Blacklist.Contains(recipient.Id))
             {
-                return ReplyAsync("Unable to donate to Bot accounts.");
+                await ReplyAsync("Not allowed to donate to that account.").ConfigureAwait(false);
             }
 
-            _service.Bank.Donate(new DonationRequest((uint)amount, _account.UserId, recipient.Id));
-            return ReplyAsync($"**{Context.User.Username}** donated {HisuiBankService.Symbol}{amount} to **{recipient.Username}**.");
+            switch (await _service.Bank.Donate(new DonationRequest((uint)amount, _account.UserId, recipient.Id)).ConfigureAwait(false))
+            {
+                case DonationResult.DonationSuccess:
+                    await ReplyAsync($"**{Context.User.Username}** donated {HisuiBankService.Symbol}{amount} to **{recipient.Username}**.").ConfigureAwait(false);
+                    return;
+
+                case DonationResult.DonorNotEnoughMoney:
+                    await ReplyAsync($"**{Context.User.Username}** currently does not have enough HisuiBucks to make that donation.").ConfigureAwait(false);
+                    return;
+
+                case DonationResult.DonorNotFound:
+                case DonationResult.RecipientNotFound:
+                case DonationResult.MiscError:
+                default:
+                    await ReplyAsync("Failed to transfer donation.").ConfigureAwait(false);
+                    return;
+            }
         }
 
         [Command("top"), Permission(MinimumPermission.Special)]
         public async Task Tops()
         {
-            var tops = (await _service.Bank.GetAllUsers())
+            var tops = (await _service.Bank.GetAllUsers().ConfigureAwait(false))
                 .Where(a => a.Bucks > 2500)
                 .OrderByDescending(a => a.Bucks)
                 .Take(10)
@@ -259,7 +277,7 @@ namespace MechHisui.HisuiBets
                 .AppendSequence(tops, (s, a) => s.AppendLine($"{a.Name,20}: {HisuiBankService.Symbol}{a.Bucks,-7}"))
                 .Append("```");
 
-            await ReplyAsync(sb.ToString());
+            await ReplyAsync(sb.ToString()).ConfigureAwait(false);
         }
     }
 }

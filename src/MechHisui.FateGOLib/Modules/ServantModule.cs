@@ -31,7 +31,7 @@ namespace MechHisui.FateGOLib
 
                 if (profile != null)
                 {
-                    await ReplyAsync("", embed: FormatServantProfile(profile)).ConfigureAwait(false);
+                    await ReplyAsync(String.Empty, embed: FormatServantProfile(profile)).ConfigureAwait(false);
                 }
             }
 
@@ -53,7 +53,7 @@ namespace MechHisui.FateGOLib
                 var potentials = _service.Config.FindServants(name);
                 if (potentials.Count() == 1)
                 {
-                    return ReplyAsync("", embed: FormatServantProfile(potentials.Single()));
+                    return ReplyAsync(String.Empty, embed: FormatServantProfile(potentials.Single()));
                 }
                 else if (potentials.Count() > 1)
                 {
@@ -214,7 +214,7 @@ namespace MechHisui.FateGOLib
                 .AddFieldSequence(profile.ActiveSkills,
                     (field, skill) => field.WithIsInline(true)
                         .WithName($"{skill.SkillName} {skill.Rank}")
-                        .WithValue($"{skill.Effect}{(!String.IsNullOrWhiteSpace(skill.RankUpEffect) ? $"\n**Rank Up:** {skill.RankUpEffect}" : "")}"))
+                        .WithValue($"{skill.Effect}{(!String.IsNullOrWhiteSpace(skill.RankUpEffect) ? $"\n**Rank Up:** {skill.RankUpEffect}" : String.Empty)}"))
 
                 .AddFieldSequence(profile.PassiveSkills,
                     (field, skill) => field.WithIsInline(true)

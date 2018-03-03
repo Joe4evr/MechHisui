@@ -14,54 +14,56 @@ namespace MechHisui.ExplodingKittens
 {
     public sealed class ExKitGame : GameBase<ExKitPlayer>
     {
-        private readonly ExpansioRules _expansioRules;
-        private readonly Timer _explodeTimer;
-        private readonly Timer _actionTimer;
-
-        private bool _nope = false;
-        private int _turn = 0;
-        private GameState _state = GameState.SetupGame;
-        private ExplodingKitttensCard _queuedAction;
-        private Stack<ExplodingKitttensCard> _discard = new Stack<ExplodingKitttensCard>();
-        private Stack<ExplodingKitttensCard> _deck;
-
         internal new IMessageChannel Channel => base.Channel;
+        internal int DeckSize => Deck.Count;
 
-        internal bool Reverse { get; private set; }
+        private ExpansioRules ExpansionRules { get; }
+        private Timer ExplodeTimer { get; }
+        private Timer ActionTimer { get; }
+
+        private bool Nope { get; set; } = false;
+        private int Turn { get; set; } = 0;
+        private Stack<ExplodingKitttensCard> Discards { get; set; } = new Stack<ExplodingKitttensCard>();
+
+        internal GameState State { get; private set; } = GameState.SetupGame;
+
+        private bool Reverse { get; set; }
+        private ExplodingKitttensCard QueuedAction { get; set; }
+        private Stack<ExplodingKitttensCard> Deck { get; set; }
 
         internal ExKitGame(
             IMessageChannel channel,
             IEnumerable<ExKitPlayer> players,
             IEnumerable<ExplodingKitttensCard> deck,
-            ExpansioRules expansioRules = ExpansioRules.None)
-            : base(channel, players)
+            ExpansioRules expansionRules = ExpansioRules.None)
+            : base(channel, players, setFirstPlayerImmediately: true)
         {
-            _expansioRules = expansioRules;
-            _deck = new Stack<ExplodingKitttensCard>(deck.Shuffle(28));
+            ExpansionRules = expansionRules;
+            Deck = new Stack<ExplodingKitttensCard>(deck.Shuffle(28));
 
-            _explodeTimer = new Timer(async _ =>
+            ExplodeTimer = new Timer(async _ =>
             {
-                _state = GameState.KittenExploded;
-                await Channel.SendMessageAsync($"**{TurnPlayer.Value.User.Username}** has failed to Defuse an Exploding Kitten!");
+                State = GameState.KittenExploded;
+                await Channel.SendMessageAsync($"**{TurnPlayer.Value.User.Username}** has failed to Defuse an Exploding Kitten!").ConfigureAwait(false);
                 TurnPlayer.Value.Explode();
-                await CheckForWinner();
+                await CheckForWinner().ConfigureAwait(false);
             },
             null,
             Timeout.Infinite,
             Timeout.Infinite);
 
-            _actionTimer = new Timer(async _ =>
+            ActionTimer = new Timer(async _ =>
             {
-                _state = GameState.Resolves;
-                if (_nope)
+                State = GameState.Resolves;
+                if (Nope)
                 {
-                    await Channel.SendMessageAsync("Time up! The played action is Nope'd!");
-                    await NextTurn();
+                    await Channel.SendMessageAsync("Time up! The played action is Nope'd!").ConfigureAwait(false);
+                    await NextTurn().ConfigureAwait(false);
                 }
                 else
                 {
-                    await Channel.SendMessageAsync("Time up! The played action is **not** Nope'd!");
-                    await ResolveCardAction();
+                    await Channel.SendMessageAsync("Time up! The played action is **not** Nope'd!").ConfigureAwait(false);
+                    await ResolveCardAction().ConfigureAwait(false);
                 }
             },
             null,
@@ -78,20 +80,20 @@ namespace MechHisui.ExplodingKittens
                     if (i == 0)
                         player.AddToHand(new DefuseCard());
                     else
-                        player.AddToHand(_deck.Pop());
+                        player.AddToHand(Deck.Pop());
                 }
             }
 
             foreach (var player in Players)
             {
-                await player.SendHand();
-                await Task.Delay(500);
+                await player.SendHand().ConfigureAwait(false);
+                await Task.Delay(500).ConfigureAwait(false);
             }
         }
 
         public override Task StartGame()
         {
-             _deck = new Stack<ExplodingKitttensCard>(CreateDeck(_deck, Players.Count, _expansioRules)
+             Deck = new Stack<ExplodingKitttensCard>(CreateDeck(Deck, Players.Count, ExpansionRules)
                  .Shuffle(28));
 
             return Task.CompletedTask;
@@ -99,12 +101,12 @@ namespace MechHisui.ExplodingKittens
 
         public override Task NextTurn()
         {
-            _turn++;
-            _queuedAction = null;
-            _nope = false;
-            _state = GameState.StartOfTurn;
+            Turn++;
+            QueuedAction = null;
+            Nope = false;
+            State = GameState.StartOfTurn;
 
-            if (_turn > 1)
+            if (Turn > 1)
             {
                 //if (IsFaceupImplodingKitten(card))
                 //{
@@ -119,47 +121,45 @@ namespace MechHisui.ExplodingKittens
                     return Channel.SendMessageAsync($"**{TurnPlayer.Value.User.Username}** was attacked and plays another turn.");
                 }
 
-                do TurnPlayer = Reverse ? TurnPlayer.Previous : TurnPlayer.Next;
+                do TurnPlayer = Reverse
+                        ? TurnPlayer.Previous
+                        : TurnPlayer.Next;
                 while (!TurnPlayer.Value.HasExploded);
             }
-            else
-            {
-                TurnPlayer = TurnPlayer.Next;
-            }
 
-            return Channel.SendMessageAsync($"It is turn {_turn}, and **{TurnPlayer.Value.User.Username}** may play.");
+            return Channel.SendMessageAsync($"It is turn {Turn}, and **{TurnPlayer.Value.User.Username}** may play.");
         }
 
         private Task PlayAction(ExplodingKitttensCard card)
         {
-            _state = GameState.ActionPlayed;
-            _queuedAction = card;
-            _actionTimer.Change(TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
+            State = GameState.ActionPlayed;
+            QueuedAction = card;
+            ActionTimer.Change(TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
             return Channel.SendMessageAsync($"**{TurnPlayer.Value.User.Username}** has played the action: **{card.CardName}**");
         }
 
-        internal Task ActionNoped(IUser user)
+        internal Task ActionNoped(ExKitPlayer player)
         {
-            _nope = !_nope;
-            _state = _nope ? GameState.ActionNoped : GameState.ActionYupd;
-            _actionTimer.Change(TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
-            var player = Players.SingleOrDefault(p => p.User.Id == user.Id);
-            return Channel.SendMessageAsync(_nope
+            Nope = !Nope;
+            State = Nope ? GameState.ActionNoped : GameState.ActionYupd;
+            ActionTimer.Change(TimeSpan.FromSeconds(10), Timeout.InfiniteTimeSpan);
+
+            return Channel.SendMessageAsync(Nope
                 ? $"**{player.User.Username}** has NOPE'd the previous action."
                 : $"**{player.User.Username}** has YUP'd the previous action.");
         }
 
-        private Task ResolveCardAction() => _queuedAction.Resolve(this);
+        private Task ResolveCardAction() => QueuedAction.Resolve(this);
 
-        internal void SetState(GameState state) => _state = state;
+        internal void SetState(GameState state) => State = state;
 
         internal IEnumerable<string> PeekTop(int number)
         {
-            var r = Math.Min(_deck.Count, number);
+            var r = Math.Min(Deck.Count, number);
             var buf = new string[r];
             for (int i = 0; i < r; i++)
             {
-                var card = _deck.ElementAt(i);
+                var card = Deck.ElementAt(i);
                 buf[i] =  (card is ImplodingKitten ik && ik.IsFaceUp)
                     ? card.CardName + " (face-up)"
                     : card.CardName;
@@ -167,48 +167,60 @@ namespace MechHisui.ExplodingKittens
             return buf;
         }
 
-        internal void Reshuffle() => _deck = new Stack<ExplodingKitttensCard>(_deck.Shuffle(32));
+        internal void Reshuffle() => Deck = new Stack<ExplodingKitttensCard>(Deck.Shuffle(32));
 
         public async Task Draw()
         {
-            var card = _deck.Pop();
-            await Task.Delay(2000); //needs gradual increase from 2000 -> 2500
+            var card = Deck.Pop();
+            await Task.Delay(2000).ConfigureAwait(false); //needs gradual increase from 2000 -> 2500
             if (card is ExplodingKitten)
             {
-                _state = GameState.KittenExploding;
-                await TurnPlayer.Value.SendMessageAsync("YOU HAVE DRAWN AN EXPLODING KITTEN! DEFUSE IT QUICKLY IF YOU CAN!");
-                _explodeTimer.Change(TimeSpan.FromSeconds(10), Timeout.InfiniteTimeSpan);
+                State = GameState.KittenExploding;
+                await TurnPlayer.Value.SendMessageAsync("YOU HAVE DRAWN AN EXPLODING KITTEN! DEFUSE IT QUICKLY IF YOU CAN!").ConfigureAwait(false);
+                ExplodeTimer.Change(TimeSpan.FromSeconds(10), Timeout.InfiniteTimeSpan);
             }
             else if (IsFaceupImplodingKitten(card))
             {
-                await Channel.SendMessageAsync($"**{TurnPlayer.Value.User.Username}** has drawn the face-up Imploding Kitten!");
+                await Channel.SendMessageAsync($"**{TurnPlayer.Value.User.Username}** has drawn the face-up Imploding Kitten! Sayonara.").ConfigureAwait(false);
                 TurnPlayer.Value.Explode();
-                await CheckForWinner();
+                await CheckForWinner().ConfigureAwait(false);
             }
             else
             {
-                await TurnPlayer.Value.SendMessageAsync($"You have drawn: **{card.CardName}**");
+                await TurnPlayer.Value.SendMessageAsync($"You have drawn: **{card.CardName}**").ConfigureAwait(false);
                 TurnPlayer.Value.AddToHand(card);
-                await Channel.SendMessageAsync($"**{TurnPlayer.Value.User.Username}** has safely drawn a card.");
-                await NextTurn();
+                await Channel.SendMessageAsync($"**{TurnPlayer.Value.User.Username}** has safely drawn a card.").ConfigureAwait(false);
+                await NextTurn().ConfigureAwait(false);
             }
         }
 
         private bool IsFaceupImplodingKitten(ExplodingKitttensCard card)
         {
-            return (_expansioRules & ExpansioRules.ImplodingKittens) == ExpansioRules.ImplodingKittens
+            return (ExpansionRules & ExpansioRules.ImplodingKittens) == ExpansioRules.ImplodingKittens
                     && card is ImplodingKitten ik
                     && ik.IsFaceUp;
         }
 
         public Task EndTurnWithoutDraw() => NextTurn();
 
-        private Task DefuseExplodingKitten(ExplodingKitttensCard defuse)
+        internal Task DefuseExplodingKitten(DefuseCard defuse)
         {
-            _explodeTimer.Change(Timeout.Infinite, Timeout.Infinite);
-            _discard.Push(defuse);
-            _state = GameState.KittenDefused;
+            ExplodeTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            _tempCard = Discards.Pop();
+            Discards.Push(defuse);
+            State = GameState.KittenDefused;
             return Channel.SendMessageAsync($"**{TurnPlayer.Value.User.Username}** has successfully defused an Exploding Kitten. You may now insert this kitten at any place in the deck.");
+        }
+
+        private ExplodingKitttensCard _tempCard;
+
+        internal void InsertExplodingKitten(uint location)
+        {
+            if (_tempCard != null)
+            {
+                Deck.InsertAt(location, _tempCard);
+                _tempCard = null;
+            }
         }
 
         private Task CheckForWinner()
@@ -221,19 +233,29 @@ namespace MechHisui.ExplodingKittens
         {
             if (card is ThreeOfAKind threekind)
             {
-                _discard.Push(threekind.One);
-                _discard.Push(threekind.Two);
-                _discard.Push(threekind.Three);
+                Discards.Push(threekind.One);
+                Discards.Push(threekind.Two);
+                Discards.Push(threekind.Three);
             }
             else if (card is Pair pair)
             {
-                _discard.Push(pair.One);
-                _discard.Push(pair.Two);
+                Discards.Push(pair.One);
+                Discards.Push(pair.Two);
             }
             else
             {
-                _discard.Push(card);
+                Discards.Push(card);
             }
+        }
+
+        internal ExKitPlayer GetFollowupPlayer()
+        {
+            ExKitPlayer temp;
+            do temp = Reverse
+                    ? TurnPlayer.Previous.Value
+                    : TurnPlayer.Next.Value;
+            while (!temp.HasExploded);
+            return temp;
         }
 
         public override string GetGameState()
@@ -244,10 +266,9 @@ namespace MechHisui.ExplodingKittens
             });
 
             var sb = new StringBuilder($"It is **{TurnPlayer.Value.User.Username}**'s turn")
-                .AppendLine($"There are **{_deck.Count}** cards left in the Deck")
-                .AppendLine($"The top card of the Discard Pile is a **{_discard.Peek().CardName}** card")
-                .AppendWhen(() => ((_expansioRules & ExpansioRules.ImplodingKittens) == ExpansioRules.ImplodingKittens
-                    && _deck.Peek() is ImplodingKitten ik && ik.IsFaceUp),
+                .AppendLine($"There are **{Deck.Count}** cards left in the Deck")
+                .AppendLine($"The top card of the Discard Pile is a **{Discards.Peek().CardName}** card")
+                .AppendWhen(() => IsFaceupImplodingKitten(Deck.Peek()),
                     b => b.AppendLine("The next card is the face-up Imploding Kitten!"))
                 .AppendLine($"**{Players.Count(p => p.HasExploded)}** players have exploded.")
                 .AppendLine($"Order of players is: {String.Join((Reverse ? " <- " : " -> "), x)}");
@@ -257,7 +278,7 @@ namespace MechHisui.ExplodingKittens
 
         private static IEnumerable<ExplodingKitttensCard> CreateDeck(IEnumerable<ExplodingKitttensCard> cards, int players, ExpansioRules expansions)
         {
-            int spcounter = 1;
+            int spcounter = players - 1;
             if (players == 2)
             {
                 cards = cards.Concat(Enumerable.Repeat(new DefuseCard(), 4));
@@ -266,10 +287,10 @@ namespace MechHisui.ExplodingKittens
             if ((expansions & ExpansioRules.ImplodingKittens) == ExpansioRules.ImplodingKittens)
             {
                 cards = cards.Concat(Enumerable.Repeat(new ImplodingKitten(), 1));
-                spcounter++;
+                spcounter--;
             }
 
-            cards = cards.Concat(Enumerable.Repeat(new ExplodingKitten(), players - spcounter));
+            cards = cards.Concat(Enumerable.Repeat(new ExplodingKitten(), spcounter));
             return cards;
         }
     }

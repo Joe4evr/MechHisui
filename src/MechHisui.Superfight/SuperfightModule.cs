@@ -13,6 +13,7 @@ using SharedExtensions;
 namespace MechHisui.Superfight
 {
     [Name("Superfight"), Group("sf")]
+    [Permission(MinimumPermission.Everyone)]
     public sealed class SuperfightModule : MpGameModuleBase<SuperfightService, SuperfightGame, SuperfightPlayer>
     {
         private int _discusstimeout = 5;
@@ -23,7 +24,7 @@ namespace MechHisui.Superfight
         protected override void BeforeExecute(CommandInfo command)
         {
             base.BeforeExecute(command);
-            _discusstimeout = GameService.DiscussionTimer.GetValueOrDefault(Context.Channel.Id, defaultValue: 5);
+            _discusstimeout = GameService.DiscussionTimer.GetValueOrDefault(Context.Channel, defaultValue: 5);
         }
 
         [Command("open"), Permission(MinimumPermission.ModRole)]
@@ -40,15 +41,14 @@ namespace MechHisui.Superfight
             }
             else
             {
-                if (GameService.OpenNewGame(Context.Channel))
+                if (GameService.OpenNewGame(Context))
                 {
                     await ReplyAsync("Opening for a game.").ConfigureAwait(false);
                 }
             }
         }
 
-        [Command("join"), Permission(MinimumPermission.Everyone)]
-        [RequireContext(ContextType.Guild)]
+        [Command("join"), RequireContext(ContextType.Guild)]
         public override async Task JoinGameCmd()
         {
             if (GameInProgress == CurrentlyPlaying.ThisGame)
@@ -68,8 +68,7 @@ namespace MechHisui.Superfight
             }
         }
 
-        [Command("leave"), Permission(MinimumPermission.Everyone)]
-        [RequireContext(ContextType.Guild)]
+        [Command("leave"), RequireContext(ContextType.Guild)]
         public override async Task LeaveGameCmd()
         {
             if (GameInProgress == CurrentlyPlaying.ThisGame)
@@ -144,7 +143,6 @@ namespace MechHisui.Superfight
 
         [Command("turn"), RequireGameState(GameState.EndOfTurn)]
         [RequireContext(ContextType.Guild), RequirePlayerRole(PlayerRole.Fighter)]
-        [Permission(MinimumPermission.Everyone)]
         public override Task NextTurnCmd()
             => GameInProgress == CurrentlyPlaying.ThisGame ? Game.NextTurn() : ReplyAsync("No game in progress.");
 
@@ -153,32 +151,44 @@ namespace MechHisui.Superfight
         public override Task EndGameCmd()
             => GameInProgress == CurrentlyPlaying.ThisGame ? Game.EndGame("Game ended early by moderator.") : ReplyAsync("No game in progress to end.");
 
-        [Command("state"), Permission(MinimumPermission.Everyone)]
-        [RequireContext(ContextType.Guild)]
+        [Command("state"), RequireContext(ContextType.Guild)]
         public override Task GameStateCmd()
-            => GameInProgress == CurrentlyPlaying.ThisGame ? ReplyAsync(Game.GetGameState()) : ReplyAsync("No game in progress.");
+            => GameInProgress == CurrentlyPlaying.ThisGame
+                ? ReplyAsync(Game.GetGameState())
+                : ReplyAsync("No game in progress.");
 
-        [Command("vote"), Permission(MinimumPermission.Everyone)]
+        [Command("vote"), RequirePlayerRole(PlayerRole.NonFighter)]
         [RequireContext(ContextType.Guild), RequireGameState(GameState.Voting)]
-        public Task VoteCmd(IUser target)
-            => GameInProgress == CurrentlyPlaying.ThisGame ? Game.ProcessVote(voter: Context.User, target: target) : ReplyAsync("No game in progress.");
+        public Task VoteCmd(SuperfightPlayer target)
+            => GameInProgress == CurrentlyPlaying.ThisGame
+                ? Game.ProcessVote(voter: Player, target: target)
+                : ReplyAsync("No game in progress.");
 
-        [Command("pick"), Permission(MinimumPermission.Everyone)]
-        [RequireContext(ContextType.DM), RequirePlayerRole(PlayerRole.Fighter)]
+        [Command("pick"), RequirePlayerRole(PlayerRole.Fighter)]
+        [RequireContext(ContextType.DM)]
         [RequireGameState(GameState.Choosing)]
         public Task ChooseCmd(int index)
-         => GameInProgress == CurrentlyPlaying.ThisGame ? ReplyAsync(Game.ChooseInternal(Context.User, index)) : ReplyAsync("No game in progress.");
+            => GameInProgress == CurrentlyPlaying.ThisGame
+                ? ReplyAsync(Game.ChooseInternal(Player, index))
+                : ReplyAsync("No game in progress.");
 
         [Command("confirm"), RequireGameState(GameState.Choosing)]
         [RequireContext(ContextType.DM), RequirePlayerRole(PlayerRole.Fighter)]
-        [Permission(MinimumPermission.Everyone)]
         public Task ConfirmCmd()
-         => GameInProgress == CurrentlyPlaying.ThisGame ? Game.ConfirmInternal(Context.User) : ReplyAsync("No game in progress.");
+            => GameInProgress == CurrentlyPlaying.ThisGame
+                ? Game.ConfirmInternal(Player)
+                : ReplyAsync("No game in progress.");
 
-        [Command("settimer"), RequireContext(ContextType.Guild), Permission(MinimumPermission.ModRole)]
+        [Command("settimer"), RequireContext(ContextType.Guild)]
+        [Permission(MinimumPermission.ModRole)]
         public Task SetTimerCmd(int minutes)
         {
-            GameService.DiscussionTimer[Context.Channel.Id] = minutes;
+            if (GameInProgress != CurrentlyPlaying.None)
+            {
+                return ReplyAsync("Command cannot be used during game.");
+            }
+
+            GameService.DiscussionTimer[Context.Channel] = minutes;
             return ReplyAsync($"Discussion timer now set to {minutes} minutes.");
         }
     }

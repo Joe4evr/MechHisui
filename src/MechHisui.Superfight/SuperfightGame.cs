@@ -15,9 +15,9 @@ namespace MechHisui.Superfight
 {
     public sealed class SuperfightGame : GameBase<SuperfightPlayer>
     {
-        private readonly Stack<Card> _characters;
-        private readonly Stack<Card> _abilities;
-        private readonly Stack<Card> _locations;
+        private readonly Stack<CharacterCard> _characters;
+        private readonly Stack<AbilityCard> _abilities;
+        private readonly Stack<LocationCard> _locations;
         private readonly Timer _debateTimer;
         private readonly int _discusstimeout;
         private readonly AsyncObservableCollection<PlayerVote> _votes = new AsyncObservableCollection<PlayerVote>();
@@ -26,30 +26,23 @@ namespace MechHisui.Superfight
 
         internal GameState State;
         private int _turn = 0;
-        private List<Card> _p1Picks;
-        private List<Card> _p2Picks;
+        private IReadOnlyList<ISuperfightCard> _p1Picks;
+        private IReadOnlyList<ISuperfightCard> _p2Picks;
         //private List<User> _voters;
 
         public SuperfightGame(
             IMessageChannel channel,
             IEnumerable<SuperfightPlayer> players,
-            ISuperfightConfig cfg,
+            ISuperfightConfig config,
             int timeout)
             : base(channel, players, setFirstPlayerImmediately: false)
         {
-            var c = cfg.GetCharacters().Shuffle(28);
-            var a = cfg.GetAbilities().Shuffle(28);
-            var l = cfg.GetLocations().Shuffle(28);
+            _characters = new Stack<CharacterCard>(config.GetCharacters().Shuffle(28).Select(c => new CharacterCard(c.Text)));
+            _abilities = new Stack<AbilityCard>(config.GetAbilities().Shuffle(28).Select(c => new AbilityCard(c.Text)));
+            _locations = new Stack<LocationCard>(config.GetLocations().Shuffle(28).Select(c => new LocationCard(c.Text)));
 
-            _characters = new Stack<Card>(c.Select(x => new Card(CardType.Character, x)));
-            _abilities = new Stack<Card>(a.Select(x => new Card(CardType.Ability, x)));
-            _locations = new Stack<Card>(l.Select(x => new Card(CardType.Location, x)));
-
-            _debateTimer = new Timer(
-                async cb => await StartVote().ConfigureAwait(false),
-                null,
-                Timeout.Infinite,
-                Timeout.Infinite);
+            _debateTimer = new Timer(async _ => await StartVote().ConfigureAwait(false),
+                null, Timeout.Infinite, Timeout.Infinite);
             _discusstimeout = timeout;
         }
 
@@ -112,9 +105,8 @@ namespace MechHisui.Superfight
             State = GameState.Choosing;
         }
 
-        internal string ChooseInternal(IUser u, int i)
+        internal string ChooseInternal(SuperfightPlayer player, int i)
         {
-            var player = Players.Single(p => p.User.Id == u.Id);
             if (i > player.HandSize)
             {
                 return "Out of range.";
@@ -125,30 +117,51 @@ namespace MechHisui.Superfight
                 : "You already confirmed your play.";
         }
 
-        internal async Task ConfirmInternal(IUser u)
+        internal async Task ConfirmInternal(SuperfightPlayer player)
         {
-            var pl = TurnPlayers.Single(p => p.User.Id == u.Id);
-            if (TurnPlayers[0].User.Id == pl.User.Id)
+            if (TurnPlayers[0].User.Id == player.User.Id)
             {
-                _p1Picks = pl.Confirm();
+                _p1Picks = player.Confirm();
             }
             else
             {
-                _p2Picks = pl.Confirm();
+                _p2Picks = player.Confirm();
             }
 
             if (_p1Picks != null && _p2Picks != null)
             {
-                var sb = new StringBuilder("Both players have selected their fight:\n")
-                    .AppendLine($"{TurnPlayers[0].User.Username}'s fighter: **{_p1Picks.Single(c => c.Type == CardType.Character).Text}**")
-                    .AppendLine($"with **{_p1Picks.Single(c => c.Type == CardType.Ability).Text}** and randomly **{_abilities.Pop().Text}**.")
-                    .AppendLine($"{TurnPlayers[1].User.Username}'s fighter: **{_p2Picks.Single(c => c.Type == CardType.Character).Text}**")
-                    .AppendLine($"with **{_p2Picks.Single(c => c.Type == CardType.Ability).Text}** and randomly **{_abilities.Pop().Text}**.")
-                    .Append($"And the Arena is **{_locations.Pop().Text}**. Discuss.");
-                await Channel.SendMessageAsync(sb.ToString()).ConfigureAwait(false);
-                _debateTimer.Change(TimeSpan.FromMinutes(_discusstimeout), Timeout.InfiniteTimeSpan);
-                State = GameState.Debating;
+                await Showdown().ConfigureAwait(false);
             }
+        }
+
+        private Board _board;
+
+        private async Task Showdown()
+        {
+            var location = _locations.Pop();
+            var p1f = (_p1Picks.Single(c => c.Type == CardType.Character) as CharacterCard);
+            var p1a = (_p1Picks.Single(c => c.Type == CardType.Ability) as AbilityCard);
+            var p1ra = _abilities.Pop();
+            var p2f = (_p2Picks.Single(c => c.Type == CardType.Character) as CharacterCard);
+            var p2a = (_p2Picks.Single(c => c.Type == CardType.Ability) as AbilityCard);
+            var p2ra = _abilities.Pop();
+
+            _board = new Board(location, p1f, p2f)
+            {
+                Fighter1Abilities = { p1a, p1ra },
+                Fighter2Abilities = { p2a, p2ra }
+            };
+
+            var sb = new StringBuilder("Both players have selected their fight:\n")
+                .AppendLine($"{TurnPlayers[0].User.Username}'s fighter: **{p1f.Text}**")
+                .AppendLine($"with **{p1a.Text}** and randomly **{p1ra.Text}**.")
+                .AppendLine($"{TurnPlayers[1].User.Username}'s fighter: **{p2f.Text}**")
+                .AppendLine($"with **{p2a.Text}** and randomly **{p2ra.Text}**.")
+                .Append($"And the Arena is **{location.Text}**. Discuss.");
+
+            await Channel.SendMessageAsync(sb.ToString()).ConfigureAwait(false);
+            _debateTimer.Change(TimeSpan.FromMinutes(_discusstimeout), Timeout.InfiniteTimeSpan);
+            State = GameState.Debating;
         }
 
         public Task StartVote()
@@ -171,32 +184,58 @@ namespace MechHisui.Superfight
             }
         }
 
-        public Task ProcessVote(IUser voter, IUser target)
+        public Task ProcessVote(SuperfightPlayer voter, SuperfightPlayer target)
         {
-            if (!TurnPlayers.Any(p => p.User.Id == target.Id))
+            if (!TurnPlayers.Any(p => p.User.Id == target.User.Id))
             {
                 return Channel.SendMessageAsync("That user did not play this turn.");
             }
-            if (_votes.Any(v => v.Voter.Id == voter.Id))
+            if (_votes.Any(v => v.Voter.User.Id == voter.User.Id))
             {
                 return Channel.SendMessageAsync("You already voted this turn.");
             }
 
-            _votes.Add(new PlayerVote(voter, TurnPlayers.Single(p => p.User.Id == target.Id)));
-            return Channel.SendMessageAsync($"**{voter.Username}** cast their vote.");
+            _votes.Add(new PlayerVote(voter, TurnPlayers.Single(p => p.User.Id == target.User.Id)));
+            return Channel.SendMessageAsync($"**{voter.User.Username}** cast their vote.");
         }
 
-        private async Task EndVote(IList<PlayerVote> l)
+        private async Task EndVote(IList<PlayerVote> votes)
         {
             _votes.CollectionChangedAsync -= VotesChanged;
             State = GameState.VotingClosed;
-            var winner = l.GroupBy(v => v.VoteTarget)
-                .Select(v => new { Count = v.Count(), Player = v.Key })
-                .OrderByDescending(v => v.Count)
-                .First();
+            var p1votes = votes.Count(v => v.VoteTarget.User.Id == TurnPlayers[0].User.Id);
+            var p2votes = votes.Count(v => v.VoteTarget.User.Id == TurnPlayers[1].User.Id);
 
-            await Channel.SendMessageAsync($"Voting has ended. The winner is **{winner.Player.User.Username}**.").ConfigureAwait(false);
-            Players.Single(p => p.User.Id == winner.Player.User.Id).AddPoint();
+            if (p1votes == p2votes)
+            {
+                await Channel.SendMessageAsync($"The votes are tied. Both fighters will receive an additional random ability....").ConfigureAwait(false);
+
+                var f1r = _abilities.Pop();
+                var f2r = _abilities.Pop();
+
+                var sb = new StringBuilder("Current state:\n")
+                    .AppendLine($"{TurnPlayers[0].User.Username}'s fighter: **{_board.Fighter1.Text}**")
+                    .AppendLine($"with abilities: **{String.Join("**, **", _board.Fighter1Abilities.Select(a => a.Text))}**")
+                    .AppendLine($"and new random: **{f1r.Text}**.")
+                    .AppendLine($"{TurnPlayers[1].User.Username}'s fighter: **{_board.Fighter2.Text}**")
+                    .AppendLine($"with abilities: **{String.Join("**, **", _board.Fighter2Abilities.Select(a => a.Text))}**")
+                    .AppendLine($"and new random: **{f2r.Text}**.")
+                    .Append($"Fighting at **{_board.Location.Text}**. Discuss again.");
+
+                _board.Fighter1Abilities.Add(f1r);
+                _board.Fighter2Abilities.Add(f2r);
+
+                await Channel.SendMessageAsync(sb.ToString()).ConfigureAwait(false);
+                _debateTimer.Change(TimeSpan.FromMinutes(_discusstimeout), Timeout.InfiniteTimeSpan);
+                State = GameState.Debating;
+                return;
+            }
+
+            var winner = (p1votes > p2votes) ? TurnPlayers[0] : TurnPlayers[1];
+
+            await Channel.SendMessageAsync($"Voting has ended. The winner is **{winner.User.Username}**.").ConfigureAwait(false);
+            winner.AddPoint();
+            _board = null;
             await NextTurn().ConfigureAwait(false);
         }
 

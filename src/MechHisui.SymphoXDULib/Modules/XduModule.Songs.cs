@@ -56,7 +56,7 @@ namespace MechHisui.SymphoXDULib
             //    await _stats.AddNewPagedAsync(await pmsg.SendMessage(Context.Channel));
             //}
 
-            internal static Embed FormatSong(XduSong song)
+            internal static Embed FormatSong(IXduSong song)
             {
                 return new EmbedBuilder
                 {

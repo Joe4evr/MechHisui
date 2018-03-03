@@ -5,25 +5,22 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.Addons.SimplePermissions;
 //using Discord.Addons.TriviaGames;
 using Discord.Commands;
 using Discord.WebSocket;
-using Newtonsoft.Json;
 using SharedExtensions;
-using SharedExtensions.Collections;
 using WS4NetCore;
 
 namespace Kohaku
 {
-    using KohakuConfigStore = EFConfigStore<KohakuConfig, KohakuUser>;
+    //using KohakuConfigStore = EFConfigStore<KohakuConfig, KohakuUser>;
 
 #pragma warning disable CA2007, CA1001 // Call 'ConfigureAwait(false)'.
     internal partial class Program
     {
-        private readonly IConfigStore<KohakuConfig> _store;
+        //private readonly IConfigStore<KohakuConfig> _store;
         private readonly Func<LogMessage, Task> _logger;
         private readonly DiscordSocketClient _client;
         private readonly IServiceProvider _services;
@@ -65,12 +62,15 @@ namespace Kohaku
                 DefaultRunMode = RunMode.Sync
             });
 
-            Log(LogSeverity.Verbose, "Constructing ConfigStore");
-            _store = new KohakuConfigStore(_commands,
-                options => options
-                    //.UseSqlServer(p.ConnectionString)
-                    .UseSqlite(p.ConnectionString)
-                );
+            _client.Log += _logger;
+            _commands.Log += _logger;
+
+            //Log(LogSeverity.Verbose, "Constructing ConfigStore");
+            //_store = new KohakuConfigStore(_commands,
+            //    options => options
+            //        //.UseSqlServer(p.ConnectionString)
+            //        .UseSqlite(p.ConnectionString)
+            //    );
             //_store = new JsonConfigStore<KohakuConfig>(p.ConfigPath, _commands);
             //Log(LogSeverity.Verbose, "Loading Config");
             //using (var config = _store.Load())
@@ -84,10 +84,7 @@ namespace Kohaku
             //    }
             //}
 
-            _client.Log += _logger;
-            _commands.Log += _logger;
-
-            _services = ConfigureServices(_client, /*_commands,*/ _store, _logger);
+            _services = ConfigureServices(_client, _commands, p, _logger);
         }
 
         private Task Log(LogSeverity severity, string msg)
@@ -101,30 +98,16 @@ namespace Kohaku
 
             //await InitCommands();
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly());
+            await _commands.AddModuleAsync<PermissionsModule>();
             _client.ReactionAdded += CheckReactionAdded;
             _client.MessageReceived += HandleCommand;
 
-            using (var config = _store.Load())
+            if (p.Token != null)
             {
-                var newModules = _commands.Modules.Select(m => m.Name).Except(config.Modules.Select(m => m.ModuleName), StringComparer.OrdinalIgnoreCase);
-                if (newModules.Any())
-                {
-                    foreach (var mName in newModules)
-                    {
-                        config.Modules.Add(new ConfigModule { ModuleName = mName });
-                    }
-                    config.Save();
-                }
-
-                //await _commands.UseFgoService(_depmap, config.FgoConfig);
-                var token = config.Strings.SingleOrDefault(t => t.Key == "LoginToken")?.Value;
-                if (token != null)
-                {
-                    await _client.LoginAsync(TokenType.Bot, token);
-                }
+                await _client.LoginAsync(TokenType.Bot, p.Token);
+                await _client.StartAsync();
             }
 
-            await _client.StartAsync();
             await Task.Delay(-1);
         }
 
@@ -146,7 +129,7 @@ namespace Kohaku
                     var context = new SocketCommandContext(_client, msg);
                     var result = await _commands.ExecuteAsync(context, pos, _services);
 
-                    if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
+                    if (!result.IsSuccess)
                         await msg.Channel.SendMessageAsync(result.ErrorReason);
                 }
             }

@@ -8,10 +8,10 @@ using Discord;
 
 namespace MechHisui.HisuiBets
 {
-    public class BetGame
+    internal sealed class BetGame
     {
         private const char _symbol = '\u050A';
-        private static readonly Random _rng = new Random();
+        //private static readonly Random _rng = new Random();
 
         //internal BetCollection ActiveBets { get; } = new BetCollection();
         internal bool BetsOpen { get; private set; } = true;
@@ -20,8 +20,9 @@ namespace MechHisui.HisuiBets
         internal GameType GameType { get; }
 
 
-        internal readonly List<Bet> _betTracker = new List<Bet>();
+        //internal readonly List<IBet> _betTracker = new List<IBet>();
         private readonly Timer _countDown;
+        private readonly Random _rng;
         private readonly ITextChannel _channel;
         private readonly IBankOfHisui _bank;
 
@@ -31,12 +32,12 @@ namespace MechHisui.HisuiBets
             IBankOfHisui bank,
             ITextChannel channel,
             GameType type,
-            //Random rng,
+            Random rng,
             ulong master)
         {
             _bank = bank;
             _channel = channel;
-            //_rng = rng;
+            _rng = rng;
             GameType = type;
             GameMaster = master;
 
@@ -57,66 +58,60 @@ namespace MechHisui.HisuiBets
             if (_isClosing)
             {
                 _isClosing = false;
-                CloseOff();
-                var highest = _betTracker.OrderByDescending(b => b.BettedAmount).First();
-                var most = _betTracker.GroupBy(b => b.Tribute, StringComparer.OrdinalIgnoreCase)
+                await CloseOff().ConfigureAwait(false);
+                var allBets = await _bank.RetrieveAllBets(_channel).ConfigureAwait(false);
+
+                var highest = allBets.OrderByDescending(b => b.BettedAmount).First();
+                var most = allBets.GroupBy(b => b.Target, StringComparer.OrdinalIgnoreCase)
                     .Select(b => new { Count = b.Count(), Tribute = b.Key })
                     .OrderByDescending(b => b.Count)
                     .First();
 
-                _finalBets = new BetCollection(_betTracker);
+                _finalBets = new BetCollection(allBets);
 
-                var sb = new StringBuilder($"Bets are closed. {_betTracker.Count} bets are in.\n");
+                var sb = new StringBuilder($"Bets are closed. {allBets.Count()} bets are in.\n", 150);
                 if ((!atEnd && _rng.Next(maxValue: 250) > 245) //TODO: fiddle with values
                     || Bonus > 0)
                 {
-                    var b = (Bonus > 0) ? Bonus : (uint)(_betTracker.Count * 300); //TODO: fiddle with values
-                    _finalBets.Bonus = _bank.RetrieveFromVault(b);
+                    var b = (Bonus > 0) ? Bonus : (uint)(allBets.Count() * 300); //TODO: fiddle with values
+                    _finalBets.Bonus = await _bank.RetrieveFromVault(b).ConfigureAwait(false);
                     sb.AppendLine($"BONUS: An additional {_symbol}{b} is added to the pot.");
                 }
                 sb.AppendLine($"The pot is {_symbol}{_finalBets.Bets.Sum(b => b.BettedAmount) + _finalBets.Bonus}.\n")
-                    .AppendLine($"The highest bet is {_symbol}{highest.BettedAmount} on `{highest.Tribute}`.")
+                    .AppendLine($"The highest bet is {_symbol}{highest.BettedAmount} on `{highest.Target}`.")
                     .Append($"The most bets are {most.Count} on `{most.Tribute}`.");
 
                 await _channel.SendMessageAsync(sb.ToString()).ConfigureAwait(false);
             }
         }
 
-        internal void CloseOff()
+        internal async Task CloseOff()
         {
             BetsOpen = false;
-            _bank.Withdraw(_betTracker.Select(b => new WithdrawalRequest(b.BettedAmount, b.UserId)));
+            await _bank.WithdrawAll((await _bank.RetrieveAllBets(_channel).ConfigureAwait(false)).Select(b => new WithdrawalRequest(b.BettedAmount, b.UserId))).ConfigureAwait(false);
         }
 
-        public string ProcessBet(Bet bet)
+        public async Task<string> ProcessBet(Bet bet)
         {
-            if (bet.BettedAmount < 50) return "Minimum bet must be 50.";
+            bet.GameType = GameType;
 
-            bool replace = false;
-            var tmp = _betTracker.SingleOrDefault(b => b.UserId == bet.UserId);
-            if (tmp != null)
+            switch (await _bank.RecordOrUpdateBet(bet).ConfigureAwait(false))
             {
-                if (GameType == GameType.SaltyBet)
-                {
+                case RecordingResult.BetAdded:
+                    return $"Added **{bet.UserName}**'s bet of {_symbol}{bet.BettedAmount} to {bet.Target}.";
+
+                case RecordingResult.BetReplaced:
+                    return $"Replaced **{bet.UserName}**'s bet with {_symbol}{bet.BettedAmount} to {bet.Target}.";
+
+                case RecordingResult.CannotReplaceOldBet:
                     return "Can only bet once per game in this format.";
-                }
-                else if (bet.BettedAmount < tmp.BettedAmount)
-                {
-                    return "Not allowed to replace an existing bet with less than previous bet.";
-                }
 
-                _betTracker.Remove(tmp);
-                replace = true;
-            }
+                case RecordingResult.NewBetLessThanOldBet:
+                    return "Not allowed to replace an existing bet with an amount less than previous bet.";
 
-            _betTracker.Add(bet);
-            if (replace)
-            {
-                return $"Replaced **{bet.UserName}**'s bet with {_symbol}{bet.BettedAmount} to {bet.Tribute}.";
-            }
-            else
-            {
-                return $"Added **{bet.UserName}**'s bet of {_symbol}{bet.BettedAmount} to {bet.Tribute}.";
+                case RecordingResult.MiscError:
+                default:
+                    return "Could not record that bet for some reason.";
             }
         }
 
@@ -148,7 +143,7 @@ namespace MechHisui.HisuiBets
                 await Close(true).ConfigureAwait(false);
             }
 
-            var result = await _bank.CashOut(_finalBets, winner);
+            var result = await _bank.CashOut(_finalBets, winner).ConfigureAwait(false);
             var wholeSum = _finalBets.WholeSum;
 
             if (result.Winners.Count > 0)
@@ -167,20 +162,26 @@ namespace MechHisui.HisuiBets
                         sb.Append($"**{user.Key}** ({_symbol}{user.Value}), ");
                     }
 
-                    _bank.AddToVault(result.RoundingLoss);
+                    await _bank.AddToVault(result.RoundingLoss).ConfigureAwait(false);
                     sb.Append($"and {_symbol}{wholeSum - result.RoundingLoss} was stashed.").ToString();
                 }
             }
             else
             {
-                _bank.AddToVault(wholeSum);
+                await _bank.AddToVault(wholeSum).ConfigureAwait(false);
                 sb.Append("No bets were made on the winner of this game. The stakes were stashed in the vault.");
             }
-            await GameEnd?.Invoke(_channel.Id);
+#pragma warning disable CA2007 // Do not directly await a Task
+            var ge = GameEnd;
+            if (ge != null)
+                await ge(_channel);
+#pragma warning restore CA2007 // Do not directly await a Task
             return sb.ToString();
         }
 
-        internal event Func<ulong, Task> GameEnd;
+#pragma warning disable CA1710
+        internal event Func<IMessageChannel, Task> GameEnd;
+#pragma warning restore CA1710
 
         internal void AddBonus(uint amount)
         {
@@ -189,6 +190,5 @@ namespace MechHisui.HisuiBets
                 Bonus = amount;
             }
         }
-
     }
 }

@@ -25,13 +25,11 @@ namespace MechHisui.SecretHitler
                 if (game != null)
                 {
                     var authorId = context.User.Id;
-                    var presidentId = game.CurrentPresident.User.Id;
-                    var chancellorId = game.CurrentChancellor.User.Id;
 
                     switch (RequiredRole)
                     {
                         case PlayerRole.President:
-                            if (authorId == presidentId)
+                            if (authorId == game.CurrentPresident.User.Id)
                             {
                                 return Task.FromResult(PreconditionResult.FromSuccess());
                             }
@@ -40,7 +38,7 @@ namespace MechHisui.SecretHitler
                                 goto default;
                             }
                         case PlayerRole.Chancellor:
-                            if (authorId == chancellorId)
+                            if (authorId == game.CurrentChancellor.User.Id)
                             {
                                 return Task.FromResult(PreconditionResult.FromSuccess());
                             }

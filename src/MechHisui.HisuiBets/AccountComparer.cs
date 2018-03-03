@@ -15,9 +15,11 @@ namespace MechHisui.HisuiBets
             return x?.UserId.GetHashCode() == y?.UserId.GetHashCode();
         }
 
+#pragma warning disable CA1720 // Identifier contains type name
         public override int GetHashCode(IBankAccount obj)
         {
             return obj?.UserId.GetHashCode() ?? 0;
         }
+#pragma warning restore CA1720 // Identifier contains type name
     }
 }

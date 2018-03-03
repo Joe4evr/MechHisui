@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MechHisui.ExplodingKittens.Cards
@@ -15,23 +13,19 @@ namespace MechHisui.ExplodingKittens.Cards
         {
             var current = game.TurnPlayer;
 
-            ExKitPlayer temp;
-            do temp = game.Reverse ? current.Previous.Value : current.Next.Value;
-            while (!temp.HasExploded);
-
-            var next = temp;
+            var next = game.GetFollowupPlayer();
             next.IsAttacked = true;
 
             if (current.Value.IsAttacked)
             {
                 current.Value.IsAttacked = false;
-                await game.Channel.SendMessageAsync($"**{current.Value.User.Username}** has passed on the Attack to **{next.User.Username}**.");
+                await game.Channel.SendMessageAsync($"**{current.Value.User.Username}** has passed on the Attack to **{next.User.Username}**.").ConfigureAwait(false);
             }
             else
             {
-                await game.Channel.SendMessageAsync($"**{current.Value.User.Username}** has attacked **{next.User.Username}**.");
+                await game.Channel.SendMessageAsync($"**{current.Value.User.Username}** has attacked **{next.User.Username}**.").ConfigureAwait(false);
             }
-            await game.EndTurnWithoutDraw();
+            await game.EndTurnWithoutDraw().ConfigureAwait(false);
         }
     }
 }

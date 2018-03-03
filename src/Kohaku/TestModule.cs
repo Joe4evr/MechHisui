@@ -11,19 +11,10 @@ namespace Kohaku
     [Group("test"), Name("Test")]
     public class TestModule : ModuleBase<SocketCommandContext>
     {
-        private readonly TestService _service;
-
-        public TestModule(TestService service)
+        [Command("echo"), Permission(MinimumPermission.Everyone)]
+        public Task RegisterFC([Remainder] string text)
         {
-            _service = service;
-        }
-
-        [Command("fc")]
-        public Task RegisterFC([Remainder] string code)
-        {
-            //validate code
-            _service.SetFgoCode(Context.User, code);
-            return ReplyAsync("Friend code set");
+            return ReplyAsync($"**Echo:** {text}");
         }
     }
 }

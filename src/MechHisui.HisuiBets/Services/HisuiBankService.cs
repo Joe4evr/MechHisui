@@ -49,33 +49,33 @@ namespace MechHisui.HisuiBets
             TimeSpan.FromMinutes(60 - DateTime.Now.Minute),
             TimeSpan.FromHours(1));
 
-            client.UserJoined += async user =>
+            client.UserJoined += user =>
             {
-                if (!user.IsBot && !Blacklist.Contains(user.Id))
+                Task.Run(async () =>
                 {
-                    if (await Bank.AddUser(user))
-                        await Log(LogSeverity.Verbose, $"Registered {user.Username} for a bank account.");
-                }
+                    if (!user.IsBot && !Blacklist.Contains(user.Id))
+                    {
+                        if (await Bank.AddUser(user).ConfigureAwait(false))
+                            await Log(LogSeverity.Verbose, $"Registered {user.Username} for a bank account.").ConfigureAwait(false);
+                    }
+                });
+                return Task.CompletedTask;
             };
 
             client.GuildAvailable += guild =>
             {
                 Task.Run(async () =>
                 {
-                    await guild.DownloadUsersAsync();
-                    var allAccounts = await Bank.GetAllUsers();
-                    var newUsers = guild.Users.Except(allAccounts.Select(a => guild.GetUser(a.UserId)), _userComparer);
-                    if (!newUsers.Any()) return;
+                    await guild.DownloadUsersAsync().ConfigureAwait(false);
+                    var allAccounts = await Bank.GetAllUsers().ConfigureAwait(false);
+                    var newUsers = guild.Users
+                        .Where(u => !u.IsBot && !Blacklist.Contains(u.Id))
+                        .Except(allAccounts.Select(a => guild.GetUser(a.UserId)), _userComparer)
+                        .ToList();
+                    if (newUsers.Count == 0) return;
 
-                    await Log(LogSeverity.Info, $"Registering new users in {guild.Name}");
-                    foreach (var user in newUsers)
-                    {
-                        if (!user.IsBot && !Blacklist.Contains(user.Id))
-                        {
-                            if (await Bank.AddUser(user))
-                                await Log(LogSeverity.Verbose, $"Registered {user.Username} for a bank account.");
-                        }
-                    }
+                    await Log(LogSeverity.Info, $"Registering new users in {guild.Name}").ConfigureAwait(false);
+                    await Bank.AddUsers(newUsers).ConfigureAwait(false);
                 });
                 return Task.CompletedTask;
             };
@@ -86,22 +86,22 @@ namespace MechHisui.HisuiBets
             return _logger(new LogMessage(severity, "HisuiBank", msg));
         }
 
-        public bool TryAddNewGame(ulong channelId, BetGame game)
+        internal bool TryAddNewGame(ulong channelId, BetGame game)
         {
             var success = _games.TryAdd(channelId, game);
             if (success)
             {
-                game.GameEnd += _onGameEnd;
+                game.GameEnd += OnGameEnd;
             }
 
             return success;
         }
 
-        private Task _onGameEnd(ulong channelId)
+        private Task OnGameEnd(IMessageChannel channel)
         {
-            if (_games.TryRemove(channelId, out var game))
+            if (_games.TryRemove(channel.Id, out var game))
             {
-                game.GameEnd -= _onGameEnd;
+                game.GameEnd -= OnGameEnd;
             }
             return Task.CompletedTask;
         }

@@ -2,7 +2,7 @@
   "profiles": {
     "DivaBot": {
       "commandName": "Project",
-      "commandLineArgs": "-c \"C:\\PublishOutputs\\DivaBot-jsons\\config.json\""
+      "commandLineArgs": "-db \"Data Source=..\\DivaBot.sqlite\""
     }
   }
 }

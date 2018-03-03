@@ -5,20 +5,20 @@ namespace MechHisui.SymphoXDULib
 {
     public interface IXduConfig
     {
-        IEnumerable<XduProfile> AllGears();
-        IEnumerable<XduProfile> FindGears(string filter);
-        XduProfile GetGear(int id);
+        IEnumerable<IXduProfile> AllGears();
+        IEnumerable<IXduProfile> FindGears(string filter);
+        IXduProfile GetGear(int id);
 
-        IEnumerable<Memoria> AllMemorias();
-        IEnumerable<Memoria> FindMemorias(string filter);
-        Memoria GetMemoria(int id);
+        IEnumerable<IMemoria> AllMemorias();
+        IEnumerable<IMemoria> FindMemorias(string filter);
+        IMemoria GetMemoria(int id);
 
-        IEnumerable<XduSong> AllSongs();
-        IEnumerable<XduSong> FindSongs(string filter);
-        XduSong GetSong(int id);
+        IEnumerable<IXduSong> AllSongs();
+        IEnumerable<IXduSong> FindSongs(string filter);
+        IXduSong GetSong(int id);
 
-        IEnumerable<XduEvent> AllEvents();
-        IEnumerable<XduEvent> GetCurrentEvents();
+        IEnumerable<IXduEvent> AllEvents();
+        IEnumerable<IXduEvent> GetCurrentEvents();
     }
 
     //public class XduConfig

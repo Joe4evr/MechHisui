@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="..\..\DiscordBotCore.props" />
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.0</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <!--<PackageReference Include="Discord.Addons.SimplePermissions.EFProvider" Version="1.0.0-rc" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.0" />-->
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions.EFProvider\Discord.Addons.SimplePermissions.EFProvider.csproj" />
+        <!--<ProjectReference Include="..\MechHisui.ExplodingKittens\MechHisui.ExplodingKittens.csproj" />
+        <ProjectReference Include="..\MechHisui.FateGOLib\MechHisui.FateGOLib.csproj" />
+        <ProjectReference Include="..\MechHisui.HisuiBets\MechHisui.HisuiBets.csproj" />-->
+        <ProjectReference Include="..\MechHisui.SecretHitler\MechHisui.SecretHitler.csproj" />
+        <!--<ProjectReference Include="..\MechHisui.Superfight\MechHisui.Superfight.csproj" />
+        <ProjectReference Include="..\MechHisui.SymphoXDULib\MechHisui.SymphoXDULib.csproj" />-->
+    </ItemGroup>
+    <ItemGroup>
+        <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Migrations\" />
+        <Folder Include="SymphoXDULib\Models\" />
+    </ItemGroup>
+</Project>
