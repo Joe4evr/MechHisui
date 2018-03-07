@@ -2,31 +2,22 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.Addons.MpGame;
 using MechHisui.SecretHitler.Models;
 
 namespace MechHisui.SecretHitler
 {
-    public sealed partial class SecretHitlerModule
+    public abstract partial class SecretHitlerModule
     {
         [RequireContext(ContextType.DM)]
-        public sealed class DMCommands : MpGameModuleBase<SecretHitlerService, SecretHitlerGame, SecretHitlerPlayer>
+        public sealed class DMCommands : SecretHitlerModule
         {
             public DMCommands(SecretHitlerService gameService)
                 : base(gameService)
             {
             }
 
-            #region MUDA
-            public override Task OpenGameCmd() => throw new NotImplementedException();
-            public override Task JoinGameCmd() => throw new NotImplementedException();
-            public override Task LeaveGameCmd() => throw new NotImplementedException();
-            public override Task CancelGameCmd() => throw new NotImplementedException();
-            public override Task StartGameCmd() => throw new NotImplementedException();
-            public override Task NextTurnCmd() => throw new NotImplementedException();
-            public override Task EndGameCmd() => throw new NotImplementedException();
-            public override Task GameStateCmd() => throw new NotImplementedException();
-            #endregion
+            // Precondition attributes guarantee that 'Game'
+            // is always non-null in methods below
 
             [Command("vote"), RequireGameState(GameState.VoteForGovernment)]
             public Task Vote(string vote)

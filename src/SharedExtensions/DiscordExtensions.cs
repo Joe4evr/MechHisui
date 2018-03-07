@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Discord
 {
@@ -41,6 +42,19 @@ namespace Discord
             MANAGE_ROLES = 0x10000000,
             MANAGE_WEBHOOKS = 0x20000000,
             MANAGE_EMOJIS = 0x40000000,
+        }
+
+        internal static EmbedBuilder AddFieldSequence<T>(
+            this EmbedBuilder builder,
+            IEnumerable<T> seq,
+            Action<EmbedFieldBuilder, T> action)
+        {
+            foreach (var item in seq)
+            {
+                builder.AddField(efb => action(efb, item));
+            }
+
+            return builder;
         }
     }
 }

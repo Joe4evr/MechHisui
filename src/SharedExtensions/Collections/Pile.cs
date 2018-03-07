@@ -192,7 +192,7 @@ namespace SharedExtensions.Collections
         /// </summary>
         /// <param name="card">The card to place on the bottom.</param>
         /// <exception cref="InvalidOperationException">The instance does not
-        /// allow placing cards onto it.</exception>
+        /// allow inserting cards at an arbitrary location.</exception>
         public void PutBottom(TCard card)
         {
             InsertAt(card, Count);
@@ -222,12 +222,17 @@ namespace SharedExtensions.Collections
                 if (index > Count)
                     throw new ArgumentOutOfRangeException(message: "Insertion index may not be greater than the pile's current size.", paramName: nameof(index));
 
+                if (index == 0)
+                {
+                    _pile.Push(card);
+                    return;
+                }
+
                 var buffer = new TCard[index];
                 for (int i = 0; i < buffer.Length; i++)
                 {
                     buffer[i] = _pile.Pop();
                 }
-
                 _pile.Push(card);
                 for (int i = buffer.Length - 1; i >= 0; i--)
                 {
@@ -255,19 +260,21 @@ namespace SharedExtensions.Collections
                 if (index > Count)
                     throw new ArgumentOutOfRangeException(message: "Retrieval index may not be greater than the pile's current size.", paramName: nameof(index));
 
+                if (index == 0)
+                {
+                    return _pile.Pop();
+                }
+
                 var buffer = new TCard[index];
                 for (int i = 0; i < buffer.Length; i++)
                 {
                     buffer[i] = _pile.Pop();
                 }
-
                 var tmp = _pile.Pop();
-
                 for (int i = buffer.Length - 1; i >= 0; i--)
                 {
                     _pile.Push(buffer[i]);
                 }
-
                 return tmp;
             }
 
@@ -316,7 +323,7 @@ namespace SharedExtensions.Collections
         }
 
         /// <summary>
-        /// Automatically called when the last card of the pile is drawn.
+        /// Automatically called when a card is drawn.
         /// Does nothing by default.
         /// </summary>
         protected virtual void OnLastDraw() { }

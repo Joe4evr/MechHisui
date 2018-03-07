@@ -18,14 +18,14 @@ namespace SharedExtensions
         /// <exception cref="ArgumentNullException">Any argument is null.</exception>
         public static StringBuilder AppendWhen(
             this StringBuilder builder,
-            Func<bool> predicate,
+            bool predicate,
             Func<StringBuilder, StringBuilder> fn)
         {
             builder = builder ?? throw new ArgumentNullException(nameof(builder));
-            predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
+            //predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
             fn = fn ?? throw new ArgumentNullException(nameof(fn));
 
-            return predicate() ? fn(builder) : builder;
+            return predicate ? fn(builder) : builder;
         }
 
         /// <summary> Appends each element of an <see cref="IEnumerable{T}"/>

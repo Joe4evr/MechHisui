@@ -20,6 +20,5 @@
     <Compile Include="$(MSBuildThisFileDirectory)Logger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Params.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringBuilderExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)WSModels.cs" />
   </ItemGroup>
 </Project>

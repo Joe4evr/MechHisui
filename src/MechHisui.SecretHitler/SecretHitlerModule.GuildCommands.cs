@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,29 +11,18 @@ using SharedExtensions;
 
 namespace MechHisui.SecretHitler
 {
-    [Name("SecretHitler"), Group("sh"), Permission(MinimumPermission.Everyone)]
-    public sealed partial class SecretHitlerModule : ModuleBase<SocketCommandContext>
+    public abstract partial class SecretHitlerModule
     {
         [RequireContext(ContextType.Guild | ContextType.Group)]
-        public sealed class GuildCommands : MpGameModuleBase<SecretHitlerService, SecretHitlerGame, SecretHitlerPlayer>
+        public sealed class GuildCommands : SecretHitlerModule
         {
-            private const int _minPlayers = 5;
-            private const int _maxPlayers = 10;
-            private HouseRules _currentHouseRules;
-
             public GuildCommands(SecretHitlerService gameService)
                 : base(gameService)
             {
             }
 
-            protected override void BeforeExecute(CommandInfo command)
-            {
-                base.BeforeExecute(command);
-                _currentHouseRules = GameService.HouseRulesList.GetValueOrDefault(Context.Channel, defaultValue: HouseRules.None);
-            }
-
             [Command("rules")]
-            public async Task RulesCmd()
+            public Task RulesCmd()
             {
                 var keys = GameService.GetKeys();
                 var sb = new StringBuilder("How to play:\n")
@@ -43,11 +31,11 @@ namespace MechHisui.SecretHitler
                     .AppendLine("Liberals will always start off not knowing anything.")
                     .AppendLine("If 6 Fascist Policies are enacted, or Hitler is chosen as Chancellor in the late-game, the Fascists win.")
                     .AppendLine("If 5 Liberal Policies are enacted, or Hitler is successfully killed, the Liberals win.")
-                    .AppendWhen(() => keys.Any(), b => b.AppendLine($"The following themes are available too: `{String.Join("`, `", keys)}`"))
+                    .AppendWhen(keys.Any(), b => b.AppendLine($"The following themes are available too: `{String.Join("`, `", keys)}`"))
                     .AppendLine("For more details: http://secrethitler.com/assets/Secret_Hitler_Rules.pdf ")
                     .Append("Good luck, have fun.");
 
-                await ReplyAsync(sb.ToString()).ConfigureAwait(false);
+                return ReplyAsync(sb.ToString());
             }
 
             [Command("open"), Permission(MinimumPermission.ModRole)]
@@ -55,7 +43,7 @@ namespace MechHisui.SecretHitler
             {
                 if (GameInProgress != CurrentlyPlaying.None)
                 {
-                    await ReplyAsync("Another game already in progress.").ConfigureAwait(false);
+                    await ReplyAsync("Another/different game already in progress.").ConfigureAwait(false);
                 }
                 else if (OpenToJoin)
                 {
@@ -74,7 +62,7 @@ namespace MechHisui.SecretHitler
             [Command("join")]
             public override async Task JoinGameCmd()
             {
-                if (GameInProgress != CurrentlyPlaying.None)
+                if (Game != null)
                 {
                     await ReplyAsync("Cannot join a game already in progress.").ConfigureAwait(false);
                 }
@@ -98,7 +86,7 @@ namespace MechHisui.SecretHitler
             [Command("leave")]
             public override async Task LeaveGameCmd()
             {
-                if (GameInProgress != CurrentlyPlaying.None)
+                if (Game != null)
                 {
                     await ReplyAsync("Cannot leave a game already in progress.").ConfigureAwait(false);
                 }
@@ -118,7 +106,7 @@ namespace MechHisui.SecretHitler
             [Command("cancel"), Permission(MinimumPermission.ModRole)]
             public override async Task CancelGameCmd()
             {
-                if (GameInProgress != CurrentlyPlaying.None)
+                if (Game != null)
                 {
                     await ReplyAsync("Cannot cancel a game already in progress.").ConfigureAwait(false);
                 }
@@ -152,7 +140,7 @@ namespace MechHisui.SecretHitler
 
             private async Task StartInternal(ISecretHitlerTheme theme)
             {
-                if (GameInProgress != CurrentlyPlaying.None)
+                if (Game != null)
                 {
                     await ReplyAsync("Another game already in progress.").ConfigureAwait(false);
                 }
@@ -201,7 +189,7 @@ namespace MechHisui.SecretHitler
                         }
                     }).Shuffle(32);
 
-                    var game = new SecretHitlerGame(Context.Channel, players, theme, _currentHouseRules);
+                    var game = new SecretHitlerGame(Context.Channel, players, theme, CurrentHouseRules);
                     if (GameService.TryAddNewGame(Context.Channel, game))
                     {
                         await game.SetupGame().ConfigureAwait(false);
@@ -213,20 +201,20 @@ namespace MechHisui.SecretHitler
             [Command("turn"), RequireGameState(GameState.EndOfTurn)]
             [RequirePlayerRole(PlayerRole.President)]
             public override Task NextTurnCmd()
-                => GameInProgress == CurrentlyPlaying.ThisGame
+                => (Game != null)
                     ? Game.NextTurn()
                     : ReplyAsync("No game in progress.");
 
             [Command("endearly"), Permission(MinimumPermission.ModRole)]
             public override Task EndGameCmd()
-                => GameInProgress == CurrentlyPlaying.ThisGame
+                => (Game != null)
                     ? Game.EndGame("Game ended early by moderator.")
                     : ReplyAsync("No game in progress to end.");
 
             [Command("state")]
             public override Task GameStateCmd()
-                => GameInProgress == CurrentlyPlaying.ThisGame
-                    ? ReplyAsync(Game.GetGameState())
+                => (Game != null)
+                    ? ReplyAsync("", embed: Game.GetGameStateEmbed()) //ReplyAsync(Game.GetGameState())
                     : ReplyAsync("No game in progress.");
 
             [Command("enable"), Permission(MinimumPermission.ModRole)]
@@ -243,17 +231,17 @@ namespace MechHisui.SecretHitler
                 else
                 {
                     var r = GetRule(rule);
-                    if ((_currentHouseRules & r) == r)
+                    if ((CurrentHouseRules & r) == r)
                     {
                         await ReplyAsync("Specified rule already enabled.").ConfigureAwait(false);
                         return;
                     }
-                    var newRules = _currentHouseRules | r;
-                    if (newRules == _currentHouseRules)
+                    var newRules = CurrentHouseRules | r;
+                    if (newRules == CurrentHouseRules)
                     {
                         await ReplyAsync("Unknown parameter.").ConfigureAwait(false);
                     }
-                    else if (GameService.HouseRulesList.TryUpdate(Context.Channel, newValue: newRules, comparisonValue: _currentHouseRules))
+                    else if (GameService.HouseRulesList.TryUpdate(Context.Channel, newValue: newRules, comparisonValue: CurrentHouseRules))
                     {
                         await ReplyAsync($"Enabled house rule: {r}.").ConfigureAwait(false);
                     }
@@ -274,17 +262,17 @@ namespace MechHisui.SecretHitler
                 else
                 {
                     var r = GetRule(rule);
-                    if ((_currentHouseRules | r) != _currentHouseRules)
+                    if ((CurrentHouseRules | r) != CurrentHouseRules)
                     {
                         await ReplyAsync("Specified rule already disabled.").ConfigureAwait(false);
                         return;
                     }
-                    var newRules = _currentHouseRules ^ r;
-                    if (newRules == _currentHouseRules)
+                    var newRules = CurrentHouseRules ^ r;
+                    if (newRules == CurrentHouseRules)
                     {
                         await ReplyAsync("Unknown parameter.").ConfigureAwait(false);
                     }
-                    else if (GameService.HouseRulesList.TryUpdate(Context.Channel, newValue: newRules, comparisonValue: _currentHouseRules))
+                    else if (GameService.HouseRulesList.TryUpdate(Context.Channel, newValue: newRules, comparisonValue: CurrentHouseRules))
                     {
                         await ReplyAsync($"Disabled house rule: {r}.").ConfigureAwait(false);
                     }
@@ -304,6 +292,9 @@ namespace MechHisui.SecretHitler
             }
 
             // Game-specific commands
+
+            // Precondition attributes guarantee that 'Game'
+            // is always non-null in methods below
 
             [Command("nominate"), RequireGameState(GameState.StartOfTurn)]
             [RequirePlayerRole(PlayerRole.President)]

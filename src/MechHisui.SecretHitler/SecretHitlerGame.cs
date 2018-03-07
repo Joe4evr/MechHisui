@@ -20,16 +20,19 @@ namespace MechHisui.SecretHitler
         private readonly Queue<BoardSpaceType> _liberalTrack = new Queue<BoardSpaceType>(5);
         private readonly Queue<BoardSpaceType> _fascistTrack = new Queue<BoardSpaceType>(6);
         private readonly AsyncObservableCollection<PlayerVote> _votes = new AsyncObservableCollection<PlayerVote>();
-        //private readonly List<SecretHitlerPlayer> _confirmedNot = new List<SecretHitlerPlayer>(5);
-        //private readonly List<SecretHitlerPlayer> _investigated = new List<SecretHitlerPlayer>(2);
-        private readonly List<PolicyType> _drawnPolicies = new List<PolicyType>();
-        private readonly Stack<PolicyType> _discards = new Stack<PolicyType>();
+
+        private readonly PolicyDeck _deck = new PolicyDeck(
+            Enumerable.Repeat(PolicyType.Fascist, 11)
+                .Concat(Enumerable.Repeat(PolicyType.Liberal, 6))
+                .Select(p => new PolicyCard(p))
+                .Shuffle(32));
+        private readonly PolicyDiscard _discards = new PolicyDiscard();
+        private readonly PolicyHand _drawnPolicies = new PolicyHand();
 
         private int _turn = 0;
         private int _electionTracker = 0;
         private bool _takenVeto = false;
 
-        private Stack<PolicyType> _deck;
         private Node<SecretHitlerPlayer> _afterSpecial;
         private SecretHitlerPlayer _chancellorNominee;
         private SecretHitlerPlayer _lastChancellor;
@@ -88,13 +91,7 @@ namespace MechHisui.SecretHitler
         }
 
         public override Task SetupGame()
-        {
-            _deck = new Stack<PolicyType>(Enumerable.Repeat(PolicyType.Fascist, 11)
-                .Concat(Enumerable.Repeat(PolicyType.Liberal, 6))
-                .Shuffle(32));
-
-            return Task.CompletedTask;
-        }
+            => Task.CompletedTask;
 
         public override async Task StartGame()
         {
@@ -107,11 +104,11 @@ namespace MechHisui.SecretHitler
 
                 var sb = new StringBuilder($"Your party is **{player.Party}**. ")
                     .AppendLine($"Your role is **{player.Role}**.")
-                    .AppendWhen(() => player.Role == _theme.Hitler, b =>
+                    .AppendWhen(player.Role == _theme.Hitler, b =>
                         otherFacists.Count == 1
                         ? b.Append($"Your teammate is **{otherFacists.Single().User.Username}**. Use this information wisely.")
                         : b.Append("Guard your secret well."))
-                    .AppendWhen(() => player.Party == _theme.FascistParty && player.Role != _theme.Hitler, b =>
+                    .AppendWhen(player.Party == _theme.FascistParty && player.Role != _theme.Hitler, b =>
                     {
                         if (otherFacists.Count == 1)
                         {
@@ -306,9 +303,9 @@ namespace MechHisui.SecretHitler
                     _electionTracker = 0;
                     _lastChancellor = null;
                     _lastPresident = null;
-                    var pol = _deck.Pop();
+                    var pol = _deck.Draw();
                     await Channel.SendMessageAsync(_theme.ThePeopleEnacted(pol.ToString())).ConfigureAwait(false);
-                    await ResolveEffect(((pol == PolicyType.Fascist) ? _fascistTrack : _liberalTrack).Dequeue(), peopleEnacted: true).ConfigureAwait(false);
+                    await ResolveEffect(((pol.PolicyType == PolicyType.Fascist) ? _fascistTrack : _liberalTrack).Dequeue(), peopleEnacted: true).ConfigureAwait(false);
                     if (_deck.Count < 3)
                     {
                         await ReshuffleDeck().ConfigureAwait(false);
@@ -322,12 +319,18 @@ namespace MechHisui.SecretHitler
             State = GameState.PresidentPicks;
 
             _drawnPolicies.Clear();
-            _drawnPolicies.AddRange(new[] { _deck.Pop(), _deck.Pop(), _deck.Pop() });
-            var sb = new StringBuilder($"You have drawn the following {_theme.Policies}:\n");
-            for (int i = 0; i < _drawnPolicies.Count; i++)
+            foreach (var policy in new[] { _deck.Draw(), _deck.Draw(), _deck.Draw() })
             {
-                sb.AppendLine($"\t**{i + 1}**: {(_drawnPolicies[i] == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)}");
+                _drawnPolicies.Put(policy);
             }
+
+            var sb = new StringBuilder($"You have drawn the following {_theme.Policies}:\n");
+            var counter = 0;
+            foreach (var policy in _drawnPolicies.Cards)
+            {
+                sb.AppendLine($"\t**{++counter}**: {(policy.PolicyType == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)}");
+            }
+
             sb.Append($"Which {_theme.Policy} will you discard? The other two are automatically sent to your {_theme.Chancellor}.");
 
             return CurrentPresident.SendMessageAsync(sb.ToString());
@@ -336,10 +339,9 @@ namespace MechHisui.SecretHitler
         public async Task PresidentDiscards(IDMChannel dms, int nr)
         {
             var tmp = _drawnPolicies.TakeAt(nr - 1);
-            await dms.SendMessageAsync($"Removing a {(tmp == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)} {_theme.Policy}.").ConfigureAwait(false);
+            await dms.SendMessageAsync($"Removing a {(tmp.PolicyType == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)} {_theme.Policy}.").ConfigureAwait(false);
 
-            _discards.Push(tmp);
-            //_drawnPolicies.RemoveAt(pick);
+            _discards.Put(tmp);
             await Channel.SendMessageAsync($"The {_theme.President} has discarded one {_theme.Policy}.").ConfigureAwait(false);
 
             await Task.Delay(1000).ConfigureAwait(false);
@@ -350,9 +352,10 @@ namespace MechHisui.SecretHitler
         {
             State = GameState.ChancellorPicks;
             var sb = new StringBuilder($"The {_theme.President} has given you these {_theme.Policies}:");
-            for (int i = 0; i < _drawnPolicies.Count; i++)
+            var counter = 0;
+            foreach (var policy in _drawnPolicies.Cards)
             {
-                sb.AppendLine($"\t**{i + 1}**: {(_drawnPolicies[i] == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)}");
+                sb.AppendLine($"\t**{++counter}**: {(policy.PolicyType == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)}");
             }
 
             if (!VetoUnlocked)
@@ -369,12 +372,13 @@ namespace MechHisui.SecretHitler
         public async Task ChancellorPlays(IDMChannel dms, int nr)
         {
             var tmp = _drawnPolicies.TakeAt(nr - 1);
-            //_drawnPolicies.RemoveAt(pick);
-            await dms.SendMessageAsync($"Playing a {(tmp == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)} {_theme.Policy}.").ConfigureAwait(false);
+            await dms.SendMessageAsync($"Playing a {(tmp.PolicyType== PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)} {_theme.Policy}.").ConfigureAwait(false);
 
-            _discards.Push(_drawnPolicies.Single());
-            _drawnPolicies.Clear();
-            await Channel.SendMessageAsync($"The {_theme.Chancellor} has discarded one {_theme.Policy} and played a **{(tmp == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)}** {_theme.Policy}.").ConfigureAwait(false);
+            foreach (var discard in _drawnPolicies.Clear())
+            {
+                _discards.Put(discard);
+            }
+            await Channel.SendMessageAsync($"The {_theme.Chancellor} has discarded one {_theme.Policy} and played a **{(tmp.PolicyType == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)}** {_theme.Policy}.").ConfigureAwait(false);
 
             _electionTracker = 0;
             if (_deck.Count < 3)
@@ -383,7 +387,7 @@ namespace MechHisui.SecretHitler
             }
             await Task.Delay(1000).ConfigureAwait(false);
 
-            var space = (tmp == PolicyType.Fascist)
+            var space = (tmp.PolicyType == PolicyType.Fascist)
                 ? _fascistTrack.Dequeue()
                 : _liberalTrack.Dequeue();
             await ResolveEffect(space).ConfigureAwait(false);
@@ -421,12 +425,8 @@ namespace MechHisui.SecretHitler
                         return;
                     case BoardSpaceType.Examine:
                         await Channel.SendMessageAsync($"The {_theme.President} may see the top 3 cards from the {_theme.Policy} deck.").ConfigureAwait(false);
-                        string tops = String.Join("**, **", new[]
-                        {
-                            _deck.ElementAt(0) == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal,
-                            _deck.ElementAt(1) == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal,
-                            _deck.ElementAt(2) == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal
-                        });
+                        string tops = String.Join("**, **", _deck.PeekTop(3)
+                            .Select(p => p.PolicyType == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal));
                         await CurrentPresident.SendMessageAsync($"The top 3 {_theme.Policy} cards are **{tops}**").ConfigureAwait(false);
                         return;
                     case BoardSpaceType.Investigate:
@@ -529,9 +529,9 @@ namespace MechHisui.SecretHitler
                 if (consent.Equals("approved", StringComparison.OrdinalIgnoreCase))
                 {
                     await Channel.SendMessageAsync($"The {_theme.President} has approved the {_theme.Chancellor}'s veto. Next turn when players are ready.").ConfigureAwait(false);
-                    foreach (var p in _drawnPolicies)
+                    foreach (var p in _drawnPolicies.Clear())
                     {
-                        _discards.Push(p);
+                        _discards.Put(p);
                     }
                     _drawnPolicies.Clear();
                     _electionTracker++;
@@ -562,9 +562,8 @@ namespace MechHisui.SecretHitler
 
         private Task ReshuffleDeck()
         {
-            var temp = _deck.Concat(_discards);
-            _deck = new Stack<PolicyType>(temp.Shuffle(28));
-            _discards.Clear();
+            _deck.Reshuffle(() => _deck.Clear().Concat(_discards.Clear()).Shuffle(28));
+
             return Channel.SendMessageAsync($"The {_theme.Policy} Deck has been reshuffled.");
         }
 
@@ -600,6 +599,36 @@ namespace MechHisui.SecretHitler
                 .Append($"(*Italic* = current {_theme.President}/{_theme.Chancellor}, **bold** = last {_theme.President}/{_theme.Chancellor}.)");
 
             return sb.ToString();
+        }
+
+        public Embed GetGameStateEmbed()
+        {
+            return new EmbedBuilder
+            {
+                Title = $"State of the board at turn {_turn}:",
+                Description = $@"Turn state is {State}.
+{5 - _liberalTrack.Count} {_theme.Liberal} {_theme.Policies} passed.
+{6 - _fascistTrack.Count} {_theme.Fascist} {_theme.Policies} passed.
+{_theme.ThePeopleState(3 - _electionTracker)}
+{_deck.Count} {_theme.Policies} in the deck.
+{_discards.Count} {_theme.Policies} discarded.",
+            }.AddFieldSequence(Players, (fb, p) =>
+            {
+                fb.IsInline = true;
+                fb.Name = p.User.Username;
+
+                var sb = new StringBuilder()
+                    .AppendWhen(p.User.Id == CurrentPresident.User.Id, b => b.AppendLine("Current President"))
+                    .AppendWhen(p.User.Id == CurrentChancellor?.User.Id, b => b.AppendLine("Current Chancellor"))
+                    .AppendWhen(p.User.Id == _lastPresident?.User.Id, b => b.AppendLine("Last President"))
+                    .AppendWhen(p.User.Id == _lastChancellor?.User.Id, b => b.AppendLine("Last Chancellor"))
+                    .AppendWhen(p.IsConfirmedNotHitler, b => b.AppendLine($"Not {_theme.Hitler} (Confirmed)"))
+                    .AppendWhen(!p.IsAlive, b => b.AppendLine("Is dead"));
+
+                fb.Value = (sb.Length > 0)
+                    ? sb.ToString()
+                    : "Just some schmuck";
+            }).Build();
         }
     }
 }
