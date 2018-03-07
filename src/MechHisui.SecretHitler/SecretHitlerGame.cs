@@ -618,10 +618,10 @@ namespace MechHisui.SecretHitler
                 fb.Name = p.User.Username;
 
                 var sb = new StringBuilder()
-                    .AppendWhen(p.User.Id == CurrentPresident.User.Id, b => b.AppendLine("Current President"))
-                    .AppendWhen(p.User.Id == CurrentChancellor?.User.Id, b => b.AppendLine("Current Chancellor"))
-                    .AppendWhen(p.User.Id == _lastPresident?.User.Id, b => b.AppendLine("Last President"))
-                    .AppendWhen(p.User.Id == _lastChancellor?.User.Id, b => b.AppendLine("Last Chancellor"))
+                    .AppendWhen(p.User.Id == CurrentPresident.User.Id, b => b.AppendLine($"Current {_theme.President}"))
+                    .AppendWhen(p.User.Id == CurrentChancellor?.User.Id, b => b.AppendLine($"Current {_theme.Chancellor}"))
+                    .AppendWhen(p.User.Id == _lastPresident?.User.Id, b => b.AppendLine($"Last {_theme.President}"))
+                    .AppendWhen(p.User.Id == _lastChancellor?.User.Id, b => b.AppendLine($"Last {_theme.Chancellor}"))
                     .AppendWhen(p.IsConfirmedNotHitler, b => b.AppendLine($"Not {_theme.Hitler} (Confirmed)"))
                     .AppendWhen(!p.IsAlive, b => b.AppendLine("Is dead"));
 
