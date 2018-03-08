@@ -128,18 +128,18 @@ namespace MechHisui.Core
             using (var config = _store.Load())
             {
                 var donor = GetConfigUser(request.DonorId, config);
-                if (donor == null) return DonationResult.DonorNotFound;
+                if (donor == null) return Task.FromResult(DonationResult.DonorNotFound);
 
                 var recepient = GetConfigUser(request.RecepientId, config);
-                if (recepient == null) return DonationResult.RecipientNotFound;
+                if (recepient == null) return Task.FromResult(DonationResult.RecipientNotFound);
 
                 var amount = (int)request.Amount;
-                if (donor.BankBalance < amount) return DonationResult.DonorNotEnoughMoney;
+                if (donor.BankBalance < amount) return Task.FromResult(DonationResult.DonorNotEnoughMoney);
 
                 donor.BankBalance -= amount;
                 recepient.BankBalance += amount;
                 config.SaveChanges();
-                return DonationResult.DonationSuccess;
+                return Task.FromResult(DonationResult.DonationSuccess);
                 //return false;
             }
         }

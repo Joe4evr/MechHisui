@@ -7,7 +7,7 @@ using Discord.Addons.SimplePermissions;
 
 namespace MechHisui.Core
 {
-    public partial class MechHisuiConfig : EFBaseConfigContext<HisuiGuild, HisuiChannel, HisuiUser>
+    public sealed partial class MechHisuiConfig : EFBaseConfigContext<HisuiGuild, HisuiChannel, HisuiUser>
     {
         public MechHisuiConfig(DbContextOptions options, CommandService commandService)
             : base(options, commandService)

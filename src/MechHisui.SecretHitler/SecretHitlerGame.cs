@@ -27,7 +27,7 @@ namespace MechHisui.SecretHitler
                 .Select(p => new PolicyCard(p))
                 .Shuffle(32));
         private readonly PolicyDiscard _discards = new PolicyDiscard();
-        private readonly PolicyHand _drawnPolicies = new PolicyHand();
+        private readonly Hand<PolicyCard> _drawnPolicies = new Hand<PolicyCard>();
 
         private int _turn = 0;
         private int _electionTracker = 0;
@@ -106,8 +106,8 @@ namespace MechHisui.SecretHitler
                     .AppendLine($"Your role is **{player.Role}**.")
                     .AppendWhen(player.Role == _theme.Hitler, b =>
                         otherFacists.Count == 1
-                        ? b.Append($"Your teammate is **{otherFacists.Single().User.Username}**. Use this information wisely.")
-                        : b.Append("Guard your secret well."))
+                            ? b.Append($"Your teammate is **{otherFacists.Single().User.Username}**. Use this information wisely.")
+                            : b.Append("Guard your secret well."))
                     .AppendWhen(player.Party == _theme.FascistParty && player.Role != _theme.Hitler, b =>
                     {
                         if (otherFacists.Count == 1)
@@ -321,7 +321,7 @@ namespace MechHisui.SecretHitler
             _drawnPolicies.Clear();
             foreach (var policy in new[] { _deck.Draw(), _deck.Draw(), _deck.Draw() })
             {
-                _drawnPolicies.Put(policy);
+                _drawnPolicies.Add(policy);
             }
 
             var sb = new StringBuilder($"You have drawn the following {_theme.Policies}:\n");
@@ -571,8 +571,8 @@ namespace MechHisui.SecretHitler
         {
             var sb = new StringBuilder($"State of the board at turn {_turn}:\n")
                 .AppendLine($"Turn state is {State}.")
-                .AppendLine($"{5 - _liberalTrack.Count} {_theme.Liberal} {_theme.Policies} passed.")
-                .AppendLine($"{6 - _fascistTrack.Count} {_theme.Fascist} {_theme.Policies} passed.")
+                .AppendLine($"{5 - _liberalTrack.Count}/5 {_theme.Liberal} {_theme.Policies} passed.")
+                .AppendLine($"{6 - _fascistTrack.Count}/6 {_theme.Fascist} {_theme.Policies} passed.")
                 .AppendLine(_theme.ThePeopleState(3 - _electionTracker))
                 .AppendLine($"{_deck.Count} {_theme.Policies} in the deck.")
                 .AppendLine($"{_discards.Count} {_theme.Policies} discarded.")
@@ -607,8 +607,8 @@ namespace MechHisui.SecretHitler
             {
                 Title = $"State of the board at turn {_turn}:",
                 Description = $@"Turn state is {State}.
-{5 - _liberalTrack.Count} {_theme.Liberal} {_theme.Policies} passed.
-{6 - _fascistTrack.Count} {_theme.Fascist} {_theme.Policies} passed.
+{5 - _liberalTrack.Count}/5 {_theme.Liberal} {_theme.Policies} passed.
+{6 - _fascistTrack.Count}/6 {_theme.Fascist} {_theme.Policies} passed.
 {_theme.ThePeopleState(3 - _electionTracker)}
 {_deck.Count} {_theme.Policies} in the deck.
 {_discards.Count} {_theme.Policies} discarded.",

@@ -15,9 +15,9 @@ namespace MechHisui.Superfight
 {
     public sealed class SuperfightGame : GameBase<SuperfightPlayer>
     {
-        private readonly Stack<CharacterCard> _characters;
-        private readonly Stack<AbilityCard> _abilities;
-        private readonly Stack<LocationCard> _locations;
+        private readonly SuperfightDeck<CharacterCard> _characters;
+        private readonly SuperfightDeck<AbilityCard>   _abilities;
+        private readonly SuperfightDeck<LocationCard>  _locations;
         private readonly Timer _debateTimer;
         private readonly int _discusstimeout;
         private readonly AsyncObservableCollection<PlayerVote> _votes = new AsyncObservableCollection<PlayerVote>();
@@ -37,9 +37,9 @@ namespace MechHisui.Superfight
             int timeout)
             : base(channel, players, setFirstPlayerImmediately: false)
         {
-            _characters = new Stack<CharacterCard>(config.GetCharacters().Shuffle(28).Select(c => new CharacterCard(c.Text)));
-            _abilities = new Stack<AbilityCard>(config.GetAbilities().Shuffle(28).Select(c => new AbilityCard(c.Text)));
-            _locations = new Stack<LocationCard>(config.GetLocations().Shuffle(28).Select(c => new LocationCard(c.Text)));
+            _characters = new SuperfightDeck<CharacterCard>(config.GetCharacters().Shuffle(28).Select(c => new CharacterCard(c.Text)));
+            _abilities  = new SuperfightDeck<AbilityCard>(config.GetAbilities().Shuffle(28).Select(c => new AbilityCard(c.Text)));
+            _locations  = new SuperfightDeck<LocationCard>(config.GetLocations().Shuffle(28).Select(c => new LocationCard(c.Text)));
 
             _debateTimer = new Timer(async _ => await StartVote().ConfigureAwait(false),
                 null, Timeout.Infinite, Timeout.Infinite);
@@ -53,8 +53,8 @@ namespace MechHisui.Superfight
             {
                 foreach (var p in Players)
                 {
-                    p.Draw(_characters.Pop());
-                    p.Draw(_abilities.Pop());
+                    p.Draw(_characters.Draw());
+                    p.Draw(_abilities.Draw());
                 }
             }
             return Task.CompletedTask;
@@ -97,8 +97,8 @@ namespace MechHisui.Superfight
 
             for (int i = 0; i < TurnPlayers.Length; i++)
             {
-                TurnPlayers[i].Draw(_characters.Pop());
-                TurnPlayers[i].Draw(_abilities.Pop());
+                TurnPlayers[i].Draw(_characters.Draw());
+                TurnPlayers[i].Draw(_abilities.Draw());
                 TurnPlayers[i].ConfirmedPlay = false;
                 await TurnPlayers[i].SendHand().ConfigureAwait(false);
             }
@@ -138,13 +138,13 @@ namespace MechHisui.Superfight
 
         private async Task Showdown()
         {
-            var location = _locations.Pop();
+            var location = _locations.Draw();
             var p1f = (_p1Picks.Single(c => c.Type == CardType.Character) as CharacterCard);
             var p1a = (_p1Picks.Single(c => c.Type == CardType.Ability) as AbilityCard);
-            var p1ra = _abilities.Pop();
+            var p1ra = _abilities.Draw();
             var p2f = (_p2Picks.Single(c => c.Type == CardType.Character) as CharacterCard);
             var p2a = (_p2Picks.Single(c => c.Type == CardType.Ability) as AbilityCard);
-            var p2ra = _abilities.Pop();
+            var p2ra = _abilities.Draw();
 
             _board = new Board(location, p1f, p2f)
             {
@@ -210,8 +210,8 @@ namespace MechHisui.Superfight
             {
                 await Channel.SendMessageAsync($"The votes are tied. Both fighters will receive an additional random ability....").ConfigureAwait(false);
 
-                var f1r = _abilities.Pop();
-                var f2r = _abilities.Pop();
+                var f1r = _abilities.Draw();
+                var f2r = _abilities.Draw();
 
                 var sb = new StringBuilder("Current state:\n")
                     .AppendLine($"{TurnPlayers[0].User.Username}'s fighter: **{_board.Fighter1.Text}**")
