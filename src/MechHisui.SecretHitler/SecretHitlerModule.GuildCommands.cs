@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Discord;
 using Discord.Commands;
 using Discord.Addons.MpGame;
 using Discord.Addons.SimplePermissions;

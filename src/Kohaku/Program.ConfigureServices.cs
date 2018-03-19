@@ -13,12 +13,13 @@ using Discord.Commands;
 using Discord.WebSocket;
 //using Discord.Addons.SimpleAudio;
 using Discord.Addons.SimplePermissions;
-using MechHisui.Core;
+//using MechHisui.Core;
 using SharedExtensions;
 
 namespace Kohaku
 {
-    using MechHisuiConfigStore = EFConfigStore<MechHisuiConfig, HisuiGuild, HisuiChannel, HisuiUser>;
+    //using MechHisuiConfigStore = EFConfigStore<MechHisuiConfig, HisuiGuild, HisuiChannel, HisuiUser>;
+    using KohakuConfigStore = EFConfigStore<KohakuConfig, KohakuUser>;
 #pragma warning disable CA2007, CA1001
     internal partial class Program
     {
@@ -28,16 +29,16 @@ namespace Kohaku
             DiscordSocketClient client,
             CommandService commands,
             Params p,
-            //IConfigStore<KohakuConfig> store,
             Func<LogMessage, Task> logger = null)
         {
             logger?.Invoke(new LogMessage(LogSeverity.Verbose, "Main", "Constructing ConfigStore"));
-            var store = new MechHisuiConfigStore(commands,
-                options => options
-                    //.UseSqlServer(p.ConnectionString)
-                    .UseSqlite(p.ConnectionString)
-                );
-
+            //var store = new MechHisuiConfigStore(commands,
+            //    options => options
+            //        //.UseSqlServer(p.ConnectionString)
+            //        .UseSqlite(p.ConnectionString)
+            //    );
+            var store = new KohakuConfigStore(commands,
+                options => options.UseSqlite(p.ConnectionString));
 
             var map = new ServiceCollection()
                 //.AddSingleton(new TestService(store))
@@ -64,12 +65,8 @@ namespace Kohaku
             //            }
             //        }
             //    };
-
             //    map.AddSingleton(new AudioService(client, audioCfg, logger));
-
-            //    //var fgoCfg = 
             //}
-
 
             return map.BuildServiceProvider();
         }

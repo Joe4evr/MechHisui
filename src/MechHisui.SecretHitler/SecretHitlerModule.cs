@@ -16,7 +16,7 @@ namespace MechHisui.SecretHitler
         private const int _minPlayers = 5;
         private const int _maxPlayers = 10;
 
-        private protected HouseRules CurrentHouseRules { get; private set; }
+        internal HouseRules CurrentHouseRules { get; private set; }
 
         private SecretHitlerModule(SecretHitlerService gameService)
             : base(gameService)
@@ -29,13 +29,13 @@ namespace MechHisui.SecretHitler
             CurrentHouseRules = GameService.HouseRulesList.GetValueOrDefault(Context.Channel, defaultValue: HouseRules.None);
         }
         
-        public override Task OpenGameCmd() => Task.CompletedTask;
-        public override Task JoinGameCmd() => Task.CompletedTask;
-        public override Task LeaveGameCmd() => Task.CompletedTask;
+        public override Task OpenGameCmd()   => Task.CompletedTask;
+        public override Task JoinGameCmd()   => Task.CompletedTask;
+        public override Task LeaveGameCmd()  => Task.CompletedTask;
         public override Task CancelGameCmd() => Task.CompletedTask;
-        public override Task StartGameCmd() => Task.CompletedTask;
-        public override Task NextTurnCmd() => Task.CompletedTask;
-        public override Task EndGameCmd() => Task.CompletedTask;
-        public override Task GameStateCmd() => Task.CompletedTask;
+        public override Task StartGameCmd()  => Task.CompletedTask;
+        public override Task NextTurnCmd()   => Task.CompletedTask;
+        public override Task EndGameCmd()    => Task.CompletedTask;
+        public override Task GameStateCmd()  => Task.CompletedTask;
     }
 }

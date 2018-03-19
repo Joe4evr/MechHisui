@@ -187,13 +187,12 @@ FakesAssemblies/
 *.scgdat
 
 # Self added
-/src/SelfBot
+[Mm]igrations/
 .vscode/
 .vs/
 **/config.json
 **/project.lock.json
 *.dll
 src/Kohaku/strings.json
-[Mm]igrations/
 *.sqlite
-*launchSettings.json
+**/launchSettings.json

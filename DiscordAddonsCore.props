@@ -14,7 +14,8 @@
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>git://github.com/Joe4evr/Discord.Addons</RepositoryUrl>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-        <!--<TargetFrameworks>netstandard2.0</TargetFrameworks>-->
+        <!--<TargetFrameworks>netstandard2.0</TargetFrameworks>
+        <LangVersion>7.2</LangVersion>-->
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Discord.Net.Commands" Version="1.0.2" />
