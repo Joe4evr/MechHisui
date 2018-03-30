@@ -7,9 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.MpGame;
-using MechHisui.Superfight.Models;
 using SharedExtensions;
 using SharedExtensions.Collections;
+using MechHisui.Superfight.Models;
 
 namespace MechHisui.Superfight
 {
@@ -261,5 +261,7 @@ namespace MechHisui.Superfight
                     : $"{player.User.Username} ({player.Points} points)";
             }
         }
+
+        public override Embed GetGameStateEmbed() => throw new NotImplementedException();
     }
 }

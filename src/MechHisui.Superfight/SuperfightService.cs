@@ -22,16 +22,4 @@ namespace MechHisui.Superfight
             Config = config ?? throw new ArgumentNullException(nameof(config));
         }
     }
-
-    //public static class SFExtensions
-    //{
-    //    public static Task AddSuperFight(
-    //        this CommandService cmds,
-    //        IServiceCollection map,
-    //        string cfgBasepath)
-    //    {
-    //        map.AddSingleton(new SuperfightService(cfgBasepath));
-    //        return cmds.AddModuleAsync<SuperfightModule>();
-    //    }
-    //}
 }

@@ -41,7 +41,7 @@ namespace MechHisui.Superfight
             }
             else
             {
-                if (GameService.OpenNewGame(Context))
+                if (await GameService.OpenNewGame(Context).ConfigureAwait(false))
                 {
                     await ReplyAsync("Opening for a game.").ConfigureAwait(false);
                 }
@@ -51,7 +51,7 @@ namespace MechHisui.Superfight
         [Command("join"), RequireContext(ContextType.Guild)]
         public override async Task JoinGameCmd()
         {
-            if (GameInProgress == CurrentlyPlaying.ThisGame)
+            if (Game != null)
             {
                 await ReplyAsync("Cannot join a game already in progress.").ConfigureAwait(false);
             }
@@ -71,7 +71,7 @@ namespace MechHisui.Superfight
         [Command("leave"), RequireContext(ContextType.Guild)]
         public override async Task LeaveGameCmd()
         {
-            if (GameInProgress == CurrentlyPlaying.ThisGame)
+            if (Game != null)
             {
                 await ReplyAsync("Cannot leave a game already in progress.").ConfigureAwait(false);
             }
@@ -132,7 +132,7 @@ namespace MechHisui.Superfight
                     var players = JoinedUsers.Select(u => new SuperfightPlayer(u, Context.Channel)).Shuffle(28);
 
                     var game = new SuperfightGame(Context.Channel, players, GameService.Config, _discusstimeout);
-                    if (GameService.TryAddNewGame(Context.Channel, game))
+                    if (await GameService.TryAddNewGame(Context.Channel, game).ConfigureAwait(false))
                     {
                         await game.SetupGame().ConfigureAwait(false);
                         await game.StartGame().ConfigureAwait(false);
@@ -144,23 +144,27 @@ namespace MechHisui.Superfight
         [Command("turn"), RequireGameState(GameState.EndOfTurn)]
         [RequireContext(ContextType.Guild), RequirePlayerRole(PlayerRole.Fighter)]
         public override Task NextTurnCmd()
-            => GameInProgress == CurrentlyPlaying.ThisGame ? Game.NextTurn() : ReplyAsync("No game in progress.");
+            => (Game != null)
+                ? Game.NextTurn()
+                : ReplyAsync("No game in progress.");
 
         [Command("endearly"), Permission(MinimumPermission.ModRole)]
         [RequireContext(ContextType.Guild)]
         public override Task EndGameCmd()
-            => GameInProgress == CurrentlyPlaying.ThisGame ? Game.EndGame("Game ended early by moderator.") : ReplyAsync("No game in progress to end.");
+            => (Game != null)
+                ? Game.EndGame("Game ended early by moderator.")
+                : ReplyAsync("No game in progress to end.");
 
         [Command("state"), RequireContext(ContextType.Guild)]
         public override Task GameStateCmd()
-            => GameInProgress == CurrentlyPlaying.ThisGame
+            => (Game != null)
                 ? ReplyAsync(Game.GetGameState())
                 : ReplyAsync("No game in progress.");
 
         [Command("vote"), RequirePlayerRole(PlayerRole.NonFighter)]
         [RequireContext(ContextType.Guild), RequireGameState(GameState.Voting)]
         public Task VoteCmd(SuperfightPlayer target)
-            => GameInProgress == CurrentlyPlaying.ThisGame
+            => (Game != null)
                 ? Game.ProcessVote(voter: Player, target: target)
                 : ReplyAsync("No game in progress.");
 
@@ -168,14 +172,14 @@ namespace MechHisui.Superfight
         [RequireContext(ContextType.DM)]
         [RequireGameState(GameState.Choosing)]
         public Task ChooseCmd(int index)
-            => GameInProgress == CurrentlyPlaying.ThisGame
+            => (Game != null)
                 ? ReplyAsync(Game.ChooseInternal(Player, index))
                 : ReplyAsync("No game in progress.");
 
         [Command("confirm"), RequireGameState(GameState.Choosing)]
         [RequireContext(ContextType.DM), RequirePlayerRole(PlayerRole.Fighter)]
         public Task ConfirmCmd()
-            => GameInProgress == CurrentlyPlaying.ThisGame
+            => (Game != null)
                 ? Game.ConfirmInternal(Player)
                 : ReplyAsync("No game in progress.");
 

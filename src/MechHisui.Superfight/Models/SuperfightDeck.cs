@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using SharedExtensions.Collections;
+using Discord.Addons.MpGame.Collections;
 
 namespace MechHisui.Superfight
 {

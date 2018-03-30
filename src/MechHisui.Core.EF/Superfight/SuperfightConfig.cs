@@ -15,6 +15,14 @@ namespace MechHisui.Core
             _store = store;
         }
 
+        public IEnumerable<ISuperfightCard> GetAllCards()
+        {
+            using (var config = _store.Load())
+            {
+                return config.SFCards.ToList();
+            }
+        }
+
         public IEnumerable<ISuperfightCard> GetCharacters()
         {
             using (var config = _store.Load())

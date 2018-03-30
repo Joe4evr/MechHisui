@@ -3,7 +3,7 @@
     public interface ISuperfightCard
     {
         CardType Type { get; }
-        string Text { get; }
+        string Text   { get; }
     }
 
     internal sealed class CharacterCard : ISuperfightCard

@@ -1,6 +1,6 @@
 ﻿<Project>
     <ItemGroup>
-        <PackageReference Include="Discord.Addons.MpGame" Version="1.0.1" />
+        <PackageReference Include="Discord.Addons.MpGame" Version="1.2.0-alpha4" />
         <!--<ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.MpGame\Discord.Addons.MpGame.csproj" />-->
     </ItemGroup>
 </Project>

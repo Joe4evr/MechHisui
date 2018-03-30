@@ -14,12 +14,11 @@
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>git://github.com/Joe4evr/Discord.Addons</RepositoryUrl>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-        <!--<TargetFrameworks>netstandard2.0</TargetFrameworks>
-        <LangVersion>7.2</LangVersion>-->
+        <TargetFrameworks>netstandard2.0</TargetFrameworks>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Discord.Net.Commands" Version="1.0.2" />
-        <PackageReference Include="Discord.Net.WebSocket" Version="1.0.2" />
+        <PackageReference Include="Discord.Net.Commands" Version="2.0.0-beta2-00915" />
+        <PackageReference Include="Discord.Net.WebSocket" Version="2.0.0-beta2-00915" />
     </ItemGroup>
     <PropertyGroup Condition="'$(Configuration)' == 'Release'">
         <Optimize>True</Optimize>
@@ -29,5 +28,5 @@
         <SolutionDir>.\</SolutionDir>
     </PropertyGroup>
     <!--<Import Project=".\Analyzers.props" Condition="'$(Configuration)' == 'Debug'"/>-->
-    <Import Project="$(SolutionDir)src\Discord.Addons.Core\Discord.Addons.Core.projitems" Label="Shared" />
+    <Import Project="C:\projects\Discord.Addons\src\Discord.Addons.Core\Discord.Addons.Core.projitems" Label="Shared" />
 </Project>
