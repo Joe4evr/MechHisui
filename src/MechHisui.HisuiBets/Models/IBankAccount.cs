@@ -5,6 +5,6 @@ namespace MechHisui.HisuiBets
     public interface IBankAccount
     {
         ulong UserId { get; }
-        int Bucks { get; }
+        int Balance { get; }
     }
 }

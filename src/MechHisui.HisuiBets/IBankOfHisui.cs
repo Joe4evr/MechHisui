@@ -2,30 +2,35 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
-using Discord.WebSocket;
 
 namespace MechHisui.HisuiBets
 {
     public interface IBankOfHisui
     {
+        char CurrencySymbol { get; }
+
         IBankAccount GetAccount(IUser user);
         Task<IEnumerable<IBankAccount>> GetAllUsers();
 
-        Task<RecordingResult> RecordOrUpdateBet(IBet bet);
-        Task<IBet> RetrieveBet(IUser user, ITextChannel channel);
-        Task<IEnumerable<IBet>> RetrieveAllBets(ITextChannel channel);
+        IBetGame CreateGame(ITextChannel channel, GameType gameType);
+        Task<IEnumerable<IBetGame>> GetUncashedGames();
+        Task<IBetGame> GetLastGameInChannel(ITextChannel channel);
+        Task<IBetGame> GetGameInChannelById(ITextChannel channel, int gameId);
 
-        Task<bool> AddUser(SocketGuildUser user);
-        Task AddUsers(IEnumerable<SocketGuildUser> users);
+        Task<RecordingResult> RecordOrUpdateBet(IBetGame game, IBet bet);
+        Task<IBet> RetrieveBet(IUser user, IBetGame game);
+
+        Task<IBankAccount> AddUser(IUser user);
+        Task AddUsers(IEnumerable<IUser> users);
 
         Task<BetResult> CashOut(BetCollection bets, string winner);
         Task<DonationResult> Donate(DonationRequest request);
 
         Task<WithdrawalResult> Withdraw(WithdrawalRequest request);
-        Task WithdrawAll(IEnumerable<WithdrawalRequest> requests);
+        Task CollectBets(IBetGame game);
         Task Interest();
 
-        Task AddToVault(uint amount);
+        Task AddToVault(int amount);
         Task<int> RetrieveFromVault(uint amount);
     }
 }

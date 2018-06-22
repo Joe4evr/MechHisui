@@ -4,21 +4,19 @@ namespace MechHisui.HisuiBets
 {
     public interface IBet
     {
-        ulong ChannelId   { get; }
-        ulong UserId      { get; }
-        string UserName   { get; }
-        GameType GameType { get; }
-        string Target     { get; }
-        uint BettedAmount { get; }
+        string UserName  { get; }
+        ulong UserId     { get; }
+        string Target    { get; }
+        int BettedAmount { get; }
+        int BetGameId    { get; }
     }
 
     internal sealed class Bet : IBet
     {
-        public string UserName   { get; set; }
-        public ulong UserId      { get; set; }
-        public ulong ChannelId   { get; set; }
-        public GameType GameType { get; set; }
-        public string Target     { get; set; }
-        public uint BettedAmount { get; set; }
+        public string UserName  { get; set; }
+        public ulong UserId     { get; set; }
+        public string Target    { get; set; }
+        public int BettedAmount { get; set; }
+        public int BetGameId    { get; set; }
     }
 }

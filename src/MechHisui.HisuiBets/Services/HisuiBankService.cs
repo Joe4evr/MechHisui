@@ -13,11 +13,11 @@ namespace MechHisui.HisuiBets
 {
     public sealed class HisuiBankService
     {
-        public const char Symbol = '\u050A';
-        private static readonly IEqualityComparer<SocketGuildUser> _userComparer = Comparers.UserComparer;
+        private static readonly IEqualityComparer<SocketGuildUser> _userComparer = DiscordComparers.UserComparer;
         private readonly Timer _interestTimer;
         private readonly Func<LogMessage, Task> _logger;
         private readonly ConcurrentDictionary<ulong, BetGame> _games = new ConcurrentDictionary<ulong, BetGame>();
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
         internal IBankOfHisui Bank { get; }
         internal ulong[] Blacklist { get; } = new[]
@@ -49,33 +49,56 @@ namespace MechHisui.HisuiBets
             TimeSpan.FromMinutes(60 - DateTime.Now.Minute),
             TimeSpan.FromHours(1));
 
+            client.Ready += () =>
+            {
+                Task.Run(async () =>
+                {
+                    var uncashed = await Bank.GetUncashedGames().ConfigureAwait(false);
+                    if (uncashed.Any())
+                    {
+                        foreach (var game in uncashed)
+                        {
+                            var channel = (client.GetChannel(game.ChannelId) as SocketTextChannel);
+                            if (channel != null)
+                                await channel.SendMessageAsync($"Found betting game that is not cashed out. Use `setwin {game.Id} <winner>` to pay out the stakes.").ConfigureAwait(false);
+                        }
+                    }
+                });
+                return Task.CompletedTask;
+            };
             client.UserJoined += user =>
             {
                 Task.Run(async () =>
                 {
                     if (!user.IsBot && !Blacklist.Contains(user.Id))
                     {
-                        if (await Bank.AddUser(user).ConfigureAwait(false))
-                            await Log(LogSeverity.Verbose, $"Registered {user.Username} for a bank account.").ConfigureAwait(false);
+                        await Bank.AddUser(user).ConfigureAwait(false);
+                        //if (ac != null)
+                        //    await Log(LogSeverity.Verbose, $"Registered {user.Username} for a bank account.").ConfigureAwait(false);
                     }
                 });
                 return Task.CompletedTask;
             };
-
             client.GuildAvailable += guild =>
             {
                 Task.Run(async () =>
                 {
                     await guild.DownloadUsersAsync().ConfigureAwait(false);
-                    var allAccounts = await Bank.GetAllUsers().ConfigureAwait(false);
+                    await _semaphore.WaitAsync().ConfigureAwait(false);
+
+                    var registered = (await Bank.GetAllUsers().ConfigureAwait(false))
+                        .Select(a => guild.GetUser(a.UserId));
                     var newUsers = guild.Users
                         .Where(u => !u.IsBot && !Blacklist.Contains(u.Id))
-                        .Except(allAccounts.Select(a => guild.GetUser(a.UserId)), _userComparer)
+                        .Except(registered, _userComparer)
                         .ToList();
+
                     if (newUsers.Count == 0) return;
 
                     await Log(LogSeverity.Info, $"Registering new users in {guild.Name}").ConfigureAwait(false);
                     await Bank.AddUsers(newUsers).ConfigureAwait(false);
+
+                    _semaphore.Release();
                 });
                 return Task.CompletedTask;
             };

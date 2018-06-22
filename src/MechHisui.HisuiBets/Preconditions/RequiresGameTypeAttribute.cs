@@ -15,7 +15,10 @@ namespace MechHisui.HisuiBets
             _requiredType = requiredType;
         }
 
-        public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override Task<PreconditionResult> CheckPermissionsAsync(
+            ICommandContext context,
+            CommandInfo command,
+            IServiceProvider services)
         {
             var hbservice = services.GetService<HisuiBankService>();
             if (hbservice != null && hbservice.Games.TryGetValue(context.Channel.Id, out var game))

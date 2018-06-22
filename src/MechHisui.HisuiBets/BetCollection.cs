@@ -1,18 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Discord;
 
 namespace MechHisui.HisuiBets
 {
     public sealed class BetCollection
     {
-        public BetCollection(IEnumerable<IBet> bets)
+        internal BetCollection(IBetGame game)
         {
-            Bets = bets.ToImmutableArray();
+            GameId    = game.Id;
+            ChannelId = game.ChannelId;
+            Bets      = game.Bets.ToImmutableArray();
         }
 
-        public IReadOnlyCollection<IBet> Bets { get; }
-        public int Bonus { get; internal set; } = 0;
-        public uint WholeSum => (uint)(Bets.Sum(b => b.BettedAmount) + Bonus);
+        public int GameId { get; }
+        public ulong ChannelId { get; }
+        public ImmutableArray<IBet> Bets { get; }
+        public int WholeSum => Bets.Sum(b => b.BettedAmount) + Bonus;
+
+        internal int Bonus { get; set; } = 0;
     }
 }

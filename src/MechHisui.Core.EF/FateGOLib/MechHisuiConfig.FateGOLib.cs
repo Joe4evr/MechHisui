@@ -33,75 +33,89 @@ namespace MechHisui.Core
 
         private static void ConfigureFgoModel(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<HisuiUser>()
-                .HasOne(u => u.FriendData)
-                .WithOne(f => f.User)
-                .HasForeignKey<FgoFriendData>(f => f.UserFK);
+            modelBuilder.Entity<HisuiUser>(user =>
+            {
+                user.HasOne(u => u.FriendData);
+            });
 
+            modelBuilder.Entity<ServantProfile>(servant =>
+            {
+                servant.HasOne(p => p.Bond10);
 
-            modelBuilder.Entity<ServantProfile>()
-                .HasOne(p => p.Bond10);
+                servant.HasMany(p => p.Traits)
+                    .WithOne(t => t.Servant);
 
-            modelBuilder.Entity<ServantProfile>()
-                .HasMany(p => p.Traits)
-                .WithOne(t => t.Servant);
+                servant.HasMany(p => p.ActiveSkills)
+                    .WithOne(s => s.Servant);
 
-            modelBuilder.Entity<ServantProfileTrait>()
-                .HasOne(t => t.Servant)
-                .WithMany(p => p.Traits);
+                servant.HasMany(p => p.PassiveSkills)
+                    .WithOne(s => s.Servant);
 
-            modelBuilder.Entity<ServantProfileTrait>()
-                .HasOne(t => t.Trait);
+                servant.HasMany(p => p.Aliases)
+                    .WithOne(a => a.Servant);
+            });
 
-            modelBuilder.Entity<ServantTrait>()
-                .HasMany(t => t.Servants)
-                .WithOne(t => t.Trait);
+            modelBuilder.Entity<CEProfile>(ce =>
+            {
+                ce.HasMany(c => c.Aliases)
+                    .WithOne(a => a.CE);
+            });
 
-            modelBuilder.Entity<ServantProfile>()
-                .HasMany(p => p.ActiveSkills)
-                .WithOne(s => s.Servant);
+            modelBuilder.Entity<ServantTrait>(trait =>
+            {
+                trait.HasMany(t => t.Servants)
+                    .WithOne(t => t.Trait);
+            });
 
-            modelBuilder.Entity<ServantActiveSkill>()
-                .HasOne(s => s.Servant)
-                .WithMany(p => p.ActiveSkills);
+            modelBuilder.Entity<ServantProfileTrait>(trait =>
+            {
+                trait.HasOne(t => t.Servant)
+                    .WithMany(p => p.Traits);
 
-            modelBuilder.Entity<ServantActiveSkill>()
-                .HasOne(s => s.Skill)
-                .WithMany(a => a.Servants);
+                trait.HasOne(t => t.Trait);
+            });
 
-            modelBuilder.Entity<ActiveSkill>()
-                .HasMany(a => a.Servants)
-                .WithOne(s => s.Skill);
+            modelBuilder.Entity<ActiveSkill>(aSkill =>
+            {
+                aSkill.HasMany(a => a.Servants)
+                    .WithOne(s => s.Skill);
+            });
 
-            modelBuilder.Entity<ServantProfile>()
-                .HasMany(p => p.PassiveSkills)
-                .WithOne(s => s.Servant);
+            modelBuilder.Entity<ServantActiveSkill>(skill =>
+            {
+                skill.HasOne(s => s.Servant)
+                    .WithMany(p => p.ActiveSkills);
 
-            modelBuilder.Entity<ServantPassiveSkill>()
-                .HasOne(s => s.Servant)
-                .WithMany(p => p.PassiveSkills);
+                skill.HasOne(s => s.Skill)
+                    .WithMany(a => a.Servants);
+            });
 
-            modelBuilder.Entity<ServantPassiveSkill>()
-                .HasOne(s => s.Skill)
-                .WithMany(p => p.Servants);
+            modelBuilder.Entity<PassiveSkill>(pSkill =>
+            {
+                pSkill.HasMany(p => p.Servants)
+                    .WithOne(s => s.Skill);
+            });
 
-            modelBuilder.Entity<ServantProfile>()
-                .HasMany(p => p.Aliases)
-                .WithOne(a => a.Servant);
+            modelBuilder.Entity<ServantPassiveSkill>(skill =>
+            {
+                skill.HasOne(s => s.Servant)
+                    .WithMany(p => p.PassiveSkills);
 
-            modelBuilder.Entity<ServantAlias>()
-                .HasOne(a => a.Servant)
-                .WithMany(p => p.Aliases);
+                skill.HasOne(s => s.Skill)
+                    .WithMany(p => p.Servants);
+            });
 
+            modelBuilder.Entity<ServantAlias>(alias =>
+            {
+                alias.HasOne(a => a.Servant)
+                    .WithMany(p => p.Aliases);
+            });
 
-            modelBuilder.Entity<CEProfile>()
-                .HasMany(c => c.Aliases)
-                .WithOne(a => a.CE);
-
-
-            modelBuilder.Entity<MysticCode>()
-                .HasMany(m => m.Aliases)
-                .WithOne(a => a.Code);
+            modelBuilder.Entity<MysticCode>(code =>
+            {
+                code.HasMany(m => m.Aliases)
+                    .WithOne(a => a.Code);
+            });
         }
     }
 }

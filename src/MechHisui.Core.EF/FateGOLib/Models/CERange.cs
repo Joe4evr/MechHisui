@@ -7,7 +7,7 @@ using MechHisui.FateGOLib;
 
 namespace MechHisui.Core
 {
-    public sealed class CERange
+    public sealed class CERange : ICERange
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -31,6 +31,10 @@ namespace MechHisui.Core
         public string EventEffectMax { get; set; }
         public string Image { get; set; }
         public bool Obtainable { get; set; }
-        public IEnumerable<CEAlias> Aliases { get; set; }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

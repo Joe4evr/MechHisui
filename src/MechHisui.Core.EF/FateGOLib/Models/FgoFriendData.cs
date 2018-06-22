@@ -22,10 +22,10 @@ namespace MechHisui.Core
         public int Id { get; set; }
 
         public string FriendCode { get; set; }
-        public string Class { get; set; }
-        public string Servant { get; set; }
+        //public string Class { get; set; }
+        //public string Servant { get; set; }
 
-        public HisuiUser User { get; set; }
-        public int UserFK { get; set; }
+        //public HisuiUser User { get; set; }
+        //public int UserFK { get; set; }
     }
 }

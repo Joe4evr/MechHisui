@@ -25,7 +25,7 @@ namespace MechHisui.HisuiBets
             _options = options.ToImmutableArray();
         }
 
-        public override Task<PreconditionResult> CheckPermissions(
+        public override Task<PreconditionResult> CheckPermissionsAsync(
             ICommandContext context,
             ParameterInfo parameter,
             object value,

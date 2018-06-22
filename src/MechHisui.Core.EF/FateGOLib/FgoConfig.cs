@@ -229,6 +229,7 @@ namespace MechHisui.Core
 
         private static IQueryable<CEProfile> QueryCEs(MechHisuiConfig config)
             => config.CEs.Include(c => c.Aliases);
+
         private static CERange QueryCERange(MechHisuiConfig config, int id)
             => config.CERanges.SingleOrDefault(r => r.LowId <= id && id <= r.HighId);
 

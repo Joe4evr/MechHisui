@@ -9,41 +9,18 @@ namespace MechHisui.Core
 {
     public sealed partial class MechHisuiConfig : EFBaseConfigContext<HisuiGuild, HisuiChannel, HisuiUser>
     {
-        public MechHisuiConfig(DbContextOptions options, CommandService commandService)
-            : base(options, commandService)
+        public MechHisuiConfig(DbContextOptions options)
+            : base(options)
         {
         }
 
         //misc
         public DbSet<NamedScalar> Scalars { get; set; }
-        public DbSet<SecretHitlerTheme> SHThemes { get; set; }
-        public DbSet<SuperfightCard> SFCards { get; set; }
-        public DbSet<PreliminaryBet> RecordedBets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ConfigureFgoModel(modelBuilder);
-
-            modelBuilder.Entity<PreliminaryBet>()
-                .HasOne(b => b.Channel);
-
-            modelBuilder.Entity<PreliminaryBet>()
-                .HasOne(b => b.User);
-
-            //modelBuilder.Entity<XduSkill>()
-            //    .Property(s => s.Id)
-            //    .ValueGeneratedOnAdd();
-
-            //modelBuilder.Entity<CharacterVariation>()
-            //    .Property(v => v.Id)
-            //    .ValueGeneratedNever();
-
-            //modelBuilder.Entity<CharacterVariation>()
-            //    .HasMany(v => v.Skills);
-
-            //modelBuilder.Entity<Memoria>()
-            //    .Property(v => v.Id)
-            //    .ValueGeneratedNever();
+            ConfigureBetsModel(modelBuilder);
 
             base.OnModelCreating(modelBuilder);
         }
@@ -54,7 +31,6 @@ namespace MechHisui.Core
         public MechHisuiConfig CreateDbContext(string[] args)
         {
             var map = new ServiceCollection()
-                .AddSingleton(new CommandService())
                 .AddDbContext<MechHisuiConfig>(opt => opt.UseSqlite(@"Data Source=test.sqlite"))
                 .BuildServiceProvider();
 

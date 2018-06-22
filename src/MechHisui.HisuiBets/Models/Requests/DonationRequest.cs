@@ -1,14 +1,15 @@
 ﻿using System;
+using Discord;
 
 namespace MechHisui.HisuiBets
 {
     public struct DonationRequest
     {
-        public DonationRequest(uint amount, ulong donorId, ulong recepientId)
+        internal DonationRequest(uint amount, IBankAccount donor, IUser recepient)
         {
             Amount = amount;
-            DonorId = donorId;
-            RecepientId = recepientId;
+            DonorId = donor.UserId;
+            RecepientId = recepient.Id;
         }
 
         public uint Amount { get; }

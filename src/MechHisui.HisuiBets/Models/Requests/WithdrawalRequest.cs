@@ -4,13 +4,13 @@ namespace MechHisui.HisuiBets
 {
     public struct WithdrawalRequest
     {
-        public WithdrawalRequest(uint amount, ulong accountId)
+        internal WithdrawalRequest(int amount, ulong accountId)
         {
             Amount = amount;
             AccountId = accountId;
         }
 
-        public uint Amount { get; }
+        public int Amount { get; }
         public ulong AccountId { get; }
     }
 }
