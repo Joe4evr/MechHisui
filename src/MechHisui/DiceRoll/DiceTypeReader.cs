@@ -9,7 +9,10 @@ namespace MechHisui
     {
         private static readonly Regex _diceReader = new Regex("^[0-9]+d[0-9]+$", RegexOptions.Compiled);
 
-        public override Task<TypeReaderResult> Read(ICommandContext context, string input, IServiceProvider services)
+        public override Task<TypeReaderResult> ReadAsync(
+            ICommandContext context,
+            string input,
+            IServiceProvider services)
         {
             if (_diceReader.Match(input).Success)
             {

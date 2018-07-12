@@ -15,12 +15,13 @@ namespace SharedExtensions
         private readonly StreamWriter _logFile;
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
+        [DebuggerStepThrough]
         public Logger(LogSeverity minimum, string logPath = null)
         { 
             _minimum = minimum;
             string logdir = Path.Combine(Directory.GetCurrentDirectory(), logPath ?? "logs");
-            Directory.CreateDirectory(logdir);
-            _logFile = File.AppendText(Path.Combine(logdir, $"{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.log"));
+            var dir = Directory.CreateDirectory(logdir);
+            _logFile = File.AppendText(Path.Combine(dir.FullName, $"{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.log"));
             _logFile.AutoFlush = true;
         }
 

@@ -11,17 +11,18 @@ namespace MechHisui.HisuiBets
     internal sealed class BetGame
     {
         internal bool BetsOpen { get; private set; } = true;
-        internal uint Bonus { get; private set; } = 0;
+        internal int Bonus { get => _bonus; private set => _bonus = value; }
         internal IUser GameMaster { get; }
         internal GameType GameType { get; }
 
-        private readonly int _gameId;
+        private readonly IBetGame _game;
         private readonly Timer _countDown;
         private readonly Random _rng;
         private readonly ITextChannel _channel;
         private readonly IBankOfHisui _bank;
 
         private bool _isClosing = false;
+        private int _bonus = 0;
 
         public BetGame(
             IBankOfHisui bank,
@@ -35,7 +36,7 @@ namespace MechHisui.HisuiBets
             _rng = rng ?? throw new ArgumentNullException();
             GameType = type;
             GameMaster = master;
-            _gameId = bank.CreateGame(channel, type).Id;
+            _game = bank.CreateGame(channel, type);
 
             _countDown = new Timer(async cb => await Close(false).ConfigureAwait(false), null,
             Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
@@ -55,22 +56,22 @@ namespace MechHisui.HisuiBets
             {
                 _isClosing = false;
                 await CloseOff().ConfigureAwait(false);
-                var game = await _bank.GetGameInChannelById(_channel, _gameId).ConfigureAwait(false);
-                var allBets = game.Bets;
+                var game = await _bank.GetGameInChannelById(_channel, _game.Id).ConfigureAwait(false);
+                var allBets = new List<IBet>(game.Bets);
 
-                var highest = allBets.OrderByDescending(b => b.BettedAmount).First();
+                var highest = allBets.OrderByDescending(b => b.BettedAmount).FirstOrDefault();
                 var most = allBets.GroupBy(b => b.Target, StringComparer.OrdinalIgnoreCase)
                     .Select(b => new { Count = b.Count(), Tribute = b.Key })
                     .OrderByDescending(b => b.Count)
-                    .First();
+                    .FirstOrDefault();
 
                 _finalBets = new BetCollection(game);
 
-                var sb = new StringBuilder(LogString(_gameId, $"Bets are closed. {allBets.Count()} bets are in.\n"), 150);
-                if ((!atEnd && _rng.Next(maxValue: 250) > 245) //TODO: fiddle with values
+                var sb = new StringBuilder(LogString(_game.Id, $"Bets are closed. {allBets.Count} bets are in.\n"), 150);
+                if ((!atEnd && _rng.NextDouble() >= 0.85) //TODO: fiddle with values
                     || Bonus > 0)
                 {
-                    var b = (Bonus > 0) ? Bonus : (uint)(allBets.Count() * 300); //TODO: fiddle with values
+                    var b = (Bonus > 0) ? Bonus : (allBets.Count * 300); //TODO: fiddle with values
                     _finalBets.Bonus = await _bank.RetrieveFromVault(b).ConfigureAwait(false);
                     sb.AppendLine($"BONUS: An additional {_bank.CurrencySymbol}{b} is added to the pot.");
                 }
@@ -85,21 +86,21 @@ namespace MechHisui.HisuiBets
         internal async Task CloseOff()
         {
             BetsOpen = false;
-            var game = await _bank.GetGameInChannelById(_channel, _gameId).ConfigureAwait(false);
-            await _bank.CollectBets(game).ConfigureAwait(false);
+            //var game = await _bank.GetGameInChannelById(_channel, _game.Id).ConfigureAwait(false);
+            await _bank.CollectBets(_game.Id).ConfigureAwait(false);
         }
 
         public async Task<string> ProcessBet(IBet bet)
         {
-            var game = await _bank.GetGameInChannelById(_channel, _gameId).ConfigureAwait(false);
+            //var game = await _bank.GetGameInChannelById(_channel, _game.Id).ConfigureAwait(false);
 
-            switch (await _bank.RecordOrUpdateBet(game, bet).ConfigureAwait(false))
+            switch (await _bank.RecordOrUpdateBet(_game, bet).ConfigureAwait(false))
             {
                 case RecordingResult.BetAdded:
-                    return LogString(_gameId, $"Added **{bet.UserName}**'s bet of {_bank.CurrencySymbol}{bet.BettedAmount} to **{bet.Target}**.");
+                    return LogString(_game.Id, $"Added **{bet.UserName}**'s bet of {_bank.CurrencySymbol}{bet.BettedAmount} to **{bet.Target}**.");
 
                 case RecordingResult.BetReplaced:
-                    return LogString(_gameId, $"Replaced **{bet.UserName}**'s bet with {_bank.CurrencySymbol}{bet.BettedAmount} to **{bet.Target}**.");
+                    return LogString(_game.Id, $"Replaced **{bet.UserName}**'s bet with {_bank.CurrencySymbol}{bet.BettedAmount} to **{bet.Target}**.");
 
                 case RecordingResult.CannotReplaceOldBet:
                     return "Can only bet once per game in this format.";
@@ -118,13 +119,13 @@ namespace MechHisui.HisuiBets
             switch (GameType)
             {
                 case GameType.HungerGame:
-                    await _channel.SendMessageAsync(LogString(_gameId, "A new game is starting. You may place your bets now.")).ConfigureAwait(false);
+                    await _channel.SendMessageAsync(LogString(_game.Id, "A new game is starting. You may place your bets now.")).ConfigureAwait(false);
                     break;
                 case GameType.HungerGameDistrictsOnly:
-                    await _channel.SendMessageAsync(LogString(_gameId, "A new game is starting. You can only bet on District numbers.")).ConfigureAwait(false);
+                    await _channel.SendMessageAsync(LogString(_game.Id, "A new game is starting. You can only bet on District numbers.")).ConfigureAwait(false);
                     break;
                 case GameType.SaltyBet:
-                    await _channel.SendMessageAsync(LogString(_gameId, "Starting a SaltyBet game. Bets will close shortly.")).ConfigureAwait(false);
+                    await _channel.SendMessageAsync(LogString(_game.Id, "Starting a SaltyBet game. Bets will close shortly.")).ConfigureAwait(false);
                     _countDown.Change(TimeSpan.FromSeconds(30), Timeout.InfiniteTimeSpan);
                     break;
                 default:
@@ -143,7 +144,7 @@ namespace MechHisui.HisuiBets
             var result = await _bank.CashOut(_finalBets, winner).ConfigureAwait(false);
             var wholeSum = _finalBets.WholeSum;
 
-            var reply = await EndMessage(result, _bank, _channel, _gameId, wholeSum).ConfigureAwait(false);
+            var reply = await EndMessage(result, _bank, _channel, _game.Id, wholeSum).ConfigureAwait(false);
 
             var ge = GameEnd;
             if (ge != null)
@@ -156,13 +157,8 @@ namespace MechHisui.HisuiBets
         internal event Func<IMessageChannel, Task> GameEnd;
 #pragma warning restore CA1710
 
-        internal void AddBonus(uint amount)
-        {
-            if (Bonus == 0) //YOBO: You Only Bonus Once (per game)
-            {
-                Bonus = amount;
-            }
-        }
+        internal void AddBonus(int amount)
+            => Interlocked.CompareExchange(ref _bonus, amount, 0); //YOBO: You Only Bonus Once (per game)
 
         //NOTE: This method has to be callable without an instance
         internal static async Task<string> EndMessage(
@@ -186,11 +182,19 @@ namespace MechHisui.HisuiBets
                     foreach (var user in result.Winners)
                     {
                         var name = await channel.GetUserAsync(user.Key).ConfigureAwait(false);
-                        sb.Append($"**{name}** ({bank.CurrencySymbol}{user.Value}), ");
+                        sb.Append($"**{name}** ({bank.CurrencySymbol}{user.Value})");
                     }
 
-                    await bank.AddToVault(result.RoundingLoss).ConfigureAwait(false);
-                    sb.Append($"and {bank.CurrencySymbol}{wholeSum - result.RoundingLoss} was stashed.").ToString();
+
+                    if (result.RoundingLoss > 0)
+                    {
+                        await bank.AddToVault(result.RoundingLoss).ConfigureAwait(false);
+                        sb.Append($", and {bank.CurrencySymbol}{result.RoundingLoss} was stashed.").ToString();
+                    }
+                    else
+                    {
+                        sb.Append('.');
+                    }
                 }
             }
             else

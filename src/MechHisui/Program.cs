@@ -1,21 +1,23 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.WebSocket;
 using Discord.Commands;
 using Discord.Addons.SimplePermissions;
-using MechHisui.HisuiBets;
+//using MechHisui.HisuiBets;
+//using MechHisui.FateGOLib;
 using SharedExtensions;
-using MechHisui.FateGOLib;
 
 namespace MechHisui
 {
 #pragma warning disable RCS1090 // Call 'ConfigureAwait(false)'.
     public partial class Program
     {
-        private const string Version = "MH v1.3-test";
+        private const string Version = "MHOS v2.0-test";
 
         private static async Task Main(string[] args)
         {
@@ -46,10 +48,7 @@ namespace MechHisui
             {
                 AlwaysDownloadUsers = true,
                 MessageCacheSize = 50,
-                LogLevel = minlog,
-#if !ARM
-                WebSocketProvider = WS4NetCore.WS4NetProvider.Instance
-#endif
+                LogLevel = minlog
             });
 
             Log(LogSeverity.Info, $"Constructing {nameof(CommandService)}");
@@ -66,6 +65,7 @@ namespace MechHisui
             _client.MessageReceived += HandleCommand;
         }
 
+        [DebuggerStepThrough]
         private Task Log(LogSeverity severity, string msg)
         {
             return _logger(new LogMessage(severity, "Main", msg));
@@ -73,12 +73,7 @@ namespace MechHisui
 
         private async Task Start(Params p)
         {
-            //await _commands.AddModulesAsync(Assembly.GetEntryAssembly());
-            await _commands.AddModuleAsync<PermissionsModule>();
-            await _commands.AddModuleAsync<DiceRollModule>();
-            await _commands.AddModuleAsync<HisuiBetsModule>();
-            await _commands.AddModuleAsync<FgoModule>();
-
+            await InitCommands();
             _client.Ready += async () =>
             {
                 await Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");
@@ -101,13 +96,13 @@ namespace MechHisui
                 await _client.StartAsync();
             }
 
-            await Task.Delay(-1);
+            await Task.Delay(Timeout.Infinite);
         }
 
         private Task HandleCommand(SocketMessage arg)
         {
-            var msg = arg as SocketUserMessage;
-            if (msg == null) return Task.CompletedTask;
+            if (!(arg is SocketUserMessage msg))
+                return Task.CompletedTask;
 
             if (msg.Author.Id == _client.CurrentUser.Id || msg.Author.IsBot) return Task.CompletedTask;
 
@@ -121,13 +116,17 @@ namespace MechHisui
                 {
                     Task.Run(async () =>
                     {
-                        var context = new SocketCommandContext(_client, msg);
-                        var result = await _commands.ExecuteAsync(context, pos, services: _services);
-
-                        if (!result.IsSuccess && (result.Error != CommandError.UnknownCommand
-                            || context.Guild?.Id == 161445678633975808ul))
+                        using (var scope = _services.CreateScope())
                         {
-                            await msg.Channel.SendMessageAsync(result.ErrorReason);
+                            var context = new SocketCommandContext(_client, msg);
+                            var result = await _commands.ExecuteAsync(context, pos, services: scope.ServiceProvider);
+
+                            if (!result.IsSuccess
+                                && (result.Error != CommandError.UnknownCommand
+                                    || context.Guild?.Id == 161445678633975808ul))
+                            {
+                                await msg.Channel.SendMessageAsync(result.ErrorReason);
+                            }
                         }
                     });
                 }

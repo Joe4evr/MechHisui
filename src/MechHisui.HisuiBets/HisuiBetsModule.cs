@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Discord.Addons.Preconditions;
 using Discord.Addons.SimplePermissions;
 using SharedExtensions;
@@ -14,7 +15,7 @@ namespace MechHisui.HisuiBets
 {
     [Name("HisuiBets"), RequireContext(ContextType.Guild)]
     [Permission(MinimumPermission.Everyone)]
-    public sealed class HisuiBetsModule : ModuleBase<SocketCommandContext>
+    public sealed partial class HisuiBetsModule : ModuleBase<SocketCommandContext>
     {
         private const char _symbol = '\u050A';
 
@@ -132,38 +133,30 @@ namespace MechHisui.HisuiBets
             return true;
         }
 
-        [Command("bet"), Hidden]
-        [Priority(0), RequiresGameType(GameType.HungerGame)]
-        public async Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, [Remainder] string target)
-        {
-            if (_account != null && await CheckPreReqs(_account.Balance).ConfigureAwait(false))
-                await Bet(_account.Balance, target).ConfigureAwait(false);
-        }
+        [Command("bet allin"), Alias("allin", "bet all")]
+        [Priority(10), RequiresGameType(GameType.HungerGame)]
+        public Task BetAllIn([Remainder] string target)
+            => Bet(_account.Balance, target);
 
-        [Command("bet"), Hidden]
-        [Priority(1), RequiresGameType(GameType.HungerGameDistrictsOnly)]
-        public async Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, int district)
-        {
-            if (_account != null && await CheckPreReqs(_account.Balance).ConfigureAwait(false))
-                await Bet(_account.Balance, district).ConfigureAwait(false);
-        }
+        [Command("bet allin"), Alias("allin", "bet all")]
+        [Priority(11), RequiresGameType(GameType.HungerGameDistrictsOnly)]
+        public Task BetAllIn(string allin, int district)
+            => Bet(_account.Balance, district);
 
-        [Command("bet"), Hidden]
-        [Priority(2), RequiresGameType(GameType.SaltyBet)]
-        public async Task Bet([LimitTo(StringComparison.OrdinalIgnoreCase, "all", "allin")] string allin, SaltyBetTeam team)
-        {
-            if (_account != null && await CheckPreReqs(_account.Balance).ConfigureAwait(false))
-                await Bet(_account.Balance, team).ConfigureAwait(false);
-        }
+        [Command("bet allin"), Alias("allin", "bet all")]
+        [Priority(12), RequiresGameType(GameType.SaltyBet)]
+        public Task BetAllIn(string allin, SaltyBetTeam team)
+            => Bet(_account.Balance, team);
 
         [Command("bet it all"), Hidden]
-        [Priority(5), RequiresGameType(GameType.Any)]
+        [Priority(20), RequiresGameType(GameType.Any)]
         public Task BetItAll()
             => Context.Channel.SendFileAsync(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "kappa.png"),
                     text: $"**{Context.User.Username}** has bet all their bucks. Good luck.");
 
         [Command("newgame"), Permission(MinimumPermission.Special)]
-        public Task NewGame(GameType gameType = GameType.HungerGame)
+        [Summary("Starts a new game.")]
+        public Task NewGame([Summary("Available game types: 1: 'HungerGames' (default), 2: 'HungerGameDistrictsOnly', 3: 'SaltyBet'")] GameType gameType = GameType.HungerGame)
         {
             var actualType = (gameType == GameType.Any)
                 ? GameType.HungerGame
@@ -172,15 +165,25 @@ namespace MechHisui.HisuiBets
 
             return (_service.TryAddNewGame(Context.Channel.Id, game))
                 ? game.StartGame()
-                : ReplyAsync("Game is already in progress.");
+                : ReplyAsync("Another game is already in progress.");
         }
 
         [Command("checkbets"), Permission(MinimumPermission.Special)]
         [RequiresGameType(GameType.Any)]
-        public async Task CheckBets()
+        public async Task CheckBets(/*int? gameId = null*/)
         {
-            var game = await _service.Bank.GetLastGameInChannel(Context.Channel as ITextChannel).ConfigureAwait(false);
-            var sb = new StringBuilder($"(#{game.Id}) The following bets have been made:\n```\n", 2000);
+            var tChan = (ITextChannel)Context.Channel;
+            var game = await _service.Bank.GetLastGameInChannel(tChan).ConfigureAwait(false);
+            //var game = (gameId.HasValue)
+            //    ? await _service.Bank.GetGameInChannelById(tChan, gameId.Value).ConfigureAwait(false)
+            //    : await _service.Bank.GetLastGameInChannel(tChan).ConfigureAwait(false);
+
+            if (game == null)
+            {
+                await ReplyAsync("No game found.").ConfigureAwait(false);
+                return;
+            }
+            var sb = new StringBuilder($"(\uFF03{game.Id}) The following bets have been made:\n```\n", 2000);
 
             foreach (var bet in game.Bets)
             {
@@ -224,86 +227,31 @@ namespace MechHisui.HisuiBets
         [Command("setwin"), Permission(MinimumPermission.Special)]
         public async Task SetWinner(int gameId, [Remainder] string winner)
         {
-            var channel = Context.Channel as ITextChannel;
-            var game = await _service.Bank.GetGameInChannelById(channel, gameId).ConfigureAwait(false);
-            if (game == null)
+            if (Context.Channel is SocketTextChannel channel)
             {
-                await ReplyAsync("Could not find a game by that ID.").ConfigureAwait(false);
-                return;
-            }
-
-            if (game.IsCashedOut)
-            {
-                await ReplyAsync("Specified game is already cashed out.").ConfigureAwait(false);
-                return;
-            }
-
-            if (!game.IsCollected)
-            {
-                await _service.Bank.CollectBets(game).ConfigureAwait(false);
-            }
-
-            var result = await _service.Bank.CashOut(new BetCollection(game), winner).ConfigureAwait(false);
-            var wholeSum = game.Bets.Sum(b => b.BettedAmount);
-
-            await ReplyAsync(await BetGame.EndMessage(result, _service.Bank, channel, gameId, wholeSum).ConfigureAwait(false)).ConfigureAwait(false);
-        }
-
-        [Command("bucks"), Alias("mybucks")]
-        public Task Bucks()
-            => ReplyAsync($"**{Context.User.Username}** currently has {_service.Bank.CurrencySymbol}{_account.Balance}.");
-
-        [Command("donate"), Ratelimit(5, 10, Measure.Minutes)]
-        public async Task Donate(int amount, IUser recipient)
-        {
-            if (amount <= 0)
-            {
-                await ReplyAsync("Cannot make a donation of 0 or less.").ConfigureAwait(false);
-            }
-            if (recipient.IsBot || _service.Blacklist.Contains(recipient.Id))
-            {
-                await ReplyAsync("Not allowed to donate to that account.").ConfigureAwait(false);
-            }
-
-            var donationResult = await _service.Bank.Donate(new DonationRequest((uint)amount, _account, recipient)).ConfigureAwait(false);
-            switch (donationResult)
-            {
-                case DonationResult.DonationSuccess:
-                    await ReplyAsync($"**{Context.User.Username}** donated {_service.Bank.CurrencySymbol}{amount} to **{recipient.Username}**.").ConfigureAwait(false);
-                    return;
-
-                case DonationResult.DonorNotEnoughMoney:
-                    await ReplyAsync($"**{Context.User.Username}** currently does not have enough HisuiBucks to make that donation.").ConfigureAwait(false);
-                    return;
-
-                case DonationResult.DonorNotFound:
-                case DonationResult.RecipientNotFound:
-                case DonationResult.MiscError:
-                default:
-                    await ReplyAsync("Failed to transfer donation.").ConfigureAwait(false);
-                    return;
-            }
-        }
-
-        [Command("top"), Permission(MinimumPermission.Special)]
-        public async Task Tops()
-        {
-            var tops = (await _service.Bank.GetAllUsers().ConfigureAwait(false))
-                .Where(a => a.Balance > 2500)
-                .OrderByDescending(a => a.Balance)
-                .Take(10)
-                .Select(a => new
+                var game = await _service.Bank.GetGameInChannelById(channel, gameId).ConfigureAwait(false);
+                if (game == null)
                 {
-                    Name = Context.Guild.GetUser(a.UserId).Username,
-                    a.Balance
-                })
-                .ToList();
+                    await ReplyAsync("Could not find a game by that ID.").ConfigureAwait(false);
+                    return;
+                }
 
-            var sb = new StringBuilder("```\n")
-                .AppendSequence(tops, (s, a) => s.AppendLine($"{a.Name,20}: {_service.Bank.CurrencySymbol}{a.Balance,-7}"))
-                .Append("```");
+                if (game.IsCashedOut)
+                {
+                    await ReplyAsync("Specified game is already cashed out.").ConfigureAwait(false);
+                    return;
+                }
 
-            await ReplyAsync(sb.ToString()).ConfigureAwait(false);
+                if (!game.IsCollected)
+                {
+                    await _service.Bank.CollectBets(game.Id).ConfigureAwait(false);
+                }
+
+                var result = await _service.Bank.CashOut(new BetCollection(game), winner).ConfigureAwait(false);
+                var wholeSum = game.Bets.Sum(b => b.BettedAmount);
+
+                await ReplyAsync(await BetGame.EndMessage(result, _service.Bank, channel, gameId, wholeSum).ConfigureAwait(false)).ConfigureAwait(false);
+            }
         }
     }
 }

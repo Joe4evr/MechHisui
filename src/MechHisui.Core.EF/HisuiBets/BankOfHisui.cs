@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Discord;
 using Discord.WebSocket;
 using Discord.Addons.SimplePermissions;
 using MechHisui.HisuiBets;
+using SharedExtensions;
 
 namespace MechHisui.Core
 {
     public sealed class BankOfHisui : IBankOfHisui
     {
         private readonly IConfigStore<MechHisuiConfig> _store;
+        private readonly SemaphoreSlim _vaultLock = new SemaphoreSlim(1, 1);
 
         public BankOfHisui(IConfigStore<MechHisuiConfig> store)
         {
@@ -27,7 +30,9 @@ namespace MechHisui.Core
         {
             using (var config = _store.Load())
             {
-                return await config.BankAccounts.ToListAsync();
+                return await config.BankAccounts
+                    .AsNoTracking()
+                    .ToListAsync();
             }
         }
 
@@ -49,7 +54,9 @@ namespace MechHisui.Core
             {
                 return await config.BetGames
                     .AsNoTracking()
+                    .Include(g => g.Channel)
                     .Include(g => g.Bets)
+                    .ThenInclude(b => b.User)
                     .Where(g => !g.IsCashedOut)
                     .ToListAsync();
             }
@@ -61,7 +68,9 @@ namespace MechHisui.Core
             {
                 return await config.BetGames
                     .AsNoTracking()
+                    .Include(g => g.Channel)
                     .Include(g => g.Bets)
+                    .ThenInclude(b => b.User)
                     .LastOrDefaultAsync(g => g.Channel.ChannelId == channel.Id);
             }
         }
@@ -72,7 +81,9 @@ namespace MechHisui.Core
             {
                 return await config.BetGames
                     .AsNoTracking()
+                    .Include(g => g.Channel)
                     .Include(g => g.Bets)
+                    .ThenInclude(b => b.User)
                     .SingleOrDefaultAsync(g => g.Channel.ChannelId == channel.Id && g.Id == gameId);
             }
         }
@@ -84,6 +95,14 @@ namespace MechHisui.Core
                 return await config.RecordedBets
                     .AsNoTracking()
                     .SingleOrDefaultAsync(b => b.BetGame.Id == game.Id && b.User.UserId == user.Id);
+            }
+        }
+
+        Task<int> IBankOfHisui.GetVaultWorth()
+        {
+            using (var config = _store.Load())
+            {
+                return Task.FromResult(GetVault(config).IntValue);
             }
         }
 
@@ -153,7 +172,11 @@ namespace MechHisui.Core
                     windict.Add(ac.UserId, payout);
                     total -= payout;
                 }
-                var game = await config.BetGames.SingleOrDefaultAsync(g => g.Id == betcollection.GameId);
+                var game = await config.BetGames
+                    .Include(g => g.Channel)
+                    .Include(g => g.Bets)
+                    .ThenInclude(b => b.User)
+                    .SingleOrDefaultAsync(g => g.Id == betcollection.GameId);
                 game.IsCashedOut = true;
 
                 await config.SaveChangesAsync().ConfigureAwait(false);
@@ -276,13 +299,18 @@ namespace MechHisui.Core
             }
         }
 
-        async Task IBankOfHisui.CollectBets(IBetGame game)
+        async Task IBankOfHisui.CollectBets(int gameId)
         {
             using (var config = _store.Load())
             {
+                var game = await config.BetGames
+                    .Include(g => g.Channel)
+                    .Include(g => g.Bets)
+                    .ThenInclude(b => b.User)
+                    .SingleOrDefaultAsync(g => g.Id == gameId).ConfigureAwait(false);
                 foreach (var bet in game.Bets)
                 {
-                    var debtor = GetAccount(bet.UserId, config);
+                    var debtor = GetAccount(bet.User.UserId, config);
                     if (debtor != null)
                     {
                         int amount = bet.BettedAmount;
@@ -291,8 +319,8 @@ namespace MechHisui.Core
                         debtor.Balance -= amount;
                     }
                 }
-                var mgame = await config.BetGames.SingleOrDefaultAsync(g => g.Id == game.Id);
-                mgame.IsCollected = true;
+                //var mgame = await config.BetGames.SingleOrDefaultAsync(g => g.Id == game.Id);
+                game.IsCollected = true;
 
                 await config.SaveChangesAsync().ConfigureAwait(false);
             }
@@ -303,6 +331,7 @@ namespace MechHisui.Core
             if (amount < 0)
                 throw new ArgumentOutOfRangeException(nameof(amount));
 
+            using (await _vaultLock.UsingLock().ConfigureAwait(false))
             using (var config = _store.Load())
             {
                 GetVault(config).IntValue += amount;
@@ -310,19 +339,20 @@ namespace MechHisui.Core
             }
         }
 
-        async Task<int> IBankOfHisui.RetrieveFromVault(uint amount)
+        async Task<int> IBankOfHisui.RetrieveFromVault(int amount)
         {
+            if (amount <= 50)
+                return 0;
+
+            using (await _vaultLock.UsingLock().ConfigureAwait(false))
             using (var config = _store.Load())
             {
                 var vault = GetVault(config);
-                var withdraw = (int)amount;
-                if (vault.IntValue > withdraw)
-                {
-                    vault.IntValue -= withdraw;
-                    await config.SaveChangesAsync().ConfigureAwait(false);
-                    return withdraw;
-                }
-                return 0;
+                var withdrawing = Math.Min(vault.IntValue, amount);
+
+                vault.IntValue -= withdrawing;
+                await config.SaveChangesAsync().ConfigureAwait(false);
+                return withdrawing;
             }
         }
 

@@ -3,7 +3,7 @@ using Discord;
 
 namespace MechHisui.HisuiBets
 {
-    public struct DonationRequest
+    public readonly struct DonationRequest
     {
         internal DonationRequest(uint amount, IBankAccount donor, IUser recepient)
         {

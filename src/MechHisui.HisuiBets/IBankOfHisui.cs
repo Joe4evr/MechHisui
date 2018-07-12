@@ -27,10 +27,11 @@ namespace MechHisui.HisuiBets
         Task<DonationResult> Donate(DonationRequest request);
 
         Task<WithdrawalResult> Withdraw(WithdrawalRequest request);
-        Task CollectBets(IBetGame game);
+        Task CollectBets(int gameId);
         Task Interest();
 
         Task AddToVault(int amount);
-        Task<int> RetrieveFromVault(uint amount);
+        Task<int> GetVaultWorth();
+        Task<int> RetrieveFromVault(int amount);
     }
 }

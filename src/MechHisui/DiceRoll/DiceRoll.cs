@@ -5,7 +5,6 @@ using SharedExtensions;
 
 namespace MechHisui
 {
-
     public sealed class DiceRoll
     {
         public int Amount { get; }

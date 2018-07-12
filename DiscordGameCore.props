@@ -1,6 +1,10 @@
 ﻿<Project>
     <ItemGroup>
-        <PackageReference Include="Discord.Addons.MpGame" Version="1.2.0-alpha4" />
-        <!--<ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.MpGame\Discord.Addons.MpGame.csproj" />-->
+        <PackageReference Include="Discord.Addons.MpGame" Version="1.2.0-alpha6" />
     </ItemGroup>
+    <!--<ItemGroup>
+    </ItemGroup>
+    <PropertyGroup>
+        <CodeAnalysisRuleSet>$(SolutionDir)MechHisui.Games.ruleset</CodeAnalysisRuleSet>
+    </PropertyGroup>-->
 </Project>

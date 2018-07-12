@@ -2,7 +2,7 @@
 
 namespace MechHisui.HisuiBets
 {
-    public struct WithdrawalRequest
+    public readonly struct WithdrawalRequest
     {
         internal WithdrawalRequest(int amount, ulong accountId)
         {

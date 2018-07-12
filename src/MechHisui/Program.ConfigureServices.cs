@@ -30,15 +30,11 @@ namespace MechHisui
             {
                 logger?.Invoke(new LogMessage(LogSeverity.Info, "Main", "Constructing ConfigStore"));
                 //logger?.Invoke(new LogMessage(LogSeverity.Debug, "Main", $"ConnectionString value: '{parameters.ConnectionString}'"));
-                var store = new MechHisuiConfigStore(commands,
-                    options =>  options.UseSqlite(parameters.ConnectionString));
+                var map = new ServiceCollection();
+                var store = new MechHisuiConfigStore(commands, map, logger);
 
-                //using (var config = store.Load())
-                //{
-                //}
-
-                var bank = new BankOfHisui(store);
-                var fgo = new FgoConfig(store);
+                var bank     = new BankOfHisui(store);
+                var fgo      = new FgoConfig(store);
                 //var shconfig = new SecretHitlerConfig(store);
                 //var sfconfig = new SuperfightConfig(store);
                 //var xdu      = new XduConfig(store);
@@ -46,17 +42,26 @@ namespace MechHisui
                 commands.AddTypeReader<DiceRoll>(new DiceTypeReader());
                 //commands.AddTypeReader<ServantFilterOptions>(new ServantFilterTypeReader());
 
-                var map = new ServiceCollection()
-                    .AddSingleton(new Random())
+                map.AddSingleton(new Random())
                     .AddSingleton(new PermissionsService(store, commands, client, logger))
+                    .AddDbContext<MechHisuiConfig>(options => options.UseSqlite(parameters.ConnectionString))
+                    .AddSingleton(new HisuiBankService(bank, client, logger))
                     .AddSingleton(new FgoStatService(fgo, client, logger))
                     //.AddSingleton(new SecretHitlerService(shconfig, client, logger))
                     //.AddSingleton(new SuperfightService(sfconfig, client, logger))
-                    //.AddSingleton(new XduStatService(xdu, client, logger))
                     //.AddSingleton(new ExKitService(client, logger))
-                    .AddSingleton(new HisuiBankService(bank, client, logger));
+                    //.AddSingleton(new XduStatService(xdu, client, logger))
+                    ;
 
-                return map.BuildServiceProvider();
+                var services = map.BuildServiceProvider();
+                //store.Services = services;
+
+                //using (var cfg = store.Load())
+                //{
+
+                //}
+
+                return services;
             }
             catch (Exception ex)
             {
@@ -65,20 +70,30 @@ namespace MechHisui
             }
         }
 
+        private async Task InitCommands()
+        {
+            //await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+            //await _commands.AddModuleAsync<MiscModule>(_services);
+            await _commands.AddModuleAsync<PermissionsModule>(_services);
+            await _commands.AddModuleAsync<DiceRollModule>(_services);
+            await _commands.AddModuleAsync<HisuiBankModule>(_services);
+            await _commands.AddModuleAsync<HisuiBetsModule>(_services);
+            await _commands.AddModuleAsync<FgoModule>(_services);
+        }
 
-            ////var eval = EvalService.Builder.BuilderWithSystemAndLinq()
-            ////    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(StatService).Assembly.Location),
-            ////        "MechHisui.FateGOLib"))
-            ////    .Build(@"(FgoConfig stats)
-            ////{
-            ////    Servants = () => stats.GetServants().Concat(stats.GetFakedServants());
-            ////    CEs = stats.GetCEs;
-            ////}
-            ////private readonly Func<IEnumerable<ServantProfile>> Servants;
-            ////private readonly Func<IEnumerable<CEProfile>> CEs;");
-            ////_map.AddSingleton(eval);
-            ////await _commands.AddModuleAsync<EvalModule>();
+        ////var eval = EvalService.Builder.BuilderWithSystemAndLinq()
+        ////    .Add(new EvalReference(MetadataReference.CreateFromFile(typeof(StatService).Assembly.Location),
+        ////        "MechHisui.FateGOLib"))
+        ////    .Build(@"(FgoConfig stats)
+        ////{
+        ////    Servants = () => stats.GetServants().Concat(stats.GetFakedServants());
+        ////    CEs = stats.GetCEs;
+        ////}
+        ////private readonly Func<IEnumerable<ServantProfile>> Servants;
+        ////private readonly Func<IEnumerable<CEProfile>> CEs;");
+        ////_map.AddSingleton(eval);
+        ////await _commands.AddModuleAsync<EvalModule>();
 
-            //await _commands.AddDiceRoll();
+        //await _commands.AddDiceRoll();
     }
 }

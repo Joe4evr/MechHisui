@@ -58,8 +58,7 @@ namespace MechHisui.HisuiBets
                     {
                         foreach (var game in uncashed)
                         {
-                            var channel = (client.GetChannel(game.ChannelId) as SocketTextChannel);
-                            if (channel != null)
+                            if (client.GetChannel(game.ChannelId) is SocketTextChannel channel)
                                 await channel.SendMessageAsync($"Found betting game that is not cashed out. Use `setwin {game.Id} <winner>` to pay out the stakes.").ConfigureAwait(false);
                         }
                     }
@@ -93,11 +92,11 @@ namespace MechHisui.HisuiBets
                         .Except(registered, _userComparer)
                         .ToList();
 
-                    if (newUsers.Count == 0) return;
-
-                    await Log(LogSeverity.Info, $"Registering new users in {guild.Name}").ConfigureAwait(false);
-                    await Bank.AddUsers(newUsers).ConfigureAwait(false);
-
+                    if (newUsers.Count > 0)
+                    {
+                        await Log(LogSeverity.Info, $"Registering new users in {guild.Name}").ConfigureAwait(false);
+                        await Bank.AddUsers(newUsers).ConfigureAwait(false);
+                    }
                     _semaphore.Release();
                 });
                 return Task.CompletedTask;

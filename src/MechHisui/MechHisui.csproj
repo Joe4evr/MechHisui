@@ -2,10 +2,8 @@
     <Import Project="..\..\DiscordBotCore.props" />
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <NoWarn>CSA1685</NoWarn>
-        <TargetFramework>netcoreapp2.0</TargetFramework>
-        <RuntimeIdentifiers>win;win10-arm</RuntimeIdentifiers>
-        <DefineConstants Condition="'$(RuntimeIdentifier)' == 'win10-arm'">ARM</DefineConstants>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <RuntimeIdentifiers>$(RuntimeIdentifiers);win10-arm</RuntimeIdentifiers>
     </PropertyGroup>
     <ItemGroup>
         <EmbeddedResource Include="**\*.resx" />
@@ -16,23 +14,10 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
+    <!--<ItemGroup Condition="'$(Configuration)' == 'Release'">
+        <PackageReference Include="ILLink.Tasks" Version="0.1.5-preview-1841731" />
+    </ItemGroup>-->
     <ItemGroup>
-        <!--<PackageReference Include="Discord.Addons.SimplePermissions.JsonProvider" Version="1.0.0-rc" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.1.0" />
-        <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0" PrivateAssets="All" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" PrivateAssets="All" />-->
-        <PackageReference Condition="'$(RuntimeIdentifier)' != 'win10-arm'" Include="WS4NetCore" Version="1.0.0-a" />
-    </ItemGroup>
-    <ItemGroup>
-        <!--<ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.MpGame\Discord.Addons.MpGame.csproj" />
-        <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions.JsonProvider\Discord.Addons.SimplePermissions.JsonProvider.csproj" />
-        <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions.EFProvider\Discord.Addons.SimplePermissions.EFProvider.csproj" />
-        <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions\Discord.Addons.SimplePermissions.csproj" />-->
         <ProjectReference Include="..\MechHisui.Core.EF\MechHisui.Core.EF.csproj" />
     </ItemGroup>
-    <!--<ItemGroup>
-        <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
-    </ItemGroup>-->
-    <!--<Import Project="..\SharedExtensions\SharedExtensions.projitems" Label="Shared" />-->
 </Project>

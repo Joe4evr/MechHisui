@@ -31,7 +31,7 @@ namespace MechHisui
                     rolls.AddRange(t);
                     return b.Append($"({String.Join(", ", t)}{(t.Count > 1 ? $" | sum: {t.Sum()}" : "")})");
                 })
-                .AppendWhen(() => rolls.Count > 1, b => b.Append($"\n(Total sum: {rolls.Sum()})"));
+                .AppendWhen(rolls.Count > 1, b => b.Append($"\n(Total sum: {rolls.Sum()})"));
 
             return ReplyAsync(sb.ToString());
         }
@@ -40,7 +40,7 @@ namespace MechHisui
         [Summary("🎵RNG, RNG, Please be nice to me....🎵")]
         public Task PickCmd(params string[] options)
         {
-            var realoptions = options.Distinct().ToList();
+            var realoptions = options.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             if (realoptions.Count <= 1)
             {
                 return ReplyAsync("Must provide more than one unique option.");
