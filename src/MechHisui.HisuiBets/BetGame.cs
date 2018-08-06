@@ -56,7 +56,7 @@ namespace MechHisui.HisuiBets
             {
                 _isClosing = false;
                 await CloseOff().ConfigureAwait(false);
-                var game = await _bank.GetGameInChannelById(_channel, _game.Id).ConfigureAwait(false);
+                var game = await _bank.GetGameInChannelByIdAsync(_channel, _game.Id).ConfigureAwait(false);
                 var allBets = new List<IBet>(game.Bets);
 
                 var highest = allBets.OrderByDescending(b => b.BettedAmount).FirstOrDefault();
@@ -72,7 +72,7 @@ namespace MechHisui.HisuiBets
                     || Bonus > 0)
                 {
                     var b = (Bonus > 0) ? Bonus : (allBets.Count * 300); //TODO: fiddle with values
-                    _finalBets.Bonus = await _bank.RetrieveFromVault(b).ConfigureAwait(false);
+                    _finalBets.Bonus = await _bank.RetrieveFromVaultAsync(b).ConfigureAwait(false);
                     sb.AppendLine($"BONUS: An additional {_bank.CurrencySymbol}{b} is added to the pot.");
                 }
                 sb.AppendLine($"The pot is {_bank.CurrencySymbol}{_finalBets.Bets.Sum(b => b.BettedAmount) + _finalBets.Bonus}.\n")
@@ -87,14 +87,14 @@ namespace MechHisui.HisuiBets
         {
             BetsOpen = false;
             //var game = await _bank.GetGameInChannelById(_channel, _game.Id).ConfigureAwait(false);
-            await _bank.CollectBets(_game.Id).ConfigureAwait(false);
+            await _bank.CollectBetsAsync(_game.Id).ConfigureAwait(false);
         }
 
         public async Task<string> ProcessBet(IBet bet)
         {
             //var game = await _bank.GetGameInChannelById(_channel, _game.Id).ConfigureAwait(false);
 
-            switch (await _bank.RecordOrUpdateBet(_game, bet).ConfigureAwait(false))
+            switch (await _bank.RecordOrUpdateBetAsync(_game, bet).ConfigureAwait(false))
             {
                 case RecordingResult.BetAdded:
                     return LogString(_game.Id, $"Added **{bet.UserName}**'s bet of {_bank.CurrencySymbol}{bet.BettedAmount} to **{bet.Target}**.");
@@ -141,21 +141,17 @@ namespace MechHisui.HisuiBets
                 await Close(true).ConfigureAwait(false);
             }
 
-            var result = await _bank.CashOut(_finalBets, winner).ConfigureAwait(false);
+            var result = await _bank.CashOutAsync(_finalBets, winner).ConfigureAwait(false);
             var wholeSum = _finalBets.WholeSum;
 
             var reply = await EndMessage(result, _bank, _channel, _game.Id, wholeSum).ConfigureAwait(false);
 
-            var ge = GameEnd;
-            if (ge != null)
-                await ge(_channel).ConfigureAwait(false);
+            GameEnd(_channel);
 
             return reply;
         }
 
-#pragma warning disable CA1710
-        internal event Func<IMessageChannel, Task> GameEnd;
-#pragma warning restore CA1710
+        internal Action<IMessageChannel> GameEnd { private get; set; }
 
         internal void AddBonus(int amount)
             => Interlocked.CompareExchange(ref _bonus, amount, 0); //YOBO: You Only Bonus Once (per game)
@@ -188,7 +184,7 @@ namespace MechHisui.HisuiBets
 
                     if (result.RoundingLoss > 0)
                     {
-                        await bank.AddToVault(result.RoundingLoss).ConfigureAwait(false);
+                        await bank.AddToVaultAsync(result.RoundingLoss).ConfigureAwait(false);
                         sb.Append($", and {bank.CurrencySymbol}{result.RoundingLoss} was stashed.").ToString();
                     }
                     else
@@ -199,7 +195,7 @@ namespace MechHisui.HisuiBets
             }
             else
             {
-                await bank.AddToVault(wholeSum).ConfigureAwait(false);
+                await bank.AddToVaultAsync(wholeSum).ConfigureAwait(false);
                 sb.Append(LogString(gameId, "No bets were made on the winner of this game. The stakes were stashed in the vault."));
             }
 

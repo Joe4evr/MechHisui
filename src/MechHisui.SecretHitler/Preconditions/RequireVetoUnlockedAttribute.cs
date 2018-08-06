@@ -8,7 +8,7 @@ namespace MechHisui.SecretHitler
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     internal sealed class RequireVetoUnlockedAttribute : PreconditionAttribute
     {
-        public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var shservice = services.GetService<SecretHitlerService>();
             if (shservice != null)

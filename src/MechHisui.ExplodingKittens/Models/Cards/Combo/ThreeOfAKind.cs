@@ -3,13 +3,13 @@ using System.Threading.Tasks;
 
 namespace MechHisui.ExplodingKittens.Cards
 {
-    internal sealed class ThreeOfAKind : ExplodingKitttensCard
+    internal sealed class ThreeOfAKind : ExplodingKittensCard
     {
-        public ExplodingKitttensCard One { get; }
-        public ExplodingKitttensCard Two { get; }
-        public ExplodingKitttensCard Three { get; }
+        public ExplodingKittensCard One { get; }
+        public ExplodingKittensCard Two { get; }
+        public ExplodingKittensCard Three { get; }
 
-        public ThreeOfAKind(ExplodingKitttensCard one, ExplodingKitttensCard two, ExplodingKitttensCard three)
+        public ThreeOfAKind(ExplodingKittensCard one, ExplodingKittensCard two, ExplodingKittensCard three)
             : base(ExKitConstants.ThreeOfAKind)
         {
             One = one;

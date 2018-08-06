@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MechHisui.Superfight
 {
@@ -7,8 +8,8 @@ namespace MechHisui.Superfight
     {
         IEnumerable<ISuperfightCard> GetAllCards();
 
-        IEnumerable<ISuperfightCard> GetCharacters();
-        IEnumerable<ISuperfightCard> GetAbilities();
-        IEnumerable<ISuperfightCard> GetLocations();
+        Task<IEnumerable<ISuperfightCard>> GetCharactersAsync();
+        Task<IEnumerable<ISuperfightCard>> GetAbilitiesAsync();
+        Task<IEnumerable<ISuperfightCard>> GetLocationsAsync();
     }
 }

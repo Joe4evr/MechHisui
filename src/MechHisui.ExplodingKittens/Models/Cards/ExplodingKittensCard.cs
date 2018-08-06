@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace MechHisui.ExplodingKittens.Cards
+namespace MechHisui.ExplodingKittens
 {
-    internal abstract class ExplodingKitttensCard
+    internal abstract class ExplodingKittensCard
     {
         public string CardName { get; }
 
-        public ExplodingKitttensCard(string cardName)
+        public ExplodingKittensCard(string cardName)
         {
             CardName = cardName;
         }

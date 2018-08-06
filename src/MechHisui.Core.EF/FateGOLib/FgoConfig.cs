@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Discord.Addons.SimplePermissions;
 using MechHisui.FateGOLib;
@@ -19,78 +20,73 @@ namespace MechHisui.Core
         }
 
 
-        public IEnumerable<IServantProfile> AllServants()
+        //reading operations
+        //Servants
+        async Task<IEnumerable<IServantProfile>> IFgoConfig.GetAllServantsAsync()
         {
             using (var config = _store.Load())
             {
-                return QueryServants(config).ToList();
+                return await config.Servants
+                    .AsNoTracking()
+                    .WithIncludes()
+                    .ToListAsync().ConfigureAwait(false);
             }
         }
 
-        //public IEnumerable<string> SearchServants(ServantFilterOptions options)
-        //{
-        //    using (var config = _store.Load())
-        //    {
-        //        return options.WithSelect(
-        //            options.WithOrderBy(
-        //                QueryServants(config).ToList()
-        //            .Where(options.WithFilters)))
-        //            .ToList();
-        //    }
-        //}
-
-        public IServantProfile GetServant(int id)
+        async Task<IEnumerable<string>> IFgoConfig.SearchServantsAsync(ServantFilterOptions options)
         {
             using (var config = _store.Load())
             {
-                return QueryServants(config).SingleOrDefault(s => s.Id == id);
+                var servants = await config.Servants
+                    .AsNoTracking()
+                    .WithIncludes()
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                return servants.ApplyFilters(options).ToList();
             }
         }
 
-        public IEnumerable<IServantProfile> FindServants(string name)
+        async Task<IServantProfile> IFgoConfig.GetServantAsync(int id)
         {
             using (var config = _store.Load())
             {
-                return QueryServants(config).Where(s => RegexMatchOneWord(s.Name, name) || s.Aliases.Any(a => RegexMatchOneWord(a.Alias, name))).ToList();
+                return await config.Servants
+                    .AsNoTracking()
+                    .WithIncludes()
+                    .SingleOrDefaultAsync(s => s.Id == id).ConfigureAwait(false);
             }
         }
 
-        public bool AddServantAlias(string servant, string alias)
+        async Task<IEnumerable<IServantProfile>> IFgoConfig.FindServantsAsync(string name)
         {
             using (var config = _store.Load())
             {
-                var srv = config.Servants
-                    .Include(s => s.Aliases)
-                    .SingleOrDefault(s => s.Name == servant);
-                if (srv == null)
-                {
-                    return false;
-                }
-                else
-                {
-                    var newalias = new ServantAlias { Servant = srv, Alias = alias };
-                    config.ServantAliases.Add(newalias);
-                    //srv.Aliases.Add(newalias);
-                    config.SaveChanges();
-                    return true;
-                }
+                return await config.Servants
+                    .AsNoTracking()
+                    .WithIncludes()
+                    .Where(s => RegexMatchOneWord(s.Name, name) || s.Aliases.Any(a => RegexMatchOneWord(a.Alias, name)))
+                    .ToListAsync().ConfigureAwait(false);
             }
         }
 
-
-        public IEnumerable<ICEProfile> AllCEs()
+        //CEs
+        async Task<IEnumerable<ICEProfile>> IFgoConfig.GetAllCEsAsync()
         {
             using (var config = _store.Load())
             {
-                return QueryCEs(config).ToList();
+                return await config.CEs
+                    .AsNoTracking()
+                    .WithIncludes()
+                    .ToListAsync().ConfigureAwait(false);
             }
         }
 
-        public ICEProfile GetCE(int id)
+        async Task<ICEProfile> IFgoConfig.GetCEAsync(int id)
         {
             using (var config = _store.Load())
             {
-                var range = QueryCERange(config, id);
+                var range = await config.CERanges.SingleOrDefaultAsync(r => r.LowId <= id && id <= r.HighId).ConfigureAwait(false);
                 if (range != null)
                 {
                     return new CEProfile
@@ -113,23 +109,130 @@ namespace MechHisui.Core
                     };
                 }
 
-                return QueryCEs(config).SingleOrDefault(c => c.Id == id);
+                return await config.CEs
+                    .AsNoTracking()
+                    .WithIncludes()
+                    .SingleOrDefaultAsync(c => c.Id == id).ConfigureAwait(false);
             }
         }
 
-        public IEnumerable<ICEProfile> FindCEs(string name)
+        async Task<IEnumerable<ICEProfile>> IFgoConfig.FindCEsAsync(string name)
         {
             using (var config = _store.Load())
             {
-                return QueryCEs(config).Where(c => RegexMatchOneWord(c.Name, name) || c.Aliases.Any(a => RegexMatchOneWord(a.Alias, name))).ToList();
+                return await config.CEs
+                    .AsNoTracking()
+                    .WithIncludes()
+                    .Where(c => RegexMatchOneWord(c.Name, name) || c.Aliases.Any(a => RegexMatchOneWord(a.Alias, name)))
+                    .ToListAsync().ConfigureAwait(false);
             }
         }
 
-        public bool AddCEAlias(string name, string alias)
+        //Mystic Codes
+        async Task<IEnumerable<IMysticCode>> IFgoConfig.GetAllMysticsAsync()
         {
             using (var config = _store.Load())
             {
-                var ce = QueryCEs(config).SingleOrDefault(c => c.Name == name);
+                return await config.MysticCodes
+                    .AsNoTracking()
+                    .WithIncludes()
+                    .ToListAsync().ConfigureAwait(false);
+            }
+        }
+
+        async Task<IMysticCode> IFgoConfig.GetMysticAsync(int id)
+        {
+            using (var config = _store.Load())
+            {
+                return await config.MysticCodes
+                    .AsNoTracking()
+                    .WithIncludes()
+                    .SingleOrDefaultAsync(m => m.Id == id).ConfigureAwait(false);
+            }
+        }
+
+        async Task<IEnumerable<IMysticCode>> IFgoConfig.FindMysticsAsync(string name)
+        {
+            using (var config = _store.Load())
+            {
+                return await config.MysticCodes
+                    .AsNoTracking()
+                    .WithIncludes()
+                    .Where(m => RegexMatchOneWord(m.Code, name) || m.Aliases.Any(a => RegexMatchOneWord(a.Alias, name)))
+                    .ToListAsync().ConfigureAwait(false);
+            }
+        }
+
+        //Events
+        async Task<IEnumerable<IFgoEvent>> IFgoConfig.GetAllEventsAsync()
+        {
+            using (var config = _store.Load())
+            {
+                return await config.FgoEvents
+                    .AsNoTracking()
+                    .WithIncludes()
+                    .ToListAsync().ConfigureAwait(false);
+            }
+        }
+
+        async Task<IEnumerable<IFgoEvent>> IFgoConfig.GetCurrentEventsAsync()
+        {
+            using (var config = _store.Load())
+            {
+                var now = DateTime.UtcNow;
+                return await config.FgoEvents
+                    .AsNoTracking()
+                    .Where(e => e.StartTime < now && ((!e.EndTime.HasValue) || e.EndTime > now))
+                    .WithIncludes()
+                    .ToListAsync().ConfigureAwait(false);
+            }
+        }
+
+        async Task<IEnumerable<IFgoEvent>> IFgoConfig.GetFutureEventsAsync()
+        {
+            using (var config = _store.Load())
+            {
+                var now = DateTime.UtcNow;
+                return await config.FgoEvents
+                    .AsNoTracking()
+                    .Where(e => (!e.StartTime.HasValue) || e.StartTime > now)
+                    .WithIncludes()
+                    .ToListAsync().ConfigureAwait(false);
+            }
+        }
+
+        //writing operations
+        async Task<bool> IFgoConfig.AddServantAliasAsync(string servant, string alias)
+        {
+            using (var config = _store.Load())
+            {
+                var srv = await config.Servants
+                    .Include(s => s.Aliases)
+                    .SingleOrDefaultAsync(s => s.Name == servant).ConfigureAwait(false);
+
+                if (srv == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    var newalias = new ServantAlias { Servant = srv, Alias = alias };
+                    await config.ServantAliases.AddAsync(newalias).ConfigureAwait(false);
+                    //srv.Aliases.Add(newalias);
+                    await config.SaveChangesAsync().ConfigureAwait(false);
+                    return true;
+                }
+            }
+        }
+
+        async Task<bool> IFgoConfig.AddCEAliasAsync(string name, string alias)
+        {
+            using (var config = _store.Load())
+            {
+                var ce = await config.CEs
+                    .AsNoTracking()
+                    .WithIncludes()
+                    .SingleOrDefaultAsync(c => c.Name == name).ConfigureAwait(false);
 
                 if (ce == null)
                 {
@@ -138,44 +241,22 @@ namespace MechHisui.Core
                 else
                 {
                     var newalias = new CEAlias { CE = ce, Alias = alias };
-                    config.CEAliases.Add(newalias);
+                    await config.CEAliases.AddAsync(newalias).ConfigureAwait(false);
                     //ce.Aliases.Add(newalias);
-                    config.SaveChanges();
+                    await config.SaveChangesAsync().ConfigureAwait(false);
                     return true;
                 }
             }
         }
 
-
-        public IEnumerable<IMysticCode> AllMystics()
+        async Task<bool> IFgoConfig.AddMysticAliasAsync(string code, string alias)
         {
             using (var config = _store.Load())
             {
-                return QueryMystic(config).ToList();
-            }
-        }
-
-        public IMysticCode GetMystic(int id)
-        {
-            using (var config = _store.Load())
-            {
-                return QueryMystic(config).SingleOrDefault(m => m.Id == id);
-            }
-        }
-
-        public IEnumerable<IMysticCode> FindMystics(string name)
-        {
-            using (var config = _store.Load())
-            {
-                return QueryMystic(config).Where(m => RegexMatchOneWord(m.Code, name) || m.Aliases.Any(a => RegexMatchOneWord(a.Alias, name))).ToList();
-            }
-        }
-
-        public bool AddMysticAlias(string code, string alias)
-        {
-            using (var config = _store.Load())
-            {
-                var mystic = QueryMystic(config).SingleOrDefault(m => m.Code == code);
+                var mystic = await config.MysticCodes
+                    .AsNoTracking()
+                    .WithIncludes()
+                    .SingleOrDefaultAsync(m => m.Code == code).ConfigureAwait(false);
 
                 if (mystic == null)
                 {
@@ -184,56 +265,36 @@ namespace MechHisui.Core
                 else
                 {
                     var newalias = new MysticAlias { Code = mystic, Alias = alias };
-                    config.MysticAliases.Add(newalias);
+                    await config.MysticAliases.AddAsync(newalias).ConfigureAwait(false);
                     //mystic.Aliases.Add(newalias);
-                    config.SaveChanges();
+                    await config.SaveChangesAsync().ConfigureAwait(false);
                     return true;
                 }
             }
         }
 
-
-        public IEnumerable<IFgoEvent> AllEvents()
+        async Task<IFgoEvent> IFgoConfig.AddEventAsync(string name, DateTimeOffset? start, DateTimeOffset? end, string info)
         {
             using (var config = _store.Load())
             {
-                return config.FgoEvents.ToList();
+                var ev = new FgoEvent
+                {
+                    EventName = name,
+                    StartTime = start,
+                    EndTime = end,
+                    InfoLink = info
+                };
+                await config.FgoEvents.AddAsync(ev).ConfigureAwait(false);
+                await config.SaveChangesAsync().ConfigureAwait(false);
+
+                return ev;
             }
         }
 
-        public IEnumerable<IFgoEvent> GetCurrentEvents()
-        {
-            using (var config = _store.Load())
-            {
-                var now = DateTime.UtcNow;
-                return config.FgoEvents.Where(e => e.EndTime.HasValue && !(e.EndTime < now)).ToList();
-            }
-        }
-
-
-        //query helpers
+        //helpers
         private static bool RegexMatchOneWord(string hay, string needle)
                 => Regex.Match(hay, String.Concat(_b, needle, _b), RegexOptions.IgnoreCase).Success;
 
         private const string _b = @"\b";
-
-        private static IQueryable<ServantProfile> QueryServants(MechHisuiConfig config)
-        {
-            return config.Servants
-                .Include(s => s.Traits).ThenInclude(t => t.Trait)
-                .Include(s => s.ActiveSkills).ThenInclude(a => a.Skill)
-                .Include(s => s.PassiveSkills).ThenInclude(p => p.Skill)
-                .Include(s => s.Aliases)
-                .Include(s => s.Bond10);
-        }
-
-        private static IQueryable<CEProfile> QueryCEs(MechHisuiConfig config)
-            => config.CEs.Include(c => c.Aliases);
-
-        private static CERange QueryCERange(MechHisuiConfig config, int id)
-            => config.CERanges.SingleOrDefault(r => r.LowId <= id && id <= r.HighId);
-
-        private static IQueryable<MysticCode> QueryMystic(MechHisuiConfig config)
-            => config.MysticCodes.Include(m => m.Aliases);
     }
 }

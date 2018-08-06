@@ -9,8 +9,7 @@ using SharedExtensions;
 
 namespace MechHisui.FateGOLib
 {
-    [Name("FGO")]
-    public sealed partial class FgoModule : ModuleBase
+    public sealed partial class FgoModule
     {
         [Name("Servants"), Group("servant")]
         public sealed class ServantModule : ModuleBase<ICommandContext>
@@ -27,7 +26,7 @@ namespace MechHisui.FateGOLib
             [Summary("Relay information on the specified Servant by ID.")]
             public async Task StatCmd(int id)
             {
-                var profile = _service.Config.GetServant(id);
+                var profile = await _service.Config.GetServantAsync(id).ConfigureAwait(false);
 
                 if (profile != null)
                 {
@@ -38,22 +37,22 @@ namespace MechHisui.FateGOLib
             [Command, Permission(MinimumPermission.Everyone)]
             [Alias("stat", "stats")]
             [Summary("Relay information on the specified Servant. Alternative names acceptable.")]
-            public Task StatCmd([Remainder] string name)
+            public async Task StatCmd([Remainder] string name)
             {
                 if (name.ContainsIgnoreCase("waifu"))
                 {
-                    return ReplyAsync("It has come to my attention that your 'waifu' is equatable to fecal matter.");
+                    await ReplyAsync("It has come to my attention that your 'waifu' is equatable to fecal matter.");
                 }
 
                 if (new[] { "arc", "arcueid" }.ContainsIgnoreCase(name))
                 {
-                    return ReplyAsync("Never ever.");
+                    await ReplyAsync("Never ever.");
                 }
 
-                var potentials = _service.Config.FindServants(name);
+                var potentials = await _service.Config.FindServantsAsync(name).ConfigureAwait(false);
                 if (potentials.Count() == 1)
                 {
-                    return ReplyAsync(String.Empty, embed: FormatServantProfile(potentials.Single()));
+                    await ReplyAsync(String.Empty, embed: FormatServantProfile(potentials.Single()));
                 }
                 else if (potentials.Count() > 1)
                 {
@@ -61,11 +60,11 @@ namespace MechHisui.FateGOLib
                     var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
                         .AppendSequence(potentials, (s, pr) => s.AppendLine($"**{pr.Name}** *({String.Join(", ", pr.Aliases)})*"));
 
-                    return ReplyAsync(sb.ToString());
+                    await ReplyAsync(sb.ToString());
                 }
                 else
                 {
-                    return ReplyAsync("No such entry found. Please try another name.");
+                    await ReplyAsync("No such entry found. Please try another name.");
                 }
             }
 
@@ -204,7 +203,7 @@ namespace MechHisui.FateGOLib
                         }
                     }
                 }.WithDescriptionWhen(() => profile.Id > 0,
-                    $"More information at: [Cirno]({_cirnoBaseUrl}{profile.Id}) | [FGO Wiki]({_fgoWBaseUrl}{Uri.EscapeDataString((profile.Additional ?? profile.Name).Replace(' ', '_'))})")
+                    $"More information at: [Cirno]({_cirnoBaseUrl}{profile.Id}) | [FGO Wikia]({_fgoWBaseUrl}{Uri.EscapeDataString((profile.Additional ?? profile.Name).Replace(' ', '_'))})")
 
                 .AddFieldWhen(() => !String.IsNullOrWhiteSpace(profile.NoblePhantasmRankUpEffect),
                     field => field.WithIsInline(false)

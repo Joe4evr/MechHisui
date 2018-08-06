@@ -14,7 +14,10 @@ namespace MechHisui.ExplodingKittens
             RequiredState = state;
         }
 
-        public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override Task<PreconditionResult> CheckPermissionsAsync(
+            ICommandContext context,
+            CommandInfo command,
+            IServiceProvider services)
         {
             var exkservice = services.GetService<ExKitService>();
             if (exkservice != null)

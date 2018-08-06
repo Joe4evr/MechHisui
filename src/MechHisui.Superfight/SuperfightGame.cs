@@ -37,9 +37,10 @@ namespace MechHisui.Superfight
             int timeout)
             : base(channel, players, setFirstPlayerImmediately: false)
         {
-            _characters = new SuperfightDeck<CharacterCard>(config.GetCharacters().Shuffle(28).Select(c => new CharacterCard(c.Text)));
-            _abilities  = new SuperfightDeck<AbilityCard>(config.GetAbilities().Shuffle(28).Select(c => new AbilityCard(c.Text)));
-            _locations  = new SuperfightDeck<LocationCard>(config.GetLocations().Shuffle(28).Select(c => new LocationCard(c.Text)));
+            var allCards = config.GetAllCards().ToLookup(c => c.Type);
+            _characters = new SuperfightDeck<CharacterCard>(allCards[CardType.Character].Shuffle(28).Select(c => new CharacterCard(c.Text)));
+            _abilities  = new SuperfightDeck<AbilityCard>  (allCards[CardType.Ability]  .Shuffle(28).Select(c => new AbilityCard  (c.Text)));
+            _locations  = new SuperfightDeck<LocationCard> (allCards[CardType.Location] .Shuffle(28).Select(c => new LocationCard (c.Text)));
 
             _debateTimer = new Timer(async _ => await StartVote().ConfigureAwait(false),
                 null, Timeout.Infinite, Timeout.Infinite);

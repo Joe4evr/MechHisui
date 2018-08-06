@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Discord;
-using SharedExtensions;
 
 namespace MechHisui.SymphoXDULib
 {
@@ -18,10 +16,10 @@ namespace MechHisui.SymphoXDULib
         int Ctd { get; }
         string LeaderSkill { get; }
         string PassiveSkill { get; }
-        IList<IXduSkill> Skills { get; }
+        IEnumerable<IXduSkill> Skills { get; }
         string Element { get; }
         string CharacterName { get; }
         string Image { get; }
-        ICollection<string> Aliases { get; }
+        IEnumerable<string> Aliases { get; }
     }
 }

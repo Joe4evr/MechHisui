@@ -10,11 +10,16 @@ namespace MechHisui.ExplodingKittens
 {
     public sealed class ExKitService : MpGameService<ExKitGame, ExKitPlayer>
     {
+        internal IExKitConfig ExKitConfig { get; }
+
         public ExKitService(
-            DiscordSocketClient socketClient,
+            BaseSocketClient client,
+            IExKitConfig exKitConfig,
+            IMpGameServiceConfig mpconfig = null,
             Func<LogMessage, Task> logger = null)
-            : base(socketClient, logger)
+            : base(client, mpconfig, logger)
         {
+            ExKitConfig = exKitConfig ?? throw new ArgumentNullException(nameof(exKitConfig));
         }
     }
 }

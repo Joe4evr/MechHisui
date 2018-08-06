@@ -3,7 +3,7 @@ using MechHisui.ExplodingKittens.Cards;
 
 namespace MechHisui.ExplodingKittens
 {
-    static class ExKitConstants
+    internal static class ExKitConstants
     {
         //Effect Cards OG
         public const string ExplodingKitten = "Exploding Kitten";
@@ -36,7 +36,7 @@ namespace MechHisui.ExplodingKittens
         //Expansion 1
         public const string ImplodingKitten = "Imploding Kitten";
 
-        public static List<ExplodingKitttensCard> StandardDeck() => new List<ExplodingKitttensCard>(70)
+        public static List<ExplodingKittensCard> StandardDeck() => new List<ExplodingKittensCard>(80)
         {
             new NopeCard(),
             new NopeCard(),

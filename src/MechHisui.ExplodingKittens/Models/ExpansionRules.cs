@@ -3,7 +3,7 @@
 namespace MechHisui.ExplodingKittens
 {
     [Flags]
-    internal enum ExpansioRules
+    internal enum ExpansionRules
     {
         None = 0,
         ImplodingKittens = 1

@@ -6,9 +6,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.MpGame;
-using MechHisui.SecretHitler.Models;
+using Discord.Addons.MpGame.Collections;
 using SharedExtensions;
 using SharedExtensions.Collections;
+using MechHisui.SecretHitler.Models;
 
 namespace MechHisui.SecretHitler
 {
@@ -326,7 +327,7 @@ namespace MechHisui.SecretHitler
 
             var sb = new StringBuilder($"You have drawn the following {_theme.Policies}:\n");
             var counter = 0;
-            foreach (var policy in _drawnPolicies.Cards)
+            foreach (var policy in _drawnPolicies.Browse())
             {
                 sb.AppendLine($"\t**{++counter}**: {(policy.PolicyType == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)}");
             }
@@ -353,7 +354,7 @@ namespace MechHisui.SecretHitler
             State = GameState.ChancellorPicks;
             var sb = new StringBuilder($"The {_theme.President} has given you these {_theme.Policies}:");
             var counter = 0;
-            foreach (var policy in _drawnPolicies.Cards)
+            foreach (var policy in _drawnPolicies.Browse())
             {
                 sb.AppendLine($"\t**{++counter}**: {(policy.PolicyType == PolicyType.Fascist ? _theme.Fascist : _theme.Liberal)}");
             }
@@ -562,7 +563,7 @@ namespace MechHisui.SecretHitler
 
         private Task ReshuffleDeck()
         {
-            _deck.Reshuffle(() => _deck.Clear().Concat(_discards.Clear()).Shuffle(28));
+            _deck.Shuffle(cards => cards.Concat(_discards.Clear()).Shuffle(28));
 
             return Channel.SendMessageAsync($"The {_theme.Policy} Deck has been reshuffled.");
         }
@@ -601,7 +602,7 @@ namespace MechHisui.SecretHitler
             return sb.ToString();
         }
 
-        public Embed GetGameStateEmbed()
+        public override Embed GetGameStateEmbed()
         {
             return new EmbedBuilder
             {
@@ -618,10 +619,10 @@ namespace MechHisui.SecretHitler
                 fb.Name = p.User.Username;
 
                 var sb = new StringBuilder()
-                    .AppendWhen(p.User.Id == CurrentPresident.User.Id, b => b.AppendLine($"Current {_theme.President}"))
+                    .AppendWhen(p.User.Id == CurrentPresident.User.Id,   b => b.AppendLine($"Current {_theme.President}"))
                     .AppendWhen(p.User.Id == CurrentChancellor?.User.Id, b => b.AppendLine($"Current {_theme.Chancellor}"))
-                    .AppendWhen(p.User.Id == _lastPresident?.User.Id, b => b.AppendLine($"Last {_theme.President}"))
-                    .AppendWhen(p.User.Id == _lastChancellor?.User.Id, b => b.AppendLine($"Last {_theme.Chancellor}"))
+                    .AppendWhen(p.User.Id == _lastPresident?.User.Id,    b => b.AppendLine($"Last {_theme.President}"))
+                    .AppendWhen(p.User.Id == _lastChancellor?.User.Id,   b => b.AppendLine($"Last {_theme.Chancellor}"))
                     .AppendWhen(p.IsConfirmedNotHitler, b => b.AppendLine($"Not {_theme.Hitler} (Confirmed)"))
                     .AppendWhen(!p.IsAlive, b => b.AppendLine("Is dead"));
 

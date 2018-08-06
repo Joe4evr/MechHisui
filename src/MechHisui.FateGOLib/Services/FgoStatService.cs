@@ -5,7 +5,9 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
+using NodaTime;
 using SharedExtensions;
 
 namespace MechHisui.FateGOLib
@@ -16,20 +18,30 @@ namespace MechHisui.FateGOLib
         internal IFgoConfig Config { get; }
 
         public FgoStatService(
-            IFgoConfig config,
             DiscordSocketClient client,
+            CommandService commands,
+            IFgoConfig config,
             Func<LogMessage, Task> logger = null)
         {
             Config = config ?? throw new ArgumentNullException(nameof(config));
 
             _logintimer = new Timer(async o =>
             {
-                await (client.GetChannel(120979035290468352ul) as SocketTextChannel)
-                    .SendMessageAsync("Login bonuses have been distributed.").ConfigureAwait(false);
+                if (client.GetChannel(120979035290468352ul) is SocketTextChannel channel)
+                    await channel.SendMessageAsync("Login bonuses have been distributed. <:brynsad:233080400556195860>").ConfigureAwait(false);
             }, null,
-            new DateTimeWithZone(DateTime.UtcNow, FgoExtensions.JpnTimeZone)
-                .TimeUntilNextLocalTimeAt(new TimeSpan(hours: 3, minutes: 59, seconds: 59)),
+            new DateTimeWithZone(DateTime.UtcNow, FgoHelpers.JpnTimeZone)
+                .TimeUntilNextLocalTimeAt(new TimeSpan(hours: 4, minutes: 0, seconds: 0)),
             TimeSpan.FromHours(24));
+
+
+            //client.Ready += async () =>
+            //{
+            //    if (!(await Config.GetAllEventsAsync().ConfigureAwait(false)).Any())
+            //    {
+            //        await Config.AddEventAsync("Test", DateTimeOffset.MinValue, DateTimeOffset.MinValue).ConfigureAwait(false);
+            //    }
+            //};
         }
 
         //public IEnumerable<IServantProfile> LookupStats(string term, bool fullsearch = false)
@@ -136,6 +148,10 @@ namespace MechHisui.FateGOLib
         //    FgoHelpers.ServantDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Config.ServantAliasesPath));
         //    FgoHelpers.CEDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Config.CEAliasesPath));
         //    FgoHelpers.MysticCodeDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Config.MysticAliasesPath));
+        //}
+
+        //public void InitRandomHgw()
+        //{
         //}
 
         private static bool RegexMatchOneWord(string hay, string needle)

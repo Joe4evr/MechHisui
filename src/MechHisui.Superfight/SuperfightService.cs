@@ -14,12 +14,13 @@ namespace MechHisui.Superfight
         internal ConcurrentDictionary<IMessageChannel, int> DiscussionTimer { get; } = new ConcurrentDictionary<IMessageChannel, int>(MessageChannelComparer);
 
         public SuperfightService(
-            ISuperfightConfig config,
-            DiscordSocketClient client,
+            BaseSocketClient client,
+            ISuperfightConfig sfconfig,
+            IMpGameServiceConfig mpconfig = null,
             Func<LogMessage, Task> logger = null)
-            : base(client, logger)
+            : base(client, mpconfig, logger)
         {
-            Config = config ?? throw new ArgumentNullException(nameof(config));
+            Config = sfconfig ?? throw new ArgumentNullException(nameof(sfconfig));
         }
     }
 }

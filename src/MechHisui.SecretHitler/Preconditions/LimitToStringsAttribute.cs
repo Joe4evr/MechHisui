@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
@@ -13,13 +14,33 @@ namespace MechHisui.SecretHitler
         private readonly IReadOnlyCollection<string> _options;
         private readonly StringComparer _comparer;
 
+        [DebuggerStepThrough]
         public LimitToStringsAttribute(StringComparison comparison, params string[] options)
         {
             _comparer = GetComparer(comparison);
             _options = options.ToImmutableArray();
+
+            StringComparer GetComparer(StringComparison comp)
+            {
+                switch (comp)
+                {
+                    case StringComparison.CurrentCulture:
+                        return StringComparer.CurrentCulture;
+
+                    case StringComparison.CurrentCultureIgnoreCase:
+                        return StringComparer.CurrentCultureIgnoreCase;
+
+                    case StringComparison.Ordinal:
+                        return StringComparer.Ordinal;
+
+                    case StringComparison.OrdinalIgnoreCase:
+                    default:
+                        return StringComparer.OrdinalIgnoreCase;
+                }
+            }
         }
 
-        public override Task<PreconditionResult> CheckPermissions(
+        public override Task<PreconditionResult> CheckPermissionsAsync(
             ICommandContext context,
             ParameterInfo parameter,
             object value,
@@ -30,23 +51,24 @@ namespace MechHisui.SecretHitler
                 : Task.FromResult(PreconditionResult.FromError($"Invalid parameter value. Valid values are `{String.Join("`, `", _options)}`."));
         }
 
-        private static StringComparer GetComparer(StringComparison comp)
-        {
-            switch (comp)
-            {
-                case StringComparison.CurrentCulture:
-                    return StringComparer.CurrentCulture;
+        //[DebuggerStepThrough]
+        //private static StringComparer GetComparer(StringComparison comp)
+        //{
+        //    switch (comp)
+        //    {
+        //        case StringComparison.CurrentCulture:
+        //            return StringComparer.CurrentCulture;
 
-                case StringComparison.CurrentCultureIgnoreCase:
-                    return StringComparer.CurrentCultureIgnoreCase;
+        //        case StringComparison.CurrentCultureIgnoreCase:
+        //            return StringComparer.CurrentCultureIgnoreCase;
 
-                case StringComparison.Ordinal:
-                    return StringComparer.Ordinal;
+        //        case StringComparison.Ordinal:
+        //            return StringComparer.Ordinal;
 
-                case StringComparison.OrdinalIgnoreCase:
-                default:
-                    return StringComparer.OrdinalIgnoreCase;
-            }
-        }
+        //        case StringComparison.OrdinalIgnoreCase:
+        //        default:
+        //            return StringComparer.OrdinalIgnoreCase;
+        //    }
+        //}
     }
 }

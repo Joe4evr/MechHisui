@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MechHisui.ExplodingKittens
 {
-    public class ExKitConfig
+    public interface IExKitConfig
     {
     }
 }

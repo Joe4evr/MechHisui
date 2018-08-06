@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Discord.Addons.SimplePermissions;
 using MechHisui.SecretHitler;
 
@@ -16,19 +18,24 @@ namespace MechHisui.Core
         }
 
 
-        public IEnumerable<string> GetKeys()
+        async Task<IEnumerable<string>> ISecretHitlerConfig.GetThemeKeysAsync()
         {
             using (var config = _store.Load())
             {
-                return config.SHThemes.Select(t => t.Key).ToList();
+                return await config.SHThemes
+                    .AsNoTracking()
+                    .Select(t => t.Key)
+                    .ToListAsync();
             }
         }
 
-        public ISecretHitlerTheme GetTheme(string key)
+        async Task<ISecretHitlerTheme> ISecretHitlerConfig.GetThemeAsync(string key)
         {
             using (var config = _store.Load())
             {
-                return config.SHThemes.SingleOrDefault(t => t.Key == key);
+                return await config.SHThemes
+                    .AsNoTracking()
+                    .SingleOrDefaultAsync(t => t.Key == key);
             }
         }
     }

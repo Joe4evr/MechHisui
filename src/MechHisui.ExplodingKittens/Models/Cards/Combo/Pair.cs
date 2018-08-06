@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 
 namespace MechHisui.ExplodingKittens.Cards
 {
-    internal sealed class Pair : ExplodingKitttensCard
+    internal sealed class Pair : ExplodingKittensCard
     {
-        public ExplodingKitttensCard One { get; }
-        public ExplodingKitttensCard Two { get; }
+        public ExplodingKittensCard One { get; }
+        public ExplodingKittensCard Two { get; }
 
-        public Pair(ExplodingKitttensCard one, ExplodingKitttensCard two)
+        public Pair(ExplodingKittensCard one, ExplodingKittensCard two)
             : base(ExKitConstants.Pair)
         {
             One = one;

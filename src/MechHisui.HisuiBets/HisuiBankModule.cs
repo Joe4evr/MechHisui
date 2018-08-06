@@ -33,7 +33,7 @@ namespace MechHisui.HisuiBets
         [Command("createacc"), Permission(MinimumPermission.ModRole)]
         public async Task CreateAccountCmd(IUser user)
         {
-            await _service.Bank.AddUser(user).ConfigureAwait(false);
+            await _service.Bank.AddUserAsync(user).ConfigureAwait(false);
             await ReplyAsync($"Created bank account for **{user.Username}**").ConfigureAwait(false);
         }
 
@@ -53,7 +53,7 @@ namespace MechHisui.HisuiBets
                 await ReplyAsync("Not allowed to donate to that account.").ConfigureAwait(false);
             }
 
-            var donationResult = await _service.Bank.Donate(new DonationRequest((uint)amount, _account, recipient)).ConfigureAwait(false);
+            var donationResult = await _service.Bank.DonateAsync(new DonationRequest((uint)amount, _account, recipient)).ConfigureAwait(false);
             switch (donationResult)
             {
                 case DonationResult.DonationSuccess:
@@ -76,7 +76,7 @@ namespace MechHisui.HisuiBets
         [Command("top"), Permission(MinimumPermission.Special)]
         public async Task Tops()
         {
-            var tops = (await _service.Bank.GetAllUsers().ConfigureAwait(false))
+            var tops = (await _service.Bank.GetAllUsersAsync().ConfigureAwait(false))
                 //.Where(a => a.Balance > 2500)
                 .OrderByDescending(a => a.Balance)
                 .Take(10)
@@ -97,7 +97,7 @@ namespace MechHisui.HisuiBets
         [Command("vault"), Permission(MinimumPermission.BotOwner), Hidden]
         public async Task Vault()
         {
-            var contents = await _service.Bank.GetVaultWorth().ConfigureAwait(false);
+            var contents = await _service.Bank.GetVaultWorthAsync().ConfigureAwait(false);
             await ReplyAsync($"Vault currently contains {_service.Bank.CurrencySymbol}{contents}").ConfigureAwait(false);
         }
     }

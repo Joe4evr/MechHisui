@@ -24,7 +24,7 @@ namespace MechHisui.HisuiBets
                     return TypeReaderResult.FromError(CommandError.ObjectNotFound, $"Could not find service: {nameof(HisuiBankService)}");
 
                 var tchan = context.Channel as ITextChannel;
-                var game = await svc.Bank.GetGameInChannelById(tchan, gameId).ConfigureAwait(false);
+                var game = await svc.Bank.GetGameInChannelByIdAsync(tchan, gameId).ConfigureAwait(false);
 
                 return (game == null)
                     ? TypeReaderResult.FromError(CommandError.ObjectNotFound, $"Could not find a game by that ID.")

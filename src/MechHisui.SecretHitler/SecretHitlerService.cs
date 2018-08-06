@@ -22,19 +22,21 @@ namespace MechHisui.SecretHitler
 
         private readonly ISecretHitlerConfig _config;
 
-        public SecretHitlerService(ISecretHitlerConfig config,
-            DiscordSocketClient client,
+        public SecretHitlerService(
+            BaseSocketClient client,
+            ISecretHitlerConfig shconfig,
+            IMpGameServiceConfig mpconfig = null,
             Func<LogMessage, Task> logger = null)
-            : base(client, logger)
+            : base(client, mpconfig, logger)
         {
-            _config = config;
+            _config = shconfig;
         }
 
-        internal ISecretHitlerTheme GetTheme(string key)
+        internal async ValueTask<ISecretHitlerTheme> GetThemeAsync(string key)
         {
             if (!CachedThemes.TryGetValue(key, out var theme))
             {
-                theme = _config.GetTheme(key);
+                theme = await _config.GetThemeAsync(key).ConfigureAwait(false);
                 if (theme != null)
                 {
                     CachedThemes.TryAdd(key, theme);
@@ -43,8 +45,8 @@ namespace MechHisui.SecretHitler
             return theme;
         }
 
-        internal IEnumerable<string> GetKeys()
-            => _config.GetKeys();
+        internal Task<IEnumerable<string>> GetThemeKeysAsync()
+            => _config.GetThemeKeysAsync();
     }
 
     //public static class SHExtensions

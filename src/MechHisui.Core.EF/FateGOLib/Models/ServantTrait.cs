@@ -13,7 +13,7 @@ namespace MechHisui.Core
 
         public string Trait { get; set; }
         public bool IsAutoComputed { get; set; }
-        public IEnumerable<ServantProfileTrait> Servants { get; set; }
+        //public IEnumerable<ServantProfileTrait> Servants { get; set; }
 
         public override string ToString() => Trait;
     }

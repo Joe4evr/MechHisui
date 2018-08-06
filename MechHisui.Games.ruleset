@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="MechHisui.Games" Description="Game analyzer rules for MechHisui" ToolsVersion="15.0">
+  <Rules AnalyzerId="Discord.Addons.MpGame.Analyzers" RuleNamespace="Discord.Addons.MpGame.Analyzers">
+    <Rule Id="MPGAME0001" Action="Warning" />
+  </Rules>
+</RuleSet>

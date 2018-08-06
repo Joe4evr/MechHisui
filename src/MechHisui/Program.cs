@@ -7,9 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.WebSocket;
 using Discord.Commands;
-using Discord.Addons.SimplePermissions;
-//using MechHisui.HisuiBets;
-//using MechHisui.FateGOLib;
 using SharedExtensions;
 
 namespace MechHisui
@@ -58,7 +55,7 @@ namespace MechHisui
                 LogLevel = minlog,
                 DefaultRunMode = RunMode.Sync
             });
-            _services = ConfigureServices(_client, p, _commands, _logger);
+            _services = ConfigureServices(_client, _commands, p, _logger);
 
             _commands.Log += _logger;
             _client.Log += _logger;
@@ -104,34 +101,39 @@ namespace MechHisui
             if (!(arg is SocketUserMessage msg))
                 return Task.CompletedTask;
 
-            if (msg.Author.Id == _client.CurrentUser.Id || msg.Author.IsBot) return Task.CompletedTask;
+            if (msg.Author.Id == _client.CurrentUser.Id || msg.Author.IsBot)
+                return Task.CompletedTask;
 
             if (msg.Channel is IPrivateChannel
                 || (msg.Channel is SocketGuildChannel sgc
                     && sgc.Guild.CurrentUser.GetPermissions(sgc).SendMessages))
             {
                 int pos = 0;
-                var user = _client.CurrentUser;
-                if (msg.HasCharPrefix('.', ref pos) || msg.HasMentionPrefix(user, ref pos))
+                if (msg.HasCharPrefix('.', ref pos) || msg.HasMentionPrefix(_client.CurrentUser, ref pos))
                 {
-                    Task.Run(async () =>
-                    {
-                        using (var scope = _services.CreateScope())
-                        {
-                            var context = new SocketCommandContext(_client, msg);
-                            var result = await _commands.ExecuteAsync(context, pos, services: scope.ServiceProvider);
-
-                            if (!result.IsSuccess
-                                && (result.Error != CommandError.UnknownCommand
-                                    || context.Guild?.Id == 161445678633975808ul))
-                            {
-                                await msg.Channel.SendMessageAsync(result.ErrorReason);
-                            }
-                        }
-                    });
+                    RunCommand(msg, pos);
                 }
             }
             return Task.CompletedTask;
+
+            // saves on Task+closure allocation
+            async void RunCommand(SocketUserMessage message, int position)
+            {
+                await Task.Yield();
+                //using (message.Channel.EnterTypingState())
+                using (var scope = _services.CreateScope())
+                {
+                    var context = new SocketCommandContext(_client, message);
+                    var result = await _commands.ExecuteAsync(context, position, services: scope.ServiceProvider);
+
+                    if (!result.IsSuccess
+                        && (result.Error != CommandError.UnknownCommand
+                            || context.Guild?.Id == 161445678633975808ul))
+                    {
+                        await context.Channel.SendMessageAsync(result.ErrorReason);
+                    }
+                }
+            }
         }
     }
 }

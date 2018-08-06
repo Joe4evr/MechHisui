@@ -6,13 +6,13 @@ namespace MechHisui.Core
 {
     public partial class MechHisuiConfig
     {
-        public DbSet<BankAccount> BankAccounts { get; set; }
+        //public DbSet<BankAccount> BankAccounts { get; set; }
         public DbSet<BetGame> BetGames { get; set; }
         public DbSet<Bet> RecordedBets { get; set; }
 
         private static void ConfigureBetsModel(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<BankAccount>(account =>
+            modelBuilder.Entity<HisuiUser>(account =>
             {
                 account.Property(ac => ac.Balance)
                     .HasDefaultValue(1500);
@@ -24,12 +24,12 @@ namespace MechHisui.Core
                 //account.HasIndex(ac => ac.UserId)
                 //    .IsUnique(true);
 
-                account.Property<long>("UserSnowflake")
-                    .HasField(nameof(BankAccount._uid))
-                    .IsRequired(true);
+                //account.Property<long>("UserSnowflake")
+                //    .HasField(nameof(BankAccount._uid))
+                //    .IsRequired(true);
 
-                account.HasIndex("UserSnowflake")
-                    .IsUnique(true);
+                //account.HasIndex("UserSnowflake")
+                //    .IsUnique(true);
             });
 
             modelBuilder.Entity<BetGame>(game =>

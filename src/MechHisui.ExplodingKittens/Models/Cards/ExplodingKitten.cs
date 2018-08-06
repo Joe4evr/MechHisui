@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace MechHisui.ExplodingKittens.Cards
 {
-    internal sealed class ExplodingKitten : ExplodingKitttensCard
+    internal sealed class ExplodingKitten : ExplodingKittensCard
     {
         public ExplodingKitten()
             : base(ExKitConstants.ExplodingKitten)

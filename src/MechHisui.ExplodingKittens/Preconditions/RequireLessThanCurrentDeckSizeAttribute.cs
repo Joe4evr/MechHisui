@@ -10,7 +10,7 @@ namespace MechHisui.ExplodingKittens
 {
     internal sealed class RequireLessThanCurrentDeckSizeAttribute : ParameterPreconditionAttribute
     {
-        public override Task<PreconditionResult> CheckPermissions(
+        public override Task<PreconditionResult> CheckPermissionsAsync(
             ICommandContext context,
             ParameterInfo parameter,
             object value,

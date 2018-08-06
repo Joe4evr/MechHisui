@@ -9,7 +9,7 @@ using SharedExtensions;
 
 namespace GudakoBot
 {
-    public class PeriodicMessageService
+    public sealed class PeriodicMessageService
     {
         private readonly Func<LogMessage, Task> _logger;
         private readonly Timer _timer;
@@ -17,7 +17,7 @@ namespace GudakoBot
 
         private string _lastLine;
 
-        internal IEnumerable<string> Lines { get; set; }
+        internal IEnumerable<string> Lines { private get; set; }
 
         public PeriodicMessageService(
             DiscordSocketClient client,
@@ -36,18 +36,22 @@ namespace GudakoBot
                 do str = Lines.ElementAt(_rng.Next(maxValue: lines.Count()));
                 while (str == _lastLine);
 
-                var ch = client.GetChannel(channel) as ITextChannel;
-                if (ch == null)
-                {
-                    await _logger(new LogMessage(LogSeverity.Info, "Periodic", $"{DateTime.Now,-19} Channel couldn't be found. Waiting for next interval.")).ConfigureAwait(false);
-                }
-                else
-                {
+                if (client.GetChannel(channel) is ITextChannel ch)
                     await ch.SendMessageAsync(str).ConfigureAwait(false);
-                }
+                else
+                    await _logger(new LogMessage(LogSeverity.Info, "Periodic", "Channel couldn't be found. Waiting for next interval.")).ConfigureAwait(false);
                 
                 _lastLine = str;
-            }, null, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(60));
+            }, null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+
+            client.Ready += () =>
+            {
+                _timer.Change(TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(60));
+                return Task.CompletedTask;
+            };
         }
+
+        internal void StopTimer() => _timer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+        internal void StartTimer() => _timer.Change(TimeSpan.FromMinutes(60), TimeSpan.FromMinutes(60));
     }
 }

@@ -10,28 +10,28 @@ namespace MechHisui.HisuiBets
         char CurrencySymbol { get; }
 
         IBankAccount GetAccount(IUser user);
-        Task<IEnumerable<IBankAccount>> GetAllUsers();
+        Task<IEnumerable<IBankAccount>> GetAllUsersAsync();
 
         IBetGame CreateGame(ITextChannel channel, GameType gameType);
-        Task<IEnumerable<IBetGame>> GetUncashedGames();
-        Task<IBetGame> GetLastGameInChannel(ITextChannel channel);
-        Task<IBetGame> GetGameInChannelById(ITextChannel channel, int gameId);
+        Task<IEnumerable<IBetGame>> GetUncashedGamesAsync();
+        Task<IBetGame> GetLastGameInChannelAsync(ITextChannel channel);
+        Task<IBetGame> GetGameInChannelByIdAsync(ITextChannel channel, int gameId);
 
-        Task<RecordingResult> RecordOrUpdateBet(IBetGame game, IBet bet);
-        Task<IBet> RetrieveBet(IUser user, IBetGame game);
+        Task<RecordingResult> RecordOrUpdateBetAsync(IBetGame game, IBet bet);
+        Task<IBet> RetrieveBetAsync(IUser user, IBetGame game);
 
-        Task<IBankAccount> AddUser(IUser user);
-        Task AddUsers(IEnumerable<IUser> users);
+        Task<IBankAccount> AddUserAsync(IUser user);
+        Task AddUsersAsync(IEnumerable<IUser> users);
 
-        Task<BetResult> CashOut(BetCollection bets, string winner);
-        Task<DonationResult> Donate(DonationRequest request);
+        Task<BetResult> CashOutAsync(BetCollection bets, string winner);
+        Task<DonationResult> DonateAsync(DonationRequest request);
 
-        Task<WithdrawalResult> Withdraw(WithdrawalRequest request);
-        Task CollectBets(int gameId);
-        Task Interest();
+        Task<WithdrawalResult> WithdrawAsync(WithdrawalRequest request);
+        Task CollectBetsAsync(int gameId);
+        Task InterestAsync();
 
-        Task AddToVault(int amount);
-        Task<int> GetVaultWorth();
-        Task<int> RetrieveFromVault(int amount);
+        Task AddToVaultAsync(int amount);
+        Task<int> GetVaultWorthAsync();
+        Task<int> RetrieveFromVaultAsync(int amount);
     }
 }

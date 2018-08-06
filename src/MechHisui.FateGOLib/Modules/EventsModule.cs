@@ -4,10 +4,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord.Addons.SimplePermissions;
 using Discord.Commands;
+using Discord.Commands.Builders;
+using NodaTime;
+using SharedExtensions;
 
 namespace MechHisui.FateGOLib
 {
-    public partial class FgoModule : ModuleBase
+    public partial class FgoModule
     {
         [Name("Events")]
         public sealed class EventsModule : ModuleBase<ICommandContext>
@@ -21,11 +24,11 @@ namespace MechHisui.FateGOLib
 
             [Command("event"), Permission(MinimumPermission.Everyone)]
             [Alias("events")]
-            public Task EventCmd()
+            public async Task EventCmd()
             {
                 var sb = new StringBuilder();
                 var utcNow = DateTime.UtcNow;
-                var currentEvents = _service.Config.GetCurrentEvents();
+                var currentEvents = await _service.Config.GetCurrentEventsAsync().ConfigureAwait(false);
 
                 if (currentEvents.Any())
                 {
@@ -34,27 +37,39 @@ namespace MechHisui.FateGOLib
                     {
                         if (ev.EndTime.HasValue)
                         {
-                            string doneAt = (ev.EndTime.Value - utcNow).ToNiceString();
-                            sb.AppendLine($"{ev.EventName} for {doneAt}.");
+                            sb.AppendLine($"(\uFF03{ev.Id}) {ev.EventName} for {(ev.EndTime.Value - utcNow).ToNiceString()}.");
                         }
                         else
                         {
-                            sb.AppendLine($"{ev.EventName} for unknown time.");
+                            sb.AppendLine($"(\uFF03{ev.Id}) {ev.EventName} for unknown time.");
                         }
 
-                        if (!String.IsNullOrEmpty(ev.EventGacha))
+                        if (!String.IsNullOrEmpty(ev.InfoLink))
                         {
-                            sb.AppendLine($"\t**Event gacha rate up on:** {ev.EventGacha}.");
+                            sb.AppendLine($"<{ev.InfoLink}>");
+                        }
+
+                        if (ev.EventGachas.Any())
+                        {
+                            foreach (var gacha in ev.EventGachas)
+                            {
+                                if (gacha.EndTime > utcNow)
+                                {
+                                    if (gacha.StartTime < utcNow)
+                                    {
+                                        sb.AppendLine($"\tRate up on {String.Join(", ", gacha.RateUpServants)}, for {(gacha.EndTime - utcNow).ToNiceString()}");
+                                    }
+                                    else
+                                    {
+                                        sb.AppendLine($"\tRate up on {String.Join(", ", gacha.RateUpServants)}, starting in {(gacha.StartTime - utcNow).ToNiceString()}");
+                                    }
+                                }
+                            }
                         }
                         else
                         {
                             sb.AppendLine("\tNo event gacha for this event.");
                         }
-
-                        //if (!String.IsNullOrEmpty(ev.InfoLink))
-                        //{
-                        //    sb.AppendLine($"\t{ev.InfoLink}");
-                        //}
                     }
                 }
                 else
@@ -62,22 +77,25 @@ namespace MechHisui.FateGOLib
                     sb.AppendLine("No events currently going on.");
                 }
 
-                var nextEvent = currentEvents.FirstOrDefault(e => e.StartTime > utcNow) ?? currentEvents.FirstOrDefault(e => !e.StartTime.HasValue);
-                if (nextEvent != null)
+                var futureEvents = await _service.Config.GetFutureEventsAsync().ConfigureAwait(false);
+                if (futureEvents.Any())
                 {
-                    if (nextEvent.StartTime.HasValue)
+                    sb.Append("**Upcoming Event(s):** ");
+                    foreach (var ev in futureEvents)
                     {
-                        string eta = (nextEvent.StartTime.Value - utcNow).ToNiceString();
-                        sb.AppendLine($"**Next Event:** {nextEvent.EventName}, planned to start in {eta}.");
-                    }
-                    else
-                    {
-                        sb.AppendLine($"**Next Event:** {nextEvent.EventName}, planned to start at an unknown time.");
-                    }
+                        if (ev.StartTime.HasValue)
+                        {
+                            sb.AppendLine($"(\uFF03{ev.Id}) {ev.EventName}, planned to start in {(ev.StartTime.Value - utcNow).ToNiceString()}.");
+                        }
+                        else
+                        {
+                            sb.AppendLine($"(\uFF03{ev.Id}) {ev.EventName}, planned to start at an unknown time.");
+                        }
 
-                    if (!String.IsNullOrEmpty(nextEvent.InfoLink))
-                    {
-                        sb.AppendLine(nextEvent.InfoLink);
+                        if (!String.IsNullOrEmpty(ev.InfoLink))
+                        {
+                            sb.AppendLine($"<{ev.InfoLink}>");
+                        }
                     }
                 }
                 else
@@ -85,7 +103,16 @@ namespace MechHisui.FateGOLib
                     sb.AppendLine("No known upcoming events.");
                 }
                 sb.Append("KanColle Collab never ever");
-                return ReplyAsync(sb.ToString());
+                await ReplyAsync(sb.ToString()).ConfigureAwait(false);
+            }
+
+            [Command("addevent"), Permission(MinimumPermission.ModRole)]
+            public async Task AddEventCmd(string name, LocalDateTime? start = null, LocalDateTime? end = null, string info = null)
+            {
+                var dtoStart = start?.InZoneLeniently(NodaTimeExtensions.JpnTimeZone).ToDateTimeOffset();
+                var dtoEnd = end?.InZoneLeniently(NodaTimeExtensions.JpnTimeZone).ToDateTimeOffset();
+                var ev = await _service.Config.AddEventAsync(name, dtoStart, dtoEnd, info).ConfigureAwait(false);
+                await ReplyAsync($"Successfully added event \uFF03{ev.Id} **{ev.EventName}**.").ConfigureAwait(false);
             }
         }
     }

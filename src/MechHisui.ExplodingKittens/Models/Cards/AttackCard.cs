@@ -3,9 +3,10 @@ using System.Threading.Tasks;
 
 namespace MechHisui.ExplodingKittens.Cards
 {
-    internal sealed class AttackCard : ExplodingKitttensCard
+    internal sealed class AttackCard : ExplodingKittensCard
     {
-        public AttackCard() : base(ExKitConstants.Attack)
+        public AttackCard()
+            : base(ExKitConstants.Attack)
         {
         }
 

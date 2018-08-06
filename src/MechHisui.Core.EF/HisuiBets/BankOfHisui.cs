@@ -26,11 +26,11 @@ namespace MechHisui.Core
         //read-only operations
         char IBankOfHisui.CurrencySymbol => '\u050A';
 
-        async Task<IEnumerable<IBankAccount>> IBankOfHisui.GetAllUsers()
+        async Task<IEnumerable<IBankAccount>> IBankOfHisui.GetAllUsersAsync()
         {
             using (var config = _store.Load())
             {
-                return await config.BankAccounts
+                return await config.Users
                     .AsNoTracking()
                     .ToListAsync();
             }
@@ -40,7 +40,7 @@ namespace MechHisui.Core
         {
             using (var config = _store.Load())
             {
-                return GetAccount(user.Id, config);
+                return GetConfigUser(user.Id, config);
                 //var cuser = GetConfigUser(user.Id, config);
                 //return (cuser != null)
                 //    ? new UserAccount { UserId = user.Id, Balance = cuser.BankBalance }
@@ -48,7 +48,7 @@ namespace MechHisui.Core
             }
         }
 
-        async Task<IEnumerable<IBetGame>> IBankOfHisui.GetUncashedGames()
+        async Task<IEnumerable<IBetGame>> IBankOfHisui.GetUncashedGamesAsync()
         {
             using (var config = _store.Load())
             {
@@ -62,7 +62,7 @@ namespace MechHisui.Core
             }
         }
 
-        async Task<IBetGame> IBankOfHisui.GetLastGameInChannel(ITextChannel channel)
+        async Task<IBetGame> IBankOfHisui.GetLastGameInChannelAsync(ITextChannel channel)
         {
             using (var config = _store.Load())
             {
@@ -75,7 +75,7 @@ namespace MechHisui.Core
             }
         }
 
-        async Task<IBetGame> IBankOfHisui.GetGameInChannelById(ITextChannel channel, int gameId)
+        async Task<IBetGame> IBankOfHisui.GetGameInChannelByIdAsync(ITextChannel channel, int gameId)
         {
             using (var config = _store.Load())
             {
@@ -88,7 +88,7 @@ namespace MechHisui.Core
             }
         }
 
-        async Task<IBet> IBankOfHisui.RetrieveBet(IUser user, IBetGame game)
+        async Task<IBet> IBankOfHisui.RetrieveBetAsync(IUser user, IBetGame game)
         {
             using (var config = _store.Load())
             {
@@ -98,7 +98,7 @@ namespace MechHisui.Core
             }
         }
 
-        Task<int> IBankOfHisui.GetVaultWorth()
+        Task<int> IBankOfHisui.GetVaultWorthAsync()
         {
             using (var config = _store.Load())
             {
@@ -122,34 +122,36 @@ namespace MechHisui.Core
             }
         }
 
-        async Task<IBankAccount> IBankOfHisui.AddUser(IUser user)
+        Task<IBankAccount> IBankOfHisui.AddUserAsync(IUser user)
         {
             using (var config = _store.Load())
             {
-                var ac = GetAccount(user.Id, config);
-                if (ac == null)
-                {
-                    ac = new BankAccount { UserId = user.Id };
-                    config.BankAccounts.Add(ac);
-                    await config.SaveChangesAsync().ConfigureAwait(false);
-                }
-                return ac;
+                return Task.FromResult<IBankAccount>(GetConfigUser(user.Id, config));
+            //    var ac = GetAccount(user.Id, config);
+            //    if (ac == null)
+            //    {
+            //        ac = new BankAccount { UserId = user.Id };
+            //        config.BankAccounts.Add(ac);
+            //        await config.SaveChangesAsync().ConfigureAwait(false);
+            //    }
+            //    return ac;
             }
         }
 
-        async Task IBankOfHisui.AddUsers(IEnumerable<IUser> users)
+        Task IBankOfHisui.AddUsersAsync(IEnumerable<IUser> users)
         {
-            using (var config = _store.Load())
-            {
-                foreach (var user in users)
-                {
-                    config.BankAccounts.Add(new BankAccount { UserId = user.Id });
-                }
-                await config.SaveChangesAsync().ConfigureAwait(false);
-            }
+            return Task.CompletedTask;
+            //using (var config = _store.Load())
+            //{
+            //    foreach (var user in users)
+            //    {
+            //        config.BankAccounts.Add(new BankAccount { UserId = user.Id });
+            //    }
+            //    await config.SaveChangesAsync().ConfigureAwait(false);
+            //}
         }
 
-        async Task<BetResult> IBankOfHisui.CashOut(BetCollection betcollection, string winner)
+        async Task<BetResult> IBankOfHisui.CashOutAsync(BetCollection betcollection, string winner)
         {
             var winningBets = betcollection.Bets.Where(b => b.Target.Equals(winner, StringComparison.OrdinalIgnoreCase)).ToList();
 
@@ -167,7 +169,7 @@ namespace MechHisui.Core
                 foreach (var bet in winningBets)
                 {
                     var payout = (int)Math.Floor(((loserSum / winnerSum) * bet.BettedAmount) + bet.BettedAmount);
-                    var ac = GetAccount(bet.UserId, config);
+                    var ac = GetConfigUser(bet.UserId, config);
                     ac.Balance += payout;
                     windict.Add(ac.UserId, payout);
                     total -= payout;
@@ -184,15 +186,15 @@ namespace MechHisui.Core
             return new BetResult(total, windict);
         }
 
-        async Task<DonationResult> IBankOfHisui.Donate(DonationRequest request)
+        async Task<DonationResult> IBankOfHisui.DonateAsync(DonationRequest request)
         {
             using (var config = _store.Load())
             {
-                var donor = GetAccount(request.DonorId, config);
+                var donor = GetConfigUser(request.DonorId, config);
                 if (donor == null)
                     return DonationResult.DonorNotFound;
 
-                var recepient = GetAccount(request.RecepientId, config);
+                var recepient = GetConfigUser(request.RecepientId, config);
                 if (recepient == null)
                     return DonationResult.RecipientNotFound;
 
@@ -207,7 +209,7 @@ namespace MechHisui.Core
             }
         }
 
-        async Task IBankOfHisui.Interest()
+        async Task IBankOfHisui.InterestAsync()
         {
             using (var config = _store.Load())
             {
@@ -229,14 +231,14 @@ namespace MechHisui.Core
                 //}
 
                 // The "meh" but working way:
-                await config.BankAccounts.Where(u => u.Balance < 2500)
+                await config.Users.Where(u => u.Balance < 2500)
                     .ForEachAsync(u => u.Balance += 10).ConfigureAwait(false);
 
                 await config.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
-        async Task<RecordingResult> IBankOfHisui.RecordOrUpdateBet(IBetGame game, IBet bet)
+        async Task<RecordingResult> IBankOfHisui.RecordOrUpdateBetAsync(IBetGame game, IBet bet)
         {
             using (var config = _store.Load())
             {
@@ -281,11 +283,11 @@ namespace MechHisui.Core
             return RecordingResult.MiscError;
         }
 
-        async Task<WithdrawalResult> IBankOfHisui.Withdraw(WithdrawalRequest request)
+        async Task<WithdrawalResult> IBankOfHisui.WithdrawAsync(WithdrawalRequest request)
         {
             using (var config = _store.Load())
             {
-                var debtor = GetAccount(request.AccountId, config);
+                var debtor = GetConfigUser(request.AccountId, config);
                 if (debtor == null)
                     return WithdrawalResult.AccountNotFound;
 
@@ -299,7 +301,7 @@ namespace MechHisui.Core
             }
         }
 
-        async Task IBankOfHisui.CollectBets(int gameId)
+        async Task IBankOfHisui.CollectBetsAsync(int gameId)
         {
             using (var config = _store.Load())
             {
@@ -310,7 +312,7 @@ namespace MechHisui.Core
                     .SingleOrDefaultAsync(g => g.Id == gameId).ConfigureAwait(false);
                 foreach (var bet in game.Bets)
                 {
-                    var debtor = GetAccount(bet.User.UserId, config);
+                    var debtor = GetConfigUser(bet.User.UserId, config);
                     if (debtor != null)
                     {
                         int amount = bet.BettedAmount;
@@ -326,7 +328,7 @@ namespace MechHisui.Core
             }
         }
 
-        async Task IBankOfHisui.AddToVault(int amount)
+        async Task IBankOfHisui.AddToVaultAsync(int amount)
         {
             if (amount < 0)
                 throw new ArgumentOutOfRangeException(nameof(amount));
@@ -339,7 +341,7 @@ namespace MechHisui.Core
             }
         }
 
-        async Task<int> IBankOfHisui.RetrieveFromVault(int amount)
+        async Task<int> IBankOfHisui.RetrieveFromVaultAsync(int amount)
         {
             if (amount <= 50)
                 return 0;
@@ -360,8 +362,8 @@ namespace MechHisui.Core
         private static HisuiUser GetConfigUser(ulong userId, MechHisuiConfig config)
             => config.Users.SingleOrDefault(u => u.UserId == userId);
 
-        private static BankAccount GetAccount(ulong userId, MechHisuiConfig config)
-            => config.BankAccounts.SingleOrDefault(a => a.UserId == userId);
+        //private static IBankAccount GetAccount(ulong userId, MechHisuiConfig config)
+        //    => config.Users.SingleOrDefault(a => a.UserId == userId);
 
         private static HisuiChannel GetConfigChannel(ulong channelId, MechHisuiConfig config)
             => config.Channels.SingleOrDefault(c => c.ChannelId == channelId);

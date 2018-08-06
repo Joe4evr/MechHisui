@@ -13,10 +13,11 @@
     <ItemGroup>
         <!--<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.0.0" />-->
         <PackageReference Include="System.Memory" Version="4.5.1" />
-        <PackageReference Include="Discord.Net.Commands" Version="2.0.0-beta2-00970" />
-        <PackageReference Include="Discord.Net.WebSocket" Version="2.0.0-beta2-00970" />
+        <PackageReference Include="Discord.Net.Commands" Version="2.0.0-beta2-00978" />
+        <PackageReference Include="Discord.Net.WebSocket" Version="2.0.0-beta2-00978" />
         <PackageReference Include="Discord.Addons.Preconditions" Version="1.2.0-alpha2" />
         <!--<PackageReference Include="Discord.Addons.SimplePermissions" Version="1.2.0-alpha3" />-->
+        <PackageReference Include="NodaTime" Version="2.3.0-beta02" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\..\Discord.Addons\src\Discord.Addons.SimplePermissions\Discord.Addons.SimplePermissions.csproj" />

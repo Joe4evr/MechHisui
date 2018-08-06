@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.Addons.SimplePermissions;
 using SharedExtensions;
+using Discord.Commands.Builders;
 
 namespace MechHisui
 {
@@ -17,6 +18,13 @@ namespace MechHisui
         public DiceRollModule(Random rng)
         {
             _rng = rng;
+        }
+
+        protected override void OnModuleBuilding(CommandService commandService, ModuleBuilder builder)
+        {
+            base.OnModuleBuilding(commandService, builder);
+
+            commandService.AddTypeReader<DiceRoll>(new DiceTypeReader());
         }
 
         [Command("roll"), Permission(MinimumPermission.Everyone)]

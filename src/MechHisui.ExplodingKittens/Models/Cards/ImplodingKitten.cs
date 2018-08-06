@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace MechHisui.ExplodingKittens.Cards
 {
-    internal class ImplodingKitten : ExplodingKitttensCard
+    internal class ImplodingKitten : ExplodingKittensCard
     {
         public bool IsFaceUp { get; private set; } = false;
 

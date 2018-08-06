@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
+using Discord.Commands.Builders;
 using Discord.Addons.MpGame;
 using Discord.Addons.SimplePermissions;
 using MechHisui.SecretHitler.Models;

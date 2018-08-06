@@ -29,18 +29,18 @@ namespace MechHisui.Core
         public string ThirdStall { get; set; }
         public string PeopleEnactedFormat { get; set; }
         public string PeopleStateFormat { get; set; }
-        public string ThePeopleEnacted(string party) => String.Format(PeopleEnactedFormat, party);
-        public string ThePeopleState(int stalls) => String.Format(PeopleStateFormat, stalls);
+        string ISecretHitlerTheme.ThePeopleEnacted(string party) => String.Format(PeopleEnactedFormat, party);
+        string ISecretHitlerTheme.ThePeopleState(int stalls) => String.Format(PeopleStateFormat, stalls);
 
         public string LiberalsWin { get; set; }
         public string FascistsWin { get; set; }
 
         public string KillFormat { get; set; }
-        public string Kill(string player) => String.Format(KillFormat, player);
+        string ISecretHitlerTheme.Kill(string player) => String.Format(KillFormat, player);
 
         public string NoKillFormat { get; set; }
         public string KilledFormat { get; set; }
-        public string HitlerNotKilled(string player) => String.Format(NoKillFormat, player);
-        public string HitlerWasKilled() => String.Format(KilledFormat, Hitler, LiberalParty);
+        string ISecretHitlerTheme.HitlerNotKilled(string player) => String.Format(NoKillFormat, player);
+        string ISecretHitlerTheme.HitlerWasKilled() => String.Format(KilledFormat, Hitler, LiberalParty);
     }
 }

@@ -26,17 +26,19 @@ namespace MechHisui.Core
         public DbSet<MysticAlias> MysticAliases { get; set; }
 
         public DbSet<FgoEvent> FgoEvents { get; set; }
+        public DbSet<FgoEventGacha> EventGachas { get; set; }
+        public DbSet<RateUpServant> RateUpServants { get; set; }
 
         public DbSet<NameOnlyServant> NameOnlyServants { get; set; }
 
-        public DbSet<FgoFriendData> FgoFriendData { get; set; }
+        //public DbSet<FgoFriendData> FgoFriendData { get; set; }
 
         private static void ConfigureFgoModel(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<HisuiUser>(user =>
-            {
-                user.HasOne(u => u.FriendData);
-            });
+            //modelBuilder.Entity<HisuiUser>(user =>
+            //{
+            //    user.HasOne(u => u.FriendData);
+            //});
 
             modelBuilder.Entity<ServantProfile>(servant =>
             {
@@ -61,49 +63,49 @@ namespace MechHisui.Core
                     .WithOne(a => a.CE);
             });
 
-            modelBuilder.Entity<ServantTrait>(trait =>
-            {
-                trait.HasMany(t => t.Servants)
-                    .WithOne(t => t.Trait);
-            });
+            //modelBuilder.Entity<ServantTrait>(trait =>
+            //{
+            //    trait.HasMany(t => t.Servants)
+            //        .WithOne(t => t.Trait);
+            //});
 
-            modelBuilder.Entity<ServantProfileTrait>(trait =>
-            {
-                trait.HasOne(t => t.Servant)
-                    .WithMany(p => p.Traits);
+            //modelBuilder.Entity<ServantProfileTrait>(pTrait =>
+            //{
+            //    pTrait.HasOne(t => t.Servant)
+            //        .WithMany(p => p.Traits);
 
-                trait.HasOne(t => t.Trait);
-            });
+            //    pTrait.HasOne(t => t.Trait);
+            //});
 
-            modelBuilder.Entity<ActiveSkill>(aSkill =>
-            {
-                aSkill.HasMany(a => a.Servants)
-                    .WithOne(s => s.Skill);
-            });
+            //modelBuilder.Entity<ActiveSkill>(aSkill =>
+            //{
+            //    aSkill.HasMany(a => a.Servants)
+            //        .WithOne(s => s.Skill);
+            //});
 
-            modelBuilder.Entity<ServantActiveSkill>(skill =>
-            {
-                skill.HasOne(s => s.Servant)
-                    .WithMany(p => p.ActiveSkills);
+            //modelBuilder.Entity<ServantActiveSkill>(skill =>
+            //{
+            //    skill.HasOne(s => s.Servant)
+            //        .WithMany(p => p.ActiveSkills);
 
-                skill.HasOne(s => s.Skill)
-                    .WithMany(a => a.Servants);
-            });
+            //    skill.HasOne(s => s.Skill)
+            //        .WithMany(a => a.Servants);
+            //});
 
-            modelBuilder.Entity<PassiveSkill>(pSkill =>
-            {
-                pSkill.HasMany(p => p.Servants)
-                    .WithOne(s => s.Skill);
-            });
+            //modelBuilder.Entity<PassiveSkill>(pSkill =>
+            //{
+            //    pSkill.HasMany(p => p.Servants)
+            //        .WithOne(s => s.Skill);
+            //});
 
-            modelBuilder.Entity<ServantPassiveSkill>(skill =>
-            {
-                skill.HasOne(s => s.Servant)
-                    .WithMany(p => p.PassiveSkills);
+            //modelBuilder.Entity<ServantPassiveSkill>(skill =>
+            //{
+            //    skill.HasOne(s => s.Servant)
+            //        .WithMany(p => p.PassiveSkills);
 
-                skill.HasOne(s => s.Skill)
-                    .WithMany(p => p.Servants);
-            });
+            //    skill.HasOne(s => s.Skill)
+            //        .WithMany(p => p.Servants);
+            //});
 
             modelBuilder.Entity<ServantAlias>(alias =>
             {
@@ -116,6 +118,22 @@ namespace MechHisui.Core
                 code.HasMany(m => m.Aliases)
                     .WithOne(a => a.Code);
             });
+
+            //modelBuilder.Entity<FgoEvent>(ev =>
+            //{
+            //    ev.HasMany(e => e.EventGachas)
+            //        .WithOne(g => g.Event);
+            //});
+            //modelBuilder.Entity<FgoEventGacha>(gacha =>
+            //{
+            //    gacha.HasMany(g => g.RateUpServants)
+            //        .WithOne(r => r.EventGacha);
+            //});
+            //modelBuilder.Entity<RateUpServant>(rateUp =>
+            //{
+            //    rateUp.HasOne(r => r.EventGacha);
+            //    rateUp.HasOne(r => r.Servant);
+            //});
         }
     }
 }

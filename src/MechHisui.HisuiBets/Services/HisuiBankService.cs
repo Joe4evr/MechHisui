@@ -44,7 +44,7 @@ namespace MechHisui.HisuiBets
             _interestTimer = new Timer(_ =>
             {
                 Log(LogSeverity.Verbose, "Increasing users' HisuiBucks.");
-                Bank.Interest();
+                Bank.InterestAsync();
             }, null,
             TimeSpan.FromMinutes(60 - DateTime.Now.Minute),
             TimeSpan.FromHours(1));
@@ -53,7 +53,7 @@ namespace MechHisui.HisuiBets
             {
                 Task.Run(async () =>
                 {
-                    var uncashed = await Bank.GetUncashedGames().ConfigureAwait(false);
+                    var uncashed = await Bank.GetUncashedGamesAsync().ConfigureAwait(false);
                     if (uncashed.Any())
                     {
                         foreach (var game in uncashed)
@@ -71,7 +71,7 @@ namespace MechHisui.HisuiBets
                 {
                     if (!user.IsBot && !Blacklist.Contains(user.Id))
                     {
-                        await Bank.AddUser(user).ConfigureAwait(false);
+                        await Bank.AddUserAsync(user).ConfigureAwait(false);
                         //if (ac != null)
                         //    await Log(LogSeverity.Verbose, $"Registered {user.Username} for a bank account.").ConfigureAwait(false);
                     }
@@ -85,7 +85,7 @@ namespace MechHisui.HisuiBets
                     await guild.DownloadUsersAsync().ConfigureAwait(false);
                     await _semaphore.WaitAsync().ConfigureAwait(false);
 
-                    var registered = (await Bank.GetAllUsers().ConfigureAwait(false))
+                    var registered = (await Bank.GetAllUsersAsync().ConfigureAwait(false))
                         .Select(a => guild.GetUser(a.UserId));
                     var newUsers = guild.Users
                         .Where(u => !u.IsBot && !Blacklist.Contains(u.Id))
@@ -95,7 +95,7 @@ namespace MechHisui.HisuiBets
                     if (newUsers.Count > 0)
                     {
                         await Log(LogSeverity.Info, $"Registering new users in {guild.Name}").ConfigureAwait(false);
-                        await Bank.AddUsers(newUsers).ConfigureAwait(false);
+                        await Bank.AddUsersAsync(newUsers).ConfigureAwait(false);
                     }
                     _semaphore.Release();
                 });
@@ -108,25 +108,19 @@ namespace MechHisui.HisuiBets
             return _logger(new LogMessage(severity, "HisuiBank", msg));
         }
 
-        internal bool TryAddNewGame(ulong channelId, BetGame game)
+        internal bool TryAddNewGame(IMessageChannel channel, BetGame game)
         {
-            var success = _games.TryAdd(channelId, game);
+            var success = _games.TryAdd(channel.Id, game);
             if (success)
             {
-                game.GameEnd += OnGameEnd;
+                game.GameEnd = OnGameEnd;
             }
 
             return success;
         }
 
-        private Task OnGameEnd(IMessageChannel channel)
-        {
-            if (_games.TryRemove(channel.Id, out var game))
-            {
-                game.GameEnd -= OnGameEnd;
-            }
-            return Task.CompletedTask;
-        }
+        private void OnGameEnd(IMessageChannel channel)
+            => _games.TryRemove(channel.Id, out var game);
     }
 
     //public static class HisuiBankExtensions

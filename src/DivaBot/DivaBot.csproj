@@ -2,29 +2,29 @@
     <Import Project="..\..\DiscordBotCore.props" />
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp2.0</TargetFramework>
+        <RuntimeIdentifiers>$(RuntimeIdentifiers);win10-arm</RuntimeIdentifiers>
+        <!--<TargetFramework>netcoreapp2.0</TargetFramework>
         <RuntimeFrameworkVersion>2.0.0</RuntimeFrameworkVersion>
-        <RuntimeIdentifiers>win;win10-arm</RuntimeIdentifiers>
-        <DefineConstants Condition="'$(RuntimeIdentifier)' == 'win10-arm'">ARM</DefineConstants>
+        <DefineConstants Condition="'$(RuntimeIdentifier)' == 'win10-arm'">ARM</DefineConstants>-->
     </PropertyGroup>
     <ItemGroup>
         <EmbeddedResource Include="**\*.resx" />
     </ItemGroup>
     <ItemGroup>
-        <!--<PackageReference Include="Discord.Addons.SimplePermissions.EFProvider" Version="1.0.0-rc" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.0" />-->
+        <PackageReference Include="Discord.Addons.SimplePermissions.EFProvider" Version="1.2.0-alpha3" />
+        <!--<PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.0" />-->
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0" PrivateAssets="All" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" PrivateAssets="All" />
+        <!--<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" PrivateAssets="All" />-->
         <PackageReference Condition="'$(RuntimeIdentifier)' != 'win10-arm'" Include="Discord.Addons.SimpleAudio" Version="0.1.3-rc" />
-        <PackageReference Condition="'$(RuntimeIdentifier)' != 'win10-arm'" Include="WS4NetCore" Version="1.0.0-a" />
+        <!--<PackageReference Condition="'$(RuntimeIdentifier)' != 'win10-arm'" Include="WS4NetCore" Version="1.0.0-a" />-->
     </ItemGroup>
-    <ItemGroup>
+    <!--<ItemGroup>
         <ProjectReference Include="..\Discord.Addons.SimplePermissions.EFProvider\Discord.Addons.SimplePermissions.EFProvider.csproj" />
     </ItemGroup>
     <ItemGroup>
         <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
-    </ItemGroup>
+    </ItemGroup>-->
     <ItemGroup Condition="'$(RuntimeIdentifier)' != 'win10-arm'">
         <None Update="libsodium.dll">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>

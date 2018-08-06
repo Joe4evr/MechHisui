@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
+using Discord.Commands.Builders;
 using Discord.Addons.MpGame;
 using Discord.Addons.SimplePermissions;
 using MechHisui.SecretHitler.Models;
@@ -21,9 +22,9 @@ namespace MechHisui.SecretHitler
             }
 
             [Command("rules")]
-            public Task RulesCmd()
+            public async Task RulesCmd()
             {
-                var keys = GameService.GetKeys();
+                var keys = await GameService.GetThemeKeysAsync().ConfigureAwait(false);
                 var sb = new StringBuilder("How to play:\n")
                     .AppendLine("There are three roles: Liberal, Fascist, and Hitler.")
                     .AppendLine("Hitler does not know who his fellow Fascists are, but the Fascists know who Hitler is (except in 5 or 6 player games).")
@@ -34,7 +35,7 @@ namespace MechHisui.SecretHitler
                     .AppendLine("For more details: http://secrethitler.com/assets/Secret_Hitler_Rules.pdf ")
                     .Append("Good luck, have fun.");
 
-                return ReplyAsync(sb.ToString());
+                await ReplyAsync(sb.ToString()).ConfigureAwait(false);
             }
 
             [Command("open"), Permission(MinimumPermission.ModRole)]
@@ -50,7 +51,7 @@ namespace MechHisui.SecretHitler
                 }
                 else
                 {
-                    if (GameService.TryUpdateOpenToJoin(Context.Channel, newValue: true, comparisonValue: false))
+                    if (GameService.TryUpdateOpenToJoin(Context.Channel, newValue: true))
                     {
                         GameService.HouseRulesList[Context.Channel] = HouseRules.None;
                         await ReplyAsync("Opening for a game.").ConfigureAwait(false);
@@ -129,12 +130,12 @@ namespace MechHisui.SecretHitler
 
             [Command("start", RunMode = RunMode.Async)]
             [Permission(MinimumPermission.ModRole)] //:thinking:
-            public Task StartGameCmd(string themeName)
+            public async Task StartGameCmd(string themeName)
             {
-                var theme = GameService.GetTheme(themeName);
-                return theme != null
+                var theme = await GameService.GetThemeAsync(themeName).ConfigureAwait(false);
+                await ((theme != null)
                     ? StartInternal(theme)
-                    : ReplyAsync("Could not find that theme.");
+                    : ReplyAsync("Could not find that theme.")).ConfigureAwait(false);
             }
 
             private async Task StartInternal(ISecretHitlerTheme theme)
@@ -189,7 +190,7 @@ namespace MechHisui.SecretHitler
                     }).Shuffle(32);
 
                     var game = new SecretHitlerGame(Context.Channel, players, theme, CurrentHouseRules);
-                    if (GameService.TryAddNewGame(Context.Channel, game))
+                    if (await GameService.TryAddNewGame(Context.Channel, game).ConfigureAwait(false))
                     {
                         await game.SetupGame().ConfigureAwait(false);
                         await game.StartGame().ConfigureAwait(false);

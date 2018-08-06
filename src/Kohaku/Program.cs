@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
@@ -10,7 +8,7 @@ using Discord.Addons.SimplePermissions;
 using Discord.Commands;
 using Discord.WebSocket;
 using SharedExtensions;
-using WS4NetCore;
+//using WS4NetCore;
 
 namespace Kohaku
 {
@@ -49,9 +47,9 @@ namespace Kohaku
             {
                 MessageCacheSize = 50,
                 LogLevel = minlog,
-#if !ARM
-                WebSocketProvider = WS4NetProvider.Instance
-#endif
+//#if !ARM
+                //WebSocketProvider = WS4NetProvider.Instance
+//#endif
             });
 
             Log(LogSeverity.Verbose, $"Constructing {nameof(CommandService)}");
@@ -64,28 +62,10 @@ namespace Kohaku
             _client.Log += _logger;
             _commands.Log += _logger;
 
-            //Log(LogSeverity.Verbose, "Constructing ConfigStore");
-            //_store = new KohakuConfigStore(_commands,
-            //    options => options
-            //        //.UseSqlServer(p.ConnectionString)
-            //        .UseSqlite(p.ConnectionString)
-            //    );
-            //_store = new JsonConfigStore<KohakuConfig>(p.ConfigPath, _commands);
-            //Log(LogSeverity.Verbose, "Loading Config");
-            //using (var config = _store.Load())
-            //{
-            //    if (!config.Strings.Any())
-            //    {
-            //        config.Strings.AddRange(
-            //            JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("strings.json"))
-            //                .DictionarySelect((k, v) => new StringKeyValuePair { Key = k, Value = v }));
-            //        config.Save();
-            //    }
-            //}
-
             _services = ConfigureServices(_client, _commands, p, _logger);
         }
 
+        [DebuggerStepThrough]
         private Task Log(LogSeverity severity, string msg)
         {
             return _logger(new LogMessage(severity, "Main", msg));
@@ -96,8 +76,8 @@ namespace Kohaku
             _client.Ready += () => Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");
 
             //await InitCommands();
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly());
-            await _commands.AddModuleAsync<PermissionsModule>();
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+            await _commands.AddModuleAsync<PermissionsModule>(_services);
             _client.ReactionAdded += CheckReactionAdded;
             _client.MessageReceived += HandleCommand;
 

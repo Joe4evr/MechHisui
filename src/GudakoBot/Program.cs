@@ -5,6 +5,9 @@ using Discord;
 using Discord.WebSocket;
 using SharedExtensions;
 
+using NodaTime;
+using NodaTime.TimeZones;
+
 namespace GudakoBot
 {
     public class Program
@@ -14,18 +17,28 @@ namespace GudakoBot
         private readonly Func<LogMessage, Task> _logger;
         private ulong _owner;
 
-        private static async Task Main(string[] args)
+        private static void Main(string[] args)
         {
-            var p = Params.Parse(args);
-            var app = new Program(p);
-            try
-            {
-                await app.AsyncMain(p);
-            }
-            catch (Exception e)
-            {
-                await app.Log(LogSeverity.Critical, $"Unhandled Exception: {e}");
-            }
+            var provider = DateTimeZoneProviders.Tzdb;
+            var jptz = provider["Japan"];
+            var utcNow = Instant.FromDateTimeOffset(DateTimeOffset.UtcNow).InZone(jptz);
+
+            var startdate = utcNow.TimeUntilNextOccurrance(new AnnualDate(month: 4, day: 1));
+            var enddate = startdate + Duration.FromDays(1);
+
+            var logins = utcNow.TimeUntilNextOccurrance(new LocalTime(hour: 4, minute: 0));
+
+
+            //var p = Params.Parse(args);
+            //var app = new Program(p);
+            //try
+            //{
+            //    await app.AsyncMain(p);
+            //}
+            //catch (Exception e)
+            //{
+            //    await app.Log(LogSeverity.Critical, $"Unhandled Exception: {e}");
+            //}
         }
 
         private Program(Params p)
@@ -62,7 +75,7 @@ namespace GudakoBot
             var config = _store.Load();
             await Log(LogSeverity.Info, $"Loaded {config.Lines.Count()} lines.");
             _periodic = new PeriodicMessageService(_client, config.FgoGeneral, config.Lines, _logger);
-            _aprilFools = new AprilFools(_client, config.FgoGeneral);
+            _aprilFools = new AprilFools(_client, _periodic, config.FgoGeneral);
 
             _client.MessageReceived += async msg =>
             {

@@ -3,7 +3,7 @@
     internal enum GameState
     {
         SetupGame,
-        StartOfTurn,
+        MainPhase,
         ActionPlayed,
         ActionNoped,
         ActionYupd,

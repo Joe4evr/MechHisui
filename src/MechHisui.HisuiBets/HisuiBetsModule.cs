@@ -161,9 +161,10 @@ namespace MechHisui.HisuiBets
             var actualType = (gameType == GameType.Any)
                 ? GameType.HungerGame
                 : gameType;
-            var game = new BetGame(_service.Bank, (ITextChannel)Context.Channel, actualType, _rng, Context.User);
+            var tChan = (ITextChannel)Context.Channel;
+            var game = new BetGame(_service.Bank, tChan, actualType, _rng, Context.User);
 
-            return (_service.TryAddNewGame(Context.Channel.Id, game))
+            return (_service.TryAddNewGame(tChan, game))
                 ? game.StartGame()
                 : ReplyAsync("Another game is already in progress.");
         }
@@ -173,10 +174,10 @@ namespace MechHisui.HisuiBets
         public async Task CheckBets(/*int? gameId = null*/)
         {
             var tChan = (ITextChannel)Context.Channel;
-            var game = await _service.Bank.GetLastGameInChannel(tChan).ConfigureAwait(false);
+            var game = await _service.Bank.GetLastGameInChannelAsync(tChan).ConfigureAwait(false);
             //var game = (gameId.HasValue)
-            //    ? await _service.Bank.GetGameInChannelById(tChan, gameId.Value).ConfigureAwait(false)
-            //    : await _service.Bank.GetLastGameInChannel(tChan).ConfigureAwait(false);
+            //    ? await _service.Bank.GetGameInChannelByIdAsync(tChan, gameId.Value).ConfigureAwait(false)
+            //    : await _service.Bank.GetLastGameInChannelAsync(tChan).ConfigureAwait(false);
 
             if (game == null)
             {
@@ -229,7 +230,7 @@ namespace MechHisui.HisuiBets
         {
             if (Context.Channel is SocketTextChannel channel)
             {
-                var game = await _service.Bank.GetGameInChannelById(channel, gameId).ConfigureAwait(false);
+                var game = await _service.Bank.GetGameInChannelByIdAsync(channel, gameId).ConfigureAwait(false);
                 if (game == null)
                 {
                     await ReplyAsync("Could not find a game by that ID.").ConfigureAwait(false);
@@ -244,10 +245,10 @@ namespace MechHisui.HisuiBets
 
                 if (!game.IsCollected)
                 {
-                    await _service.Bank.CollectBets(game.Id).ConfigureAwait(false);
+                    await _service.Bank.CollectBetsAsync(game.Id).ConfigureAwait(false);
                 }
 
-                var result = await _service.Bank.CashOut(new BetCollection(game), winner).ConfigureAwait(false);
+                var result = await _service.Bank.CashOutAsync(new BetCollection(game), winner).ConfigureAwait(false);
                 var wholeSum = game.Bets.Sum(b => b.BettedAmount);
 
                 await ReplyAsync(await BetGame.EndMessage(result, _service.Bank, channel, gameId, wholeSum).ConfigureAwait(false)).ConfigureAwait(false);

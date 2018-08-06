@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MechHisui.SecretHitler
 {
     public interface ISecretHitlerConfig
     {
-        IEnumerable<string> GetKeys();
+        Task<IEnumerable<string>> GetThemeKeysAsync();
 
-        ISecretHitlerTheme GetTheme(string key);
+        Task<ISecretHitlerTheme> GetThemeAsync(string key);
     }
 }

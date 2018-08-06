@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
+//using System.Collections.Generic;
+//using System.IO;
 using System.Linq;
-using System.Text;
+//using System.Text;
 //using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 //using Microsoft.CodeAnalysis;
@@ -37,12 +37,11 @@ namespace Kohaku
             //        //.UseSqlServer(p.ConnectionString)
             //        .UseSqlite(p.ConnectionString)
             //    );
-            var store = new KohakuConfigStore(commands,
-                options => options.UseSqlite(p.ConnectionString));
+            var map = new ServiceCollection();
+            var store = new KohakuConfigStore(commands, map, logger);
 
-            var map = new ServiceCollection()
-                //.AddSingleton(new TestService(store))
-                .AddSingleton(new PermissionsService(store, commands, client, logger));
+            map.AddSingleton(new PermissionsService(store, commands, client, logger))
+                .AddDbContext<KohakuConfig>(options => options.UseSqlite(p.ConnectionString));
 
             //using (var config = store.Load())
             //{

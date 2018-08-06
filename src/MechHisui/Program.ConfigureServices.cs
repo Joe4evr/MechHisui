@@ -10,7 +10,7 @@ using MechHisui.Core;
 //using MechHisui.ExplodingKittens;
 using MechHisui.FateGOLib;
 using MechHisui.HisuiBets;
-//using MechHisui.SecretHitler;
+using MechHisui.SecretHitler;
 //using MechHisui.Superfight;
 //using MechHisui.SymphoXDULib;
 using SharedExtensions;
@@ -22,8 +22,8 @@ namespace MechHisui
     {
         private static IServiceProvider ConfigureServices(
             DiscordSocketClient client,
-            Params parameters,
             CommandService commands,
+            Params parameters,
             Func<LogMessage, Task> logger = null)
         {
             try
@@ -35,26 +35,22 @@ namespace MechHisui
 
                 var bank     = new BankOfHisui(store);
                 var fgo      = new FgoConfig(store);
-                //var shconfig = new SecretHitlerConfig(store);
+                var shconfig = new SecretHitlerConfig(store);
                 //var sfconfig = new SuperfightConfig(store);
                 //var xdu      = new XduConfig(store);
 
-                commands.AddTypeReader<DiceRoll>(new DiceTypeReader());
-                //commands.AddTypeReader<ServantFilterOptions>(new ServantFilterTypeReader());
-
                 map.AddSingleton(new Random())
-                    .AddSingleton(new PermissionsService(store, commands, client, logger))
+                    .AddSingleton(new PermissionsService(client, commands, store, logger))
                     .AddDbContext<MechHisuiConfig>(options => options.UseSqlite(parameters.ConnectionString))
                     .AddSingleton(new HisuiBankService(bank, client, logger))
-                    .AddSingleton(new FgoStatService(fgo, client, logger))
-                    //.AddSingleton(new SecretHitlerService(shconfig, client, logger))
+                    .AddSingleton(new FgoStatService(client, commands, fgo, logger))
+                    .AddSingleton(new SecretHitlerService(client, shconfig, logger: logger))
                     //.AddSingleton(new SuperfightService(sfconfig, client, logger))
                     //.AddSingleton(new ExKitService(client, logger))
                     //.AddSingleton(new XduStatService(xdu, client, logger))
                     ;
 
                 var services = map.BuildServiceProvider();
-                //store.Services = services;
 
                 //using (var cfg = store.Load())
                 //{
@@ -79,6 +75,7 @@ namespace MechHisui
             await _commands.AddModuleAsync<HisuiBankModule>(_services);
             await _commands.AddModuleAsync<HisuiBetsModule>(_services);
             await _commands.AddModuleAsync<FgoModule>(_services);
+            await _commands.AddModuleAsync<SecretHitlerModule>(_services);
         }
 
         ////var eval = EvalService.Builder.BuilderWithSystemAndLinq()

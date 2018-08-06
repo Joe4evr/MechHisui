@@ -1,0 +1,64 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26124.0
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EC02FAD7-9EAA-400C-A6F5-2663C07EAB7A}"
+	ProjectSection(SolutionItems) = preProject
+		DiscordAddonsCore.props = DiscordAddonsCore.props
+		DiscordBotCore.props = DiscordBotCore.props
+		DiscordGameCore.props = DiscordGameCore.props
+		MechHisui.Games.ruleset = MechHisui.Games.ruleset
+		MechHisui.Rules.ruleset = MechHisui.Rules.ruleset
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B74625FB-6AB7-4351-B5F6-BAEB4BE9FCB0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MechHisui.ExplodingKittens", "src\MechHisui.ExplodingKittens\MechHisui.ExplodingKittens.csproj", "{9B917360-4EB0-41CF-BA01-BEF3BB17068E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MechHisui.SecretHitler", "src\MechHisui.SecretHitler\MechHisui.SecretHitler.csproj", "{1757EA52-AD6D-4824-B27D-7370E9396845}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MechHisui.Superfight", "src\MechHisui.Superfight\MechHisui.Superfight.csproj", "{BC8BAFB9-6C0E-41CF-84AC-F2C28E03BB6E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MechHisui.Weiss", "src\MechHisui.Weiss\MechHisui.Weiss.csproj", "{09E973D0-6C79-48EA-9ADF-DC4862DF94C2}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\SharedExtensions\SharedExtensions.projitems*{1757ea52-ad6d-4824-b27d-7370e9396845}*SharedItemsImports = 4
+		src\SharedExtensions\SharedExtensions.projitems*{9b917360-4eb0-41cf-ba01-bef3bb17068e}*SharedItemsImports = 4
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9B917360-4EB0-41CF-BA01-BEF3BB17068E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B917360-4EB0-41CF-BA01-BEF3BB17068E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B917360-4EB0-41CF-BA01-BEF3BB17068E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B917360-4EB0-41CF-BA01-BEF3BB17068E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1757EA52-AD6D-4824-B27D-7370E9396845}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1757EA52-AD6D-4824-B27D-7370E9396845}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1757EA52-AD6D-4824-B27D-7370E9396845}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1757EA52-AD6D-4824-B27D-7370E9396845}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC8BAFB9-6C0E-41CF-84AC-F2C28E03BB6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC8BAFB9-6C0E-41CF-84AC-F2C28E03BB6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC8BAFB9-6C0E-41CF-84AC-F2C28E03BB6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC8BAFB9-6C0E-41CF-84AC-F2C28E03BB6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09E973D0-6C79-48EA-9ADF-DC4862DF94C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09E973D0-6C79-48EA-9ADF-DC4862DF94C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09E973D0-6C79-48EA-9ADF-DC4862DF94C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09E973D0-6C79-48EA-9ADF-DC4862DF94C2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9B917360-4EB0-41CF-BA01-BEF3BB17068E} = {B74625FB-6AB7-4351-B5F6-BAEB4BE9FCB0}
+		{1757EA52-AD6D-4824-B27D-7370E9396845} = {B74625FB-6AB7-4351-B5F6-BAEB4BE9FCB0}
+		{BC8BAFB9-6C0E-41CF-84AC-F2C28E03BB6E} = {B74625FB-6AB7-4351-B5F6-BAEB4BE9FCB0}
+		{09E973D0-6C79-48EA-9ADF-DC4862DF94C2} = {B74625FB-6AB7-4351-B5F6-BAEB4BE9FCB0}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {45FD49EF-A98C-421A-AFE9-1416E897480E}
+	EndGlobalSection
+EndGlobal

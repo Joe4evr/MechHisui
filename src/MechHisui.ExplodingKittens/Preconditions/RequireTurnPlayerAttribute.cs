@@ -8,7 +8,10 @@ namespace MechHisui.ExplodingKittens
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     internal sealed class RequireTurnPlayerAttribute : PreconditionAttribute
     {
-        public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override Task<PreconditionResult> CheckPermissionsAsync(
+            ICommandContext context,
+            CommandInfo command,
+            IServiceProvider services)
         {
             var exkservice = services.GetService<ExKitService>();
             if (exkservice != null)

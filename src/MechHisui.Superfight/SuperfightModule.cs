@@ -127,7 +127,7 @@ namespace MechHisui.Superfight
             }
             else
             {
-                if (GameService.TryUpdateOpenToJoin(Context.Channel, newValue: false, comparisonValue: true))
+                if (GameService.TryUpdateOpenToJoin(Context.Channel, newValue: false))
                 {
                     var players = JoinedUsers.Select(u => new SuperfightPlayer(u, Context.Channel)).Shuffle(28);
 

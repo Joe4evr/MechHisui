@@ -16,7 +16,7 @@ namespace MechHisui.Core
         public string Effect { get; set; }
         public string RankUpEffect { get; set; }
 
-        public IEnumerable<ServantActiveSkill> Servants { get; set; }
+        //public IEnumerable<ServantActiveSkill> Servants { get; set; }
 
         public override string ToString() => $"{SkillName}: {Rank}";
     }
@@ -31,7 +31,7 @@ namespace MechHisui.Core
         public string Rank { get; set; }
         public string Effect { get; set; }
 
-        public ICollection<ServantPassiveSkill> Servants { get; set; }
+        //public ICollection<ServantPassiveSkill> Servants { get; set; }
 
         public override string ToString() => $"{SkillName}: {Rank}";
     }

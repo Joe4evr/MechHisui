@@ -5,6 +5,10 @@ using MechHisui.FateGOLib;
 
 namespace MechHisui.Core
 {
+    public sealed partial class HisuiUser : IFgoFriendData
+    {
+        public string FriendCode { get; set; }
+    }
     //public sealed class UserAP
     //{
     //    public int StartAP { get; set; }
@@ -16,16 +20,17 @@ namespace MechHisui.Core
     //    //    .TotalMinutes / FgoHelpers.PerAP.TotalMinutes);
     //}
 
-    public sealed class FgoFriendData : IFgoFriendData
-    {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
 
-        public string FriendCode { get; set; }
-        //public string Class { get; set; }
-        //public string Servant { get; set; }
+    //public sealed class FgoFriendData : IFgoFriendData
+    //{
+    //    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    //    public int Id { get; set; }
 
-        //public HisuiUser User { get; set; }
-        //public int UserFK { get; set; }
-    }
+    //    public string FriendCode { get; set; }
+    //    //public string Class { get; set; }
+    //    //public string Servant { get; set; }
+
+    //    //public HisuiUser User { get; set; }
+    //    //public int UserFK { get; set; }
+    //}
 }

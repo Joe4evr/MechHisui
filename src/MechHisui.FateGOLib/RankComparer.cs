@@ -8,6 +8,9 @@ namespace MechHisui.FateGOLib
     /// <remarks>"EX" > "A" > "B" > "C" etc.</remarks>
     public class RankComparer : Comparer<string>
     {
+        private static readonly Func<char, bool> _plusses = c => c == '+';
+        private static readonly Func<char, bool> _minusses = c => c == '-';
+
         public override int Compare(string x, string y)
         {
             if (x == y) return 0;
@@ -18,10 +21,8 @@ namespace MechHisui.FateGOLib
 
             if (x.First() == y.First())
             {
-                Func<char, bool> plusses = c => c == '+';
-                Func<char, bool> minusses = c => c == '-';
-                return (x.Count(plusses) > y.Count(plusses)
-                    ^ x.Count(minusses) < y.Count(minusses)) ? 1 : -1;
+                return (x.Count(_plusses) > y.Count(_plusses)
+                    ^ x.Count(_minusses) < y.Count(_minusses)) ? 1 : -1;
             }
             else
             {

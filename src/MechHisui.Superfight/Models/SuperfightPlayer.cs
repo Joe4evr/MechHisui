@@ -35,7 +35,7 @@ namespace MechHisui.Superfight.Models
         {
             ConfirmedPlay = false;
             var sb = new StringBuilder("Your Hand:\n")
-                .AppendLine(String.Join("\n", _hand.Cards.Select((c, i) => $"[{i+1}]: **{c.Type}** - {c.Text}")))
+                .AppendLine(String.Join("\n", _hand.Browse().Select((c, i) => $"[{i+1}]: **{c.Type}** - {c.Text}")))
                 .Append($"Please pick one {CardType.Character} and one {CardType.Ability} card.");
 
             return SendMessageAsync(sb.ToString());

@@ -42,7 +42,7 @@ namespace MechHisui.SymphoXDULib
                 return new EmbedBuilder
                 {
                     Author = new EmbedAuthorBuilder { Name = $"Symphogear #{profile.StartId}..{profile.StartId + 3}: {profile.Rarity}☆ Element: {profile.Element}" },
-                    Title = $"{profile.CharacterName}: {profile.Skills[1].SkillName}",
+                    Title = $"{profile.CharacterName}: {profile.Skills.FirstOrDefault()?.SkillName}",
                     Description = "Detailed stats not known yet."
                 }
                 .AddFieldWhen(profile.HP > 0,

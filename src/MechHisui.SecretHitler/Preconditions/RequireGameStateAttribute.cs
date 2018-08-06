@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Discord.Commands;
@@ -10,12 +11,14 @@ namespace MechHisui.SecretHitler
     internal sealed class RequireGameStateAttribute : PreconditionAttribute
     {
         private GameState RequiredState { get; }
+
+        [DebuggerStepThrough]
         public RequireGameStateAttribute(GameState state)
         {
             RequiredState = state;
         }
 
-        public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var shservice = services.GetService<SecretHitlerService>();
             if (shservice != null)

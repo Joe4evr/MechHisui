@@ -32,9 +32,8 @@ namespace DivaBot
     {
         public DbSet<StringKeyValuePair> Strings { get; set; }
 
-        public DivaBotConfig(DbContextOptions options, CommandService commandService)
-            : base(options, commandService)
-            //: base(options)
+        public DivaBotConfig(DbContextOptions options)
+            : base(options)
         {
         }
     }

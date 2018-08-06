@@ -9,15 +9,18 @@
     <Import_RootNamespace>SharedExtensions</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ArrayPoolStrategy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\AsyncObservableCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CoreExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DateTimeWithZone.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DependencyInjection\RegisterAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DiscordExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EntityEqualityComparer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\EnumerableExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Logger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NodaTimeExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Params.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SpanExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringBuilderExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ThreadingExtensions.cs" />
   </ItemGroup>
 </Project>

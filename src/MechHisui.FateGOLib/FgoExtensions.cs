@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.DotNet.PlatformAbstractions;
+//using Microsoft.DotNet.PlatformAbstractions;
 using Discord;
 
 namespace MechHisui.FateGOLib
@@ -88,22 +88,22 @@ namespace MechHisui.FateGOLib
                 : $"{ts.Hours} {h} and {ts.Minutes} {m}";
         }
 
-        private static readonly Platform _platform = RuntimeEnvironment.OperatingSystemPlatform;
-        internal static TimeZoneInfo JpnTimeZone => _platform == Platform.Windows
-                    ? TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time")
-                    : TimeZoneInfo.FindSystemTimeZoneById("Asia/Tokyo");
+        //private static readonly Platform _platform = RuntimeEnvironment.OperatingSystemPlatform;
+        //internal static TimeZoneInfo JpnTimeZone => _platform == Platform.Windows
+        //            ? TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time")
+        //            : TimeZoneInfo.FindSystemTimeZoneById("Asia/Tokyo");
 
-        public static IEnumerable<IServantProfile> WhereActive(this IEnumerable<IServantProfile> profiles, string skill)
-            => profiles.Where(p => p.ActiveSkills.Any(s => s.SkillName == skill));
+        //public static IEnumerable<IServantProfile> WhereActive(this IEnumerable<IServantProfile> profiles, string skill)
+        //    => profiles.Where(p => p.ActiveSkills.Any(s => s.SkillName == skill));
 
-        public static IEnumerable<IServantProfile> WhereActiveEffect(this IEnumerable<IServantProfile> profiles, string effect)
-            => profiles.Where(p => p.ActiveSkills.Any(s => s.Effect.Contains(effect)));
+        //public static IEnumerable<IServantProfile> WhereActiveEffect(this IEnumerable<IServantProfile> profiles, string effect)
+        //    => profiles.Where(p => p.ActiveSkills.Any(s => s.Effect.Contains(effect)));
 
-        public static IEnumerable<IServantProfile> WherePassive(this IEnumerable<IServantProfile> profiles, string skill)
-            => profiles.Where(p => p.PassiveSkills.Any(s => s.SkillName == skill));
+        //public static IEnumerable<IServantProfile> WherePassive(this IEnumerable<IServantProfile> profiles, string skill)
+        //    => profiles.Where(p => p.PassiveSkills.Any(s => s.SkillName == skill));
 
-        public static IEnumerable<IServantProfile> WherePassiveEffect(this IEnumerable<IServantProfile> profiles, string effect)
-            => profiles.Where(p => p.PassiveSkills.Any(s => s.Effect.Contains(effect)));
+        //public static IEnumerable<IServantProfile> WherePassiveEffect(this IEnumerable<IServantProfile> profiles, string effect)
+        //    => profiles.Where(p => p.PassiveSkills.Any(s => s.Effect.Contains(effect)));
 
         //public static IEnumerable<ServantProfile> WhereTrait(this IEnumerable<ServantProfile> profiles, string trait)
         //    => profiles.Where(p => p.Traits.Any(t => t.ContainsIgnoreCase(trait)));

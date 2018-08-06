@@ -18,10 +18,10 @@ namespace DivaBot
 #pragma warning disable RCS1090 // Call 'ConfigureAwait(false)'.
     internal partial class Program
     {
-        private readonly IServiceCollection _map = new ServiceCollection();
-        private readonly IConfigStore<DivaBotConfig> _store;
+        //private readonly IConfigStore<DivaBotConfig> _store;
         private readonly Func<LogMessage, Task> _logger;
         private readonly DiscordSocketClient _client;
+        private readonly IServiceProvider _services;
         private readonly CommandService _commands;
 
         private static async Task Main(string[] args)
@@ -52,8 +52,6 @@ namespace DivaBot
 
             //Log(LogSeverity.Info, $"Loading config from: {p.ConfigPath}");
             //_store = new JsonConfigStore<DivaBotConfig>(p.ConfigPath, _commands);
-            _store = new EFConfigStore<DivaBotConfig, DivaGuild, DivaChannel, DivaUser>(
-                _commands, opts => opts.UseSqlite(p.ConnectionString));
 
             //using (var config = _store.Load())
             //{
@@ -96,10 +94,16 @@ namespace DivaBot
                 AlwaysDownloadUsers = true,
                 MessageCacheSize = 50,
                 LogLevel = minlog,
-#if !ARM
-                WebSocketProvider = WS4NetCore.WS4NetProvider.Instance
-#endif
+//#if !ARM
+//                WebSocketProvider = WS4NetCore.WS4NetProvider.Instance
+//#endif
             });
+
+            _services = ConfigureServices(_client, p, _commands, _logger);
+
+            _client.Log += _logger;
+            _commands.Log += _logger;
+            _client.MessageReceived += CmdHandler;
         }
 
         private Task Log(LogSeverity severity, string msg)
@@ -109,17 +113,20 @@ namespace DivaBot
 
         private async Task AsyncMain(Params p)
         {
-            _client.Log += _logger;
-            _client.Ready += () => Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");
+            _client.Ready += async () =>
+            {
+                await _client.CurrentUser.ModifyAsync(up => up.Username = "DivaBot");
+                await Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");
+            };
 
             await InitCommands();
 
-            using (var config = _store.Load())
+            if (p.Token != null)
             {
-                await _client.LoginAsync(TokenType.Bot, config.Strings.Single(s => s.Key == "LoginToken").Value);
+                await _client.LoginAsync(TokenType.Bot, p.Token);
+                await _client.StartAsync();
             }
 
-            await _client.StartAsync();
             await Task.Delay(-1);
         }
 
@@ -139,7 +146,7 @@ namespace DivaBot
                 if (msg.HasCharPrefix('!', ref pos) || msg.HasMentionPrefix(user, ref pos))
                 {
                     var context = new SocketCommandContext(_client, msg);
-                    var result = await _commands.ExecuteAsync(context, pos, services: _map.BuildServiceProvider(validateScopes: true));
+                    var result = await _commands.ExecuteAsync(context, pos, _services);
 
                     if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
                         await msg.Channel.SendMessageAsync(result.ErrorReason).ConfigureAwait(false);
