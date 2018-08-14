@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "MechHisui": {
-      "commandName": "Project",
-      "commandLineArgs": "-c \"C:\\PublishOutputs\\MechHisui-jsons\\config.json\""
-    }
-  }
-}

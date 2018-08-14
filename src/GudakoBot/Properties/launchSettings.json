@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "GudakoBot": {
-      "commandName": "Project",
-      "commandLineArgs": "-c \"config.json\""
-    }
-  }
-}
