@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace SharedExtensions
 {
@@ -25,9 +25,7 @@ namespace SharedExtensions
             => new string(span.ToArray());
 
         public static ReadOnlySpan<char> TrimBraces(this ReadOnlySpan<char> span)
-            => (CharAliasMap.ContainsKey(span[0]))
-                ? span.Slice(1, FindMatchingBrace(span) - 1)
-                : span;
+            => span.TrimStart(_startChars.AsSpan()).TrimEnd(_endChars.AsSpan());
 
         public static int FindMatchingBrace(this ReadOnlySpan<char> span)
         {
@@ -57,7 +55,7 @@ namespace SharedExtensions
 
         // Output of a gist provided by https://gist.github.com/ufcpp
         // https://gist.github.com/ufcpp/5b2cf9a9bf7d0b8743714a0b88f7edc5
-        internal static readonly Dictionary<char, char> CharAliasMap
+        internal static readonly IReadOnlyDictionary<char, char> CharAliasMap
             = new Dictionary<char, char> {
                     {'\"', '\"' },
                     {'[', ']' },
@@ -128,5 +126,8 @@ namespace SharedExtensions
                     {'〘', '〙' },
                     {'〚', '〛' }
                 };
+
+        private static readonly string _startChars = new string(CharAliasMap.Keys.ToArray());
+        private static readonly string _endChars = new string(CharAliasMap.Values.ToArray());
     }
 }

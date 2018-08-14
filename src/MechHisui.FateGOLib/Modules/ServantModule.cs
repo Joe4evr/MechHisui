@@ -11,9 +11,10 @@ namespace MechHisui.FateGOLib
 {
     public sealed partial class FgoModule
     {
-        [Name("Servants"), Group("servant")]
+        [Name("Servants"), Group("servant"), Alias("servants")]
         public sealed class ServantModule : ModuleBase<ICommandContext>
         {
+            private static readonly string[] _neverEver = new[] { "arc", "arcueid" };
             private readonly FgoStatService _service;
 
             public ServantModule(FgoStatService service)
@@ -21,8 +22,7 @@ namespace MechHisui.FateGOLib
                 _service = service;
             }
 
-            [Command, Permission(MinimumPermission.Everyone)]
-            [Alias("stat", "stats"), Priority(5)]
+            [Command, Alias("stat", "stats"), Priority(5)]
             [Summary("Relay information on the specified Servant by ID.")]
             public async Task StatCmd(int id)
             {
@@ -34,19 +34,20 @@ namespace MechHisui.FateGOLib
                 }
             }
 
-            [Command, Permission(MinimumPermission.Everyone)]
-            [Alias("stat", "stats")]
+            [Command, Alias("stat", "stats")]
             [Summary("Relay information on the specified Servant. Alternative names acceptable.")]
             public async Task StatCmd([Remainder] string name)
             {
                 if (name.ContainsIgnoreCase("waifu"))
                 {
                     await ReplyAsync("It has come to my attention that your 'waifu' is equatable to fecal matter.");
+                    return;
                 }
 
-                if (new[] { "arc", "arcueid" }.ContainsIgnoreCase(name))
+                if (_neverEver.ContainsIgnoreCase(name))
                 {
                     await ReplyAsync("Never ever.");
+                    return;
                 }
 
                 var potentials = await _service.Config.FindServantsAsync(name).ConfigureAwait(false);
@@ -86,7 +87,7 @@ namespace MechHisui.FateGOLib
             //    }
             //}
 
-            [Command("curve"), Permission(MinimumPermission.Everyone)]
+            [Command("curve")]
             public Task CurveCmd()
              => ReplyAsync(String.Concat(
                     "From master KyteM: `Linear curves scale as you'd expect.\n",
@@ -126,14 +127,15 @@ namespace MechHisui.FateGOLib
             //    }
             //}
 
-            //[Command("filter"), Permission(MinimumPermission.Everyone)]
-            //public Task Filter([Remainder] ServantFilterOptions options)
-            //{
-            //    var matches = _service.Config.SearchServants(options);
-            //    return (matches.Any())
-            //        ? ReplyAsync("No matches were found for that query")
-            //        : ReplyAsync($"**Result:** {String.Join(", ", matches)}");
-            //}
+            [Command("filter")]
+            public async Task Filter([Remainder] ServantFilterOptions options)
+            {
+                var matches = await _service.Config.SearchServantsAsync(options).ConfigureAwait(false);
+                if (matches.Any())
+                    await ReplyAsync($"**Result:** {String.Join("\n", matches)}").ConfigureAwait(false);
+                else
+                    await ReplyAsync("No matches were found for that query").ConfigureAwait(false);
+            }
 
 
             private static Embed FormatServantProfile(IServantProfile profile)
@@ -220,12 +222,17 @@ namespace MechHisui.FateGOLib
                         .WithName($"{skill.SkillName} {skill.Rank}")
                         .WithValue($"{skill.Effect}"))
 
+                .AddFieldWhen(() => profile.Bond10 != null,
+                    field => field.WithIsInline(true)
+                        .WithName(profile.Bond10.Name)
+                        .WithValue(profile.Bond10.Effect))
+
                 .AddFieldWhen(() => profile.Aliases.Any(),
                     field => field.WithIsInline(false)
                         .WithName("Also known as:")
                         .WithValue(String.Join(", ", profile.Aliases.Select(a => a.Alias))))
 
-                .WithImageWhen(() => !String.IsNullOrWhiteSpace(profile.Image), profile.Image)
+                .WithImageIfNotNull(profile.Image)
                 .Build();
 
 #if DEBUG

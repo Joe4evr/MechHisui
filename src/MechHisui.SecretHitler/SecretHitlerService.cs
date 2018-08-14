@@ -49,20 +49,16 @@ namespace MechHisui.SecretHitler
             => _config.GetThemeKeysAsync();
     }
 
-    //public static class SHExtensions
-    //{
-    //    public static Task AddSecretHitler(
-    //        this CommandService cmds,
-    //        DiscordSocketClient client,
-    //        IServiceCollection map,
-    //        IEnumerable<SecretHitlerConfig> configs,
-    //        Func<LogMessage, Task> logger = null)
-    //    {
-    //        map.AddSingleton(new SecretHitlerService(configs.ToDictionary(keySelector: shc => shc.Key), client, logger)
-    //            //.AddPlayerTypereader<SecretHitlerService,SecretHitlerGame, SecretHitlerPlayer>(cmds)
-    //            );
-            
-    //        return cmds.AddModuleAsync<SecretHitlerModule>();
-    //    }
-    //}
+    public static class SHExtensions
+    {
+        public static IServiceCollection AddSecretHitler(
+            this IServiceCollection services,
+            BaseSocketClient client,
+            Func<IServiceProvider, ISecretHitlerConfig> shConfigFactory,
+            Func<IServiceProvider, IMpGameServiceConfig> mpConfigFactory = null,
+            Func<LogMessage, Task> logger = null)
+        {
+            return services.AddSingleton(isp => new SecretHitlerService(client, shConfigFactory(isp), mpConfigFactory?.Invoke(isp), logger));
+        }
+    }
 }

@@ -16,11 +16,14 @@ namespace MechHisui.Core
     public sealed class BankOfHisui : IBankOfHisui
     {
         private readonly IConfigStore<MechHisuiConfig> _store;
+        private readonly IServiceProvider _services;
+
         private readonly SemaphoreSlim _vaultLock = new SemaphoreSlim(1, 1);
 
-        public BankOfHisui(IConfigStore<MechHisuiConfig> store)
+        public BankOfHisui(IConfigStore<MechHisuiConfig> store, IServiceProvider services)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
+            _services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
         //read-only operations
@@ -28,7 +31,7 @@ namespace MechHisui.Core
 
         async Task<IEnumerable<IBankAccount>> IBankOfHisui.GetAllUsersAsync()
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.Users
                     .AsNoTracking()
@@ -38,7 +41,7 @@ namespace MechHisui.Core
 
         IBankAccount IBankOfHisui.GetAccount(IUser user)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return GetConfigUser(user.Id, config);
                 //var cuser = GetConfigUser(user.Id, config);
@@ -50,7 +53,7 @@ namespace MechHisui.Core
 
         async Task<IEnumerable<IBetGame>> IBankOfHisui.GetUncashedGamesAsync()
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.BetGames
                     .AsNoTracking()
@@ -64,7 +67,7 @@ namespace MechHisui.Core
 
         async Task<IBetGame> IBankOfHisui.GetLastGameInChannelAsync(ITextChannel channel)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.BetGames
                     .AsNoTracking()
@@ -77,7 +80,7 @@ namespace MechHisui.Core
 
         async Task<IBetGame> IBankOfHisui.GetGameInChannelByIdAsync(ITextChannel channel, int gameId)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.BetGames
                     .AsNoTracking()
@@ -90,7 +93,7 @@ namespace MechHisui.Core
 
         async Task<IBet> IBankOfHisui.RetrieveBetAsync(IUser user, IBetGame game)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.RecordedBets
                     .AsNoTracking()
@@ -100,7 +103,7 @@ namespace MechHisui.Core
 
         Task<int> IBankOfHisui.GetVaultWorthAsync()
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return Task.FromResult(GetVault(config).IntValue);
             }
@@ -109,7 +112,7 @@ namespace MechHisui.Core
         //writing operations
         IBetGame IBankOfHisui.CreateGame(ITextChannel channel, GameType gameType)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 var game = new BetGame
                 {
@@ -124,7 +127,7 @@ namespace MechHisui.Core
 
         Task<IBankAccount> IBankOfHisui.AddUserAsync(IUser user)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return Task.FromResult<IBankAccount>(GetConfigUser(user.Id, config));
             //    var ac = GetAccount(user.Id, config);
@@ -164,7 +167,7 @@ namespace MechHisui.Core
 
             var windict = new Dictionary<ulong, int>();
 
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 foreach (var bet in winningBets)
                 {
@@ -188,7 +191,7 @@ namespace MechHisui.Core
 
         async Task<DonationResult> IBankOfHisui.DonateAsync(DonationRequest request)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 var donor = GetConfigUser(request.DonorId, config);
                 if (donor == null)
@@ -211,7 +214,7 @@ namespace MechHisui.Core
 
         async Task IBankOfHisui.InterestAsync()
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 //// The ideal way:
                 //config.Users.Where(u => u.BankBalance < 2500)
@@ -240,7 +243,7 @@ namespace MechHisui.Core
 
         async Task<RecordingResult> IBankOfHisui.RecordOrUpdateBetAsync(IBetGame game, IBet bet)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 var recBet = QuerySingleBet(bet.UserId, game.Id, config);
                 if (recBet == null) //new bet
@@ -285,7 +288,7 @@ namespace MechHisui.Core
 
         async Task<WithdrawalResult> IBankOfHisui.WithdrawAsync(WithdrawalRequest request)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 var debtor = GetConfigUser(request.AccountId, config);
                 if (debtor == null)
@@ -303,7 +306,7 @@ namespace MechHisui.Core
 
         async Task IBankOfHisui.CollectBetsAsync(int gameId)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 var game = await config.BetGames
                     .Include(g => g.Channel)
@@ -334,7 +337,7 @@ namespace MechHisui.Core
                 throw new ArgumentOutOfRangeException(nameof(amount));
 
             using (await _vaultLock.UsingLock().ConfigureAwait(false))
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 GetVault(config).IntValue += amount;
                 await config.SaveChangesAsync().ConfigureAwait(false);
@@ -347,7 +350,7 @@ namespace MechHisui.Core
                 return 0;
 
             using (await _vaultLock.UsingLock().ConfigureAwait(false))
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 var vault = GetVault(config);
                 var withdrawing = Math.Min(vault.IntValue, amount);

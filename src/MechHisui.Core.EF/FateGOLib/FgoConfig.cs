@@ -7,16 +7,19 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Discord.Addons.SimplePermissions;
 using MechHisui.FateGOLib;
+using SharedExtensions;
 
 namespace MechHisui.Core
 {
     public sealed class FgoConfig : IFgoConfig
     {
         private readonly IConfigStore<MechHisuiConfig> _store;
+        private readonly IServiceProvider _services;
 
-        public FgoConfig(IConfigStore<MechHisuiConfig> store)
+        public FgoConfig(IConfigStore<MechHisuiConfig> store, IServiceProvider services)
         {
-            _store = store;
+            _store = store ?? throw new ArgumentNullException(nameof(store));
+            _services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
 
@@ -24,7 +27,7 @@ namespace MechHisui.Core
         //Servants
         async Task<IEnumerable<IServantProfile>> IFgoConfig.GetAllServantsAsync()
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.Servants
                     .AsNoTracking()
@@ -35,13 +38,12 @@ namespace MechHisui.Core
 
         async Task<IEnumerable<string>> IFgoConfig.SearchServantsAsync(ServantFilterOptions options)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 var servants = await config.Servants
                     .AsNoTracking()
                     .WithIncludes()
-                    .ToListAsync()
-                    .ConfigureAwait(false);
+                    .ToListAsync().ConfigureAwait(false);
 
                 return servants.ApplyFilters(options).ToList();
             }
@@ -49,7 +51,7 @@ namespace MechHisui.Core
 
         async Task<IServantProfile> IFgoConfig.GetServantAsync(int id)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.Servants
                     .AsNoTracking()
@@ -60,7 +62,7 @@ namespace MechHisui.Core
 
         async Task<IEnumerable<IServantProfile>> IFgoConfig.FindServantsAsync(string name)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.Servants
                     .AsNoTracking()
@@ -73,7 +75,7 @@ namespace MechHisui.Core
         //CEs
         async Task<IEnumerable<ICEProfile>> IFgoConfig.GetAllCEsAsync()
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.CEs
                     .AsNoTracking()
@@ -84,7 +86,7 @@ namespace MechHisui.Core
 
         async Task<ICEProfile> IFgoConfig.GetCEAsync(int id)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 var range = await config.CERanges.SingleOrDefaultAsync(r => r.LowId <= id && id <= r.HighId).ConfigureAwait(false);
                 if (range != null)
@@ -118,7 +120,7 @@ namespace MechHisui.Core
 
         async Task<IEnumerable<ICEProfile>> IFgoConfig.FindCEsAsync(string name)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.CEs
                     .AsNoTracking()
@@ -128,10 +130,28 @@ namespace MechHisui.Core
             }
         }
 
+        async Task<IEnumerable<ICEProfile>> IFgoConfig.FindCEsByEffectAsync(string effect)
+        {
+            using (var config = _store.Load(_services))
+            {
+                return (effect.Equals("event", StringComparison.OrdinalIgnoreCase))
+                    ? await config.CEs
+                        .AsNoTracking()
+                        .WithIncludes()
+                        .Where(c => !String.IsNullOrWhiteSpace(c.EventEffect))
+                        .ToListAsync().ConfigureAwait(false)
+                    : await config.CEs
+                        .AsNoTracking()
+                        .WithIncludes()
+                        .Where(c => c.Effect.ContainsIgnoreCase(effect, StringComparison.OrdinalIgnoreCase))
+                        .ToListAsync().ConfigureAwait(false);
+            }
+        }
+
         //Mystic Codes
         async Task<IEnumerable<IMysticCode>> IFgoConfig.GetAllMysticsAsync()
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.MysticCodes
                     .AsNoTracking()
@@ -142,7 +162,7 @@ namespace MechHisui.Core
 
         async Task<IMysticCode> IFgoConfig.GetMysticAsync(int id)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.MysticCodes
                     .AsNoTracking()
@@ -153,7 +173,7 @@ namespace MechHisui.Core
 
         async Task<IEnumerable<IMysticCode>> IFgoConfig.FindMysticsAsync(string name)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.MysticCodes
                     .AsNoTracking()
@@ -166,7 +186,7 @@ namespace MechHisui.Core
         //Events
         async Task<IEnumerable<IFgoEvent>> IFgoConfig.GetAllEventsAsync()
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.FgoEvents
                     .AsNoTracking()
@@ -177,7 +197,7 @@ namespace MechHisui.Core
 
         async Task<IEnumerable<IFgoEvent>> IFgoConfig.GetCurrentEventsAsync()
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 var now = DateTime.UtcNow;
                 return await config.FgoEvents
@@ -190,7 +210,7 @@ namespace MechHisui.Core
 
         async Task<IEnumerable<IFgoEvent>> IFgoConfig.GetFutureEventsAsync()
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 var now = DateTime.UtcNow;
                 return await config.FgoEvents
@@ -204,7 +224,7 @@ namespace MechHisui.Core
         //writing operations
         async Task<bool> IFgoConfig.AddServantAliasAsync(string servant, string alias)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 var srv = await config.Servants
                     .Include(s => s.Aliases)
@@ -227,7 +247,7 @@ namespace MechHisui.Core
 
         async Task<bool> IFgoConfig.AddCEAliasAsync(string name, string alias)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 var ce = await config.CEs
                     .AsNoTracking()
@@ -251,7 +271,7 @@ namespace MechHisui.Core
 
         async Task<bool> IFgoConfig.AddMysticAliasAsync(string code, string alias)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 var mystic = await config.MysticCodes
                     .AsNoTracking()
@@ -275,7 +295,7 @@ namespace MechHisui.Core
 
         async Task<IFgoEvent> IFgoConfig.AddEventAsync(string name, DateTimeOffset? start, DateTimeOffset? end, string info)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 var ev = new FgoEvent
                 {

@@ -1,81 +1,105 @@
-﻿//using System;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-//using Discord.Addons.SimplePermissions;
-//using Discord.Commands;
-//using SharedExtensions;
+﻿using System;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Discord;
+using Discord.Addons.SimplePermissions;
+using Discord.Commands;
+using SharedExtensions;
 
-//namespace MechHisui.FateGOLib
-//{
-//    public partial class FgoModule
-//    {
-//        [Name("MysticCodes")]
-//        public sealed class MysticModule : ModuleBase<ICommandContext>
-//        {
-//            private readonly FgoStatService _service;
+namespace MechHisui.FateGOLib
+{
+    public partial class FgoModule
+    {
+        [Name("MysticCodes"), Group("mystic")]
+        public sealed class MysticModule : ModuleBase<ICommandContext>
+        {
+            private readonly FgoStatService _service;
 
-//            public MysticModule(FgoStatService service)
-//            {
-//                _service = service;
-//            }
+            public MysticModule(FgoStatService service)
+            {
+                _service = service;
+            }
 
-//            [Command("mystic"), Permission(MinimumPermission.Everyone)]
-//            public async Task MysticCmd(string name)
-//            {
-//                var codes = _service.Config.FindMystics(name);
+            [Command]
+            public async Task MysticCmd(string name)
+            {
+                var codes = await _service.Config.FindMysticsAsync(name).ConfigureAwait(false);
 
-//                if (codes.Count() == 1)
-//                {
-//                    await ReplyAsync(FormatMysticCodeProfile(codes.Single())).ConfigureAwait(false);
-//                }
-//                else if (codes.Count() > 1)
-//                {
-//                    var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
-//                        .AppendSequence(codes, (s, m) => s.AppendLine($"**{m.Code}** *({String.Join(", ", m.Aliases)})*"));
+                if (codes.Count() == 1)
+                {
+                    await ReplyAsync("", embed: FormatMysticCodeProfile(codes.Single())).ConfigureAwait(false);
+                }
+                else if (codes.Count() > 1)
+                {
+                    var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
+                        .AppendSequence(codes, (s, m) => s.AppendLine($"**{m.Code}** *({String.Join(", ", m.Aliases)})*"));
 
-//                    await ReplyAsync(sb.ToString()).ConfigureAwait(false);
-//                }
-//                else
-//                {
-//                    await ReplyAsync("Specified Mystic Code not found. Please use `.listmystic` for the list of available Mystic Codes.").ConfigureAwait(false);
-//                }
-//            }
+                    await ReplyAsync(sb.ToString()).ConfigureAwait(false);
+                }
+                else
+                {
+                    await ReplyAsync("Specified Mystic Code not found. Please use `.listmystic` for the list of available Mystic Codes.").ConfigureAwait(false);
+                }
+            }
 
-//            [Command("listmystic"), Permission(MinimumPermission.Everyone)]
-//            public Task ListMysticsCmd()
-//            {
-//                return ReplyAsync(String.Join("\n", _service.Config.AllMystics().Select(m => $"**{m.Code}** *({String.Join(", ", m.Aliases)})*")));
-//            }
+            [Command("list")]
+            public async Task ListMysticsCmd()
+            {
+                var ms = await _service.Config.GetAllMysticsAsync().ConfigureAwait(false);
+                await ReplyAsync(String.Join("\n", ms.Select(m => $"**{m.Code}** *({String.Join(", ", m.Aliases)})*"))).ConfigureAwait(false);
+            }
 
-//            //[Command("mysticalias"), Permission(MinimumPermission.ModRole)]
-//            //public Task MysticAliasCmd(string code, string alias)
-//            //{
-//            //    if (!_service.Config.FindMystics(code).Select(c => c.Code).Contains(code))
-//            //    {
-//            //        return ReplyAsync("Could not find name to add alias for.");
-//            //    }
+            //[Command("alias"), Permission(MinimumPermission.ModRole)]
+            //public Task MysticAliasCmd(string code, string alias)
+            //{
+            //    if (!_service.Config.FindMystics(code).Select(c => c.Code).Contains(code))
+            //    {
+            //        return ReplyAsync("Could not find name to add alias for.");
+            //    }
 
-//            //    if (_service.Config.AddMysticAlias(code, alias.ToLowerInvariant()))
-//            //    {
-//            //        return ReplyAsync($"Added alias `{alias}` for `{code}`.");
-//            //    }
-//            //    else
-//            //    {
-//            //        return ReplyAsync($"Alias `{alias}` already exists for CE `{_service.Config.AllMystics().Single(c => c.Aliases.Any(a => a.Alias == alias)).Code}`.");
-//            //    }
-//            //}
+            //    if (_service.Config.AddMysticAlias(code, alias.ToLowerInvariant()))
+            //    {
+            //        return ReplyAsync($"Added alias `{alias}` for `{code}`.");
+            //    }
+            //    else
+            //    {
+            //        return ReplyAsync($"Alias `{alias}` already exists for CE `{_service.Config.AllMystics().Single(c => c.Aliases.Any(a => a.Alias == alias)).Code}`.");
+            //    }
+            //}
 
-//            private static string FormatMysticCodeProfile(IMysticCode code)
-//            {
-//                var sb = new StringBuilder()
-//                    .AppendLine($"**Name:** {code.Code}")
-//                    .AppendLine($"**Skill 1:** {code.Skill1} - *{code.Skill1Effect}*")
-//                    .AppendLine($"**Skill 2:** {code.Skill2} - *{code.Skill2Effect}*")
-//                    .AppendLine($"**Skill 3:** {code.Skill3} - *{code.Skill3Effect}*")
-//                    .Append(code.Image);
-//                return sb.ToString();
-//            }
-//        }
-//    }
-//}
+            private static Embed FormatMysticCodeProfile(IMysticCode code)
+            {
+                var embed = new EmbedBuilder
+                {
+                    Title = code.Code,
+                    //Description = code.
+                    Fields =
+                    {
+                        new EmbedFieldBuilder
+                        {
+                            IsInline = false,
+                            Name = $"Skill 1: **{code.Skill1}**",
+                            Value = code.Skill1Effect
+                        },
+                        new EmbedFieldBuilder
+                        {
+                            IsInline = false,
+                            Name = $"Skill 2: **{code.Skill2}**",
+                            Value = code.Skill2Effect
+                        },
+                        new EmbedFieldBuilder
+                        {
+                            IsInline = false,
+                            Name = $"Skill 3: **{code.Skill3}**",
+                            Value = code.Skill3Effect
+                        }
+                    },
+                    ImageUrl = code.Image
+                };
+
+                return embed.Build();
+            }
+        }
+    }
+}

@@ -14,6 +14,7 @@ namespace MechHisui.FateGOLib
 
         Task<IEnumerable<ICEProfile>> GetAllCEsAsync();
         //Task<IEnumerable<string>> SearchCEsAsync(CEFilterOptions options);
+        Task<IEnumerable<ICEProfile>> FindCEsByEffectAsync(string effect);
         Task<IEnumerable<ICEProfile>> FindCEsAsync(string name);
         Task<ICEProfile> GetCEAsync(int id);
         Task<bool> AddCEAliasAsync(string ce, string alias);

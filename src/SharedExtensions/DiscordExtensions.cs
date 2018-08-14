@@ -56,5 +56,54 @@ namespace Discord
 
             return builder;
         }
+
+        internal static EmbedBuilder AddFieldWhen(
+            this EmbedBuilder builder,
+            Func<bool> predicate,
+            Action<EmbedFieldBuilder> field)
+        {
+            if (predicate())
+            {
+                builder.AddField(field);
+            }
+
+            return builder;
+        }
+
+        internal static EmbedBuilder WithImageIfNotNull(
+            this EmbedBuilder builder,
+            string img)
+        {
+            if (!String.IsNullOrWhiteSpace(img))
+            {
+                builder.WithImageUrl(img);
+            }
+
+            return builder;
+        }
+
+        internal static EmbedBuilder WithDescriptionWhen(
+            this EmbedBuilder builder,
+            Func<bool> predicate,
+            string description)
+        {
+            if (predicate())
+            {
+                builder.WithDescription(description);
+            }
+
+            return builder;
+        }
+
+        internal static string ToNiceString(this TimeSpan ts)
+        {
+            var d = ts.TotalDays == 1 ? "day" : "days";
+            var h = ts.Hours == 1 ? "hour" : "hours";
+            var m = ts.Minutes == 1 ? "minute" : "minutes";
+
+            return (ts.TotalHours > 24)
+                ? $"{ts.Days} {d} and {ts.Hours} {h}"
+                : $"{ts.Hours} {h} and {ts.Minutes} {m}";
+        }
     }
 }

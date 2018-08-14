@@ -35,8 +35,8 @@ namespace MechHisui.HisuiBets
         internal IReadOnlyDictionary<ulong, BetGame> Games => _games;
 
         public HisuiBankService(
-            IBankOfHisui bank,
             DiscordSocketClient client,
+            IBankOfHisui bank,
             Func<LogMessage, Task> logger = null)
         {
             Bank = bank;
@@ -123,17 +123,15 @@ namespace MechHisui.HisuiBets
             => _games.TryRemove(channel.Id, out var game);
     }
 
-    //public static class HisuiBankExtensions
-    //{
-    //    public static Task UseHisuiBank(
-    //        this CommandService commands,
-    //        IServiceCollection map,
-    //        IBankOfHisui bank,
-    //        DiscordSocketClient client,
-    //        Func<LogMessage, Task> logger = null)
-    //    {
-    //        map.AddSingleton(new HisuiBankService(bank, client, logger ?? (msg => Task.CompletedTask)));
-    //        return commands.AddModuleAsync<HisuiBetsModule>();
-    //    }
-    //}
+    public static class HisuiBankExtensions
+    {
+        public static IServiceCollection AddHisuiBankService(
+            this IServiceCollection services,
+            DiscordSocketClient client,
+            Func<IServiceProvider, IBankOfHisui> bankFactory,
+            Func<LogMessage, Task> logger = null)
+        {
+            return services.AddSingleton(isp => new HisuiBankService(client, bankFactory(isp), logger));
+        }
+    }
 }

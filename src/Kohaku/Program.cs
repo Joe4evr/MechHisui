@@ -7,8 +7,9 @@ using Discord.Addons.SimplePermissions;
 //using Discord.Addons.TriviaGames;
 using Discord.Commands;
 using Discord.WebSocket;
+using MechHisui.Core;
+using MechHisui.FateGOLib;
 using SharedExtensions;
-//using WS4NetCore;
 
 namespace Kohaku
 {
@@ -47,9 +48,6 @@ namespace Kohaku
             {
                 MessageCacheSize = 50,
                 LogLevel = minlog,
-//#if !ARM
-                //WebSocketProvider = WS4NetProvider.Instance
-//#endif
             });
 
             Log(LogSeverity.Verbose, $"Constructing {nameof(CommandService)}");
@@ -76,8 +74,11 @@ namespace Kohaku
             _client.Ready += () => Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");
 
             //await InitCommands();
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+            //await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
             await _commands.AddModuleAsync<PermissionsModule>(_services);
+            await _commands.AddModuleAsync<FgoModule>(_services);
+            await _commands.AddModuleAsync<DiceRollModule>(_services);
+
             _client.ReactionAdded += CheckReactionAdded;
             _client.MessageReceived += HandleCommand;
 

@@ -22,7 +22,6 @@ namespace SharedExtensions
             Func<StringBuilder, StringBuilder> fn)
         {
             builder = builder ?? throw new ArgumentNullException(nameof(builder));
-            //predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
             fn = fn ?? throw new ArgumentNullException(nameof(fn));
 
             return predicate ? fn(builder) : builder;

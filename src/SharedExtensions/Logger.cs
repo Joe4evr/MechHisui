@@ -28,33 +28,34 @@ namespace SharedExtensions
         [DebuggerStepThrough]
         public async Task Log(LogMessage lmsg)
         {
-            string logline = $"{DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss"),-19} [{lmsg.Severity,8}] {lmsg.Source}: {lmsg.Message} {lmsg.Exception}";
+            string logline = $"{DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")} [{lmsg.Severity,8}] {lmsg.Source}: {lmsg.Message} {lmsg.Exception}";
 
-            await _lock.WaitAsync().ConfigureAwait(false);
-            await _logFile.WriteLineAsync(logline).ConfigureAwait(false);
-            _lock.Release();
-
-            if (lmsg.Severity <= _minimum)
+            using (await _lock.UsingLock().ConfigureAwait(false))
             {
-                switch (lmsg.Severity)
+                await _logFile.WriteLineAsync(logline).ConfigureAwait(false);
+
+                if (lmsg.Severity <= _minimum)
                 {
-                    case LogSeverity.Critical:
-                    case LogSeverity.Error:
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        break;
-                    case LogSeverity.Warning:
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        break;
-                    case LogSeverity.Info:
-                        Console.ForegroundColor = ConsoleColor.White;
-                        break;
-                    case LogSeverity.Verbose:
-                    case LogSeverity.Debug:
-                        Console.ForegroundColor = ConsoleColor.DarkGray;
-                        break;
+                    switch (lmsg.Severity)
+                    {
+                        case LogSeverity.Critical:
+                        case LogSeverity.Error:
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            break;
+                        case LogSeverity.Warning:
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            break;
+                        case LogSeverity.Info:
+                            Console.ForegroundColor = ConsoleColor.White;
+                            break;
+                        case LogSeverity.Verbose:
+                        case LogSeverity.Debug:
+                            Console.ForegroundColor = ConsoleColor.DarkGray;
+                            break;
+                    }
+                    Console.WriteLine(logline);
+                    Console.ResetColor();
                 }
-                Console.WriteLine(logline);
-                Console.ResetColor();
             }
         }
     }

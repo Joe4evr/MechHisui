@@ -8,9 +8,9 @@ using Discord.Addons.SimplePermissions;
 using SharedExtensions;
 using Discord.Commands.Builders;
 
-namespace MechHisui
+namespace MechHisui.Core
 {
-    [Name("RNG")]
+    [Name("RNG")/*, Permission(MinimumPermission.Everyone)*/]
     public sealed class DiceRollModule : ModuleBase<ICommandContext>
     {
         private readonly Random _rng;
@@ -27,24 +27,25 @@ namespace MechHisui
             commandService.AddTypeReader<DiceRoll>(new DiceTypeReader());
         }
 
-        [Command("roll"), Permission(MinimumPermission.Everyone)]
+        [Command("roll")]
         [Summary("Roll an arbitrary set of arbitrary-sided dice. Uses D&D notation.")]
         public Task DiceRoll(params DiceRoll[] dice)
         {
-            var rolls = new List<int>();
+            var sums = new List<int>();
             var sb = new StringBuilder("**Rolled: **")
                 .AppendSequence(dice, (b, d) =>
                 {
                     var t = d.Roll(_rng).ToList();
-                    rolls.AddRange(t);
-                    return b.Append($"({String.Join(", ", t)}{(t.Count > 1 ? $" | sum: {t.Sum()}" : "")})");
+                    var sum = t.Sum();
+                    sums.Add((d.IsNegative ? -sum : sum));
+                    return b.Append($"{(d.IsNegative ? "-" : "")}({String.Join(", ", t)}{(t.Count > 1 ? $" | sum: {sum}" : "")}) ");
                 })
-                .AppendWhen(rolls.Count > 1, b => b.Append($"\n(Total sum: {rolls.Sum()})"));
+                .AppendWhen(sums.Count > 1, b => b.Append($"\n(Total: {sums.Sum()})"));
 
             return ReplyAsync(sb.ToString());
         }
 
-        [Command("pick"), Permission(MinimumPermission.Everyone)]
+        [Command("pick")]
         [Summary("🎵RNG, RNG, Please be nice to me....🎵")]
         public Task PickCmd(params string[] options)
         {
@@ -57,13 +58,4 @@ namespace MechHisui
             return ReplyAsync($"**Picked:** `{choice}`");
         }
     }
-
-    //public static class DiceRollExtensions
-    //{
-    //    public static Task AddDiceRoll(this CommandService commands)
-    //    {
-    //        commands.AddTypeReader<DiceRoll>(new DiceTypeReader());
-    //        return commands.AddModuleAsync<DiceRollModule>();
-    //    }
-    //}
 }

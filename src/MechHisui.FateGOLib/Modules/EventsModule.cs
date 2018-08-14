@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 using Discord.Addons.SimplePermissions;
 using Discord.Commands;
 using Discord.Commands.Builders;
-using NodaTime;
+//using NodaTime;
 using SharedExtensions;
 
 namespace MechHisui.FateGOLib
 {
     public partial class FgoModule
     {
-        [Name("Events")]
+        [Name("Events"), Group("event"), Alias("events")]
         public sealed class EventsModule : ModuleBase<ICommandContext>
         {
             private readonly FgoStatService _service;
@@ -22,8 +22,7 @@ namespace MechHisui.FateGOLib
                 _service = service;
             }
 
-            [Command("event"), Permission(MinimumPermission.Everyone)]
-            [Alias("events")]
+            [Command, Alias("list")]
             public async Task EventCmd()
             {
                 var sb = new StringBuilder();
@@ -106,14 +105,14 @@ namespace MechHisui.FateGOLib
                 await ReplyAsync(sb.ToString()).ConfigureAwait(false);
             }
 
-            [Command("addevent"), Permission(MinimumPermission.ModRole)]
-            public async Task AddEventCmd(string name, LocalDateTime? start = null, LocalDateTime? end = null, string info = null)
-            {
-                var dtoStart = start?.InZoneLeniently(NodaTimeExtensions.JpnTimeZone).ToDateTimeOffset();
-                var dtoEnd = end?.InZoneLeniently(NodaTimeExtensions.JpnTimeZone).ToDateTimeOffset();
-                var ev = await _service.Config.AddEventAsync(name, dtoStart, dtoEnd, info).ConfigureAwait(false);
-                await ReplyAsync($"Successfully added event \uFF03{ev.Id} **{ev.EventName}**.").ConfigureAwait(false);
-            }
+            //[Command("add"), Permission(MinimumPermission.ModRole)]
+            //public async Task AddEventCmd(string name, LocalDateTime? start = null, LocalDateTime? end = null, string info = null)
+            //{
+            //    var dtoStart = start?.InZoneLeniently(NodaTimeExtensions.JpnTimeZone).ToDateTimeOffset();
+            //    var dtoEnd = end?.InZoneLeniently(NodaTimeExtensions.JpnTimeZone).ToDateTimeOffset();
+            //    var ev = await _service.Config.AddEventAsync(name, dtoStart, dtoEnd, info).ConfigureAwait(false);
+            //    await ReplyAsync($"Successfully added event \uFF03{ev.Id} **{ev.EventName}**.").ConfigureAwait(false);
+            //}
         }
     }
 }

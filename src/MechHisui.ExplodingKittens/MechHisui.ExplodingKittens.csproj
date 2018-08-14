@@ -1,4 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
-    <Import Project="..\..\DiscordBotCore.props" />
-    <Import Project="..\..\DiscordGameCore.props" />
-</Project>

@@ -31,7 +31,7 @@ namespace MechHisui.Core
         public MechHisuiConfig CreateDbContext(string[] args)
         {
             var map = new ServiceCollection()
-                .AddDbContext<MechHisuiConfig>(opt => opt.UseSqlite(@"Data Source=test.sqlite"))
+                .AddDbContext<MechHisuiConfig>(opt => opt.UseSqlite(@"Data Source=./test.sqlite"))
                 .BuildServiceProvider();
 
             return map.GetService<MechHisuiConfig>();

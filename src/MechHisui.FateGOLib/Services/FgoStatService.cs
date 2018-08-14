@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using NodaTime;
+//using NodaTime;
 using SharedExtensions;
 
 namespace MechHisui.FateGOLib
@@ -18,7 +19,7 @@ namespace MechHisui.FateGOLib
         internal IFgoConfig Config { get; }
 
         public FgoStatService(
-            DiscordSocketClient client,
+            BaseSocketClient client,
             CommandService commands,
             IFgoConfig config,
             Func<LogMessage, Task> logger = null)
@@ -156,5 +157,18 @@ namespace MechHisui.FateGOLib
 
         private static bool RegexMatchOneWord(string hay, string needle)
             => Regex.Match(hay, String.Concat(@"\b", needle, @"\b"), RegexOptions.IgnoreCase).Success;
+    }
+
+    public static class FgoExtensions
+    {
+        public static IServiceCollection AddFgoService(
+            this IServiceCollection services,
+            BaseSocketClient client,
+            CommandService commands,
+            Func<IServiceProvider, IFgoConfig> configFactory,
+            Func<LogMessage, Task> logger = null)
+        {
+            return services.AddSingleton(isp => new FgoStatService(client, commands, configFactory(isp), logger));
+        }
     }
 }

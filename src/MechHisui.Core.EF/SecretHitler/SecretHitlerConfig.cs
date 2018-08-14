@@ -11,16 +11,18 @@ namespace MechHisui.Core
     public sealed class SecretHitlerConfig : ISecretHitlerConfig
     {
         private readonly IConfigStore<MechHisuiConfig> _store;
+        private readonly IServiceProvider _services;
 
-        public SecretHitlerConfig(IConfigStore<MechHisuiConfig> store)
+        public SecretHitlerConfig(IConfigStore<MechHisuiConfig> store, IServiceProvider services)
         {
-            _store = store;
+            _store = store ?? throw new ArgumentNullException(nameof(store));
+            _services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
 
         async Task<IEnumerable<string>> ISecretHitlerConfig.GetThemeKeysAsync()
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.SHThemes
                     .AsNoTracking()
@@ -31,7 +33,7 @@ namespace MechHisui.Core
 
         async Task<ISecretHitlerTheme> ISecretHitlerConfig.GetThemeAsync(string key)
         {
-            using (var config = _store.Load())
+            using (var config = _store.Load(_services))
             {
                 return await config.SHThemes
                     .AsNoTracking()

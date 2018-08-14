@@ -13,13 +13,14 @@ using Discord.Commands;
 using Discord.WebSocket;
 //using Discord.Addons.SimpleAudio;
 using Discord.Addons.SimplePermissions;
-//using MechHisui.Core;
+using MechHisui.Core;
+using MechHisui.FateGOLib;
 using SharedExtensions;
 
 namespace Kohaku
 {
-    //using MechHisuiConfigStore = EFConfigStore<MechHisuiConfig, HisuiGuild, HisuiChannel, HisuiUser>;
-    using KohakuConfigStore = EFConfigStore<KohakuConfig, KohakuUser>;
+    using MechHisuiConfigStore = EFConfigStore<MechHisuiConfig, HisuiGuild, HisuiChannel, HisuiUser>;
+    //using KohakuConfigStore = EFConfigStore<KohakuConfig, KohakuUser>;
 #pragma warning disable CA2007, CA1001
     internal partial class Program
     {
@@ -31,17 +32,18 @@ namespace Kohaku
             Params p,
             Func<LogMessage, Task> logger = null)
         {
-            logger?.Invoke(new LogMessage(LogSeverity.Verbose, "Main", "Constructing ConfigStore"));
-            //var store = new MechHisuiConfigStore(commands,
-            //    options => options
-            //        //.UseSqlServer(p.ConnectionString)
-            //        .UseSqlite(p.ConnectionString)
-            //    );
             var map = new ServiceCollection();
-            var store = new KohakuConfigStore(commands, map, logger);
+            logger?.Invoke(new LogMessage(LogSeverity.Verbose, "Main", "Constructing ConfigStore"));
 
-            map.AddSingleton(new PermissionsService(store, commands, client, logger))
-                .AddDbContext<KohakuConfig>(options => options.UseSqlite(p.ConnectionString));
+            var store = new MechHisuiConfigStore(commands, map, logger);
+            //var store = new KohakuConfigStore(commands, map, logger);
+
+            map.AddSingleton(new Random())
+                .AddDbContext<MechHisuiConfig>(options => options.UseSqlite(p.ConnectionString))
+                //.AddDbContext<KohakuConfig>(options => options.UseSqlite(p.ConnectionString))
+                .AddPermissionService(client, commands, store, logger)
+                .AddFgoService(client, commands, isp => new FgoConfig(store, isp), logger)
+                ;
 
             //using (var config = store.Load())
             //{

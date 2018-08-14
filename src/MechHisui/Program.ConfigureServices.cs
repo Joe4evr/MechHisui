@@ -33,18 +33,12 @@ namespace MechHisui
                 var map = new ServiceCollection();
                 var store = new MechHisuiConfigStore(commands, map, logger);
 
-                var bank     = new BankOfHisui(store);
-                var fgo      = new FgoConfig(store);
-                var shconfig = new SecretHitlerConfig(store);
-                //var sfconfig = new SuperfightConfig(store);
-                //var xdu      = new XduConfig(store);
-
                 map.AddSingleton(new Random())
-                    .AddSingleton(new PermissionsService(client, commands, store, logger))
                     .AddDbContext<MechHisuiConfig>(options => options.UseSqlite(parameters.ConnectionString))
-                    .AddSingleton(new HisuiBankService(bank, client, logger))
-                    .AddSingleton(new FgoStatService(client, commands, fgo, logger))
-                    .AddSingleton(new SecretHitlerService(client, shconfig, logger: logger))
+                    .AddPermissionService(client, commands, store, logger)
+                    .AddFgoService(client, commands, isp => new FgoConfig(store, isp), logger)
+                    .AddHisuiBankService(client, isp => new BankOfHisui(store, isp), logger)
+                    .AddSecretHitler(client, isp => new SecretHitlerConfig(store, isp), logger: logger)
                     //.AddSingleton(new SuperfightService(sfconfig, client, logger))
                     //.AddSingleton(new ExKitService(client, logger))
                     //.AddSingleton(new XduStatService(xdu, client, logger))

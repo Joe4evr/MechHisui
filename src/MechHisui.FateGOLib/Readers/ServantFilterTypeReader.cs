@@ -16,13 +16,21 @@ namespace MechHisui.FateGOLib
             ICommandContext context,
             string input,
             IServiceProvider services)
-            => Task.FromResult(TypeReaderResult.FromSuccess(ParseFull(input)));
+        {
+            try
+            {
+                return Task.FromResult(TypeReaderResult.FromSuccess(ParseFull(input)));
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(TypeReaderResult.FromError(ex));
+            }
+        }
 
         public static ServantFilterOptions ParseFull(string input)
         {
             var result = new ServantFilterOptions();
             var span = input.AsSpan().Trim();
-
 
             var opWord = span.SliceUntil(' ', out var remainder);
             if (opWord.SequenceEqual(Where.AsSpan()))
@@ -70,23 +78,23 @@ namespace MechHisui.FateGOLib
         private static readonly string IsEqual = "==";
         private static readonly string IsNotEqual = "!=";
 
-        private static Operator ParseOperator(ReadOnlySpan<char> span)
+        private static Operator ParseOperator(ReadOnlySpan<char> opSpan)
         {
-            if (span.SequenceEqual(Contains.AsSpan()))
+            if (opSpan.SequenceEqual(Contains.AsSpan()))
                 return Operator.Contains;
-            if (span.SequenceEqual(NotContains.AsSpan()))
+            if (opSpan.SequenceEqual(NotContains.AsSpan()))
                 return Operator.NotContains;
-            else if (span.SequenceEqual(LessThan.AsSpan()))
+            else if (opSpan.SequenceEqual(LessThan.AsSpan()))
                 return Operator.LessThan;
-            else if (span.SequenceEqual(LessThanOrEqual.AsSpan()))
+            else if (opSpan.SequenceEqual(LessThanOrEqual.AsSpan()))
                 return Operator.LessThanOrEqual;
-            else if (span.SequenceEqual(GreaterThan.AsSpan()))
+            else if (opSpan.SequenceEqual(GreaterThan.AsSpan()))
                 return Operator.GreaterThan;
-            else if (span.SequenceEqual(GreaterThanOrEqual.AsSpan()))
+            else if (opSpan.SequenceEqual(GreaterThanOrEqual.AsSpan()))
                 return Operator.GreaterThanOrEqual;
-            else if (span.SequenceEqual(IsEqual.AsSpan()))
+            else if (opSpan.SequenceEqual(IsEqual.AsSpan()))
                 return Operator.IsEqual;
-            else if (span.SequenceEqual(IsNotEqual.AsSpan()))
+            else if (opSpan.SequenceEqual(IsNotEqual.AsSpan()))
                 return Operator.NotEqual;
             else
                 throw new InvalidOperationException("Unrecognized operator");
@@ -119,10 +127,13 @@ namespace MechHisui.FateGOLib
 
             for (var slice = orderBySpan.SliceUntil(',', out var next); slice.Length > 0; slice = next.SliceUntil(',', out next))
             {
-                var (v, d) = (slice.StartsWith(Desc.AsSpan()))
+                var (p, d) = (slice.StartsWith(Desc.AsSpan()))
                     ? (slice.Slice(2).Materialize(), true)
                     : (slice.Materialize(), false);
-                var prop = _profileProps.SingleOrDefault(p => p.Name.Equals(v, StringComparison.OrdinalIgnoreCase));
+
+                if (!_profileProps.TryGetValue(p, out var prop))
+                    throw new InvalidOperationException($"No such property '{p}'");
+
                 if (prop.PropertyType != _intType)
                     throw new InvalidOperationException("Cannot order by a non-numeric property");
 
@@ -160,43 +171,34 @@ namespace MechHisui.FateGOLib
 
             for (var slice = selectSpan.SliceUntil(',', out var next); slice.Length > 0; slice = next.SliceUntil(',', out next))
             {
-                var v = slice.Materialize();
-                var prop = _profileProps.SingleOrDefault(p => p.Name.Equals(v, StringComparison.OrdinalIgnoreCase));
-                if (prop != null)
-                    props.Add(prop);
+                var p = slice.Materialize();
+                if (!_profileProps.TryGetValue(p, out var prop))
+                    throw new InvalidOperationException($"No such property '{p}'");
+
+                props.Add(prop);
             }
 
-            try
-            {
-                var fmtExpr = Expression.NewArrayInit(_objType, props.Select(p =>
-                    Expression.Convert(
-                        Expression.Call(
-                            _strConcat,
-                            Expression.Constant(p.Name),
-                            _colonExpr,
-                            (p.PropertyType == _strType)
-                                ? Expression.Property(_spParamExpr, p)
-                                : (Expression)Expression.Call(
-                                    Expression.Property(_spParamExpr, p),
-                                    _toString)),
-                        _objType)));
-
-                var lambda = Expression.Lambda<Func<IServantProfile, string>>(
+            var fmtExpr = Expression.NewArrayInit(_objType, props.Select(p =>
+                Expression.Convert(
                     Expression.Call(
-                        _strJoin,
-                        _commaExpr,
-                        fmtExpr),
-                    _spParamExpr);
+                        _strConcat,
+                        Expression.Constant(p.Name),
+                        _colonExpr,
+                        (p.PropertyType == _strType)
+                            ? Expression.Property(_spParamExpr, p)
+                            : (Expression)Expression.Call(
+                                Expression.Property(_spParamExpr, p),
+                                _toString)),
+                    _objType)));
 
-                //options.Selector = lambda.Compile();
-                //return FilterParseResult.Success;
-                return lambda.Compile();
-            }
-            catch (Exception)
-            {
-                throw;
-                //return new FilterParseResult(false, "Failed to parse expression");
-            }
+            var lambda = Expression.Lambda<Func<IServantProfile, string>>(
+                Expression.Call(
+                    _strJoin,
+                    _commaExpr,
+                    fmtExpr),
+                _spParamExpr);
+
+            return lambda.Compile();
         }
 
         private static BlockExpression AddClause(
@@ -206,17 +208,17 @@ namespace MechHisui.FateGOLib
             ReadOnlySpan<char> opSpan,
             ReadOnlySpan<char> valSpan)
         {
-            var v = propSpan.Materialize();
-            var prop = _profileProps.SingleOrDefault(p => p.Name.Equals(v, StringComparison.OrdinalIgnoreCase));
+            var p = propSpan.Materialize();
+            if (!_profileProps.TryGetValue(p, out var prop))
+                throw new InvalidOperationException($"No such property '{p}'");
+
             var pType = prop.PropertyType;
 
             var (isCollection, eType) = (pType.IsGenericType && pType.GetGenericTypeDefinition() == _ienumType)
                 ? (true, pType.GetGenericArguments()[0])
                 : (false, pType);
-            var valExpr = (eType == _intType)
-                ? Expression.Constant(Convert.ChangeType(valSpan.Materialize(), eType), eType)
-                : Expression.Constant(valSpan.Materialize(), _strType);
 
+            var valExpr = GetValueExpression(valSpan.Materialize());
             var propExpr = Expression.Property(_spParamExpr, prop);
             var intermVarExpr = Expression.Variable(pType, $"interm{blockExpr.Variables.Count}");
             var op = ParseOperator(opSpan);
@@ -321,6 +323,30 @@ namespace MechHisui.FateGOLib
             {
                 switch (op)
                 {
+                    case Operator.Contains:
+                        return blockExpr.Update(
+                            blockExpr.Variables,
+                            blockExpr.Expressions.Concat(
+                                new Expression[]
+                                {
+                                    Expression.Assign(
+                                        resExpr,
+                                        Expression.AndAlso(
+                                            resExpr,
+                                            GenerateExpression(true, propExpr, _strContains, valExpr, _strCompExpr)))
+                                }));
+                    case Operator.NotContains:
+                        return blockExpr.Update(
+                            blockExpr.Variables,
+                            blockExpr.Expressions.Concat(
+                                new Expression[]
+                                {
+                                    Expression.Assign(
+                                        resExpr,
+                                        Expression.AndAlso(
+                                            resExpr,
+                                            GenerateExpression(false, propExpr, _strContains, valExpr, _strCompExpr)))
+                                }));
                     case Operator.IsEqual:
                         return blockExpr.Update(
                             blockExpr.Variables,
@@ -386,7 +412,20 @@ namespace MechHisui.FateGOLib
                 throw new InvalidOperationException($"Property type '{pType}' not supported.");
             }
 
+            Expression GetValueExpression(string valueString)
+            {
+                if (_profileProps.TryGetValue(valueString, out var compareProp))
+                {
+                    if (compareProp.PropertyType == eType)
+                    {
+                        return Expression.Property(_spParamExpr, compareProp);
+                    }
+                }
 
+                return (_iconvType.IsAssignableFrom(eType))
+                    ? Expression.Constant(Convert.ChangeType(valueString, eType), eType)
+                    : Expression.Constant(valueString, _strType);
+            }
 
             Expression GenerateExpression(
                 bool isTrue,
@@ -405,6 +444,7 @@ namespace MechHisui.FateGOLib
         private static readonly Type _strType = typeof(string);
         private static readonly Type _boolType = typeof(bool);
         private static readonly Type _intType = typeof(int);
+        private static readonly Type _iconvType = typeof(IConvertible);
         private static readonly Type _linqType = typeof(Enumerable);
         private static readonly Type _ienumType = typeof(IEnumerable<>);
         private static readonly Type _spType = typeof(IServantProfile);
@@ -413,16 +453,16 @@ namespace MechHisui.FateGOLib
         private static readonly Type _funcSpToIntType = typeof(Func<IServantProfile, int>);
         private static readonly Type _exType = typeof(Ex);
 
-        private static readonly PropertyInfo[] _profileProps = _spType.GetProperties();
-        private static readonly Type[] _strTypeArr = new Type[] { _strType };
-        private static readonly Type[] _strCompTypeArr = new Type[] { _strType, typeof(StringComparison) };
+        private static readonly IReadOnlyDictionary<string, PropertyInfo> _profileProps = _spType.GetProperties().ToImmutableDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
+        //private static readonly Type[] _strTypeArr = new Type[] { _strType };
+        //private static readonly Type[] _strCompTypeArr = new Type[] { _strType, typeof(StringComparison) };
         private static readonly Type[] _intTypeArr = new Type[] { _intType };
 
         private static readonly MethodInfo _toString = _objType.GetMethod("ToString");
         private static readonly MethodInfo _strJoin = _strType.GetMethod("Join", new Type[] { _strType, typeof(object[]) });
-        private static readonly MethodInfo _strContains = _strType.GetMethod("Contains", _strTypeArr);
+        private static readonly MethodInfo _strContains = _strType.GetMethod("Contains", new Type[] { _strType });
         private static readonly MethodInfo _strConcat = _strType.GetMethod("Concat", new Type[] { _strType, _strType, _strType });
-        private static readonly MethodInfo _strEquals = _strType.GetMethod("Equals", _strCompTypeArr);
+        private static readonly MethodInfo _strEquals = _strType.GetMethod("Equals", new Type[] { _strType, typeof(StringComparison) });
         private static readonly MethodInfo _intEquals = _intType.GetMethod("Equals", _intTypeArr);
         private static readonly MethodInfo _intCompare = _intType.GetMethod("CompareTo", _intTypeArr);
         private static readonly MethodInfo _linqOrderBy = _exType.GetMethod("Order", new Type[] { _ienumSpType, _funcSpToIntType, _boolType });

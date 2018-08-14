@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Kohaku": {
-      "commandName": "Project",
-      "commandLineArgs": "-db \"Data Source=test.sqlite\" -t \"MjM2NzkxMDY2MDA1NjAyMzA0.DFilJQ.5rxv4iCBjm2694SMpOh20SoDFmA\""
-    }
-  }
-}
