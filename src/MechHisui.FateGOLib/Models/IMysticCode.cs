@@ -4,7 +4,7 @@ namespace MechHisui.FateGOLib
 {
     public interface IMysticCode
     {
-        string Code { get; }
+        string Name { get; }
         string Skill1 { get; }
         string Skill1Effect { get; }
         string Skill2 { get; }

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
     <Import Project="..\..\DiscordBotCore.props" />
     <ItemGroup>
-      <PackageReference Include="JiiLib.SimpleDsl" Version="1.0.0-alpha1" />
+      <PackageReference Include="JiiLib.SimpleDsl" Version="1.0.0-alpha6" />
     </ItemGroup>
 </Project>

@@ -1,8 +1,8 @@
-﻿namespace MechHisui.FateGOLib
-{
-    public interface IServantTrait
-    {
-        bool IsAutoComputed { get; }
-        string Trait { get; }
-    }
-}
+﻿//namespace MechHisui.FateGOLib
+//{
+//    public interface IServantTrait
+//    {
+//        bool IsAutoComputed { get; }
+//        string Trait { get; }
+//    }
+//}

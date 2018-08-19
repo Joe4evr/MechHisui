@@ -12,22 +12,23 @@ namespace MechHisui.Core
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
 
-        public string Class { get; set; }
+        public ServantClass Class { get; set; }
         public int Rarity { get; set; }
         public string Name { get; set; }
         public int Atk { get; set; }
         public int HP { get; set; }
         public int Starweight { get; set; }
-        public string Gender { get; set; }
-        public string GrowthCurve { get; set; }
-        public string CardPool { get; set; }
+        public ServantGender Gender { get; set; }
+        public ServantAttribute Attribute { get; set; }
+        public ServantGrowthCurve GrowthCurve { get; set; }
+
+        public ServantCardPool CardPool { get; set; }
         public int B { get; set; }
         public int A { get; set; }
         public int Q { get; set; }
         public int EX { get; set; }
-        public string Attribute { get; set; }
 
-        public string NPType { get; set; }
+        public FgoCard NPType { get; set; }
         public string NoblePhantasm { get; set; }
         public string NoblePhantasmEffect { get; set; }
         public string NoblePhantasmRankUpEffect { get; set; }
@@ -43,7 +44,7 @@ namespace MechHisui.Core
         public IEnumerable<ServantAlias> Aliases { get; set; }
 
         ICEProfile IServantProfile.Bond10 => Bond10;
-        IEnumerable<IServantTrait> IServantProfile.Traits => Traits.Select(t => t.Trait);
+        IEnumerable<string> IServantProfile.Traits => Traits.Select(t => t.Trait.Name);
         IEnumerable<IActiveSkill> IServantProfile.ActiveSkills => ActiveSkills.Select(s => s.Skill);
         IEnumerable<IPassiveSkill> IServantProfile.PassiveSkills => PassiveSkills.Select(s => s.Skill);
         IEnumerable<IServantAlias> IServantProfile.Aliases => Aliases;

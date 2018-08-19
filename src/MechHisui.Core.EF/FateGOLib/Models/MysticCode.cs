@@ -12,7 +12,7 @@ namespace MechHisui.Core
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public string Code { get; set; }
+        public string Name { get; set; }
         public string Skill1 { get; set; }
         public string Skill1Effect { get; set; }
         public string Skill2 { get; set; }
@@ -24,6 +24,6 @@ namespace MechHisui.Core
 
         IEnumerable<IMysticAlias> IMysticCode.Aliases => Aliases;
 
-        public override string ToString() => Code;
+        public override string ToString() => Name;
     }
 }

@@ -20,15 +20,4 @@ namespace MechHisui.FateGOLib
             [DayOfWeek.Sunday] = new DailyInfo { Materials = ServantClass.Saber }
         };
     }
-
-    public enum ServantClass
-    {
-        Saber = 0,
-        Archer = 1,
-        Lancer = 2,
-        Rider = 3,
-        Caster = 4,
-        Assassin = 5,
-        Berserker = 6
-    }
 }

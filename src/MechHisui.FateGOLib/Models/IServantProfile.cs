@@ -5,23 +5,23 @@ namespace MechHisui.FateGOLib
     public interface IServantProfile
     {
         int Id { get; }
-        string Class { get; }
+        ServantClass Class { get; }
         int Rarity { get; }
         string Name { get; }
         int Atk { get; }
         int HP { get; }
         int Starweight { get; }
-        string Gender { get; }
-        string Attribute { get; }
-        string GrowthCurve { get; }
+        ServantGender Gender { get; }
+        ServantAttribute Attribute { get; }
+        ServantGrowthCurve GrowthCurve { get; }
 
-        string CardPool { get; }
+        ServantCardPool CardPool { get; }
         int B { get; }
         int A { get; }
         int Q { get; }
         int EX { get; }
 
-        string NPType { get; }
+        FgoCard NPType { get; }
         string NoblePhantasm { get; }
         string NoblePhantasmEffect { get; }
         string NoblePhantasmRankUpEffect { get; }
@@ -31,7 +31,7 @@ namespace MechHisui.FateGOLib
         string Image { get; }
         bool Obtainable { get; }
 
-        IEnumerable<IServantTrait> Traits { get; }
+        IEnumerable<string> Traits { get; }
         IEnumerable<IActiveSkill> ActiveSkills { get; }
         IEnumerable<IPassiveSkill> PassiveSkills { get; }
         IEnumerable<IServantAlias> Aliases { get; }

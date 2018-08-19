@@ -1,11 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <Import Project="..\..\DiscordBotCore.props" />
+    <PropertyGroup>
+        <RootNamespace>MechHisui.Core</RootNamespace>
+    </PropertyGroup>
     <ItemGroup>
         <!--<PackageReference Include="Discord.Addons.SimplePermissions.EFProvider" Version="1.2.0-alpha3" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.0.0" PrivateAssets="All" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.0" PrivateAssets="All" />-->
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.1.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.0-preview1-34993" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.0-preview1-34993" />
     </ItemGroup>
     <ItemGroup>
         <!--<ProjectReference Include="..\MechHisui.ExplodingKittens\MechHisui.ExplodingKittens.csproj" />-->

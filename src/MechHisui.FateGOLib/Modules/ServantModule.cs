@@ -5,69 +5,59 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.SimplePermissions;
 using Discord.Commands;
+using JiiLib.SimpleDsl;
 using SharedExtensions;
 
 namespace MechHisui.FateGOLib
 {
-    public sealed partial class FgoModule
+    public partial class FgoModule
     {
         [Name("Servants"), Group("servant"), Alias("servants")]
-        public sealed class ServantModule : ModuleBase<ICommandContext>
+        public sealed class ServantModule : FgoModule
         {
-            private static readonly string[] _neverEver = new[] { "arc", "arcueid" };
-            private readonly FgoStatService _service;
 
             public ServantModule(FgoStatService service)
+                : base (service)
             {
-                _service = service;
             }
 
-            [Command, Alias("stat", "stats"), Priority(5)]
-            [Summary("Relay information on the specified Servant by ID.")]
-            public async Task StatCmd(int id)
-            {
-                var profile = await _service.Config.GetServantAsync(id).ConfigureAwait(false);
-
-                if (profile != null)
-                {
-                    await ReplyAsync(String.Empty, embed: FormatServantProfile(profile)).ConfigureAwait(false);
-                }
-            }
-
-            [Command, Alias("stat", "stats")]
+            [Command]
             [Summary("Relay information on the specified Servant. Alternative names acceptable.")]
-            public async Task StatCmd([Remainder] string name)
-            {
-                if (name.ContainsIgnoreCase("waifu"))
-                {
-                    await ReplyAsync("It has come to my attention that your 'waifu' is equatable to fecal matter.");
-                    return;
-                }
+            public Task StatCmd([Remainder] IServantProfile profile)
+                => ReplyAsync(String.Empty, embed: FormatServantProfile(profile));
 
-                if (_neverEver.ContainsIgnoreCase(name))
-                {
-                    await ReplyAsync("Never ever.");
-                    return;
-                }
+            //[Command, Priority(5)]
+            //[Summary("Relay information on the specified Servant by ID.")]
+            //public async Task StatCmd(int id)
+            //{
+            //    var profile = 
 
-                var potentials = await _service.Config.FindServantsAsync(name).ConfigureAwait(false);
-                if (potentials.Count() == 1)
-                {
-                    await ReplyAsync(String.Empty, embed: FormatServantProfile(potentials.Single()));
-                }
-                else if (potentials.Count() > 1)
-                {
-                    //var aliases = _service.Config.GetServantAliases();
-                    var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
-                        .AppendSequence(potentials, (s, pr) => s.AppendLine($"**{pr.Name}** *({String.Join(", ", pr.Aliases)})*"));
+            //    if (profile != null)
+            //    {
+            //        await ReplyAsync(String.Empty, embed: FormatServantProfile(profile)).ConfigureAwait(false);
+            //    }
+            //}
+            //public async Task StatCmd([Remainder] string name)
+            //{
 
-                    await ReplyAsync(sb.ToString());
-                }
-                else
-                {
-                    await ReplyAsync("No such entry found. Please try another name.");
-                }
-            }
+            //    var potentials = await _service.Config.FindServantsAsync(name).ConfigureAwait(false);
+            //    if (potentials.Count() == 1)
+            //    {
+            //        await ReplyAsync(String.Empty, embed: FormatServantProfile(potentials.Single()));
+            //    }
+            //    else if (potentials.Count() > 1)
+            //    {
+            //        //var aliases = _service.Config.GetServantAliases();
+            //        var sb = new StringBuilder("Entry ambiguous. Did you mean one of the following?\n")
+            //            .AppendSequence(potentials, (s, pr) => s.AppendLine($"**{pr.Name}** *({String.Join(", ", pr.Aliases)})*"));
+
+            //        await ReplyAsync(sb.ToString());
+            //    }
+            //    else
+            //    {
+            //        await ReplyAsync("No such entry found. Please try another name.");
+            //    }
+            //}
 
             //[Command("addalias"), Permission(MinimumPermission.ModRole)]
             //public Task AliasCmd(string servant, string alias)
@@ -128,7 +118,7 @@ namespace MechHisui.FateGOLib
             //}
 
             [Command("filter")]
-            public async Task Filter([Remainder] ServantFilterOptions options)
+            public async Task Filter([Remainder] QueryParseResult<IServantProfile> options)
             {
                 var matches = await _service.Config.SearchServantsAsync(options).ConfigureAwait(false);
                 if (matches.Any())
@@ -195,7 +185,9 @@ namespace MechHisui.FateGOLib
                         {
                             IsInline = false,
                             Name = "Traits",
-                            Value = String.Join(", ", profile.Traits)
+                            Value = (profile.Traits.Any())
+                                ? String.Join(", ", profile.Traits)
+                                : "(no traits listed (yet))"
                         },
                         new EmbedFieldBuilder
                         {
@@ -214,12 +206,12 @@ namespace MechHisui.FateGOLib
 
                 .AddFieldSequence(profile.ActiveSkills,
                     (field, skill) => field.WithIsInline(true)
-                        .WithName($"{skill.SkillName} {skill.Rank}")
+                        .WithName($"{skill.Name} {skill.Rank}")
                         .WithValue($"{skill.Effect}{(!String.IsNullOrWhiteSpace(skill.RankUpEffect) ? $"\n**Rank Up:** {skill.RankUpEffect}" : String.Empty)}"))
 
                 .AddFieldSequence(profile.PassiveSkills,
                     (field, skill) => field.WithIsInline(true)
-                        .WithName($"{skill.SkillName} {skill.Rank}")
+                        .WithName($"{skill.Name} {skill.Rank}")
                         .WithValue($"{skill.Effect}"))
 
                 .AddFieldWhen(() => profile.Bond10 != null,

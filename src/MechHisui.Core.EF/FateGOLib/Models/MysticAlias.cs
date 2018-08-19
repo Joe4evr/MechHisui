@@ -15,6 +15,6 @@ namespace MechHisui.Core
 
         IMysticCode IMysticAlias.Code => Code;
 
-        public override string ToString() => $"{Alias} ({Code.Code})";
+        public override string ToString() => $"{Alias} ({Code.Name})";
     }
 }

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Discord.Addons.SimplePermissions;
 using Discord.Commands;
 using Discord.Commands.Builders;
-//using NodaTime;
+using NodaTime;
 using SharedExtensions;
 
 namespace MechHisui.FateGOLib
@@ -13,13 +13,11 @@ namespace MechHisui.FateGOLib
     public partial class FgoModule
     {
         [Name("Events"), Group("event"), Alias("events")]
-        public sealed class EventsModule : ModuleBase<ICommandContext>
+        public sealed class EventsModule : FgoModule
         {
-            private readonly FgoStatService _service;
-
             public EventsModule(FgoStatService service)
+                : base(service)
             {
-                _service = service;
             }
 
             [Command, Alias("list")]
@@ -105,14 +103,19 @@ namespace MechHisui.FateGOLib
                 await ReplyAsync(sb.ToString()).ConfigureAwait(false);
             }
 
-            //[Command("add"), Permission(MinimumPermission.ModRole)]
-            //public async Task AddEventCmd(string name, LocalDateTime? start = null, LocalDateTime? end = null, string info = null)
-            //{
-            //    var dtoStart = start?.InZoneLeniently(NodaTimeExtensions.JpnTimeZone).ToDateTimeOffset();
-            //    var dtoEnd = end?.InZoneLeniently(NodaTimeExtensions.JpnTimeZone).ToDateTimeOffset();
-            //    var ev = await _service.Config.AddEventAsync(name, dtoStart, dtoEnd, info).ConfigureAwait(false);
-            //    await ReplyAsync($"Successfully added event \uFF03{ev.Id} **{ev.EventName}**.").ConfigureAwait(false);
-            //}
+            [Command("add")/*, Permission(MinimumPermission.ModRole)*/]
+            public async Task AddEventCmd(string name, EventProperties eventProperties)
+            {
+                var ev = await _service.Config.AddEventAsync(name, eventProperties).ConfigureAwait(false);
+                await ReplyAsync($"Successfully added event \uFF03{ev.Id} **{ev.EventName}**.").ConfigureAwait(false);
+            }
+
+            [Command("edit")/*, Permission(MinimumPermission.ModRole)*/]
+            public async Task EditEventCmd(int id, EventProperties updatedProperties)
+            {
+                var ev = await _service.Config.EditEventAsync(id, updatedProperties).ConfigureAwait(false);
+                await ReplyAsync($"Successfully edited event \uFF03{ev.Id} **{ev.EventName}**.").ConfigureAwait(false);
+            }
         }
     }
 }

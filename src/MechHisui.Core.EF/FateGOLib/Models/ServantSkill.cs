@@ -11,14 +11,12 @@ namespace MechHisui.Core
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public string SkillName { get; set; }
+        public string Name { get; set; }
         public string Rank { get; set; }
         public string Effect { get; set; }
         public string RankUpEffect { get; set; }
 
-        //public IEnumerable<ServantActiveSkill> Servants { get; set; }
-
-        public override string ToString() => $"{SkillName}: {Rank}";
+        public override string ToString() => $"{Name}: {Rank}";
     }
 
 
@@ -27,12 +25,10 @@ namespace MechHisui.Core
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public string SkillName { get; set; }
+        public string Name { get; set; }
         public string Rank { get; set; }
         public string Effect { get; set; }
 
-        //public ICollection<ServantPassiveSkill> Servants { get; set; }
-
-        public override string ToString() => $"{SkillName}: {Rank}";
+        public override string ToString() => $"{Name}: {Rank}";
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
@@ -75,8 +76,13 @@ namespace Kohaku
 
             //await InitCommands();
             //await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
-            await _commands.AddModuleAsync<PermissionsModule>(_services);
-            await _commands.AddModuleAsync<FgoModule>(_services);
+            //await _commands.AddModuleAsync<PermissionsModule>(_services);
+            var mi = await _commands.AddModuleAsync<FgoModule>(_services);
+            //var sub = mi.Submodules.Single(m => m.Name == "Events");
+            //var cmd = sub.Commands.Single(c => c.Name == "add");
+            //var param = "startTime: \"Aug 24 T 12:30\" endTime: \"Aug 24 T 13:29\"";
+
+
             await _commands.AddModuleAsync<DiceRollModule>(_services);
 
             _client.ReactionAdded += CheckReactionAdded;
@@ -109,7 +115,7 @@ namespace Kohaku
                     var context = new SocketCommandContext(_client, msg);
                     var result = await _commands.ExecuteAsync(context, pos, _services);
 
-                    if (!result.IsSuccess)
+                    if (!result.IsSuccess && !String.IsNullOrWhiteSpace(result.ErrorReason))
                         await msg.Channel.SendMessageAsync(result.ErrorReason);
                 }
             }

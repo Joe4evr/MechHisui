@@ -1,54 +1,68 @@
-﻿//using System;
-//using NodaTime;
+﻿using System;
+using NodaTime;
 
-//namespace SharedExtensions
-//{
-//    internal static class NodaTimeExtensions
-//    {
-//        internal static DateTimeZone JpnTimeZone { get; } = DateTimeZoneProviders.Tzdb["Japan"];
+namespace SharedExtensions
+{
+    internal static class NodaTimeExtensions
+    {
+        internal static DateTimeZone JpnTimeZone { get; } = DateTimeZoneProviders.Tzdb["Japan"];
 
-//        public static Duration TimeUntilNextOccurrance(
-//            this ZonedDateTime startingTime,
-//            AnnualDate targetDate,
-//            LocalTime? targetTime = null)
-//        {
-//            var dateInYear = targetDate.InYear((startingTime.Month < targetDate.Month)
-//                ? startingTime.Year
-//                : startingTime.Year + 1);
+        public static ZonedDateTime InYearOfNextOccurrance(
+            this AnnualDate date,
+            LocalTime targetTime,
+            DateTimeZone zone)
+        {
+            var now = SystemClock.Instance.GetCurrentInstant().InZone(zone);
+            bool passedInThisYear = now.Month < date.Month || (now.Month == date.Month && now.Day < date.Day);
 
-//            var targetDateTime = (targetTime.HasValue)
-//                ? dateInYear.At(targetTime.Value).InZoneLeniently(startingTime.Zone)
-//                : dateInYear.AtStartOfDayInZone(startingTime.Zone);
+            return date.InYear(passedInThisYear ? now.Year : now.Year + 1)
+                .At(targetTime)
+                .InZoneLeniently(zone);
+        }
 
-//            return targetDateTime - startingTime;
-//        }
+        public static Duration TimeUntilNextOccurrance(
+            this ZonedDateTime startingTime,
+            AnnualDate targetDate,
+            LocalTime? targetTime = null)
+        {
+            bool passedThisYear = startingTime.Month < targetDate.Month || (startingTime.Month == targetDate.Month && startingTime.Day < targetDate.Day);
+            var dateInYear = targetDate.InYear(passedThisYear
+                ? startingTime.Year
+                : startingTime.Year + 1);
 
-//        public static Duration TimeUntilNextOccurrance(
-//            this ZonedDateTime startingTime,
-//            LocalDateTime targetDateTime)
-//        {
-//            return targetDateTime.InZoneLeniently(startingTime.Zone) - startingTime;
-//        }
+            var targetDateTime = (targetTime.HasValue)
+                ? dateInYear.At(targetTime.Value).InZoneLeniently(startingTime.Zone)
+                : dateInYear.AtStartOfDayInZone(startingTime.Zone);
 
-//        public static Duration TimeUntilNextOccurrance(
-//            this ZonedDateTime startingTime,
-//            LocalTime targetTime)
-//        {
-//            var localStart = startingTime.LocalDateTime;
+            return targetDateTime - startingTime;
+        }
 
-//            var nextOccurrance = ((localStart.TimeOfDay < targetTime)
-//                ? localStart.Date.At(targetTime)
-//                : localStart.PlusDays(1).Date.At(targetTime))
-//                .InZoneLeniently(startingTime.Zone);
+        public static Duration TimeUntilNextOccurrance(
+            this ZonedDateTime startingTime,
+            LocalDateTime targetDateTime)
+        {
+            return targetDateTime.InZoneLeniently(startingTime.Zone) - startingTime;
+        }
 
-//            return nextOccurrance - startingTime;
-//        }
+        public static Duration TimeUntilNextOccurrance(
+            this ZonedDateTime startingTime,
+            LocalTime targetTime)
+        {
+            var localStart = startingTime.LocalDateTime;
 
-//        public static bool IsAnnualDate(
-//            this ZonedDateTime zonedDate,
-//            AnnualDate targetDate)
-//        {
-//            return (zonedDate.Month == targetDate.Month && zonedDate.Day == targetDate.Day);
-//        }
-//    }
-//}
+            var nextOccurrance = ((localStart.TimeOfDay < targetTime)
+                ? localStart.Date.At(targetTime)
+                : localStart.PlusDays(1).Date.At(targetTime))
+                .InZoneLeniently(startingTime.Zone);
+
+            return nextOccurrance - startingTime;
+        }
+
+        public static bool IsAnnualDate(
+            this ZonedDateTime zonedDate,
+            AnnualDate targetDate)
+        {
+            return (zonedDate.Month == targetDate.Month && zonedDate.Day == targetDate.Day);
+        }
+    }
+}
