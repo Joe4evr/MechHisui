@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30002.166
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EC02FAD7-9EAA-400C-A6F5-2663C07EAB7A}"
 	ProjectSection(SolutionItems) = preProject
@@ -23,10 +23,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MechHisui.Weiss", "src\MechHisui.Weiss\MechHisui.Weiss.csproj", "{09E973D0-6C79-48EA-9ADF-DC4862DF94C2}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		src\SharedExtensions\SharedExtensions.projitems*{1757ea52-ad6d-4824-b27d-7370e9396845}*SharedItemsImports = 4
-		src\SharedExtensions\SharedExtensions.projitems*{9b917360-4eb0-41cf-ba01-bef3bb17068e}*SharedItemsImports = 4
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU

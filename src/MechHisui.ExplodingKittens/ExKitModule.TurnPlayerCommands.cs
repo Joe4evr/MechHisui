@@ -8,7 +8,7 @@ namespace MechHisui.ExplodingKittens
 {
     public partial class ExKitModule
     {
-        [RequireTurnPlayer]
+        [RequireTurnPlayer(true)]
         public sealed class TurnPlayerCommands : ExKitModule
         {
             public TurnPlayerCommands(ExKitService gameService)
@@ -27,29 +27,29 @@ namespace MechHisui.ExplodingKittens
             [Command("defuse"), RequireGameState(GameState.KittenExploding)]
             public Task Defuse()
             {
-                var defuse = Player.TakeCard<DefuseCard>();
+                var defuse = Player!.TakeCard<DefuseCard>();
                 return (defuse == null)
                     ? ReplyAsync("You do not have a Defuse card in your hand. Goodbye.")
-                    : Game.DefuseExplodingKitten(defuse);
+                    : Game!.DefuseExplodingKitten(defuse);
             }
 
             [Command("play"), RequireGameState(GameState.MainPhase)]
             public Task PlayCard([RequireBaseType(typeof(ExplodingKittensCard))] Type cardType)
             {
-                var card = Player.TakeCard(cardType);
-                return (card == null)
-                    ? ReplyAsync()
-                    : Game.PlayAction(card);
+                var card = Player!.TakeCard(cardType);
+                return (card is null)
+                    ? ReplyAsync("")
+                    : Game!.PlayAction(card);
             }
 
             [Command("draw"), RequireGameState(GameState.MainPhase)]
-            public override Task NextTurnCmd() => Game.Draw();
+            public override Task NextTurnCmd() => Game!.Draw();
 
             [Command("insert"), RequireContext(ContextType.DM)]
             [RequireGameState(GameState.KittenDefused)]
             public Task ReinsertExplodingKitten([RequireLessThanCurrentDeckSize] uint location)
             {
-                Game.InsertExplodingKitten(location);
+                Game!.InsertExplodingKitten(location);
                 return ReplyAsync("You inserted the Exploding Kitten back into the deck.");
             }
         }

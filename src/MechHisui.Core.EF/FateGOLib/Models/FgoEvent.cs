@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MechHisui.FateGOLib;
 
+#nullable disable warnings
 namespace MechHisui.Core
 {
     public sealed class FgoEvent : IFgoEvent
@@ -15,7 +16,7 @@ namespace MechHisui.Core
         public DateTimeOffset? StartTime { get; set; }
         public DateTimeOffset? EndTime { get; set; }
         public IEnumerable<FgoEventGacha> EventGachas { get; set; }
-        public string InfoLink { get; set; }
+        public string? InfoLink { get; set; }
 
         IEnumerable<IFgoEventGacha> IFgoEvent.EventGachas => EventGachas;
     }

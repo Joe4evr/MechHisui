@@ -18,12 +18,12 @@ namespace MechHisui.SymphoXDULib
         internal const string EmoteStop = "❌";
         internal const string EmoteSelect = "✅";
         private readonly Func<LogMessage, Task> _logger;
-        private readonly DiscordSocketClient _sockClient;
+        private readonly BaseSocketClient _sockClient;
 
         public XduStatService(
             IXduConfig config,
-            DiscordSocketClient client,
-            Func<LogMessage, Task> logger = null)
+            BaseSocketClient client,
+            Func<LogMessage, Task>? logger = null)
         {
             Config = config;
             client.ReactionAdded += Client_ReactionAdded;
@@ -31,14 +31,14 @@ namespace MechHisui.SymphoXDULib
             //client.ReactionsCleared += Client_ReactionsCleared;
             client.MessageDeleted += Client_MessageDeleted;
             _sockClient = client;
-            _logger = msg => Task.CompletedTask;
+            _logger = logger ?? (msg => Task.CompletedTask);
         }
 
         internal Task Log(LogSeverity severity, string msg)
             => _logger(new LogMessage(severity, "XDU", msg));
 
         internal Task AddNewPagedAsync(PaginatedMessage pm)
-            => Task.FromResult(_paginated.TryAdd(pm.Msg.Id, pm));
+            => Task.FromResult(_paginated.TryAdd(pm.Msg!.Id, pm));
 
         private async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
         {
@@ -55,7 +55,7 @@ namespace MechHisui.SymphoXDULib
             var msg = message.Value;
             if (_paginated.TryGetValue(msg.Id, out var pagedmsg))
             {
-                if (reaction.UserId == _sockClient?.CurrentUser.Id) return;
+                if (reaction.UserId == _sockClient.CurrentUser.Id) return;
 
                 if (reaction.UserId != pagedmsg.UserId)
                 {
@@ -77,7 +77,7 @@ namespace MechHisui.SymphoXDULib
                     case EmoteSelect:
                         if (pagedmsg.ListenForSelect)
                         {
-                            var desc = pagedmsg.Msg.Embeds.FirstOrDefault()?.Description;
+                            var desc = pagedmsg.Msg!.Embeds.FirstOrDefault()?.Description;
                             if (desc != null && Int32.TryParse(GetId(desc), out var id))
                             {
                                 await Task.WhenAll(
@@ -89,7 +89,7 @@ namespace MechHisui.SymphoXDULib
                         }
                         else
                         {
-                            await pagedmsg.Msg.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
+                            await pagedmsg.Msg!.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
                         }
                         break;
                     default:

@@ -16,7 +16,7 @@ namespace SharedExtensions
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
         [DebuggerStepThrough]
-        public Logger(LogSeverity minimum, string logPath = null)
+        public Logger(LogSeverity minimum, string? logPath = null)
         { 
             _minimum = minimum;
             string logdir = Path.Combine(Directory.GetCurrentDirectory(), logPath ?? "logs");

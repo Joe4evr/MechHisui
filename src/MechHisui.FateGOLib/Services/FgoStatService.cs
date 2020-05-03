@@ -19,9 +19,9 @@ namespace MechHisui.FateGOLib
 
         public FgoStatService(
             DiscordSocketClient client,
-            CommandService commands,
+            //CommandService commands,
             IFgoConfig config,
-            Func<LogMessage, Task> logger = null)
+            Func<LogMessage, Task>? logger = null)
         {
             Config = config ?? throw new ArgumentNullException(nameof(config));
 
@@ -154,7 +154,7 @@ namespace MechHisui.FateGOLib
         //{
         //}
 
-        private static bool RegexMatchOneWord(string hay, string needle)
-            => Regex.Match(hay, String.Concat(@"\b", needle, @"\b"), RegexOptions.IgnoreCase).Success;
+        //private static bool RegexMatchOneWord(string hay, string needle)
+        //    => Regex.Match(hay, String.Concat(@"\b", needle, @"\b"), RegexOptions.IgnoreCase).Success;
     }
 }

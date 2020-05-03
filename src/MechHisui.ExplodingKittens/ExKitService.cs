@@ -15,8 +15,8 @@ namespace MechHisui.ExplodingKittens
         public ExKitService(
             BaseSocketClient client,
             IExKitConfig exKitConfig,
-            IMpGameServiceConfig mpconfig = null,
-            Func<LogMessage, Task> logger = null)
+            IMpGameServiceConfig? mpconfig = null,
+            Func<LogMessage, Task>? logger = null)
             : base(client, mpconfig, logger)
         {
             ExKitConfig = exKitConfig ?? throw new ArgumentNullException(nameof(exKitConfig));

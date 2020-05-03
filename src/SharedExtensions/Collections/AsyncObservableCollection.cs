@@ -8,39 +8,63 @@ namespace SharedExtensions.Collections
 {
     internal delegate Task NotifyCollectionChangedAsync(object sender, NotifyCollectionChangedEventArgs e);
 
+#nullable disable warnings
     internal sealed class AsyncObservableCollection<T> : ObservableCollection<T>
     {
-        /// <summary> Initializes a new instance of AsyncObservableCollection that is empty and has default initial capacity. </summary>
+        /// <summary>
+        ///     Initializes a new instance of AsyncObservableCollection
+        ///     that is empty and has default initial capacity.
+        /// </summary>
         public AsyncObservableCollection()
             : base()
         {
         }
 
-        /// <summary> Initializes a new instance of the AsyncObservableCollection class
-        /// that contains elements copied from the specified list </summary>
-        /// <param name="list">The list whose elements are copied to the new list.</param>
-        /// <remarks> The elements are copied onto the AsyncObservableCollection in the
-        /// same order they are read by the enumerator of the list. </remarks>
-        /// <exception cref="ArgumentNullException"> list is a null reference </exception>
+        /// <summary>
+        ///     Initializes a new instance of the AsyncObservableCollection class
+        ///     that contains elements copied from the specified list
+        /// </summary>
+        /// <param name="list">
+        ///     The list whose elements are copied to the new list.
+        /// </param>
+        /// <remarks>
+        ///     The elements are copied onto the AsyncObservableCollection in the
+        ///     same order they are read by the enumerator of the list.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="list"/> is a null reference
+        /// </exception>
         public AsyncObservableCollection(List<T> list)
             : base((list != null) ? new List<T>(list.Count) : list)
         {
         }
 
-        /// <summary> Initializes a new instance of the AsyncObservableCollection class that contains
-        /// elements copied from the specified collection and has sufficient capacity
-        /// to accommodate the number of elements copied. </summary>
-        /// <param name="collection">The collection whose elements are copied to the new list.</param>
-        /// <remarks> The elements are copied onto the AsyncObservableCollection in the
-        /// same order they are read by the enumerator of the collection. </remarks>
-        /// <exception cref="ArgumentNullException"> collection is a null reference </exception>
+        /// <summary>
+        ///     Initializes a new instance of the AsyncObservableCollection class that contains
+        ///     elements copied from the specified collection and has sufficient capacity
+        ///     to accommodate the number of elements copied.
+        /// </summary>
+        /// <param name="collection">
+        ///     The collection whose elements are copied to the new list.
+        /// </param>
+        /// <remarks>
+        ///     The elements are copied onto the AsyncObservableCollection in the
+        ///     same order they are read by the enumerator of the collection.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="collection"/> is a null reference
+        /// </exception>
         public AsyncObservableCollection(IEnumerable<T> collection)
             : base(collection)
         {
         }
 
-        /// <summary> Occurs when the collection changes, either by adding or removing an item. </summary>
-        /// <remarks> see <seealso cref="INotifyCollectionChanged"/> </remarks>
+        /// <summary>
+        ///     Occurs when the collection changes, either by adding or removing an item.
+        /// </summary>
+        /// <remarks>
+        ///     see <seealso cref="INotifyCollectionChanged"/>
+        /// </remarks>
         public event NotifyCollectionChangedAsync CollectionChangedAsync;
 
         protected override void ClearItems()

@@ -24,12 +24,8 @@ namespace MechHisui.HisuiBets
         private bool _isClosing = false;
         private int _bonus = 0;
 
-        public BetGame(
-            IBankOfHisui bank,
-            ITextChannel channel,
-            GameType type,
-            Random rng,
-            IUser master)
+        public BetGame(IBankOfHisui bank, ITextChannel channel,
+            GameType type, Random rng, IUser master)
         {
             _bank = bank ?? throw new ArgumentNullException();
             _channel = channel ?? throw new ArgumentNullException();
@@ -48,7 +44,7 @@ namespace MechHisui.HisuiBets
             _countDown.Change(TimeSpan.FromSeconds(45), Timeout.InfiniteTimeSpan);
         }
 
-        private BetCollection _finalBets;
+        private BetCollection? _finalBets;
 
         private async Task Close(bool atEnd)
         {
@@ -57,7 +53,7 @@ namespace MechHisui.HisuiBets
                 _isClosing = false;
                 await CloseOff().ConfigureAwait(false);
                 var game = await _bank.GetGameInChannelByIdAsync(_channel, _game.Id).ConfigureAwait(false);
-                var allBets = new List<IBet>(game.Bets);
+                var allBets = new List<IBet>(game!.Bets);
 
                 var highest = allBets.OrderByDescending(b => b.BettedAmount).FirstOrDefault();
                 var most = allBets.GroupBy(b => b.Target, StringComparer.OrdinalIgnoreCase)
@@ -94,24 +90,14 @@ namespace MechHisui.HisuiBets
         {
             //var game = await _bank.GetGameInChannelById(_channel, _game.Id).ConfigureAwait(false);
 
-            switch (await _bank.RecordOrUpdateBetAsync(_game, bet).ConfigureAwait(false))
+            return (await _bank.RecordOrUpdateBetAsync(_game, bet).ConfigureAwait(false)) switch
             {
-                case RecordingResult.BetAdded:
-                    return LogString(_game.Id, $"Added **{bet.UserName}**'s bet of {_bank.CurrencySymbol}{bet.BettedAmount} to **{bet.Target}**.");
-
-                case RecordingResult.BetReplaced:
-                    return LogString(_game.Id, $"Replaced **{bet.UserName}**'s bet with {_bank.CurrencySymbol}{bet.BettedAmount} to **{bet.Target}**.");
-
-                case RecordingResult.CannotReplaceOldBet:
-                    return "Can only bet once per game in this format.";
-
-                case RecordingResult.NewBetLessThanOldBet:
-                    return "Not allowed to replace an existing bet with an amount less than previous bet.";
-
-                case RecordingResult.MiscError:
-                default:
-                    return "Could not record that bet for some reason.";
-            }
+                RecordingResult.BetAdded => LogString(_game.Id, $"Added **{bet.UserName}**'s bet of {_bank.CurrencySymbol}{bet.BettedAmount} to **{bet.Target}**."),
+                RecordingResult.BetReplaced => LogString(_game.Id, $"Replaced **{bet.UserName}**'s bet with {_bank.CurrencySymbol}{bet.BettedAmount} to **{bet.Target}**."),
+                RecordingResult.CannotReplaceOldBet => "Can only bet once per game in this format.",
+                RecordingResult.NewBetLessThanOldBet => "Not allowed to replace an existing bet with an amount less than previous bet.",
+                _ => "Could not record that bet for some reason.",
+            };
         }
 
         public async Task StartGame()
@@ -141,28 +127,26 @@ namespace MechHisui.HisuiBets
                 await Close(true).ConfigureAwait(false);
             }
 
-            var result = await _bank.CashOutAsync(_finalBets, winner).ConfigureAwait(false);
-            var wholeSum = _finalBets.WholeSum;
+            var result = await _bank.CashOutAsync(_finalBets!, winner).ConfigureAwait(false);
+            var wholeSum = _finalBets!.WholeSum;
 
             var reply = await EndMessage(result, _bank, _channel, _game.Id, wholeSum).ConfigureAwait(false);
 
-            GameEnd(_channel);
+            GameEnd?.Invoke(_channel);
 
             return reply;
         }
 
-        internal Action<IMessageChannel> GameEnd { private get; set; }
+        internal Action<IMessageChannel>? GameEnd { private get; set; }
 
         internal void AddBonus(int amount)
-            => Interlocked.CompareExchange(ref _bonus, amount, 0); //YOBO: You Only Bonus Once (per game)
+            => Interlocked.CompareExchange(ref _bonus, amount, 0); // YOBO: You Only Bonus Once (per game)
 
-        //NOTE: This method has to be callable without an instance
+        // IMPORTANT: This method is static because it
+        // has to be callable without an instance
         internal static async Task<string> EndMessage(
-            BetResult result,
-            IBankOfHisui bank,
-            ITextChannel channel,
-            int gameId,
-            int wholeSum)
+            BetResult result, IBankOfHisui bank, ITextChannel channel,
+            int gameId, int wholeSum)
         {
             var sb = new StringBuilder();
             if (result.Winners.Count > 0)

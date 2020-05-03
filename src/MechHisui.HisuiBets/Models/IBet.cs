@@ -1,5 +1,6 @@
 ﻿using System;
 
+#nullable disable warnings
 namespace MechHisui.HisuiBets
 {
     public interface IBet

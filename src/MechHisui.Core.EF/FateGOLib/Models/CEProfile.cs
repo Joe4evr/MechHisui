@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using MechHisui.FateGOLib;
 
+#nullable disable warnings
 namespace MechHisui.Core
 {
     public sealed class CEProfile : ICEProfile

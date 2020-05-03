@@ -14,6 +14,7 @@ using MechHisui.SecretHitler;
 //using MechHisui.Superfight;
 //using MechHisui.SymphoXDULib;
 using SharedExtensions;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MechHisui
 {
@@ -24,14 +25,14 @@ namespace MechHisui
             DiscordSocketClient client,
             CommandService commands,
             Params parameters,
-            Func<LogMessage, Task> logger = null)
+            Func<LogMessage, Task>? logger = null)
         {
             try
             {
                 logger?.Invoke(new LogMessage(LogSeverity.Info, "Main", "Constructing ConfigStore"));
                 //logger?.Invoke(new LogMessage(LogSeverity.Debug, "Main", $"ConnectionString value: '{parameters.ConnectionString}'"));
                 var map = new ServiceCollection();
-                var store = new MechHisuiConfigStore(commands, map, logger);
+                var store = new MechHisuiConfigStore(commands, logger);
 
                 var bank     = new BankOfHisui(store);
                 var fgo      = new FgoConfig(store);
@@ -40,10 +41,10 @@ namespace MechHisui
                 //var xdu      = new XduConfig(store);
 
                 map.AddSingleton(new Random())
-                    .AddSingleton(new PermissionsService(client, commands, store, logger))
+                    .AddSingleton(new PermissionsService(store, commands, client, logger))
                     .AddDbContext<MechHisuiConfig>(options => options.UseSqlite(parameters.ConnectionString))
                     .AddSingleton(new HisuiBankService(bank, client, logger))
-                    .AddSingleton(new FgoStatService(client, commands, fgo, logger))
+                    .AddSingleton(new FgoStatService(client, /*commands,*/ fgo, logger))
                     .AddSingleton(new SecretHitlerService(client, shconfig, logger: logger))
                     //.AddSingleton(new SuperfightService(sfconfig, client, logger))
                     //.AddSingleton(new ExKitService(client, logger))

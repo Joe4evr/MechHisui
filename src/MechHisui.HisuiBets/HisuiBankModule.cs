@@ -17,7 +17,7 @@ namespace MechHisui.HisuiBets
     {
         private readonly HisuiBankService _service;
 
-        private IBankAccount _account;
+        private IBankAccount? _account;
 
         public HisuiBankModule(HisuiBankService service)
         {
@@ -39,7 +39,7 @@ namespace MechHisui.HisuiBets
 
         [Command("bucks"), Alias("mybucks")]
         public Task Bucks()
-            => ReplyAsync($"**{Context.User.Username}** currently has {_service.Bank.CurrencySymbol}{_account.Balance}.");
+            => ReplyAsync($"**{Context.User.Username}** currently has {_service.Bank.CurrencySymbol}{_account!.Balance}.");
 
         [Command("donate"), Ratelimit(5, 10, Measure.Minutes)]
         public async Task Donate(int amount, IUser recipient)
@@ -53,7 +53,7 @@ namespace MechHisui.HisuiBets
                 await ReplyAsync("Not allowed to donate to that account.").ConfigureAwait(false);
             }
 
-            var donationResult = await _service.Bank.DonateAsync(new DonationRequest((uint)amount, _account, recipient)).ConfigureAwait(false);
+            var donationResult = await _service.Bank.DonateAsync(new DonationRequest((uint)amount, _account!, recipient)).ConfigureAwait(false);
             switch (donationResult)
             {
                 case DonationResult.DonationSuccess:

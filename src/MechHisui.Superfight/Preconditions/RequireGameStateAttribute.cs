@@ -16,24 +16,19 @@ namespace MechHisui.Superfight.Preconditions
         }
 
         public override Task<PreconditionResult> CheckPermissionsAsync(
-            ICommandContext context,
-            CommandInfo command,
-            IServiceProvider services)
+            ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var sfservice = services.GetService<SuperfightService>();
-            if (sfservice != null)
-            {
-                var game = sfservice.GetGameFromChannel(context.Channel);
+            if (sfservice is null)
+                return Task.FromResult(PreconditionResult.FromError("No service."));
 
-                if (game != null)
-                {
-                    return (game.State == RequiredState)
-                        ? Task.FromResult(PreconditionResult.FromSuccess())
-                        : Task.FromResult(PreconditionResult.FromError("Cannot use command at this time."));
-                }
+            var game = sfservice.GetGameFromChannel(context.Channel);
+            if (game is null)
                 return Task.FromResult(PreconditionResult.FromError("No game."));
-            }
-            return Task.FromResult(PreconditionResult.FromError("No service."));
+
+            return (game.State == RequiredState)
+                ? Task.FromResult(PreconditionResult.FromSuccess())
+                : Task.FromResult(PreconditionResult.FromError("Cannot use command at this time."));
         }
     }
 }

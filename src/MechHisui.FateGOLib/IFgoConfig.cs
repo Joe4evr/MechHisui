@@ -26,6 +26,6 @@ namespace MechHisui.FateGOLib
         Task<IEnumerable<IFgoEvent>> GetAllEventsAsync();
         Task<IEnumerable<IFgoEvent>> GetCurrentEventsAsync();
         Task<IEnumerable<IFgoEvent>> GetFutureEventsAsync();
-        Task<IFgoEvent> AddEventAsync(string name, DateTimeOffset? start = null, DateTimeOffset? end = null, string info = null);
+        Task<IFgoEvent> AddEventAsync(string name, DateTimeOffset? start = null, DateTimeOffset? end = null, string? info = null);
     }
 }

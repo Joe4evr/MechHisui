@@ -25,14 +25,14 @@ namespace MechHisui.SecretHitler
         public SecretHitlerService(
             BaseSocketClient client,
             ISecretHitlerConfig shconfig,
-            IMpGameServiceConfig mpconfig = null,
-            Func<LogMessage, Task> logger = null)
-            : base(client, mpconfig, logger)
+            //IMpGameServiceConfig? mpconfig = null,
+            Func<LogMessage, Task>? logger = null)
+            : base(client, shconfig, logger)
         {
             _config = shconfig;
         }
 
-        internal async ValueTask<ISecretHitlerTheme> GetThemeAsync(string key)
+        internal async Task<ISecretHitlerTheme?> GetThemeAsync(string key)
         {
             if (!CachedThemes.TryGetValue(key, out var theme))
             {

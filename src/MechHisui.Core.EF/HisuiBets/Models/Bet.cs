@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MechHisui.HisuiBets;
 
+#nullable disable warnings
 namespace MechHisui.Core
 {
     public sealed class Bet : IBet

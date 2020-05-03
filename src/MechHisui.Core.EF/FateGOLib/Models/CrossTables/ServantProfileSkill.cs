@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+#nullable disable warnings
 namespace MechHisui.Core
 {
     public sealed class ServantActiveSkill
@@ -12,7 +13,7 @@ namespace MechHisui.Core
         public ServantProfile Servant { get; set; }
         public ActiveSkill Skill { get; set; }
 
-        public override string ToString() => $"{Servant.ToString()} - {Skill.ToString()}";
+        public override string ToString() => $"{Servant} - {Skill}";
     }
 
     public sealed class ServantPassiveSkill
@@ -23,7 +24,7 @@ namespace MechHisui.Core
         public ServantProfile Servant { get; set; }
         public PassiveSkill Skill { get; set; }
 
-        public override string ToString() => $"{Servant.ToString()} - {Skill.ToString()}";
+        public override string ToString() => $"{Servant} - {Skill}";
     }
 
 }

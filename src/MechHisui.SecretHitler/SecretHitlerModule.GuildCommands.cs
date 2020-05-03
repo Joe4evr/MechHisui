@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.Commands.Builders;
 using Discord.Addons.MpGame;
-using Discord.Addons.SimplePermissions;
+//using Discord.Addons.SimplePermissions;
 using MechHisui.SecretHitler.Models;
 using SharedExtensions;
 
@@ -38,7 +38,7 @@ namespace MechHisui.SecretHitler
                 await ReplyAsync(sb.ToString()).ConfigureAwait(false);
             }
 
-            [Command("open"), Permission(MinimumPermission.ModRole)]
+            [Command("open")/*, Permission(MinimumPermission.ModRole)*/]
             public override async Task OpenGameCmd()
             {
                 if (GameInProgress != CurrentlyPlaying.None)
@@ -76,7 +76,7 @@ namespace MechHisui.SecretHitler
                 }
                 else
                 {
-                    if (await GameService.AddUser(Context.Channel, Context.User).ConfigureAwait(false))
+                    if (await GameService.AddUserAsync(Context.Channel, Context.User).ConfigureAwait(false))
                     {
                         await ReplyAsync($"**{Context.User.Username}** has joined.").ConfigureAwait(false);
                     }
@@ -96,14 +96,14 @@ namespace MechHisui.SecretHitler
                 }
                 else
                 {
-                    if (await GameService.RemoveUser(Context.Channel, Context.User).ConfigureAwait(false))
+                    if (await GameService.RemoveUserAsync(Context.Channel, Context.User).ConfigureAwait(false))
                     {
                         await ReplyAsync($"**{Context.User.Username}** has left.").ConfigureAwait(false);
                     }
                 }
             }
 
-            [Command("cancel"), Permission(MinimumPermission.ModRole)]
+            [Command("cancel")/*, Permission(MinimumPermission.ModRole)*/]
             public override async Task CancelGameCmd()
             {
                 if (Game != null)
@@ -116,7 +116,7 @@ namespace MechHisui.SecretHitler
                 }
                 else
                 {
-                    if (await GameService.CancelGame(Context.Channel).ConfigureAwait(false))
+                    if (await GameService.CancelGameAsync(Context.Channel).ConfigureAwait(false))
                     {
                         await ReplyAsync("Game was cancelled.").ConfigureAwait(false);
                     }
@@ -124,12 +124,12 @@ namespace MechHisui.SecretHitler
             }
 
             [Command("start", RunMode = RunMode.Async)]
-            [Permission(MinimumPermission.ModRole)] //:thinking:
+            //[Permission(MinimumPermission.ModRole)] //:thinking:
             public override Task StartGameCmd()
                 => StartInternal(DefaultSecretHitlerTheme.Instance);
 
             [Command("start", RunMode = RunMode.Async)]
-            [Permission(MinimumPermission.ModRole)] //:thinking:
+            //[Permission(MinimumPermission.ModRole)] //:thinking:
             public async Task StartGameCmd(string themeName)
             {
                 var theme = await GameService.GetThemeAsync(themeName).ConfigureAwait(false);
@@ -190,7 +190,7 @@ namespace MechHisui.SecretHitler
                     }).Shuffle(32);
 
                     var game = new SecretHitlerGame(Context.Channel, players, theme, CurrentHouseRules);
-                    if (await GameService.TryAddNewGame(Context.Channel, game).ConfigureAwait(false))
+                    if (await GameService.TryAddNewGameAsync(Context.Channel, game).ConfigureAwait(false))
                     {
                         await game.SetupGame().ConfigureAwait(false);
                         await game.StartGame().ConfigureAwait(false);
@@ -201,23 +201,23 @@ namespace MechHisui.SecretHitler
             [Command("turn"), RequireGameState(GameState.EndOfTurn)]
             [RequirePlayerRole(PlayerRole.President)]
             public override Task NextTurnCmd()
-                => (Game != null)
-                    ? Game.NextTurn()
-                    : ReplyAsync("No game in progress.");
+                => (Game is null)
+                    ? ReplyAsync("No game in progress.")
+                    : Game.NextTurn();
 
-            [Command("endearly"), Permission(MinimumPermission.ModRole)]
+            [Command("endearly")/*, Permission(MinimumPermission.ModRole)*/]
             public override Task EndGameCmd()
-                => (Game != null)
-                    ? Game.EndGame("Game ended early by moderator.")
-                    : ReplyAsync("No game in progress to end.");
+                => (Game is null)
+                    ? ReplyAsync("No game in progress to end.")
+                    : Game.EndGame("Game ended early by moderator.");
 
             [Command("state")]
             public override Task GameStateCmd()
-                => (Game != null)
-                    ? ReplyAsync("", embed: Game.GetGameStateEmbed()) //ReplyAsync(Game.GetGameState())
-                    : ReplyAsync("No game in progress.");
+                => (Game is null)
+                    ? ReplyAsync("No game in progress.")
+                    : ReplyAsync("", embed: Game.GetGameStateEmbed());
 
-            [Command("enable"), Permission(MinimumPermission.ModRole)]
+            [Command("enable")/*, Permission(MinimumPermission.ModRole)*/]
             public async Task EnableHouserule(string rule)
             {
                 if (GameInProgress != CurrentlyPlaying.None)
@@ -248,7 +248,7 @@ namespace MechHisui.SecretHitler
                 }
             }
 
-            [Command("disable"), Permission(MinimumPermission.ModRole)]
+            [Command("disable")/*, Permission(MinimumPermission.ModRole)*/]
             public async Task DisableHouserule(string rule)
             {
                 if (GameInProgress != CurrentlyPlaying.None)
@@ -299,27 +299,27 @@ namespace MechHisui.SecretHitler
             [Command("nominate"), RequireGameState(GameState.StartOfTurn)]
             [RequirePlayerRole(PlayerRole.President)]
             public Task NominatePlayer(SecretHitlerPlayer player)
-                => Game.NominatedChancellor(player);
+                => Game!.NominatedChancellor(player);
 
             [Command("elect"), RequireGameState(GameState.SpecialElection)]
             [RequirePlayerRole(PlayerRole.President)]
             public Task ElectPlayer(SecretHitlerPlayer player)
-                => Game.SpecialElection(player);
+                => Game!.SpecialElection(player);
 
             [Command("investigate"), RequireGameState(GameState.Investigating)]
             [RequirePlayerRole(PlayerRole.President)]
             public Task InvestigatePlayer(SecretHitlerPlayer player)
-                => Game.InvestigatePlayer(player);
+                => Game!.InvestigatePlayer(player);
 
             [Command("kill"), RequireGameState(GameState.Kill)]
             [RequirePlayerRole(PlayerRole.President)]
             public Task KillPlayer(SecretHitlerPlayer player)
-                => Game.KillPlayer(player);
+                => Game!.KillPlayer(player);
 
             [Command("veto"), RequireGameState(GameState.ChancellorVetod)]
             [RequirePlayerRole(PlayerRole.President)]
             public Task Veto([LimitToStrings(StringComparison.OrdinalIgnoreCase, "approved", "denied")] string consent)
-                => Game.PresidentConsentsVeto(consent.ToLowerInvariant());
+                => Game!.PresidentConsentsVeto(consent.ToLowerInvariant());
         }
     }
 }

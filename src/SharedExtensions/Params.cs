@@ -3,6 +3,7 @@ using Discord;
 
 namespace SharedExtensions
 {
+#nullable disable warnings
     internal sealed class Params
     {
         public string ConfigPath { get; private set; }
@@ -22,7 +23,7 @@ namespace SharedExtensions
             var p = new Params();
             for (int i = 0; i < parameters.Length; i++)
             {
-                string next = (i < lastIdx)
+                string? next = (i < lastIdx)
                     ? parameters[i + 1]
                     : null;
                 switch (parameters[i])

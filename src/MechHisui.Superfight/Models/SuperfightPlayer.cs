@@ -27,7 +27,7 @@ namespace MechHisui.Superfight.Models
 
         internal void Draw(ISuperfightCard card)
         {
-            Tentative.Clear();
+            //Tentative.Clear();
             _hand.Add(card);
         }
 

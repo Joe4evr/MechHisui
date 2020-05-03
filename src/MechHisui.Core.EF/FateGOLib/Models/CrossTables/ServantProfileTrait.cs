@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+#nullable disable warnings
 namespace MechHisui.Core
 {
     public sealed class ServantProfileTrait
@@ -12,6 +13,6 @@ namespace MechHisui.Core
         public ServantProfile Servant { get; set; }
         public ServantTrait Trait { get; set; }
 
-        public override string ToString() => $"{Servant.ToString()}: {Trait.ToString()}";
+        public override string ToString() => $"{Servant}: {Trait}";
     }
 }

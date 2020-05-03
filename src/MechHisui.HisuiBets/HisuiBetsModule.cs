@@ -10,6 +10,7 @@ using Discord.WebSocket;
 using Discord.Addons.Preconditions;
 using Discord.Addons.SimplePermissions;
 using SharedExtensions;
+using System.Diagnostics;
 
 namespace MechHisui.HisuiBets
 {
@@ -17,14 +18,14 @@ namespace MechHisui.HisuiBets
     [Permission(MinimumPermission.Everyone)]
     public sealed partial class HisuiBetsModule : ModuleBase<SocketCommandContext>
     {
-        private const char _symbol = '\u050A';
+        //private const char _symbol = '\u050A';
+        private static readonly int _minimumBet = 50;
 
         private readonly HisuiBankService _service;
         private readonly Random _rng;
 
-        private IBankAccount _account;
-        private BetGame _game;
-        private int _minimumBet = 50;
+        private IBankAccount? _account;
+        private BetGame? _game;
 
         public HisuiBetsModule(HisuiBankService service, Random rng)
         {
@@ -45,7 +46,7 @@ namespace MechHisui.HisuiBets
         {
             if (_account != null && await CheckPreReqs(amount).ConfigureAwait(false))
             {
-                await ReplyAsync(await _game.ProcessBet(new Bet
+                await ReplyAsync(await _game!.ProcessBet(new Bet
                 {
                     UserName = Context.User.Username,
                     UserId = Context.User.Id,
@@ -61,7 +62,7 @@ namespace MechHisui.HisuiBets
         {
             if (_account != null && await CheckPreReqs(amount).ConfigureAwait(false))
             {
-                await ReplyAsync(await _game.ProcessBet(new Bet
+                await ReplyAsync(await _game!.ProcessBet(new Bet
                 {
                     UserName = Context.User.Username,
                     UserId = Context.User.Id,
@@ -77,7 +78,7 @@ namespace MechHisui.HisuiBets
         {
             if (_account != null && await CheckPreReqs(amount).ConfigureAwait(false))
             {
-                await ReplyAsync(await _game.ProcessBet(new Bet
+                await ReplyAsync(await _game!.ProcessBet(new Bet
                 {
                     UserName = Context.User.Username,
                     UserId = Context.User.Id,
@@ -136,22 +137,22 @@ namespace MechHisui.HisuiBets
         [Command("bet allin"), Alias("allin", "bet all")]
         [Priority(10), RequiresGameType(GameType.HungerGame)]
         public Task BetAllIn([Remainder] string target)
-            => Bet(_account.Balance, target);
+            => Bet(_account!.Balance, target);
 
         [Command("bet allin"), Alias("allin", "bet all")]
         [Priority(11), RequiresGameType(GameType.HungerGameDistrictsOnly)]
-        public Task BetAllIn(string allin, int district)
-            => Bet(_account.Balance, district);
+        public Task BetAllIn(int district)
+            => Bet(_account!.Balance, district);
 
         [Command("bet allin"), Alias("allin", "bet all")]
         [Priority(12), RequiresGameType(GameType.SaltyBet)]
-        public Task BetAllIn(string allin, SaltyBetTeam team)
-            => Bet(_account.Balance, team);
+        public Task BetAllIn(SaltyBetTeam team)
+            => Bet(_account!.Balance, team);
 
         [Command("bet it all"), Hidden]
         [Priority(20), RequiresGameType(GameType.Any)]
         public Task BetItAll()
-            => Context.Channel.SendFileAsync(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "kappa.png"),
+            => Context.Channel.SendFileAsync(KappaPath,
                     text: $"**{Context.User.Username}** has bet all their bucks. Good luck.");
 
         [Command("newgame"), Permission(MinimumPermission.Special)]
@@ -171,13 +172,12 @@ namespace MechHisui.HisuiBets
 
         [Command("checkbets"), Permission(MinimumPermission.Special)]
         [RequiresGameType(GameType.Any)]
-        public async Task CheckBets(/*int? gameId = null*/)
+        public async Task CheckBets(int? gameId = null)
         {
             var tChan = (ITextChannel)Context.Channel;
-            var game = await _service.Bank.GetLastGameInChannelAsync(tChan).ConfigureAwait(false);
-            //var game = (gameId.HasValue)
-            //    ? await _service.Bank.GetGameInChannelByIdAsync(tChan, gameId.Value).ConfigureAwait(false)
-            //    : await _service.Bank.GetLastGameInChannelAsync(tChan).ConfigureAwait(false);
+            var game = (gameId.HasValue)
+                ? await _service.Bank.GetGameInChannelByIdAsync(tChan, gameId.Value).ConfigureAwait(false)
+                : await _service.Bank.GetLastGameInChannelAsync(tChan).ConfigureAwait(false);
 
             if (game == null)
             {
@@ -205,7 +205,7 @@ namespace MechHisui.HisuiBets
         [RequiresGameType(GameType.Any)]
         public async Task CloseBets()
         {
-            if (!_game.BetsOpen)
+            if (!_game!.BetsOpen)
             {
                 await ReplyAsync("Bets are already closed.").ConfigureAwait(false);
                 return;
@@ -223,7 +223,7 @@ namespace MechHisui.HisuiBets
         [Command("winner"), Permission(MinimumPermission.Special)]
         [RequiresGameType(GameType.Any)]
         public async Task SetWinner([Remainder] string winner)
-            => await ReplyAsync(await _game.Winner(winner).ConfigureAwait(false)).ConfigureAwait(false);
+            => await ReplyAsync(await _game!.Winner(winner).ConfigureAwait(false)).ConfigureAwait(false);
 
         [Command("setwin"), Permission(MinimumPermission.Special)]
         public async Task SetWinner(int gameId, [Remainder] string winner)
@@ -254,5 +254,8 @@ namespace MechHisui.HisuiBets
                 await ReplyAsync(await BetGame.EndMessage(result, _service.Bank, channel, gameId, wholeSum).ConfigureAwait(false)).ConfigureAwait(false);
             }
         }
+
+        private static string? _kappaPath;
+        private string KappaPath => _kappaPath ??= Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)!, "kappa.png");
     }
 }

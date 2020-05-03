@@ -12,9 +12,7 @@ namespace MechHisui.HisuiBets
         private sealed class BetGameTypeReader : TypeReader
         {
             public override async Task<TypeReaderResult> ReadAsync(
-                ICommandContext context,
-                string input,
-                IServiceProvider services)
+                ICommandContext context, string input, IServiceProvider services)
             {
                 if (!Int32.TryParse(input, out int gameId))
                     return TypeReaderResult.FromError(CommandError.ParseFailed, "Could not parse input as integer.");
@@ -23,8 +21,7 @@ namespace MechHisui.HisuiBets
                 if (svc == null)
                     return TypeReaderResult.FromError(CommandError.ObjectNotFound, $"Could not find service: {nameof(HisuiBankService)}");
 
-                var tchan = context.Channel as ITextChannel;
-                var game = await svc.Bank.GetGameInChannelByIdAsync(tchan, gameId).ConfigureAwait(false);
+                var game = await svc.Bank.GetGameInChannelByIdAsync(context.Channel, gameId).ConfigureAwait(false);
 
                 return (game == null)
                     ? TypeReaderResult.FromError(CommandError.ObjectNotFound, $"Could not find a game by that ID.")

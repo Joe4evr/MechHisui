@@ -50,13 +50,13 @@ namespace SharedExtensions
             this IReadOnlyDictionary<TKey, TValue> source,
             TKey key,
             TValue defaultValue = default)
-        {
-            return source.TryGetValue(key, out var ret) ? ret : defaultValue;
-        }
+            where TKey : notnull
+                => source.TryGetValue(key, out var ret) ? ret : defaultValue;
 
         public static IEnumerable<TResult> DictionarySelect<TKey, TValue, TResult>(
             this IDictionary<TKey, TValue> source,
             Func<TKey, TValue, TResult> selector)
+            where TKey : notnull
                 => source.Select(kvp => selector(kvp.Key, kvp.Value));
 
         public static void InsertAt<T>(this Stack<T> source, uint index, T item)

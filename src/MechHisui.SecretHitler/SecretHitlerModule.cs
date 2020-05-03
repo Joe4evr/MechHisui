@@ -3,15 +3,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
-using Discord.Commands.Builders;
 using Discord.Addons.MpGame;
-using Discord.Addons.SimplePermissions;
+//using Discord.Addons.SimplePermissions;
 using MechHisui.SecretHitler.Models;
 using SharedExtensions;
 
 namespace MechHisui.SecretHitler
 {
-    [Name("SecretHitler"), Group("sh"), Permission(MinimumPermission.Everyone)]
+    [Name("SecretHitler"), Group("sh")/*, Permission(MinimumPermission.Everyone)*/]
     public abstract partial class SecretHitlerModule : MpGameModuleBase<SecretHitlerService, SecretHitlerGame, SecretHitlerPlayer>
     {
         private const int _minPlayers = 5;

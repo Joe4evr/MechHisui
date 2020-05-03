@@ -9,7 +9,7 @@
     <Import_RootNamespace>SharedExtensions</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)ArrayPoolStrategy.cs" />
+    <!-- <Compile Include="$(MSBuildThisFileDirectory)ArrayPoolStrategy.cs" /> -->
     <Compile Include="$(MSBuildThisFileDirectory)Collections\AsyncObservableCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CoreExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DateTimeWithZone.cs" />

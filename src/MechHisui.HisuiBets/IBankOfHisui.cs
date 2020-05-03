@@ -9,16 +9,16 @@ namespace MechHisui.HisuiBets
     {
         char CurrencySymbol { get; }
 
-        IBankAccount GetAccount(IUser user);
+        IBankAccount? GetAccount(IUser user);
         Task<IEnumerable<IBankAccount>> GetAllUsersAsync();
 
-        IBetGame CreateGame(ITextChannel channel, GameType gameType);
+        IBetGame CreateGame(IMessageChannel channel, GameType gameType);
         Task<IEnumerable<IBetGame>> GetUncashedGamesAsync();
-        Task<IBetGame> GetLastGameInChannelAsync(ITextChannel channel);
-        Task<IBetGame> GetGameInChannelByIdAsync(ITextChannel channel, int gameId);
+        Task<IBetGame?> GetLastGameInChannelAsync(IMessageChannel channel);
+        Task<IBetGame?> GetGameInChannelByIdAsync(IMessageChannel channel, int gameId);
 
         Task<RecordingResult> RecordOrUpdateBetAsync(IBetGame game, IBet bet);
-        Task<IBet> RetrieveBetAsync(IUser user, IBetGame game);
+        Task<IBet?> RetrieveBetAsync(IUser user, IBetGame game);
 
         Task<IBankAccount> AddUserAsync(IUser user);
         Task AddUsersAsync(IEnumerable<IUser> users);

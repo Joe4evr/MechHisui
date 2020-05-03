@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.WebSocket;
 using Discord.Commands;
+using Techsola;
 using SharedExtensions;
 
 namespace MechHisui
@@ -14,19 +15,21 @@ namespace MechHisui
 #pragma warning disable RCS1090 // Call 'ConfigureAwait(false)'.
     public partial class Program
     {
-        private const string Version = "MHOS v2.0-test";
+        private const string _version = "MHOS v2.0-test";
 
         private static async Task Main(string[] args)
         {
+            AmbientTasks.BeginContext();
+
             var p = Params.Parse(args);
             var app = new Program(p);
             try
             {
                 await app.Start(p);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                await app.Log(LogSeverity.Critical, $"Unhandled Exception: {e}");
+                await app.Log(LogSeverity.Critical, $"Unhandled Exception: {ex}");
             }
         }
 
@@ -74,7 +77,7 @@ namespace MechHisui
             _client.Ready += async () =>
             {
                 await Log(LogSeverity.Info, $"Logged in as {_client.CurrentUser.Username}");
-                await _client.SetGameAsync(Version);
+                await _client.SetGameAsync(_version);
             };
 
 
@@ -111,27 +114,26 @@ namespace MechHisui
                 int pos = 0;
                 if (msg.HasCharPrefix('.', ref pos) || msg.HasMentionPrefix(_client.CurrentUser, ref pos))
                 {
-                    RunCommand(msg, pos);
+                    AmbientTasks.Add(RunCommand(msg, pos));
                 }
             }
             return Task.CompletedTask;
 
-            // saves on Task+closure allocation
-            async void RunCommand(SocketUserMessage message, int position)
+            // saves on closure allocation
+            async Task RunCommand(SocketUserMessage message, int position)
             {
                 await Task.Yield();
                 //using (message.Channel.EnterTypingState())
-                using (var scope = _services.CreateScope())
-                {
-                    var context = new SocketCommandContext(_client, message);
-                    var result = await _commands.ExecuteAsync(context, position, services: scope.ServiceProvider);
 
-                    if (!result.IsSuccess
-                        && (result.Error != CommandError.UnknownCommand
-                            || context.Guild?.Id == 161445678633975808ul))
-                    {
-                        await context.Channel.SendMessageAsync(result.ErrorReason);
-                    }
+                using var scope = _services.CreateScope();
+                var context = new SocketCommandContext(_client, message);
+                var result = await _commands.ExecuteAsync(context, position, services: scope.ServiceProvider);
+
+                if (!result.IsSuccess
+                    && (result.Error != CommandError.UnknownCommand
+                        || context.Guild?.Id == 161445678633975808ul))
+                {
+                    await context.Channel.SendMessageAsync(result.ErrorReason);
                 }
             }
         }

@@ -26,17 +26,18 @@ namespace MechHisui.ExplodingKittens
 
         [Command("state")]
         public override Task GameStateCmd()
-                => (Game != null)
-                    ? ReplyAsync("", embed: Game.GetGameStateEmbed()) //ReplyAsync(Game.GetGameState())
-                    : ReplyAsync("No game in progress.");
+                => (Game is null)
+                    ? ReplyAsync("No game in progress.")
+                    : ReplyAsync("", embed: Game.GetGameStateEmbed());
 
         [Command("nope"), RequireGameState(GameState.ActionPlayed)]
+        [RequireTurnPlayer(false)]
         public Task Nope()
         {
-            var nope = Player.TakeCard<NopeCard>();
-            return (nope == null)
-                ? ReplyAsync("")
-                : Game.ActionNoped(Player, nope);
+            var nope = Player!.TakeCard<NopeCard>();
+            return (nope is null)
+                ? ReplyAsync("You do not have a Nope card in your hand.")
+                : Game!.ActionNoped(Player, nope);
         }
     }
 }

@@ -34,24 +34,22 @@ namespace MechHisui.SecretHitler
         private int _electionTracker = 0;
         private bool _takenVeto = false;
 
-        private Node<SecretHitlerPlayer> _afterSpecial;
-        private SecretHitlerPlayer _chancellorNominee;
-        private SecretHitlerPlayer _lastChancellor;
-        private SecretHitlerPlayer _lastPresident;
-        private SecretHitlerPlayer _specialElected;
+        private Node<SecretHitlerPlayer>? _afterSpecial;
+        private SecretHitlerPlayer? _chancellorNominee;
+        private SecretHitlerPlayer? _lastChancellor;
+        private SecretHitlerPlayer? _lastPresident;
+        private SecretHitlerPlayer? _specialElected;
 
-        private IEnumerable<SecretHitlerPlayer> LivingPlayers => Players.Where(p => p.IsAlive);
+        internal IEnumerable<SecretHitlerPlayer> LivingPlayers => Players.Where(p => p.IsAlive);
 
         internal SecretHitlerPlayer CurrentPresident => TurnPlayer.Value;
-        internal SecretHitlerPlayer CurrentChancellor { get; private set; }
+        internal SecretHitlerPlayer? CurrentChancellor { get; private set; }
         internal bool VetoUnlocked { get; private set; } = false;
         internal GameState State { get; private set; } = GameState.Setup;
 
         internal SecretHitlerGame(
-            IMessageChannel channel,
-            IEnumerable<SecretHitlerPlayer> players,
-            ISecretHitlerTheme theme,
-            HouseRules houseRules)
+            IMessageChannel channel, IEnumerable<SecretHitlerPlayer> players,
+            ISecretHitlerTheme theme, HouseRules houseRules)
             : base(channel, players, setFirstPlayerImmediately: true)
         {
             _theme = theme ?? throw new ArgumentNullException(nameof(theme));
@@ -143,7 +141,7 @@ namespace MechHisui.SecretHitler
                 _lastPresident = CurrentPresident;
                 if (_specialElected != null)
                 {
-                    TurnPlayer = Players.Find(_specialElected);
+                    TurnPlayer = Players.Find(_specialElected)!;
                     _specialElected = null;
                 }
                 else if (_afterSpecial != null)
@@ -256,7 +254,7 @@ namespace MechHisui.SecretHitler
             }
             else
             {
-                CurrentChancellor = _chancellorNominee;
+                CurrentChancellor = _chancellorNominee!;
                 if (_fascistTrack.Count <= 3 && !CurrentChancellor.IsConfirmedNotHitler)
                 {
                     sb.Append($"The vote has gone through. Now to ask: **Are you {_theme.Hitler}**?");
@@ -305,7 +303,7 @@ namespace MechHisui.SecretHitler
                     _lastChancellor = null;
                     _lastPresident = null;
                     var pol = _deck.Draw();
-                    await Channel.SendMessageAsync(_theme.ThePeopleEnacted(pol.ToString())).ConfigureAwait(false);
+                    await Channel.SendMessageAsync(_theme.ThePeopleEnacted(pol.ToString()!)).ConfigureAwait(false);
                     await ResolveEffect(((pol.PolicyType == PolicyType.Fascist) ? _fascistTrack : _liberalTrack).Dequeue(), peopleEnacted: true).ConfigureAwait(false);
                     if (_deck.Count < 3)
                     {
@@ -367,7 +365,7 @@ namespace MechHisui.SecretHitler
             {
                 sb.Append($"Will you play one or `veto`?");
             }
-            return CurrentChancellor.SendMessageAsync(sb.ToString());
+            return CurrentChancellor!.SendMessageAsync(sb.ToString());
         }
 
         public async Task ChancellorPlays(IDMChannel dms, int nr)
@@ -552,13 +550,12 @@ namespace MechHisui.SecretHitler
             }
         }
 
-        public override Task EndGame(string endmsg)
+        protected override Task OnGameEnd()
         {
-            var sb = new StringBuilder(endmsg)
-                .AppendLine("\nThe game is over.")
+            var sb = new StringBuilder("The game is over.\n")
                 .AppendLine($"The {_theme.Fascist}s were **{String.Join("**, **", Players.Where(p => p.Party == _theme.FascistParty).Select(p => p.User.Username))}**.")
                 .AppendLine($"The {_theme.Liberal}s were **{String.Join("**, **", Players.Where(p => p.Party == _theme.LiberalParty).Select(p => p.User.Username))}**.");
-            return base.EndGame(sb.ToString());
+            return Channel.SendMessageAsync(sb.ToString());
         }
 
         private Task ReshuffleDeck()

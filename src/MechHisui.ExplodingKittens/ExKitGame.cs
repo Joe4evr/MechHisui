@@ -15,6 +15,7 @@ namespace MechHisui.ExplodingKittens
     {
         internal new IMessageChannel Channel => base.Channel;
         internal int DeckSize => Deck.Count;
+        internal IEnumerable<ulong> PlayerIds => Players.Select(p => p.User.Id);
 
         private ExpansionRules ExpansionRules { get; }
         private Timer ExplodeTimer { get; }
@@ -27,7 +28,7 @@ namespace MechHisui.ExplodingKittens
         internal GameState State { get; private set; } = GameState.SetupGame;
 
         private bool Reverse { get; set; }
-        private ExplodingKittensCard QueuedAction { get; set; }
+        private ExplodingKittensCard? QueuedAction { get; set; }
         private ExKitDeck Deck { get; }
 
         internal ExKitGame(
@@ -40,34 +41,36 @@ namespace MechHisui.ExplodingKittens
             ExpansionRules = expansionRules;
             Deck = new ExKitDeck(cards.Shuffle(28));
 
-            ExplodeTimer = new Timer(async _ =>
+            ExplodeTimer = new Timer(async s =>
             {
-                State = GameState.KittenExploded;
-                await Channel.SendMessageAsync($"**{TurnPlayer.Value.User.Username}** has failed to Defuse an Exploding Kitten!").ConfigureAwait(false);
-                TurnPlayer.Value.Explode();
-                _tempCard = null;
-                await CheckForWinner().ConfigureAwait(false);
+                var self = (ExKitGame)s;
+                self.State = GameState.KittenExploded;
+                await self.Channel.SendMessageAsync($"**{self.TurnPlayer.Value.User.Username}** has failed to Defuse an Exploding Kitten!").ConfigureAwait(false);
+                self.TurnPlayer.Value.Explode();
+                self._tempCard = null;
+                await self.CheckForWinner().ConfigureAwait(false);
             },
-            null,
+            this,
             Timeout.Infinite,
             Timeout.Infinite);
 
-            ActionTimer = new Timer(async _ =>
+            ActionTimer = new Timer(async s =>
             {
-                if (Nope)
+                var self = (ExKitGame)s;
+                if (self.Nope)
                 {
-                    await Channel.SendMessageAsync("Time up! The played action is Nope'd!").ConfigureAwait(false);
+                    await self.Channel.SendMessageAsync("Time up! The played action is Nope'd!").ConfigureAwait(false);
                     //await NextTurn().ConfigureAwait(false);
                 }
                 else
                 {
-                    State = GameState.Resolves;
-                    await Channel.SendMessageAsync("Time up! The played action is **not** Nope'd!").ConfigureAwait(false);
-                    await ResolveCardAction().ConfigureAwait(false);
-                    State = GameState.MainPhase;
+                    self.State = GameState.Resolves;
+                    await self.Channel.SendMessageAsync("Time up! The played action is **not** Nope'd!").ConfigureAwait(false);
+                    await self.ResolveCardAction().ConfigureAwait(false);
+                    self.State = GameState.MainPhase;
                 }
             },
-            null,
+            this,
             Timeout.Infinite,
             Timeout.Infinite);
         }
@@ -150,7 +153,7 @@ namespace MechHisui.ExplodingKittens
                 : $"**{player.User.Username}** has YUP'd the previous action.");
         }
 
-        private Task ResolveCardAction() => QueuedAction.Resolve(this);
+        private Task ResolveCardAction() => (QueuedAction?.Resolve(this) ?? Task.CompletedTask);
 
         internal void SetState(GameState state) => State = state;
 
@@ -218,13 +221,13 @@ namespace MechHisui.ExplodingKittens
             return Channel.SendMessageAsync($"**{TurnPlayer.Value.User.Username}** has successfully defused an Exploding Kitten. You may now insert this kitten at any place in the deck.");
         }
 
-        private ExplodingKitten _tempCard;
+        private ExplodingKitten? _tempCard;
 
         internal void InsertExplodingKitten(uint location)
         {
-            if (_tempCard != null)
+            if (_tempCard is ExplodingKitten exploding)
             {
-                Deck.InsertAt(_tempCard, (int)location);
+                Deck.InsertAt(exploding, (int)location);
                 _tempCard = null;
             }
         }
@@ -290,7 +293,7 @@ namespace MechHisui.ExplodingKittens
                 Description = new StringBuilder($"Turn state is {State}.\n")
                     .AppendLine($"It is **{TurnPlayer.Value.User.Username}**'s turn.")
                     .AppendWhen(Discards.Count > 0,
-                        b => b.AppendLine($"The top card of the Discard Pile is a **{Discards.Top.CardName}**."))
+                        b => b.AppendLine($"The top card of the Discard Pile is a **{Discards.PeekAt(0)!.CardName}**."))
                     .AppendLine($"**{Discards.AsEnumerable().Count(c => c is DefuseCard)}** Defuse cards have been played.")
                     .AppendWhen(IsFaceupImplodingKitten(Deck.PeekTop(1).SingleOrDefault()),
                         b => b.AppendLine("The next card is the face-up Imploding Kitten!"))

@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Discord.Commands;
 using Discord.Addons.SimplePermissions;
 
+#nullable disable warnings
 namespace MechHisui.Core
 {
     public sealed partial class MechHisuiConfig : EFBaseConfigContext<HisuiGuild, HisuiChannel, HisuiUser>
@@ -15,7 +16,7 @@ namespace MechHisui.Core
         }
 
         //misc
-        public DbSet<NamedScalar> Scalars { get; set; }
+        public DbSet<Variant> Scalars { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

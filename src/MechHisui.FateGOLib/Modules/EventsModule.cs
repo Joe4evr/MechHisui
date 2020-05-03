@@ -107,7 +107,7 @@ namespace MechHisui.FateGOLib
             }
 
             [Command("addevent"), Permission(MinimumPermission.ModRole)]
-            public async Task AddEventCmd(string name, LocalDateTime? start = null, LocalDateTime? end = null, string info = null)
+            public async Task AddEventCmd(string name, LocalDateTime? start = null, LocalDateTime? end = null, string? info = null)
             {
                 var dtoStart = start?.InZoneLeniently(NodaTimeExtensions.JpnTimeZone).ToDateTimeOffset();
                 var dtoEnd = end?.InZoneLeniently(NodaTimeExtensions.JpnTimeZone).ToDateTimeOffset();

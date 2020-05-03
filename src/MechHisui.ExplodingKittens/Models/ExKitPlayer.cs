@@ -18,7 +18,7 @@ namespace MechHisui.ExplodingKittens
         public bool IsAttacked { get; internal set; } = false;
         public bool IsFavored { get; internal set; } = false;
 
-        private Hand<ExplodingKittensCard> _hand = new Hand<ExplodingKittensCard>();
+        private readonly Hand<ExplodingKittensCard> _hand = new Hand<ExplodingKittensCard>();
 
         public ExKitPlayer(IUser user, IMessageChannel channel)
             : base(user, channel)
@@ -37,12 +37,12 @@ namespace MechHisui.ExplodingKittens
         internal ExplodingKittensCard TakeCard(int index)
             => _hand.TakeAt(index);
 
-        internal ExplodingKittensCard TakeCard(Type type)
+        internal ExplodingKittensCard? TakeCard(Type type)
             => _hand.TakeFirstOrDefault(c => c.GetType() == type);
 
-        internal TCard TakeCard<TCard>()
+        internal TCard? TakeCard<TCard>()
             where TCard : ExplodingKittensCard
-            => (TCard)TakeCard(typeof(TCard));
+            => (TCard?)TakeCard(typeof(TCard));
 
         //internal DefuseCard TakeDefuse()
         //{

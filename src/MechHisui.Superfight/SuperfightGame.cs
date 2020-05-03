@@ -26,15 +26,13 @@ namespace MechHisui.Superfight
 
         internal GameState State;
         private int _turn = 0;
-        private IReadOnlyList<ISuperfightCard> _p1Picks;
-        private IReadOnlyList<ISuperfightCard> _p2Picks;
+        private IReadOnlyList<ISuperfightCard>? _p1Picks;
+        private IReadOnlyList<ISuperfightCard>? _p2Picks;
         //private List<User> _voters;
 
         public SuperfightGame(
-            IMessageChannel channel,
-            IEnumerable<SuperfightPlayer> players,
-            ISuperfightConfig config,
-            int timeout)
+            IMessageChannel channel, IEnumerable<SuperfightPlayer> players,
+            ISuperfightConfig config, int timeout)
             : base(channel, players, setFirstPlayerImmediately: false)
         {
             var allCards = config.GetAllCards().ToLookup(c => c.Type);
@@ -135,16 +133,16 @@ namespace MechHisui.Superfight
             }
         }
 
-        private Board _board;
+        private Board? _board;
 
         private async Task Showdown()
         {
             var location = _locations.Draw();
-            var p1f = (_p1Picks.Single(c => c.Type == CardType.Character) as CharacterCard);
-            var p1a = (_p1Picks.Single(c => c.Type == CardType.Ability) as AbilityCard);
+            var p1f = (_p1Picks.Single(c => c.Type == CardType.Character) as CharacterCard)!;
+            var p1a = (_p1Picks.Single(c => c.Type == CardType.Ability) as AbilityCard)!;
             var p1ra = _abilities.Draw();
-            var p2f = (_p2Picks.Single(c => c.Type == CardType.Character) as CharacterCard);
-            var p2a = (_p2Picks.Single(c => c.Type == CardType.Ability) as AbilityCard);
+            var p2f = (_p2Picks.Single(c => c.Type == CardType.Character) as CharacterCard)!;
+            var p2a = (_p2Picks.Single(c => c.Type == CardType.Ability) as AbilityCard)!;
             var p2ra = _abilities.Draw();
 
             _board = new Board(location, p1f, p2f)
@@ -214,17 +212,19 @@ namespace MechHisui.Superfight
                 var f1r = _abilities.Draw();
                 var f2r = _abilities.Draw();
 
-                var sb = new StringBuilder("Current state:\n")
-                    .AppendLine($"{TurnPlayers[0].User.Username}'s fighter: **{_board.Fighter1.Text}**")
-                    .AppendLine($"with abilities: **{String.Join("**, **", _board.Fighter1Abilities.Select(a => a.Text))}**")
-                    .AppendLine($"and new random: **{f1r.Text}**.")
-                    .AppendLine($"{TurnPlayers[1].User.Username}'s fighter: **{_board.Fighter2.Text}**")
-                    .AppendLine($"with abilities: **{String.Join("**, **", _board.Fighter2Abilities.Select(a => a.Text))}**")
-                    .AppendLine($"and new random: **{f2r.Text}**.")
-                    .Append($"Fighting at **{_board.Location.Text}**. Discuss again.");
+                var board = _board!;
 
-                _board.Fighter1Abilities.Add(f1r);
-                _board.Fighter2Abilities.Add(f2r);
+                var sb = new StringBuilder("Current state:\n")
+                    .AppendLine($"{TurnPlayers[0].User.Username}'s fighter: **{board.Fighter1.Text}**")
+                    .AppendLine($"with abilities: **{String.Join("**, **", board.Fighter1Abilities.Select(a => a.Text))}**")
+                    .AppendLine($"and new random: **{f1r.Text}**.")
+                    .AppendLine($"{TurnPlayers[1].User.Username}'s fighter: **{board.Fighter2.Text}**")
+                    .AppendLine($"with abilities: **{String.Join("**, **", board.Fighter2Abilities.Select(a => a.Text))}**")
+                    .AppendLine($"and new random: **{f2r.Text}**.")
+                    .Append($"Fighting at **{board.Location.Text}**. Discuss again.");
+
+                board.Fighter1Abilities.Add(f1r);
+                board.Fighter2Abilities.Add(f2r);
 
                 await Channel.SendMessageAsync(sb.ToString()).ConfigureAwait(false);
                 _debateTimer.Change(TimeSpan.FromMinutes(_discusstimeout), Timeout.InfiniteTimeSpan);

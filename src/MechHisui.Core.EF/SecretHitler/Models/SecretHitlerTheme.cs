@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using MechHisui.SecretHitler;
 
+#nullable disable warnings
 namespace MechHisui.Core
 {
     public sealed class SecretHitlerTheme : ISecretHitlerTheme

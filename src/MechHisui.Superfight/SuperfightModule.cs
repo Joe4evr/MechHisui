@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
+//using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.MpGame;
-using Discord.Addons.SimplePermissions;
+//using Discord.Addons.SimplePermissions;
 using Discord.Commands;
 using MechHisui.Superfight.Preconditions;
 using MechHisui.Superfight.Models;
@@ -13,7 +13,7 @@ using SharedExtensions;
 namespace MechHisui.Superfight
 {
     [Name("Superfight"), Group("sf")]
-    [Permission(MinimumPermission.Everyone)]
+    //[Permission(MinimumPermission.Everyone)]
     public sealed class SuperfightModule : MpGameModuleBase<SuperfightService, SuperfightGame, SuperfightPlayer>
     {
         private int _discusstimeout = 5;
@@ -24,10 +24,10 @@ namespace MechHisui.Superfight
         protected override void BeforeExecute(CommandInfo command)
         {
             base.BeforeExecute(command);
-            _discusstimeout = GameService.DiscussionTimer.GetValueOrDefault(Context.Channel, defaultValue: 5);
+            _discusstimeout = GameService.DiscussionTimers.GetValueOrDefault(Context.Channel, defaultValue: 5);
         }
 
-        [Command("open"), Permission(MinimumPermission.ModRole)]
+        [Command("open")/*, Permission(MinimumPermission.ModRole)*/]
         [RequireContext(ContextType.Guild)]
         public override async Task OpenGameCmd()
         {
@@ -41,7 +41,7 @@ namespace MechHisui.Superfight
             }
             else
             {
-                if (await GameService.OpenNewGame(Context).ConfigureAwait(false))
+                if (await GameService.OpenNewGameAsync(Context).ConfigureAwait(false))
                 {
                     await ReplyAsync("Opening for a game.").ConfigureAwait(false);
                 }
@@ -61,7 +61,7 @@ namespace MechHisui.Superfight
             }
             else
             {
-                if (await GameService.AddUser(Context.Channel, Context.User).ConfigureAwait(false))
+                if (await GameService.AddUserAsync(Context.Channel, Context.User).ConfigureAwait(false))
                 {
                     await ReplyAsync($"**{Context.User.Username}** has joined.").ConfigureAwait(false);
                 }
@@ -81,14 +81,14 @@ namespace MechHisui.Superfight
             }
             else
             {
-                if (await GameService.RemoveUser(Context.Channel, Context.User).ConfigureAwait(false))
+                if (await GameService.RemoveUserAsync(Context.Channel, Context.User).ConfigureAwait(false))
                 {
                     await ReplyAsync($"**{Context.User.Username}** has left.").ConfigureAwait(false);
                 }
             }
         }
 
-        [Command("cancel"), Permission(MinimumPermission.ModRole)]
+        [Command("cancel")/*, Permission(MinimumPermission.ModRole)*/]
         [RequireContext(ContextType.Guild)]
         public override async Task CancelGameCmd()
         {
@@ -102,14 +102,14 @@ namespace MechHisui.Superfight
             }
             else
             {
-                if (await GameService.CancelGame(Context.Channel).ConfigureAwait(false))
+                if (await GameService.CancelGameAsync(Context.Channel).ConfigureAwait(false))
                 {
                     await ReplyAsync("Game was canceled.").ConfigureAwait(false);
                 }
             }
         }
 
-        [Command("start"), Permission(MinimumPermission.ModRole)]
+        [Command("start")/*, Permission(MinimumPermission.ModRole)*/]
         [RequireContext(ContextType.Guild)]
         public override async Task StartGameCmd()
         {
@@ -132,7 +132,7 @@ namespace MechHisui.Superfight
                     var players = JoinedUsers.Select(u => new SuperfightPlayer(u, Context.Channel)).Shuffle(28);
 
                     var game = new SuperfightGame(Context.Channel, players, GameService.Config, _discusstimeout);
-                    if (await GameService.TryAddNewGame(Context.Channel, game).ConfigureAwait(false))
+                    if (await GameService.TryAddNewGameAsync(Context.Channel, game).ConfigureAwait(false))
                     {
                         await game.SetupGame().ConfigureAwait(false);
                         await game.StartGame().ConfigureAwait(false);
@@ -148,7 +148,7 @@ namespace MechHisui.Superfight
                 ? Game.NextTurn()
                 : ReplyAsync("No game in progress.");
 
-        [Command("endearly"), Permission(MinimumPermission.ModRole)]
+        [Command("endearly")/*, Permission(MinimumPermission.ModRole)*/]
         [RequireContext(ContextType.Guild)]
         public override Task EndGameCmd()
             => (Game != null)
@@ -165,7 +165,7 @@ namespace MechHisui.Superfight
         [RequireContext(ContextType.Guild), RequireGameState(GameState.Voting)]
         public Task VoteCmd(SuperfightPlayer target)
             => (Game != null)
-                ? Game.ProcessVote(voter: Player, target: target)
+                ? Game.ProcessVote(voter: Player!, target: target)
                 : ReplyAsync("No game in progress.");
 
         [Command("pick"), RequirePlayerRole(PlayerRole.Fighter)]
@@ -173,18 +173,18 @@ namespace MechHisui.Superfight
         [RequireGameState(GameState.Choosing)]
         public Task ChooseCmd(int index)
             => (Game != null)
-                ? ReplyAsync(Game.ChooseInternal(Player, index))
+                ? ReplyAsync(Game.ChooseInternal(Player!, index))
                 : ReplyAsync("No game in progress.");
 
         [Command("confirm"), RequireGameState(GameState.Choosing)]
         [RequireContext(ContextType.DM), RequirePlayerRole(PlayerRole.Fighter)]
         public Task ConfirmCmd()
             => (Game != null)
-                ? Game.ConfirmInternal(Player)
+                ? Game.ConfirmInternal(Player!)
                 : ReplyAsync("No game in progress.");
 
         [Command("settimer"), RequireContext(ContextType.Guild)]
-        [Permission(MinimumPermission.ModRole)]
+        //[Permission(MinimumPermission.ModRole)]
         public Task SetTimerCmd(int minutes)
         {
             if (GameInProgress != CurrentlyPlaying.None)
@@ -192,7 +192,7 @@ namespace MechHisui.Superfight
                 return ReplyAsync("Command cannot be used during game.");
             }
 
-            GameService.DiscussionTimer[Context.Channel] = minutes;
+            GameService.SetDiscussionTimer(Context.Channel, minutes);
             return ReplyAsync($"Discussion timer now set to {minutes} minutes.");
         }
     }

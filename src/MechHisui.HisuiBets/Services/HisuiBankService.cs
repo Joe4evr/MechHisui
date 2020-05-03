@@ -34,10 +34,8 @@ namespace MechHisui.HisuiBets
 
         internal IReadOnlyDictionary<ulong, BetGame> Games => _games;
 
-        public HisuiBankService(
-            IBankOfHisui bank,
-            DiscordSocketClient client,
-            Func<LogMessage, Task> logger = null)
+        public HisuiBankService(IBankOfHisui bank, DiscordSocketClient client,
+            Func<LogMessage, Task>? logger = null)
         {
             Bank = bank;
             _logger = logger ?? (_ => Task.CompletedTask);
@@ -120,7 +118,7 @@ namespace MechHisui.HisuiBets
         }
 
         private void OnGameEnd(IMessageChannel channel)
-            => _games.TryRemove(channel.Id, out var game);
+            => _games.TryRemove(channel.Id, out _);
     }
 
     //public static class HisuiBankExtensions

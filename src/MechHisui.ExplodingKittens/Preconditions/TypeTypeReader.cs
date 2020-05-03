@@ -19,9 +19,7 @@ namespace MechHisui.ExplodingKittens
         //}
 
         public override Task<TypeReaderResult> ReadAsync(
-            ICommandContext context,
-            string input,
-            IServiceProvider services)
+            ICommandContext context, string input, IServiceProvider services)
         {
             var entry = Assembly.GetEntryAssembly();
             var allAssemblies = entry.GetReferencedAssemblies().Select(an => Assembly.ReflectionOnlyLoad(an.FullName)).ToList();
@@ -49,10 +47,8 @@ namespace MechHisui.ExplodingKittens
         }
 
         public override Task<PreconditionResult> CheckPermissionsAsync(
-            ICommandContext context,
-            CommandParameter parameter,
-            object value,
-            IServiceProvider services)
+            ICommandContext context, CommandParameter parameter,
+            object value, IServiceProvider services)
         {
             if (!(value is Type type))
                 return Task.FromResult(PreconditionResult.FromError("Precondition may only be used on a parameter of type 'Type'."));

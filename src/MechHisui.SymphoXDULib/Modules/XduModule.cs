@@ -53,7 +53,7 @@ namespace MechHisui.SymphoXDULib
 
             await stats.AddNewPagedAsync(await pmsg.SendMessage(context.Channel).ConfigureAwait(false)).ConfigureAwait(false);
             if (listenForSelect)
-                await pmsg.Msg.AddReactionAsync(new Emoji(XduStatService.EmoteSelect)).ConfigureAwait(false);
+                await pmsg.Msg!.AddReactionAsync(new Emoji(XduStatService.EmoteSelect)).ConfigureAwait(false);
         }
 
         private static bool RegexMatchOneWord(string hay, string needle)

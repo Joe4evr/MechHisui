@@ -20,41 +20,37 @@ namespace MechHisui.SecretHitler
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var shservice = services.GetService<SecretHitlerService>();
-            if (shservice != null)
-            {
-                var game = shservice.GetGameFromChannel(context.Channel);
+            if (shservice is null)
+                return Task.FromResult(PreconditionResult.FromError($"Service {nameof(SecretHitlerService)} not found."));
 
-                if (game != null)
-                {
-                    var authorId = context.User.Id;
-
-                    switch (RequiredRole)
-                    {
-                        case PlayerRole.President:
-                            if (authorId == game.CurrentPresident.User.Id)
-                            {
-                                return Task.FromResult(PreconditionResult.FromSuccess());
-                            }
-                            else
-                            {
-                                goto default;
-                            }
-                        case PlayerRole.Chancellor:
-                            if (authorId == game.CurrentChancellor.User.Id)
-                            {
-                                return Task.FromResult(PreconditionResult.FromSuccess());
-                            }
-                            else
-                            {
-                                goto default;
-                            }
-                        default:
-                            return Task.FromResult(PreconditionResult.FromError("Cannot use command at this time."));
-                    }
-                }
+            var game = shservice.GetGameFromChannel(context.Channel);
+            if (game is null)
                 return Task.FromResult(PreconditionResult.FromError("No game active in this channel."));
+
+            var authorId = context.User.Id;
+            switch (RequiredRole)
+            {
+                case PlayerRole.President:
+                    if (authorId == game.CurrentPresident.User.Id)
+                    {
+                        return Task.FromResult(PreconditionResult.FromSuccess());
+                    }
+                    else
+                    {
+                        goto default;
+                    }
+                case PlayerRole.Chancellor:
+                    if (authorId == game.CurrentChancellor!.User.Id)
+                    {
+                        return Task.FromResult(PreconditionResult.FromSuccess());
+                    }
+                    else
+                    {
+                        goto default;
+                    }
+                default:
+                    return Task.FromResult(PreconditionResult.FromError("Cannot use command at this time."));
             }
-            return Task.FromResult(PreconditionResult.FromError($"Service {nameof(SecretHitlerService)} not found."));
         }
     }
 

@@ -1,7 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
-  <PropertyGroup>
-    <ProjectGuid>bc8bafb9-6c0e-41cf-84ac-f2c28e03bb6e</ProjectGuid>
-  </PropertyGroup>
   <Import Project="..\..\DiscordBotCore.props" />
   <Import Project="..\..\DiscordGameCore.props" />
 </Project>

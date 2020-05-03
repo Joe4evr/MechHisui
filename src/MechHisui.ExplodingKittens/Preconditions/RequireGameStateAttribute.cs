@@ -15,23 +15,19 @@ namespace MechHisui.ExplodingKittens
         }
 
         public override Task<PreconditionResult> CheckPermissionsAsync(
-            ICommandContext context,
-            CommandInfo command,
-            IServiceProvider services)
+            ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var exkservice = services.GetService<ExKitService>();
-            if (exkservice != null)
-            {
-                var game = exkservice.GetGameFromChannel(context.Channel);
-                if (game != null)
-                {
-                    return (game.State == RequiredState)
-                        ? Task.FromResult(PreconditionResult.FromSuccess())
-                        : Task.FromResult(PreconditionResult.FromError("Cannot use command at this time."));
-                }
+            if (exkservice is null)
+                return Task.FromResult(PreconditionResult.FromError($"Service '{nameof(ExKitService)}' not found."));
+
+            var game = exkservice.GetGameFromChannel(context.Channel);
+            if (game is null)
                 return Task.FromResult(PreconditionResult.FromError("No game active in this channel."));
-            }
-            return Task.FromResult(PreconditionResult.FromError($"Service '{nameof(ExKitService)}' not found."));
+
+            return (game.State == RequiredState)
+                ? Task.FromResult(PreconditionResult.FromSuccess())
+                : Task.FromResult(PreconditionResult.FromError("Cannot use command at this time."));
         }
     }
 }

@@ -28,114 +28,96 @@ namespace MechHisui.Core
 
         async Task<IEnumerable<IBankAccount>> IBankOfHisui.GetAllUsersAsync()
         {
-            using (var config = _store.Load())
-            {
-                return await config.Users
-                    .AsNoTracking()
-                    .ToListAsync();
-            }
+            using var config = _store.Load();
+            return await config.Users
+                .AsNoTracking()
+                .ToListAsync();
         }
 
-        IBankAccount IBankOfHisui.GetAccount(IUser user)
+        IBankAccount? IBankOfHisui.GetAccount(IUser user)
         {
-            using (var config = _store.Load())
-            {
-                return GetConfigUser(user.Id, config);
-                //var cuser = GetConfigUser(user.Id, config);
-                //return (cuser != null)
-                //    ? new UserAccount { UserId = user.Id, Balance = cuser.BankBalance }
-                //    : null;
-            }
+            using var config = _store.Load();
+            return GetConfigUser(user.Id, config);
+            //var cuser = GetConfigUser(user.Id, config);
+            //return (cuser != null)
+            //    ? new UserAccount { UserId = user.Id, Balance = cuser.BankBalance }
+            //    : null;
         }
 
         async Task<IEnumerable<IBetGame>> IBankOfHisui.GetUncashedGamesAsync()
         {
-            using (var config = _store.Load())
-            {
-                return await config.BetGames
-                    .AsNoTracking()
-                    .Include(g => g.Channel)
-                    .Include(g => g.Bets)
-                    .ThenInclude(b => b.User)
-                    .Where(g => !g.IsCashedOut)
-                    .ToListAsync();
-            }
+            using var config = _store.Load();
+            return await config.BetGames
+                .AsNoTracking()
+                .Include(g => g.Channel)
+                .Include(g => g.Bets)
+                .ThenInclude(b => b.User)
+                .Where(g => !g.IsCashedOut)
+                .ToListAsync();
         }
 
-        async Task<IBetGame> IBankOfHisui.GetLastGameInChannelAsync(ITextChannel channel)
+        async Task<IBetGame?> IBankOfHisui.GetLastGameInChannelAsync(IMessageChannel channel)
         {
-            using (var config = _store.Load())
-            {
-                return await config.BetGames
-                    .AsNoTracking()
-                    .Include(g => g.Channel)
-                    .Include(g => g.Bets)
-                    .ThenInclude(b => b.User)
-                    .LastOrDefaultAsync(g => g.Channel.ChannelId == channel.Id);
-            }
+            using var config = _store.Load();
+            return await config.BetGames
+                .AsNoTracking()
+                .Include(g => g.Channel)
+                .Include(g => g.Bets)
+                .ThenInclude(b => b.User)
+                .LastOrDefaultAsync(g => g.Channel.ChannelId == channel.Id);
         }
 
-        async Task<IBetGame> IBankOfHisui.GetGameInChannelByIdAsync(ITextChannel channel, int gameId)
+        async Task<IBetGame?> IBankOfHisui.GetGameInChannelByIdAsync(IMessageChannel channel, int gameId)
         {
-            using (var config = _store.Load())
-            {
-                return await config.BetGames
-                    .AsNoTracking()
-                    .Include(g => g.Channel)
-                    .Include(g => g.Bets)
-                    .ThenInclude(b => b.User)
-                    .SingleOrDefaultAsync(g => g.Channel.ChannelId == channel.Id && g.Id == gameId);
-            }
+            using var config = _store.Load();
+            return await config.BetGames
+                .AsNoTracking()
+                .Include(g => g.Channel)
+                .Include(g => g.Bets)
+                .ThenInclude(b => b.User)
+                .SingleOrDefaultAsync(g => g.Channel.ChannelId == channel.Id && g.Id == gameId);
         }
 
-        async Task<IBet> IBankOfHisui.RetrieveBetAsync(IUser user, IBetGame game)
+        async Task<IBet?> IBankOfHisui.RetrieveBetAsync(IUser user, IBetGame game)
         {
-            using (var config = _store.Load())
-            {
-                return await config.RecordedBets
-                    .AsNoTracking()
-                    .SingleOrDefaultAsync(b => b.BetGame.Id == game.Id && b.User.UserId == user.Id);
-            }
+            using var config = _store.Load();
+            return await config.RecordedBets
+                .AsNoTracking()
+                .SingleOrDefaultAsync(b => b.BetGame.Id == game.Id && b.User.UserId == user.Id);
         }
 
         Task<int> IBankOfHisui.GetVaultWorthAsync()
         {
-            using (var config = _store.Load())
-            {
-                return Task.FromResult(GetVault(config).IntValue);
-            }
+            using var config = _store.Load();
+            return Task.FromResult(GetVault(config).IntValue);
         }
 
         //writing operations
-        IBetGame IBankOfHisui.CreateGame(ITextChannel channel, GameType gameType)
+        IBetGame IBankOfHisui.CreateGame(IMessageChannel channel, GameType gameType)
         {
-            using (var config = _store.Load())
+            using var config = _store.Load();
+            var game = new BetGame
             {
-                var game = new BetGame
-                {
-                    Channel = GetConfigChannel(channel.Id, config),
-                    GameType = gameType
-                };
-                config.BetGames.Add(game);
-                config.SaveChanges();
-                return game;
-            }
+                Channel = GetConfigChannel(channel.Id, config),
+                GameType = gameType
+            };
+            config.BetGames.Add(game);
+            config.SaveChanges();
+            return game;
         }
 
         Task<IBankAccount> IBankOfHisui.AddUserAsync(IUser user)
         {
-            using (var config = _store.Load())
-            {
-                return Task.FromResult<IBankAccount>(GetConfigUser(user.Id, config));
-            //    var ac = GetAccount(user.Id, config);
-            //    if (ac == null)
-            //    {
-            //        ac = new BankAccount { UserId = user.Id };
-            //        config.BankAccounts.Add(ac);
-            //        await config.SaveChangesAsync().ConfigureAwait(false);
-            //    }
-            //    return ac;
-            }
+            using var config = _store.Load();
+            return Task.FromResult<IBankAccount>(GetConfigUser(user.Id, config));
+            //var ac = GetAccount(user.Id, config);
+            //if (ac == null)
+            //{
+            //    ac = new BankAccount { UserId = user.Id };
+            //    config.BankAccounts.Add(ac);
+            //    await config.SaveChangesAsync().ConfigureAwait(false);
+            //}
+            //return ac;
         }
 
         Task IBankOfHisui.AddUsersAsync(IEnumerable<IUser> users)
@@ -188,54 +170,50 @@ namespace MechHisui.Core
 
         async Task<DonationResult> IBankOfHisui.DonateAsync(DonationRequest request)
         {
-            using (var config = _store.Load())
-            {
-                var donor = GetConfigUser(request.DonorId, config);
-                if (donor == null)
-                    return DonationResult.DonorNotFound;
+            using var config = _store.Load();
+            var donor = GetConfigUser(request.DonorId, config);
+            if (donor == null)
+                return DonationResult.DonorNotFound;
 
-                var recepient = GetConfigUser(request.RecepientId, config);
-                if (recepient == null)
-                    return DonationResult.RecipientNotFound;
+            var recepient = GetConfigUser(request.RecepientId, config);
+            if (recepient == null)
+                return DonationResult.RecipientNotFound;
 
-                var amount = (int)request.Amount;
-                if (donor.Balance < amount)
-                    return DonationResult.DonorNotEnoughMoney;
+            var amount = (int)request.Amount;
+            if (donor.Balance < amount)
+                return DonationResult.DonorNotEnoughMoney;
 
-                donor.Balance -= amount;
-                recepient.Balance += amount;
-                await config.SaveChangesAsync().ConfigureAwait(false);
-                return DonationResult.DonationSuccess;
-            }
+            donor.Balance -= amount;
+            recepient.Balance += amount;
+            await config.SaveChangesAsync().ConfigureAwait(false);
+            return DonationResult.DonationSuccess;
         }
 
         async Task IBankOfHisui.InterestAsync()
         {
-            using (var config = _store.Load())
-            {
-                //// The ideal way:
-                //config.Users.Where(u => u.BankBalance < 2500)
-                //    .Update(u => new { u.BankBalance },
-                //        o => new { BankBalance = o.BankBalance + 10 })
-                //    .Load();
+            using var config = _store.Load();
+            //// The ideal way:
+            //config.Users.Where(u => u.BankBalance < 2500)
+            //    .Update(u => new { u.BankBalance },
+            //        o => new { BankBalance = o.BankBalance + 10 })
+            //    .Load();
 
-                ////The "what's supposed to be the alternative but is broken" way:
-                //config.Users.FromSql(@"UPDATE Users SET BankBalance = BankBalance + 10 WHERE BankBalance < 2500").Load();
+            ////The "what's supposed to be the alternative but is broken" way:
+            //config.Users.FromSql(@"UPDATE Users SET BankBalance = BankBalance + 10 WHERE BankBalance < 2500").Load();
 
-                //// The slow but working way:
-                //var updating = config.Users.Where(u => u.BankBalance < 2500).ToList();
-                //foreach (var user in updating)
-                //{
-                //    user.BankBalance += 10;
-                //    config.Users.Update(user);
-                //}
+            //// The slow but working way:
+            //var updating = config.Users.Where(u => u.BankBalance < 2500).ToList();
+            //foreach (var user in updating)
+            //{
+            //    user.BankBalance += 10;
+            //    config.Users.Update(user);
+            //}
 
-                // The "meh" but working way:
-                await config.Users.Where(u => u.Balance < 2500)
-                    .ForEachAsync(u => u.Balance += 10).ConfigureAwait(false);
+            // The "meh" but working way:
+            await config.Users.Where(u => u.Balance < 2500)
+                .ForEachAsync(u => u.Balance += 10).ConfigureAwait(false);
 
-                await config.SaveChangesAsync().ConfigureAwait(false);
-            }
+            await config.SaveChangesAsync().ConfigureAwait(false);
         }
 
         async Task<RecordingResult> IBankOfHisui.RecordOrUpdateBetAsync(IBetGame game, IBet bet)
@@ -285,47 +263,44 @@ namespace MechHisui.Core
 
         async Task<WithdrawalResult> IBankOfHisui.WithdrawAsync(WithdrawalRequest request)
         {
-            using (var config = _store.Load())
-            {
-                var debtor = GetConfigUser(request.AccountId, config);
-                if (debtor == null)
-                    return WithdrawalResult.AccountNotFound;
+            using var config = _store.Load();
+            var debtor = GetConfigUser(request.AccountId, config);
+            if (debtor == null)
+                return WithdrawalResult.AccountNotFound;
 
-                int amount = request.Amount;
-                if (debtor.Balance < amount)
-                    return WithdrawalResult.AccountNotEnoughMoney;
+            int amount = request.Amount;
+            if (debtor.Balance < amount)
+                return WithdrawalResult.AccountNotEnoughMoney;
 
-                debtor.Balance -= amount;
-                await config.SaveChangesAsync().ConfigureAwait(false);
-                return WithdrawalResult.WithdrawalSuccess;
-            }
+            debtor.Balance -= amount;
+            await config.SaveChangesAsync().ConfigureAwait(false);
+            return WithdrawalResult.WithdrawalSuccess;
         }
 
         async Task IBankOfHisui.CollectBetsAsync(int gameId)
         {
-            using (var config = _store.Load())
+            using var config = _store.Load();
+            var game = await config.BetGames
+                .Include(g => g.Channel)
+                .Include(g => g.Bets)
+                .ThenInclude(b => b.User)
+                .SingleOrDefaultAsync(g => g.Id == gameId).ConfigureAwait(false);
+
+            foreach (var bet in game.Bets)
             {
-                var game = await config.BetGames
-                    .Include(g => g.Channel)
-                    .Include(g => g.Bets)
-                    .ThenInclude(b => b.User)
-                    .SingleOrDefaultAsync(g => g.Id == gameId).ConfigureAwait(false);
-                foreach (var bet in game.Bets)
+                var debtor = GetConfigUser(bet.User.UserId, config);
+                if (debtor != null)
                 {
-                    var debtor = GetConfigUser(bet.User.UserId, config);
-                    if (debtor != null)
-                    {
-                        int amount = bet.BettedAmount;
-                        if (debtor.Balance < amount) continue;
+                    int amount = bet.BettedAmount;
+                    if (debtor.Balance < amount) continue;
 
-                        debtor.Balance -= amount;
-                    }
+                    debtor.Balance -= amount;
                 }
-                //var mgame = await config.BetGames.SingleOrDefaultAsync(g => g.Id == game.Id);
-                game.IsCollected = true;
-
-                await config.SaveChangesAsync().ConfigureAwait(false);
             }
+            //var mgame = await config.BetGames.SingleOrDefaultAsync(g => g.Id == game.Id);
+            game.IsCollected = true;
+
+            await config.SaveChangesAsync().ConfigureAwait(false);
         }
 
         async Task IBankOfHisui.AddToVaultAsync(int amount)
@@ -360,20 +335,20 @@ namespace MechHisui.Core
 
         //query helpers
         private static HisuiUser GetConfigUser(ulong userId, MechHisuiConfig config)
-            => config.Users.SingleOrDefault(u => u.UserId == userId);
+            => config.Users.Single(u => u.UserId == userId);
 
         //private static IBankAccount GetAccount(ulong userId, MechHisuiConfig config)
         //    => config.Users.SingleOrDefault(a => a.UserId == userId);
 
         private static HisuiChannel GetConfigChannel(ulong channelId, MechHisuiConfig config)
-            => config.Channels.SingleOrDefault(c => c.ChannelId == channelId);
+            => config.Channels.Single(c => c.ChannelId == channelId);
 
-        private static NamedScalar GetVault(MechHisuiConfig config)
+        private static Variant GetVault(MechHisuiConfig config)
         {
             var vault = config.Scalars.SingleOrDefault(s => s.Key == "Vault");
-            if (vault == null)
+            if (vault is null)
             {
-                vault = new NamedScalar { Key = "Vault" };
+                vault = new Variant { Key = "Vault" };
                 config.Scalars.Add(vault);
                 config.SaveChanges();
             }
@@ -381,19 +356,19 @@ namespace MechHisui.Core
             return vault;
         }
 
-        private static NamedScalar GetIdTracker(MechHisuiConfig config)
-            => config.Scalars.SingleOrDefault(s => s.Key == "GameId")
-                    ?? new NamedScalar { Key = "GameId" };
+        //private static NamedScalar GetIdTracker(MechHisuiConfig config)
+        //    => config.Scalars.SingleOrDefault(s => s.Key == "GameId")
+        //            ?? new NamedScalar { Key = "GameId" };
 
         private static IQueryable<Bet> QueryBets(MechHisuiConfig config)
             => config.RecordedBets
                 .Include(b => b.BetGame)
                 .Include(b => b.User);
 
-        private static IQueryable<Bet> QueryAllBetsIn(ulong channelId, MechHisuiConfig config)
-            => QueryBets(config).Where(b => b.BetGame.Channel.ChannelId == channelId);
+        //private static IQueryable<Bet> QueryAllBetsIn(ulong channelId, MechHisuiConfig config)
+        //    => QueryBets(config).Where(b => b.BetGame.Channel.ChannelId == channelId);
 
-        private static Bet QuerySingleBet(ulong userId, int gameId, MechHisuiConfig config)
+        private static Bet? QuerySingleBet(ulong userId, int gameId, MechHisuiConfig config)
             => QueryBets(config).SingleOrDefault(b => b.BetGame.Id == gameId && b.User.UserId == userId);
     }
 
